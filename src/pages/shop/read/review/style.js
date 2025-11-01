@@ -16,10 +16,22 @@ S.ReviewRatingTitleWrap = styled.div`
   margin-bottom: 20px;
 `;
 
-S.ReviewRatingTitle = styled.h3`
+S.ReviewTitle = styled.h3`
   ${C.subtitleRegular};
   color: ${({ theme }) => theme.PALLETE.basic};
-  margin: 0;
+  margin-bottom: 20px;
+`;
+
+S.ReviewProduct = styled.h3`
+  ${C.subtitleRegular};
+  color: ${({ theme }) => theme.PALLETE.basic};
+  margin-top: 80px;
+`;
+
+S.ReviewProductWrap = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
 `;
 
 /* 드롭다운 */
@@ -75,13 +87,14 @@ S.DropdownItem = styled.li`
 S.ReviewContainer = styled.div`
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
+  align-items: center;
 `;
 
 S.ReviewLeft = styled.div`
   display: flex;
   flex-direction: column;
   gap: 8px;
+  align-items: center;
 `;
 
 S.ReviewAverage = styled.p`
@@ -94,7 +107,15 @@ S.ReviewCount = styled.div`
   display: flex;
   align-items: center;
   gap: 8px;
-  img { width: 18px; height: 18px; }
+  img { 
+    width: 18px; 
+    height: 18px; 
+  }
+
+  span {
+    display: inline-block;
+    transform: translateY(1px);
+  }
 `;
 
 S.ReviewRight = styled.div`
@@ -141,15 +162,18 @@ S.ReviewCountText = styled.span`
   min-width: 40px;
 `;
 
+
+
 /* 리뷰 아이템 */
 S.ReviewItem = styled.div`
-  padding: 24px 0 0;
+  padding: 30px 0 0;
 `;
 
 S.ReviewHeader = styled.div`
   display: flex;
   align-items: center;
   gap: 12px;
+  width: 100%;
 `;
 
 S.ProfileImage = styled.img`
@@ -160,7 +184,7 @@ S.ProfileImage = styled.img`
 `;
 
 S.UserInfoWrap = styled.div`
-  margin-top: 52px;
+  margin-top: 10px;
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -186,6 +210,7 @@ S.UserMeta = styled.div`
   display: flex;
   align-items: center;
   gap: 8px;
+  line-height: 1;
 `;
 
 S.UserName = styled.span`
@@ -195,6 +220,7 @@ S.UserName = styled.span`
 
 S.Dot = styled.span`
   color: ${({ theme }) => theme.PALLETE.grey.greyScale2};
+  margin: 0 6px;
 `;
 
 S.ReviewDate = styled.span`
@@ -207,6 +233,7 @@ S.ReportButton = styled.button`
   color: ${({ theme }) => theme.PALLETE.grey.greyScale4};
   background: none;
   border: 0;
+  display: inline-flex;  
   cursor: pointer;
 `;
 
@@ -232,12 +259,6 @@ S.ReviewText = styled.p`
   white-space: pre-line;
 `;
 
-/* 하단(도움돼요) */
-S.ReviewFooter = styled.div`
-  margin-top: 12px;
-  display: flex;
-  justify-content: flex-end;
-`;
 
 S.HelpfulButton = styled.button`
   ${C.smallText2Light};
@@ -254,6 +275,7 @@ S.HelpfulButton = styled.button`
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  margin-left: auto;
   gap: 6px;
   cursor: pointer;
 

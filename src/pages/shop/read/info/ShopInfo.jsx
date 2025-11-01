@@ -6,7 +6,6 @@ const ShopInfo = () => {
 
   return (
     <>
-
       <S.InfoTextWrap>
         <S.InfoKicker>따뜻하고 포근한 솜이 인형</S.InfoKicker>
         <S.InfoTitle>솜이 인형</S.InfoTitle>
@@ -29,7 +28,7 @@ const ShopInfo = () => {
             <img src="/assets/images/shop_detailSub_doll4.png" alt="상품 상세 이미지4" />
           </S.InfoImage>
 
-          {/* ── 상품 정보 섹션 ── */}
+          {/* 상품 정보 */}
           <S.SpecSection>
             <S.SpecTitle>상품정보</S.SpecTitle>
             <S.SpecList>
@@ -48,7 +47,7 @@ const ShopInfo = () => {
             </S.SpecList>
           </S.SpecSection>
 
-          {/* ── 유의사항 ── */}
+          {/* 유의사항 */}
           <S.CautionBox>
             <S.CautionTitle>유의사항</S.CautionTitle>
             <S.CautionText>
@@ -60,7 +59,7 @@ const ShopInfo = () => {
             </S.CautionText>
           </S.CautionBox>
 
-          {/* ── 판매자 정보 ── */}
+          {/* 판매자 정보 */}
           <S.SellerSection>
             <S.SellerTitle>판매자 정보</S.SellerTitle>
             <S.SellerList>
@@ -93,15 +92,9 @@ const ShopInfo = () => {
         </>
       )}
 
-    <S.ToggleBox type="button"
-      aria-expanded={open}
-      onClick={() => setOpen((v) => !v)}>
+    <S.ToggleBox type="button" aria-expanded={open} onClick={() => setOpen((v) => !v)}>
       <S.ToggleText>{open ? "상세정보 접기" : "상세정보 더보기"}</S.ToggleText>
-      <S.ToggleIcon
-        src="/assets/icons/drop_down.svg"   
-        alt="접기/펴기 아이콘"
-        $open={open}
-      />
+      <S.ToggleIcon src="/assets/icons/drop_down.svg" alt="접기/펴기 아이콘" $open={open}/>
     </S.ToggleBox>
     </>
   );

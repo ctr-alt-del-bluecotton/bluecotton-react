@@ -47,8 +47,7 @@ S.PrevButton = styled.button`
   &::after {
     content: "";
     position: absolute;
-    right: -20px; /* ← 버튼과 선 간 간격 */
-    top: 50%;
+    right: -20px;
     transform: translateY(-50%);
     width: 1px;
     height: 9px;

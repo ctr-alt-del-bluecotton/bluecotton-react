@@ -315,7 +315,7 @@ S.LikeButton = styled.button`
     content: "";
     display: block;
     width: 14px;
-    height: 14px;
+    height: 13px;
     margin: 0 auto;
     background: url("/assets/icons/favorite.svg") center/contain no-repeat;
     transition: background-image 0.2s ease;

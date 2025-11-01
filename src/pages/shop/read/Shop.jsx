@@ -108,13 +108,9 @@ const Shop = () => {
           <S.CountWrap>
             <S.DeliveryCount>수량</S.DeliveryCount>
             <S.CountBox>
-              <S.CountBtn className="minus"
-                onClick={() => handleCount("minus")}
+              <S.CountBtn className="minus" onClick={() => handleCount("minus")}
                 disabled={count === 1}
-                $disabled={count === 1}
-              >
-                -
-              </S.CountBtn>
+                $disabled={count === 1}>-</S.CountBtn>
               <S.CountNum>{count}</S.CountNum>
               <S.CountBtn className="plus" onClick={() => handleCount("plus")}>+</S.CountBtn>
             </S.CountBox>
@@ -132,17 +128,9 @@ const Shop = () => {
           {/* 찜하기 / 장바구니 / 구매 */}
           <S.ButtonRow>
             <S.ProductLikeButton onClick={handleLikeClick}>
-              <img
-                src={
-                  isLiked
-                    ? "/assets/icons/filedlike.svg"
-                    : "/assets/icons/favorite.svg"
-                }
-                alt="좋아요"
-              />
+              <img src={isLiked? "/assets/icons/filedlike.svg" : "/assets/icons/favorite.svg"}/>
               <span>{likeCount}</span>
             </S.ProductLikeButton>
-
             <S.CartButton onClick={() => setOpen(true)}>장바구니</S.CartButton>
             <S.PurchaseButton onClick={() => navigate("/main/shop/order")}>구매하기</S.PurchaseButton>
           </S.ButtonRow>
@@ -154,14 +142,8 @@ const Shop = () => {
           <S.Dialog onClick={(e) => e.stopPropagation()}>
             <S.DialogMsg>장바구니에 상품을 담았습니다.</S.DialogMsg>
             <S.DialogBtns>
-              <S.DialogBtnCancel onClick={() => setOpen(false)}>
-                닫기
-              </S.DialogBtnCancel>
-              <S.DialogBtnCart
-                onClick={() => navigate("/main/my-page/my-shop/cart")}
-              >
-                보러가기
-              </S.DialogBtnCart>
+              <S.DialogBtnCancel onClick={() => setOpen(false)}>닫기</S.DialogBtnCancel>
+              <S.DialogBtnCart onClick={() => navigate("/main/my-page/my-shop/cart")}>보러가기</S.DialogBtnCart>
             </S.DialogBtns>
           </S.Dialog>
         </S.Overlay>

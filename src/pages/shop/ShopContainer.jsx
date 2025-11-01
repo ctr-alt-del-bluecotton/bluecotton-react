@@ -98,7 +98,6 @@ const ShopContainer = () => {
 
           {/* 현재 페이지 8개 상품 보여줌 (마지막 페이지는 2개) */}
           <ShopList items={pagedItems} />
-
           <S.Pagination>
             <ShopNumberSelect
               shopList={ALL_ITEMS}

@@ -1,4 +1,5 @@
 import styled from 'styled-components';
+import * as C from "../../../styles/common"
 
 export const ContentTitle = styled.h1`
   font-size: 32px;
@@ -485,3 +486,152 @@ export const ReviewButton = styled.button`
   }
 `;
 
+
+
+
+//  MyShopLikeContainer 스타일
+export const LikeGrid = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 40px 16px;
+  justify-content: flex-start;
+`;
+
+export const LikeCard = styled.div`
+  width: calc((100% - 48px) / 4);
+  position: relative;
+`;
+
+export const ProductImageBox = styled.div`
+  position: relative;
+  width: 100%;
+  aspect-ratio: 218 / 290;              
+  background: ${({ $bg }) => `url(${$bg}) center/cover no-repeat`};
+  border-radius: 0;
+  overflow: hidden;
+  background-color: ${({ theme }) => theme.PALLETE.grey.greyScale1};
+  transition: transform .2s;
+`;
+
+export const LikeHeartBtn = styled.button`
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 26px;
+  height: 26px;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  z-index: 2;
+
+  /* 바깥 원 */
+  background: url("/assets/icons/circle.svg") center/contain no-repeat;
+
+  /* 안쪽 하트 아이콘 */
+  &::after {
+    content: "";
+    display: block;
+    width: 12px;
+    height: 11px;
+    margin: 0 auto;
+    background: url("/assets/icons/favorite.svg") center/contain no-repeat;
+  }
+
+  /* 클릭시 하트 아이콘 */
+  ${({ $active }) => $active && `
+    &::after {
+      background: url("/assets/icons/filedlike.svg") center/contain no-repeat;
+    }
+  `}
+`;
+
+export const ProductTitleRow = styled.div`
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin-top: 10px;
+  flex-wrap: nowrap;
+`;
+
+export const ProductShopName = styled.p`
+  ${C.smallText1Bold}
+  ${C.basic}
+`;
+
+export const NewTag = styled.span`
+  ${C.smallText0Bold}
+  padding: 1px 4px;
+  display: inline-block;
+  color: ${({ theme }) => theme.PALLETE.secondary.main};
+  background-color: rgba(248, 59, 170, 0.1);
+`;
+
+export const BestTag = styled.span`
+  ${C.smallText0Bold}
+  padding: 1px 4px;
+  display: inline-block;
+  color: ${({ theme }) => theme.PALLETE.primary.main};
+  background-color: rgba(0, 81, 255, 0.1);
+`;
+
+export const PriceText = styled.p`
+  ${C.smallText1Bold}
+  color: ${({ theme }) => theme.PALLETE.primary.main};
+  margin: 6px 0 8px;
+`;
+
+export const MetaRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-top: 6px;
+`;
+
+export const IconText = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  img {
+    width: 12px;
+    height: 12px;
+    object-fit: contain;
+    vertical-align: middle;
+  }
+
+  span {
+    ${C.smallText1Regular}
+    ${C.basic}
+  }
+`;
+
+export const Spacer = styled.span`
+  margin-left: auto;
+`;
+
+
+// 커스텀 체크박스
+export const Checkbox = styled.input.attrs({ type: "checkbox" })`
+  appearance: none;
+  width: 19px;
+  height: 19px;
+  border-radius: 1px;
+  border: 1px solid ${({ theme }) => theme.PALLETE.grey.greyScale1};
+  background-color: #fff;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  vertical-align: middle;
+
+  &:hover {
+    border-color: ${({ theme }) => theme.PALLETE.primary.main};
+  }
+
+  &:checked {
+    background-color: ${({ theme }) => theme.PALLETE.primary.main};
+    border-color: ${({ theme }) => theme.PALLETE.primary.main};
+    background-image: url("/assets/icons/checkicon.png");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 11px 9px;
+  }
+`;

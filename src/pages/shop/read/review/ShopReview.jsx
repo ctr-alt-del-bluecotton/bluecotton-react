@@ -1,4 +1,3 @@
-// ✅ src/pages/shop/read/ShopReview.jsx
 import React, { useMemo, useState } from "react";
 import { useTheme } from "styled-components";
 import S from "./style";
@@ -62,38 +61,20 @@ const ShopReview = () => {
 
   return (
     <S.ReviewSection>
-
-      <S.ReviewRatingTitleWrap>
-        <S.ReviewRatingTitle>상품 리뷰</S.ReviewRatingTitle>
-
-        <S.ReviewFilters>
-          {/* 리뷰 유형 선택 */}
-          <S.ReviewSelect value={type} onChange={(e) => setType(e.target.value)}>
-            <option value="all">전체 리뷰</option>
-            <option value="photo">사진 리뷰</option>
-          </S.ReviewSelect>
-
-          {/* 정렬 기준 선택 */}
-          <S.ReviewSelect value={sort} onChange={(e) => setSort(e.target.value)}>
-            <option value="latest">최신순</option>
-            <option value="ratingHigh">별점 높은 순</option>
-            <option value="ratingLow">별점 낮은 순</option>
-          </S.ReviewSelect>
-        </S.ReviewFilters>
-      </S.ReviewRatingTitleWrap>
-
+        <S.ReviewTitle>리뷰 평점</S.ReviewTitle>
       <S.ReviewContainer>
+        
         <S.ReviewLeft>
           <S.ReviewAverage>{avgScore}</S.ReviewAverage>
           <S.ReviewCount>
             <img src="/assets/icons/review.svg" alt="리뷰 아이콘" />
-            리뷰 {totalCount}개
+            <span className="count-text">리뷰 {totalCount}개</span>
           </S.ReviewCount>
         </S.ReviewLeft>
 
         <S.ReviewRight>
           {ratingBuckets.map(({ rating, count }) => {
-            // 퍼센트(정수) 계산: (개수 / 총합) * 100
+            // 퍼센트 계산: (개수 / 총합) * 100
             const percent = totalCount ? Math.round((count / totalCount) * 100) : 0;
             return (
               <S.ReviewRow key={rating}>
@@ -107,6 +88,25 @@ const ShopReview = () => {
           })}
         </S.ReviewRight>
       </S.ReviewContainer>
+
+      <S.ReviewProductWrap>
+        <S.ReviewProduct>상품 리뷰</S.ReviewProduct>
+
+          <S.ReviewFilters>
+          {/* 리뷰 유형 선택 */}
+          <S.ReviewSelect value={type} onChange={(e) => setType(e.target.value)}>
+            <option value="all">전체 리뷰</option>
+            <option value="photo">사진 리뷰</option>
+          </S.ReviewSelect>
+
+          {/* 정렬 기준 선택 */}
+          <S.ReviewSelect value={sort} onChange={(e) => setSort(e.target.value)}>
+            <option value="latest">최신순</option>
+            <option value="ratingHigh">별점 높은 순</option>
+            <option value="ratingLow">별점 낮은 순</option>
+          </S.ReviewSelect>
+          </S.ReviewFilters>
+      </S.ReviewProductWrap>
 
       {reviewList.map((rv) => (
         <S.ReviewItem key={rv.id}>
@@ -122,10 +122,7 @@ const ShopReview = () => {
                     style={{
                       width: "19px",
                       height: "18px",
-                      filter:
-                        i < rv.rating
-                          ? "none"
-                          : "brightness(0) saturate(100%) invert(93%) sepia(4%) saturate(0%) hue-rotate(184deg) brightness(93%) contrast(92%)",
+                      filter: i < rv.rating ? "none" : "grayscale(1) brightness(1.0)",
                     }}
                   />
                 ))}
@@ -138,24 +135,15 @@ const ShopReview = () => {
                 <S.ReportButton>신고하기</S.ReportButton>
               </S.UserMeta>
             </S.UserInfoWrap>
-          </S.ReviewHeader>
-
-          {rv.image && (
-            <S.ReviewImage>
-              <img src={rv.image} alt="리뷰 이미지" />
-            </S.ReviewImage>
-          )}
-
-          <S.ReviewText>{rv.content}</S.ReviewText>
-
-          <S.ReviewFooter>
             <S.HelpfulButton
               $active={helpfulState[rv.id]?.active}
               onClick={() => toggleHelpful(rv.id)}>
               <img src="/assets/icons/shop_smile.svg" alt="도움돼요" /> 도움돼요 {helpfulState[rv.id]?.count ?? 0}
             </S.HelpfulButton>
-          </S.ReviewFooter>
+          </S.ReviewHeader>
 
+          {rv.image && (<S.ReviewImage><img src={rv.image} alt="리뷰 이미지" /></S.ReviewImage>)}
+          <S.ReviewText>{rv.content}</S.ReviewText>
           <S.ReviewDivider />
         </S.ReviewItem>
       ))}
