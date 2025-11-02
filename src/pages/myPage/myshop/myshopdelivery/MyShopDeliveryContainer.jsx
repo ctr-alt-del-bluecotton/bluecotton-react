@@ -4,11 +4,20 @@ import {
   ItemDetails, ItemTitle, Pagination, PageButton, PageNumber,
   DeliveryItemImage, ActionButton
 } from "../style";
+import ReviewModal from "../review/ReviewModal";
 
 export default function MyShopDeliveryContainer() {
   //  구매완료(pending) / 배송 중(shipping) / 배송완료(completed)
   const [activeFilter, setActiveFilter] = useState("completed");
 
+
+  // 모달 상태
+  const [open, setOpen] = useState(false);
+  const [target, setTarget] = useState(null); // { id, name }
+
+  // 모달 열기/닫기
+  const openReview = (item) => { setTarget(item); setOpen(true); };
+  const closeReview = () => { setOpen(false); setTarget(null); };
 
   const allItems = [
     { id: 1, name: "솜이 인형", date: "2025-09-11", status: "completed" },
@@ -67,7 +76,7 @@ export default function MyShopDeliveryContainer() {
 
               <div>
                 {activeFilter === "pending" && <ActionButton>구매 취소</ActionButton>}
-                <ActionButton primary>리뷰하기</ActionButton>
+                <ActionButton primary onClick={() => openReview(item)}>리뷰하기</ActionButton>
               </div>
             </div>
           </ListItem>
@@ -79,6 +88,11 @@ export default function MyShopDeliveryContainer() {
         <PageNumber>1</PageNumber>
         <PageButton>다음 &gt;</PageButton>
       </Pagination>
+
+      {/* 모달창 렌더링 */}
+       <ReviewModal open={open} onClose={closeReview} mode="create" product={{ id: target?.id, name: target?.name }}
+        onSubmit={() => closeReview()}></ReviewModal>
+
     </div>
   );
 }

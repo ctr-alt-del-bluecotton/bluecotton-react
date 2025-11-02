@@ -19,11 +19,11 @@ import {
   OrderSummary,
   SummaryRow,
   OrderButton,
-  Checkbox as SCheckbox, // 커스텀 체크박스
+  Checkbox as SCheckbox
 } from "../style";
+import { Link, Navigate } from "react-router-dom";
 
 const MyShopCartContainer = () => {
-  /** 1) 더미 데이터(실제 연동 시 대체) */
   const generalData = useMemo(
     () => [
       { id: "g1", name: "솜이 레옹 키링", price: 5000 },
@@ -40,14 +40,14 @@ const MyShopCartContainer = () => {
     []
   );
 
-  /**  탭(일반/캔디) */
+  /* 탭(일반/캔디) */
   const [tab, setTab] = useState("general"); // 'general' | 'candy'
   const currentItems = tab === "general" ? generalData : candyData;
   const unit = tab === "general" ? "원" : "캔디";
   const shippingText =
     tab === "candy" ? "무료배송" : "3,000원";
 
-  /** 선택/수량 상태 (탭이 바뀌면 현재 탭 기준으로 초기화) */
+  /* 선택/수량 상태 (탭이 바뀌면 현재 탭 기준으로 초기화) */
   const [checkedIds, setCheckedIds] = useState(new Set()); 
   const [qtyMap, setQtyMap] = useState({}); 
 
@@ -59,7 +59,7 @@ const MyShopCartContainer = () => {
     setCheckedIds(new Set());
   }, [tab, currentItems]);
 
-  /** 전체선택/개별선택 */
+  /* 전체선택/개별선택 */
   const allChecked = checkedIds.size === currentItems.length && currentItems.length > 0;
 
   const toggleAll = (e) => {
@@ -85,6 +85,8 @@ const MyShopCartContainer = () => {
     .filter((it) => checkedIds.has(it.id))
     .reduce((sum, it) => sum + it.price * (qtyMap[it.id] || 1), 0);
 
+
+
   return (
     <div>
       <ListHeader>장바구니</ListHeader>
@@ -98,7 +100,7 @@ const MyShopCartContainer = () => {
           캔디 상품
         </FilterButton>
       </FilterContainer>
-
+    
       {/* 상단 전체선택/삭제(선택해제) */}
       <CartHeader>
         <SelectAll>
@@ -187,7 +189,9 @@ const MyShopCartContainer = () => {
         </SummaryRow>
       </OrderSummary>
 
-      <OrderButton>주문하기</OrderButton>
+      <Link to="/main/shop/order" style={{ textDecoration: "none" }}>
+        <OrderButton>주문하기</OrderButton>
+      </Link>
     </div>
   );
 };
