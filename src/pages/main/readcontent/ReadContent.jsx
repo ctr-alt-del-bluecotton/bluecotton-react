@@ -9,6 +9,10 @@ import leaderData from '../dummyData/readDummys/somLeaderDummy.json'
 import reviewData from '../dummyData/readDummys/somReviewDummy.json'
 import isLikeData from '../dummyData/somIsLikeDummy.json'
 import somContentData from '../dummyData/readDummys/somContentDummy.json'
+import leaderData from '../dummyData/readDummys/somLeaderDummy.json'
+import reviewData from '../dummyData/readDummys/somReviewDummy.json'
+import isLikeData from '../dummyData/somIsLikeDummy.json'
+import somContentData from '../dummyData/readDummys/somContentDummy.json'
 
 const ReadContent = () => {
 
