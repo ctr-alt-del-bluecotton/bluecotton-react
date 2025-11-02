@@ -1,6 +1,6 @@
 import styled from "styled-components";
 
-import { smallText3Bold, smallText0Regular, smallText1Regular, primary ,white, secondary} from '../../../styles/common';
+import { smallText3Bold, smallText0Regular, smallText1Regular, white, secondary} from '../../../styles/common';
 
 const S = {};
 
@@ -10,14 +10,32 @@ S.Card = styled.div`
   flex-direction: column;
 `;
 
-S.SomImage = styled.img`
+S.SomImage = styled.div`
   width: 100%;
-  height: 180px;
+  height: 230px;
+  background-image: url(${({ bgsrc }) => bgsrc});
+  background-position: center;
+  border-radius: 8px;
   object-fit: cover;
+  cursor: pointer;
 `;
 
 S.SomInfo = styled.div`
   padding: 12px 0;
+`;
+
+S.SomLocationIcon = styled.img`
+  width: 8px;
+`;
+
+S.SomDateIcon = styled.img`
+  width: 8px;
+  height: 9px;
+`;
+
+S.somLikeIcon = styled.img`
+  width: 13px;
+  height: 12px;
 `;
 
 S.SomTitleArea = styled.div`
@@ -39,6 +57,7 @@ S.SomTitleArea = styled.div`
 
 S.SomTitle = styled.div`
   ${smallText3Bold}
+  cursor: pointer;
 `;
 
 S.SomExplanation = styled.div`
@@ -52,6 +71,7 @@ S.SomExplanation = styled.div`
 `;
 
 S.SomButtonArea = styled.div`
+  ${smallText0Regular}
   display: flex;
   justify-content: space-between;
   gap: 10px;
@@ -112,9 +132,10 @@ S.SomExplantionArea = styled.div`
 
 S.SomExplanationInfo = styled.div`
   display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
   gap: 5px;
-  
-
 `
 
 export default S;

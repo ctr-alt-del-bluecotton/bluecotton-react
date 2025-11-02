@@ -1,15 +1,20 @@
 import styled from "styled-components";
 
-import { smallText3Bold, smallText0Regular, smallText1Regular, primary ,white, secondary} from '../../../../../styles/common';
+import {  } from '../../../../../styles/common';
 
 const S = {};
 
 S.somReadContentContainer = styled.div`
-
+    display: flex;
+    flex-direction: column;
+    justify-content: start;
 `
 
 S.somContent = styled.div`
-
+    display: flex;
+    gap: 20px;
+    flex-direction: column;
+    justify-content: center;
 `
 S.somMemberListTitleWrap = styled.div`
 

@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import theme from '../../styles/common';
+import { } from '../../styles/common';
 
 const S = {};
 

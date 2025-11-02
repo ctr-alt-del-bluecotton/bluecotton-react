@@ -4,12 +4,14 @@ import MainCategory from "./maincategory/MainCategory";
 import MainContent from "./maincontent/MainContent";
 import { fetchSomList } from "./api/somAPI";
 import { useParams } from "react-router-dom";
+import somIsLikeList from "./dummyData/somIsLikeDummy.json";
 
 
 const MainContainer = () => {
   const { category } = useParams();
   const [sortBy, setSortBy] = useState("최신순");
   const [somList, setSomList] = useState([]);
+  const [somisLikeList, setSomisLikeList] = useState([]);
   const [pageNumber, setPageNumber] = useState(1);
 
   const categoryMap = {
@@ -19,11 +21,12 @@ const MainContainer = () => {
     social: "소셜",
     hobby: "취미",
     life: "생활",
-    rookie: "루키",
-  };
+    rookie: "루키"
+  }
 
   useEffect(() => {
     setPageNumber(1);
+    setSomisLikeList(somIsLikeList);
   }, [category]);
 
   useEffect(() => {
@@ -49,6 +52,8 @@ const MainContainer = () => {
           somList={somList}
           pageNumber={pageNumber}
           setPageNumber={setPageNumber}
+          somisLikeList={somisLikeList}
+          setSomisLikeList={setSomisLikeList}
         />
       </S.Wrap>
     </S.Container>

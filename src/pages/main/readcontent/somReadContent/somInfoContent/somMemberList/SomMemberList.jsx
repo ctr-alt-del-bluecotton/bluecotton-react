@@ -8,13 +8,14 @@ const SomMemberList = ({somMemberList}) => {
     <SomMemberContent memberData={data}/>
   ));
 
-  console.log(list)
-
   return (
     <S.somMemberListContainer>
       <S.somMemberListTitleWrap>
-        <S.somMemberListTitle>함께하는 멤버</S.somMemberListTitle>
-        <S.somMemberListTitleCotext></S.somMemberListTitleCotext>
+        <S.somMemberListCountWrap>
+          <S.somMemberListTitle>멤버 소개</S.somMemberListTitle>
+          <S.somMemberCount>{somMemberList.length}명</S.somMemberCount>
+        </S.somMemberListCountWrap>
+        <S.somMemberListCotext>함께하는 멤버들을 알려드릴게요</S.somMemberListCotext>
       </S.somMemberListTitleWrap>
       <S.somMemberListContents>
         {list}

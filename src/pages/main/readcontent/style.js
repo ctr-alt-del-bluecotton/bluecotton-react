@@ -1,6 +1,6 @@
 import styled from "styled-components";
 
-import { smallText3Bold, smallText0Regular, smallText1Regular, primary ,white, secondary} from '../../../styles/common';
+import {  } from '../../../styles/common';
 
 const S = {};
 
@@ -8,12 +8,14 @@ S.somReadContainer = styled.div`
   width: 100%;
   display: flex;
   margin-top: 70px;
+  margin-bottom: 150px;
+  justify-content: center;
 `
 
 S.somReadWrap = styled.div`
   display: flex;
   width: 1160px;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
   margin: 0 auto;
   gap: 40px;

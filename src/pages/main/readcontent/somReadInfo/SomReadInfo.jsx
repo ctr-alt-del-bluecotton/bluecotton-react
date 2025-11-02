@@ -1,57 +1,70 @@
 import React from 'react';
 import S from './style'
 
-const SomReadInfo = ({somInfo}) => {
+const SomReadInfo = ({somInfo, somIsLike, setSomIsLike}) => {
   const {
+    somId,
     somTitle,
-    somImagePath,
-    somImageName,
     somCategory,
-    somType,
     somAddress,
     somStartDate,
-    somEndDate,
     somCount,
-    somContent,
-    somLikeCount,
-    userName
+    somLikeCount
   } = somInfo
+
+  // 증가 쿼리 fetch 예정
+  const somLikeButtonOnclick = () => {
+    setSomIsLike(
+      somIsLike.map((item) =>
+        String(item.somId) === String(somId)
+          ? { somIsLike, isLike: !item.isLike }
+          : item
+    ));
+  } 
+
+  const somLikeButton = somIsLike ?
+    <S.somLikeButton onClick={somLikeButtonOnclick}>
+      <S.somLikeIcon src='../../../../assets/icons/som_read_like_active.png' alt='솜 좋아요 true'/>
+      <S.somLikeCount>{somLikeCount}</S.somLikeCount>
+    </S.somLikeButton> : 
+    <S.somLikeButton onClick={somLikeButtonOnclick}>
+      <S.somLikeIcon src='../../../../assets/icons/som_read_like_inactive.png' alt='솜 좋아요 false'/>
+      <S.somLikeCount>{somLikeCount}</S.somLikeCount>
+    </S.somLikeButton> ;
+
   return (
     <S.somInfoWrap>
       <S.somCategoryWrap>
-        <S.somCategoryIcon alt="카테고리 아이콘"/>
+        <S.somCategoryIcon src='../../../../assets/icons/som_read_category_icon.png' alt="카테고리 아이콘"/>
         <S.somCategoryTitle>카테고리</S.somCategoryTitle>
         <span>{'>'}</span>
         <S.somCategory>{somCategory}</S.somCategory>
       </S.somCategoryWrap>
       <S.somTitle>{somTitle}</S.somTitle>
       <S.somCountWrap>
-        <S.somCountIcon alt="인원수 아이콘"/>
+        <S.somCountIcon src='./../../../assets/icons/som_read_people_icon.png' alt="인원수 아이콘"/>
         <S.somCount>{somCount} 명</S.somCount>
       </S.somCountWrap>
       <S.somDateWrap>
         <S.somStartDateWrap>
-          <S.somStartDateIcon />
-          <S.somStartDateTitle></S.somStartDateTitle>
+          <S.somDateIcon src='../../../../assets/icons/som_read_calendar.png'/>
+          <S.somStartDateTitle>시작 날짜</S.somStartDateTitle>
           <S.somStartDate>{somStartDate}</S.somStartDate>
         </S.somStartDateWrap>
         <S.somEndDateWrap>
-          <S.somEndDateIcon />
-          <S.somEndDateTitle></S.somEndDateTitle>
+          <S.somDateIcon src='../../../../assets/icons/som_read_calendar.png'/>
+          <S.somEndDateTitle>종료 날짜</S.somEndDateTitle>
           <S.somEndDate>{somStartDate}</S.somEndDate>
         </S.somEndDateWrap>
       </S.somDateWrap>
       <S.somAddressWrap>
-        <S.somAddressIcon />
+        <S.somAddressIcon src='../../../assets/icons/som_read_location.png'/>
         <S.somAddress>{somAddress}</S.somAddress>
       </S.somAddressWrap>
       <S.somButtonWrap>
-        <S.somWhisperButton>귓솜말하기</S.somWhisperButton>
-        <S.somJoinButton>참여하기 {somCount}/10</S.somJoinButton>
-        <S.somLikeButtonWrap>
-          <S.somLikeIcon />
-          <S.somLikeCount>{somLikeCount}</S.somLikeCount>
-        </S.somLikeButtonWrap>
+        <S.somButton>귓솜말하기</S.somButton>
+        <S.somButton>참여하기 {somCount}/10</S.somButton>
+        {somLikeButton}
       </S.somButtonWrap>
     </S.somInfoWrap>
   );

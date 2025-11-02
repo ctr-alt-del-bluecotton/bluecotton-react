@@ -1,4 +1,5 @@
 import styled, { css } from "styled-components";
+import { smallText1Regular, smallText2Regular } from "../../../styles/common";
 
 /* === 상단 컨테이너 === */
 const S = {};
@@ -20,6 +21,7 @@ S.CategoryList = styled.div`
 
 /* === 버튼 (Link 대신 button) === */
 S.CategoryButton = styled.button`
+  ${smallText2Regular}
   display: flex;
   align-items: center;
   justify-content: center;

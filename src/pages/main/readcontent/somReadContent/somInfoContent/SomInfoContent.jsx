@@ -1,14 +1,20 @@
 import React from 'react';
 import S from './style';
 import SomMemberList from './somMemberList/SomMemberList'
+import SomLeaderInfo from './somLeader/SomLeaderInfo';
 
-const SomInfoContent = ({infoMenuSelect, somMemberList}) => {
+const SomInfoContent = ({
+  infoMenuSelect, 
+  somMemberList, 
+  somLeader, 
+  somReviews, 
+  somContent
+}) => {
   let content = ""
 
   if(infoMenuSelect === "info"){
     content = ( 
-    <S.somContent>
-      솜 정보
+    <S.somContent dangerouslySetInnerHTML={{ __html: somContent }}>
     </S.somContent> 
     );
   } else if (infoMenuSelect === "memberList") {
@@ -17,14 +23,11 @@ const SomInfoContent = ({infoMenuSelect, somMemberList}) => {
     )
   } else if (infoMenuSelect === "leader") {
     content = (
-      <S.somLeaderInfo>
-
-      </S.somLeaderInfo>
-    )
+      <SomLeaderInfo somReviews={somReviews} somLeader={somLeader}/>
+    );
   } else {
     content = ( 
-    <S.somContent>
-      솜 정보
+    <S.somContent dangerouslySetInnerHTML={{ __html: somContent }}>
     </S.somContent> 
     );
   }
