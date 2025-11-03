@@ -12,7 +12,7 @@ IntroStyle.IntroBannerWarp = styled.div `
     overflow: hidden;
     position: relative;
     z-index: 1;
-    background: url("/assets/images/intro_main.png") center/cover no-repeat;
+    background: url("/assets/images/moveBanner.gif") center/cover no-repeat;
     
 `
 
