@@ -8,30 +8,36 @@ import {
   ItemDetails,
   Pagination,
   PageButton,
-  PageNumber
+  PageNumber,
+  DeleteButton
 } from '../style';
 
 const MyPostSaveContainer = () => {
   const posts = [
     {
-      type: '솔로',
+      id: 1,
+      type: '취미',
       title: '초록색 패션 코디 챌린지',
       date: '2025.09.15',
-      status: '임시저장'
     },
     {
-      type: '파티',
+      id: 2,
+      type: '소셜',
       title: '친구들과 함께하는 산책',
       date: '2025.09.10',
-      status: '임시저장'
     },
     {
-      type: '솔로',
+      id: 3,
+      type: '건강',
       title: '다이어트 습관 만들기',
       date: '2025.09.05',
-      status: '임시저장'
     }
   ];
+
+  const handleDelete = (id) => {
+    console.log('삭제:', id);
+    // 삭제 로직 구현
+  };
 
   return (
     <div>
@@ -45,7 +51,12 @@ const MyPostSaveContainer = () => {
               <ItemTitle>{post.title}</ItemTitle>
               <ItemDetails>
                 <span>저장일: {post.date}</span>
-                <span>{post.status}</span>
+                <DeleteButton onClick={(e) => {
+                  e.stopPropagation();
+                  handleDelete(post.id);
+                }}>
+                  삭제
+                </DeleteButton>
               </ItemDetails>
             </div>
           </ListItem>

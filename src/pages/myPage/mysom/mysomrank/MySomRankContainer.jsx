@@ -12,10 +12,20 @@ import {
   InfoSection,
   InfoTitle,
   InfoList,
-  BulletList
+  BulletList,
+  RankIcon
 } from '../style';
 
 const MySomRankContainer = () => {
+  // 등급별 아이콘 설정
+  const rankConfig = {
+    rookie: { letter: 'r', color: '#00C853' },
+    silver: { letter: 's', color: '#B0BEC5' },
+    gold: { letter: 'g', color: '#DAB24C' },
+    diamond: { letter: 'd', color: '#00E5FF' },
+    master: { letter: 'm', color: '#FF1744' }
+  };
+
   return (
     <div>
       <ContentTitle>솜 등급 현황이 궁금하세요?</ContentTitle>
@@ -49,35 +59,45 @@ const MySomRankContainer = () => {
             <td style={{ padding: '12px', borderBottom: '1px solid #E0E0E0' }}>0솜</td>
             <td style={{ padding: '12px', borderBottom: '1px solid #E0E0E0' }}>0%</td>
             <td style={{ padding: '12px', borderBottom: '1px solid #E0E0E0' }}>0%</td>
-            <td style={{ padding: '12px', borderBottom: '1px solid #E0E0E0' }}>😊</td>
+            <td style={{ padding: '12px', borderBottom: '1px solid #E0E0E0' }}>
+              <RankIcon $bgColor={rankConfig.rookie.color}>{rankConfig.rookie.letter}</RankIcon>
+            </td>
           </tr>
           <tr>
             <td style={{ padding: '12px', borderBottom: '1px solid #E0E0E0' }}>Silver</td>
             <td style={{ padding: '12px', borderBottom: '1px solid #E0E0E0' }}>10솜</td>
             <td style={{ padding: '12px', borderBottom: '1px solid #E0E0E0' }}>10%</td>
             <td style={{ padding: '12px', borderBottom: '1px solid #E0E0E0' }}>5%</td>
-            <td style={{ padding: '12px', borderBottom: '1px solid #E0E0E0' }}>😎</td>
+            <td style={{ padding: '12px', borderBottom: '1px solid #E0E0E0' }}>
+              <RankIcon $bgColor={rankConfig.silver.color}>{rankConfig.silver.letter}</RankIcon>
+            </td>
           </tr>
           <tr>
             <td style={{ padding: '12px', borderBottom: '1px solid #E0E0E0' }}>Gold</td>
             <td style={{ padding: '12px', borderBottom: '1px solid #E0E0E0' }}>50솜</td>
             <td style={{ padding: '12px', borderBottom: '1px solid #E0E0E0' }}>20%</td>
             <td style={{ padding: '12px', borderBottom: '1px solid #E0E0E0' }}>10%</td>
-            <td style={{ padding: '12px', borderBottom: '1px solid #E0E0E0' }}>🧑‍💼</td>
+            <td style={{ padding: '12px', borderBottom: '1px solid #E0E0E0' }}>
+              <RankIcon $bgColor={rankConfig.gold.color}>{rankConfig.gold.letter}</RankIcon>
+            </td>
           </tr>
           <tr>
             <td style={{ padding: '12px', borderBottom: '1px solid #E0E0E0' }}>Diamond</td>
             <td style={{ padding: '12px', borderBottom: '1px solid #E0E0E0' }}>100솜</td>
             <td style={{ padding: '12px', borderBottom: '1px solid #E0E0E0' }}>30%</td>
             <td style={{ padding: '12px', borderBottom: '1px solid #E0E0E0' }}>15%</td>
-            <td style={{ padding: '12px', borderBottom: '1px solid #E0E0E0' }}>👑</td>
+            <td style={{ padding: '12px', borderBottom: '1px solid #E0E0E0' }}>
+              <RankIcon $bgColor={rankConfig.diamond.color}>{rankConfig.diamond.letter}</RankIcon>
+            </td>
           </tr>
           <tr>
             <td style={{ padding: '12px', borderBottom: '1px solid #E0E0E0' }}>Master</td>
             <td style={{ padding: '12px', borderBottom: '1px solid #E0E0E0' }}>200솜</td>
             <td style={{ padding: '12px', borderBottom: '1px solid #E0E0E0' }}>50%</td>
             <td style={{ padding: '12px', borderBottom: '1px solid #E0E0E0' }}>25%</td>
-            <td style={{ padding: '12px', borderBottom: '1px solid #E0E0E0' }}>🎩</td>
+            <td style={{ padding: '12px', borderBottom: '1px solid #E0E0E0' }}>
+              <RankIcon $bgColor={rankConfig.master.color}>{rankConfig.master.letter}</RankIcon>
+            </td>
           </tr>
         </tbody>
       </table>
