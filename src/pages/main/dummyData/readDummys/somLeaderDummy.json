@@ -1,0 +1,114 @@
+[
+    {
+        "memberId": 1,
+        "somId" : 1,
+        "memberName": "유준혁",
+        "memberInfo": "잘 부탁드립니다",
+        "memberProfilePath": "",
+        "memberProfileName": "프로필사진1.png"
+    },
+    {
+        "memberId": 2,
+        "somId" : 2,
+        "memberName": "최우빈",
+        "memberInfo": "연애하고 싶다",
+        "memberProfilePath": "",
+        "memberProfileName": "프로필사진1.png"
+    }
+    ,{
+        "memberId": 3,
+        "somId" : 3,
+        "memberName": "이하연",
+        "memberInfo": "코딩 열심히 합시다",
+        "memberProfilePath": "",
+        "memberProfileName": "프로필사진1.png"
+    },
+    {
+        "memberId": 4,
+        "somId" : 4,
+        "memberName": "박서현",
+        "memberInfo": "저랑 런닝하실 분",
+        "memberProfilePath": "",
+        "memberProfileName": "프로필사진1.png"
+    },
+    {
+        "memberId": 5,
+        "somId" : 5,
+        "memberName": "이정훈",
+        "memberInfo": "오늘도 화이팅!!",
+        "memberProfilePath": "",
+        "memberProfileName": "프로필사진1.png"
+    },
+    {
+        "memberId": 6,
+        "somId" : 6,
+        "memberName": "홍성민",
+        "memberInfo": "농구는 내 인생",
+        "memberProfilePath": "",
+        "memberProfileName": "프로필사진1.png"
+    },
+    {
+        "memberId": 7,
+        "somId" : 7,
+        "memberName": "홍성민",
+        "memberInfo": "농구는 내 인생",
+        "memberProfilePath": "",
+        "memberProfileName": "프로필사진1.png"
+    },
+    {
+        "memberId": 8,
+        "somId" : 8,
+        "memberName": "홍성민",
+        "memberInfo": "농구는 내 인생",
+        "memberProfilePath": "",
+        "memberProfileName": "프로필사진1.png"
+    },
+    {
+        "memberId": 9,
+        "somId" : 9,
+        "memberName": "홍성민",
+        "memberInfo": "농구는 내 인생",
+        "memberProfilePath": "",
+        "memberProfileName": "프로필사진1.png"
+    },
+    {
+        "memberId": 10,
+        "somId" : 10,
+        "memberName": "홍성민",
+        "memberInfo": "농구는 내 인생",
+        "memberProfilePath": "",
+        "memberProfileName": "프로필사진1.png"
+    },
+    {
+        "memberId": 11,
+        "somId" : 11,
+        "memberName": "홍성민",
+        "memberInfo": "농구는 내 인생",
+        "memberProfilePath": "",
+        "memberProfileName": "프로필사진1.png"
+    },
+    {
+        "memberId": 12,
+        "somId" : 12,
+        "memberName": "홍성민",
+        "memberInfo": "농구는 내 인생",
+        "memberProfilePath": "",
+        "memberProfileName": "프로필사진1.png"
+    },
+    {
+        "memberId": 13,
+        "somId" : 13,
+        "memberName": "홍성민",
+        "memberInfo": "농구는 내 인생",
+        "memberProfilePath": "",
+        "memberProfileName": "프로필사진1.png"
+    },
+    {
+        "memberId": 14,
+        "somId" : 14,
+        "memberName": "홍성민",
+        "memberInfo": "농구는 내 인생",
+        "memberProfilePath": "",
+        "memberProfileName": "프로필사진1.png"
+    }
+]

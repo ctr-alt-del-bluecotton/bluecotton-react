@@ -2,262 +2,262 @@
   {
     "id": 1,
     "somTitle": "다같이 플로깅!",
-    "somImageLocation": "/images/som1.jpg",
+    "somImagePath": "../../../assets/images/som/som_read_image1.png",
     "somType": "파티솜",
     "somAddress": "서울특별시 중구",
     "somStartDate": "2025-01-11",
     "somEndDate": "2025-01-12",
     "somCount": 7,
     "somLikeCount": 25,
-    "userName": "유준혁",
-    "userProfileLocation": "/images/user1.png"
+    "memberName": "유준혁",
+    "memberProfilePath": "/images/member1.png"
   },
   {
     "id": 2,
     "somTitle": "여름대비 몸 만들기!",
-    "somImageLocation": "/images/som2.jpg",
+    "somImagePath": "../../../assets/images/som/som_read_image2.png",
     "somType": "솔로솜",
     "somAddress": "서울특별시 강남구",
     "somStartDate": "2025-02-01",
     "somEndDate": "2025-02-10",
     "somCount": 10,
     "somLikeCount": 17,
-    "userName": "최우빈",
-    "userProfileLocation": "/images/user2.png"
+    "memberName": "최우빈",
+    "memberProfilePath": "/images/member2.png"
   },
   {
     "id": 3,
     "somTitle": "코딩 마스터를 위하여!",
-    "somImageLocation": "/images/som3.jpg",
+    "somImagePath": "../../../assets/images/som/som_read_image3.png",
     "somType": "파티솜",
     "somAddress": "부산광역시 해운대구",
     "somStartDate": "2025-03-05",
     "somEndDate": "2025-03-10",
     "somCount": 10,
     "somLikeCount": 11,
-    "userName": "이하연",
-    "userProfileLocation": "/images/user3.png"
+    "memberName": "이하연",
+    "memberProfilePath": "/images/member3.png"
   },
   {
     "id": 4,
     "somTitle": "같이 달린 당신 분~",
-    "somImageLocation": "/images/som4.jpg",
+    "somImagePath": "../../../assets/images/som/som_read_image4.png",
     "somType": "솔로솜",
     "somAddress": "대구광역시 달서구",
     "somStartDate": "2025-04-01",
     "somEndDate": "2025-04-15",
     "somCount": 8,
     "somLikeCount": 9,
-    "userName": "박서현",
-    "userProfileLocation": "/images/user4.png"
+    "memberName": "박서현",
+    "memberProfilePath": "/images/member4.png"
   },
   {
     "id": 5,
     "somTitle": "하이킹 좋아하시는 분? 같이 딸까요?",
-    "somImageLocation": "/images/som5.jpg",
+    "somImagePath": "../../../assets/images/som/som_read_image5.png",
     "somType": "파티솜",
     "somAddress": "경기도 수원시",
     "somStartDate": "2025-02-20",
     "somEndDate": "2025-02-21",
     "somCount": 10,
     "somLikeCount": 31,
-    "userName": "이정훈",
-    "userProfileLocation": "/images/user5.png"
+    "memberName": "이정훈",
+    "memberProfilePath": "/images/member5.png"
   },
   {
     "id": 6,
     "somTitle": "오늘 한강에서 농구하실분?",
-    "somImageLocation": "/images/som6.jpg",
+    "somImagePath": "../../../assets/images/som/som_read_image6.png",
     "somType": "파티솜",
     "somAddress": "서울특별시 마포구",
     "somStartDate": "2025-05-01",
     "somEndDate": "2025-05-01",
     "somCount": 5,
     "somLikeCount": 28,
-    "userName": "홍성민",
-    "userProfileLocation": "/images/user6.png"
+    "memberName": "홍성민",
+    "memberProfilePath": "/images/member6.png"
   },
   {
     "id": 7,
     "somTitle": "특종 기차여행 가실분 구해요!!",
-    "somImageLocation": "/images/som7.jpg",
+    "somImagePath": "../../../assets/images/som/som_read_image7.png",
     "somType": "솔로솜",
     "somAddress": "인천광역시 미추홀구",
     "somStartDate": "2025-06-10",
     "somEndDate": "2025-06-13",
     "somCount": 8,
     "somLikeCount": 40,
-    "userName": "김소연",
-    "userProfileLocation": "/images/user7.png"
+    "memberName": "김소연",
+    "memberProfilePath": "/images/member7.png"
   },
   {
     "id": 8,
     "somTitle": "같이 독서하고 좋은 내용 공유해요!",
-    "somImageLocation": "/images/som8.jpg",
+    "somImagePath": "../../../assets/images/som/som_read_image8.png",
     "somType": "솔로솜",
     "somAddress": "서울특별시 종로구",
     "somStartDate": "2025-07-01",
     "somEndDate": "2025-07-20",
     "somCount": 6,
     "somLikeCount": 23,
-    "userName": "이예린",
-    "userProfileLocation": "/images/user8.png"
+    "memberName": "이예린",
+    "memberProfilePath": "/images/member8.png"
   },
   {
     "id": 9,
     "somTitle": "이번 주말 윷놀이모임으로 봅시다~",
-    "somImageLocation": "/images/som9.jpg",
+    "somImagePath": "../../../assets/images/som/som_read_image9.png",
     "somType": "파티솜",
     "somAddress": "서울특별시 송파구",
     "somStartDate": "2025-08-10",
     "somEndDate": "2025-08-11",
     "somCount": 6,
     "somLikeCount": 15,
-    "userName": "정민수",
-    "userProfileLocation": "/images/user9.png"
+    "memberName": "정민수",
+    "memberProfilePath": "/images/member9.png"
   },
   {
     "id": 11,
     "somTitle": "다같이 플로깅!",
-    "somImageLocation": "/images/som1.jpg",
+    "somImagePath": "/images/som/som1.jpg",
     "somType": "파티솜",
     "somAddress": "서울특별시 중구",
     "somStartDate": "2025-01-11",
     "somEndDate": "2025-01-12",
     "somCount": 10,
     "somLikeCount": 25,
-    "userName": "유준혁",
-    "userProfileLocation": "/images/user1.png"
+    "memberName": "유준혁",
+    "memberProfilePath": "/images/member1.png"
   },
   {
     "id": 12,
     "somTitle": "여름대비 몸 만들기!",
-    "somImageLocation": "/images/som2.jpg",
+    "somImagePath": "/images/som/som/som2.jpg",
     "somType": "솔로솜",
     "somAddress": "서울특별시 강남구",
     "somStartDate": "2025-02-01",
     "somEndDate": "2025-02-10",
     "somCount": 10,
     "somLikeCount": 17,
-    "userName": "최우빈",
-    "userProfileLocation": "/images/user2.png"
+    "memberName": "최우빈",
+    "memberProfilePath": "/images/member2.png"
   },
   {
     "id": 13,
     "somTitle": "코딩 마스터를 위하여!",
-    "somImageLocation": "/images/som3.jpg",
+    "somImagePath": "/images/som/som/som3.jpg",
     "somType": "파티솜",
     "somAddress": "부산광역시 해운대구",
     "somStartDate": "2025-03-05",
     "somEndDate": "2025-03-10",
     "somCount": 10,
     "somLikeCount": 11,
-    "userName": "이하연",
-    "userProfileLocation": "/images/user3.png"
+    "memberName": "이하연",
+    "memberProfilePath": "/images/member3.png"
   },
   {
     "id": 14,
     "somTitle": "같이 달린 당신 분~",
-    "somImageLocation": "/images/som4.jpg",
+    "somImagePath": "/images/som/som/som4.jpg",
     "somType": "솔로솜",
     "somAddress": "대구광역시 달서구",
     "somStartDate": "2025-04-01",
     "somEndDate": "2025-04-15",
     "somCount": 8,
     "somLikeCount": 9,
-    "userName": "박서현",
-    "userProfileLocation": "/images/user4.png"
+    "memberName": "박서현",
+    "memberProfilePath": "/images/member4.png"
   },
   {
     "id": 15,
     "somTitle": "하이킹 좋아하시는 분? 같이 딸까요?",
-    "somImageLocation": "/images/som5.jpg",
+    "somImagePath": "/images/som/som/som5.jpg",
     "somType": "파티솜",
     "somAddress": "경기도 수원시",
     "somStartDate": "2025-02-20",
     "somEndDate": "2025-02-21",
     "somCount": 10,
     "somLikeCount": 31,
-    "userName": "이정훈",
-    "userProfileLocation": "/images/user5.png"
+    "memberName": "이정훈",
+    "memberProfilePath": "/images/member5.png"
   },
   {
     "id": 16,
     "somTitle": "오늘 한강에서 농구하실분?",
-    "somImageLocation": "/images/som6.jpg",
+    "somImagePath": "/images/som/som/som6.jpg",
     "somType": "파티솜",
     "somAddress": "서울특별시 마포구",
     "somStartDate": "2025-05-01",
     "somEndDate": "2025-05-01",
     "somCount": 5,
     "somLikeCount": 28,
-    "userName": "홍성민",
-    "userProfileLocation": "/images/user6.png"
+    "memberName": "홍성민",
+    "memberProfilePath": "/images/member6.png"
   },
   {
     "id": 17,
     "somTitle": "특종 기차여행 가실분 구해요!!",
-    "somImageLocation": "/images/som7.jpg",
+    "somImagePath": "/images/som/som/som7.jpg",
     "somType": "솔로솜",
     "somAddress": "인천광역시 미추홀구",
     "somStartDate": "2025-06-10",
     "somEndDate": "2025-06-13",
     "somCount": 8,
     "somLikeCount": 40,
-    "userName": "김소연",
-    "userProfileLocation": "/images/user7.png"
+    "memberName": "김소연",
+    "memberProfilePath": "/images/member7.png"
   },
   {
     "id": 18,
     "somTitle": "같이 독서하고 좋은 내용 공유해요!",
-    "somImageLocation": "/images/som8.jpg",
+    "somImagePath": "/images/som/som/som8.jpg",
     "somType": "솔로솜",
     "somAddress": "서울특별시 종로구",
     "somStartDate": "2025-07-01",
     "somEndDate": "2025-07-20",
     "somCount": 6,
     "somLikeCount": 23,
-    "userName": "이예린",
-    "userProfileLocation": "/images/user8.png"
+    "memberName": "이예린",
+    "memberProfilePath": "/images/member8.png"
   },
   {
     "id": 19,
     "somTitle": "이번 주말 윷놀이모임으로 봅시다~",
-    "somImageLocation": "/images/som9.jpg",
+    "somImagePath": "/images/som/som/som9.jpg",
     "somType": "파티솜",
     "somAddress": "서울특별시 송파구",
     "somStartDate": "2025-08-10",
     "somEndDate": "2025-08-11",
     "somCount": 6,
     "somLikeCount": 15,
-    "userName": "정민수",
-    "userProfileLocation": "/images/user9.png"
+    "memberName": "정민수",
+    "memberProfilePath": "/images/member9.png"
   },
   {
     "id": 20,
     "somTitle": "이번 주말 윷놀이모임으로 봅시다~",
-    "somImageLocation": "/images/som9.jpg",
+    "somImagePath": "/images/som/som/som9.jpg",
     "somType": "파티솜",
     "somAddress": "서울특별시 송파구",
     "somStartDate": "2025-08-10",
     "somEndDate": "2025-08-11",
     "somCount": 6,
     "somLikeCount": 15,
-    "userName": "정민수",
-    "userProfileLocation": "/images/user9.png"
+    "memberName": "정민수",
+    "memberProfilePath": "/images/member9.png"
   }
   ,
   {
     "id": 21,
     "somTitle": "이번 주말 윷놀이모임으로 봅시다~",
-    "somImageLocation": "/images/som9.jpg",
+    "somImagePath": "/images/som/som/som9.jpg",
     "somType": "파티솜",
     "somAddress": "서울특별시 송파구",
     "somStartDate": "2025-08-10",
     "somEndDate": "2025-08-11",
     "somCount": 6,
     "somLikeCount": 15,
-    "userName": "정민수",
-    "userProfileLocation": "/images/user9.png"
+    "memberName": "정민수",
+    "memberProfilePath": "/images/member9.png"
   }
 ]

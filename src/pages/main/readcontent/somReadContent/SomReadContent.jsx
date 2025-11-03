@@ -4,23 +4,34 @@ import SomInfoContent from './somInfoContent/SomInfoContent';
 
 const SomReadContent = ({
   somMemberList,
-  setSomMemberList,
   infoMenuSelect, 
   setInfoMenuSelect,
-  somInfo
+  somLeader,
+  somInfo,
+  somContent,
+  somReviews
 }) => {
 
   const { somImageName, somImagePath } = somInfo;
 
+  const somInfoMenu = [
+    { title: "정보", name: "info", onClick: () => {setInfoMenuSelect("info");} },
+    { title: "함께하는 멤버", name: "memberList", onClick: () => {setInfoMenuSelect("memberList");} },
+    { title: "팀장", name: "leader", onClick: () => setInfoMenuSelect("leader") }
+  ]
+
   return (
     <S.somReadContentContainer>
-      <S.somImage src={somImagePath} alt={somImageName}/>
-      <S.somInfoMenu>
-        <S.somInfo onClick={() => {setInfoMenuSelect("info");}}>정보</S.somInfo>
-        <S.somMemberList onClick={() => {setInfoMenuSelect("memberList");}}>함께하는 멤버</S.somMemberList>
-        <S.somLeader onClick={() => setInfoMenuSelect("leader")}>팀장</S.somLeader>
-      </S.somInfoMenu>
-      <SomInfoContent infoMenuSelect={infoMenuSelect} somMemberList={somMemberList} setSomMemberList={somMemberList}/>
+      <S.somInfoMenuWrap>
+        <S.somImage src={somImagePath} alt={somImageName}/>
+        <S.somInfoMenu>
+          {somInfoMenu.map((menu, index) => (
+            <S.somButton key={index} $active={infoMenuSelect === menu.name} onClick={menu.onClick}>{menu.title}</S.somButton>
+          ))}
+        </S.somInfoMenu>
+
+      </S.somInfoMenuWrap>
+      <SomInfoContent somLeader={somLeader} somContent={somContent} somReviews={somReviews} infoMenuSelect={infoMenuSelect} somMemberList={somMemberList} setSomMemberList={somMemberList}/>
     </S.somReadContentContainer>
   );
 };

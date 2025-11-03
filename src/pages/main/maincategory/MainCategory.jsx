@@ -18,9 +18,9 @@ const reverseMap = Object.fromEntries(
 
 const categories = Object.values(categoryMap);
 const sortOptions = [
-  { value: "latest", label: "최신순" },
-  { value: "popular", label: "좋아요순" },
-  { value: "closing", label: "마감 임박순" },
+  { value: "latest", label: "전체" },
+  { value: "popular", label: "솔로솜" },
+  { value: "closing", label: "파티솜" },
 ];
 
 const MainCategory = ({ sortBy, setSortBy }) => {

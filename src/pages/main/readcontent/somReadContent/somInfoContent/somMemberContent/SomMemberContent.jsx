@@ -3,16 +3,16 @@ import S from './style';
 
 const SomMemberContent = ({memberData}) => {
   const {
-    userName,
-    userProfileImagePath,
-    userProfileImageName
+    memberName,
+    memberProfilePath,
+    memberProfileName
   } = memberData
 
   return (
-    <S.userInfoContainer>
-      <S.userInfoIamge src={userProfileImagePath} alt={userProfileImageName}/>
-      <S.userInfoName>{userName}</S.userInfoName>
-    </S.userInfoContainer>
+    <S.memberInfoContainer>
+      <S.memberInfoIamge src={memberProfilePath} alt={memberProfileName}/>
+      <S.memberInfoName>{memberName}</S.memberInfoName>
+    </S.memberInfoContainer>
   );
 };
 export default SomMemberContent;

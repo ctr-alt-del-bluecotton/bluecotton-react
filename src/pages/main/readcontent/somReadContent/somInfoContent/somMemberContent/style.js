@@ -1,18 +1,22 @@
 import styled from "styled-components";
 
-import { smallText3Bold, smallText0Regular, smallText1Regular, primary ,white, secondary} from '../../../../../../styles/common';
+import { flexCenterColumn } from '../../../../../../styles/common';
 
 const S = {};
 
-S.userInfoContainer = styled.div`
-
+S.memberInfoContainer = styled.div`
+    ${flexCenterColumn}
+    gap: 10px;
 `
 
-S.userInfoIamge = styled.img`
-
+S.memberInfoIamge = styled.img`
+    width: 60px;
+    height: 60px;
+    border-radius: 100%;
+    border: 1px solid ${({ theme }) => theme.PALLETE.grey.greyScale3};
 `
 
-S.userInfoName = styled.div`
+S.memberInfoName = styled.div`
 
 `
 
