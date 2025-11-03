@@ -58,35 +58,6 @@ export const EditBox = styled.div`
   cursor: pointer;
 `;
 
-/* ===== 좋아요한 솜이 ===== */
-export const LikeSection = styled.div`
-  margin: 40px 0;
-`;
-
-export const LikeHeader = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
-
-  h3 {
-    font-size: ${({ theme }) => theme.FONT_SIZE["smallText3"]};
-    font-weight: ${({ theme }) => theme.FONT_WEIGHT["bold"]};
-  }
-
-  .pink {
-    color: ${({ theme }) => theme.PALLETE.primary.main};
-  }
-
-  button {
-    background: none;
-    border: none;
-    color: ${({ theme }) => theme.PALLETE.grey.greyScale3};
-    cursor: pointer;
-    font-size: ${({ theme }) => theme.FONT_SIZE["smallText3"]};
-  }
-`;
-
 /* ✅ 간격 균등 + 닉네임 ellipsis + 높이 일치 */
 export const LikeGrid = styled.div`
   display: grid;
@@ -151,6 +122,7 @@ export const CommentHeader = styled.div`
     color: ${({ theme }) => theme.PALLETE.grey.greyScale3};
     font-size: ${({ theme }) => theme.FONT_SIZE["smallText3"]};
     cursor: pointer;
+    font-family: inherit;
   }
 `;
 
@@ -204,6 +176,7 @@ export const CommentItem = styled.div`
     display: flex;
     align-items: center;
     gap: 3px;
+    margin-top: 3px;
     font-size: ${({ theme }) => theme.FONT_SIZE["smallText1"]};
     color: ${({ theme }) => theme.PALLETE.grey.greyScale3};
 
@@ -233,8 +206,10 @@ export const CommentItem = styled.div`
         border-radius: 4px;
         padding: 2px 10px;
         cursor: pointer;
+        color: ${({ theme }) => theme.PALLETE.grey.greyScale3};
         font-size: ${({ theme }) => theme.FONT_SIZE["smallText3"]};
         transition: 0.15s;
+        font-family: inherit;
 
         &:hover {
           border-color: ${({ theme }) => theme.PALLETE.primary.main};
@@ -325,6 +300,7 @@ export const CommentForm = styled.div`
       resize: none;
       font-size: ${({ theme }) => theme.FONT_SIZE["smallText2"]};
       box-sizing: border-box;
+      font-family: inherit;
 
       &:focus {
         border-color: ${({ theme }) => theme.PALLETE.primary.main};
@@ -353,6 +329,7 @@ export const CommentForm = styled.div`
     margin-top: 8px;
     margin-right: 2px;
     transition: 0.15s;
+    font-family: inherit;
 
     &:hover {
       background: ${({ theme }) => theme.PALLETE.primary.dark};
@@ -383,6 +360,7 @@ export const NavButton = styled.button`
   background: #fff;
   color: ${({ theme }) => theme.PALLETE.basic};
   cursor: pointer;
+  font-family: inherit;
 
 `;
 
@@ -421,11 +399,12 @@ export const LikeButton = styled.button`
   cursor: pointer;
   transition: all 0.15s ease;
   padding: 0 10px;
+  font-family: inherit;
 
   /* 기본 텍스트 색상 */
   color: ${({ theme }) => theme.PALLETE.grey.greyScale3};
-  font-size: ${({ theme }) => theme.FONT_SIZE["smallText3"]};
-  font-weight: ${({ theme }) => theme.FONT_WEIGHT["medium"]};
+  font-size: ${({ theme }) => theme.FONT_SIZE["smallText2"]};
+  font-weight: ${({ theme }) => theme.FONT_WEIGHT["regulat"]};
 
   img {
     width: 16px;
@@ -490,6 +469,7 @@ export const Mention = styled.span`
   color: ${({ theme }) => theme.PALLETE.primary.main};
   font-style: italic;
   font-weight: ${({ theme }) => theme.FONT_WEIGHT.medium};
+  margin-right: 4px;
 `;
 
 /* ===== 삭제 확인 모달 ===== */
@@ -538,6 +518,7 @@ export const ModalBox = styled.div`
       font-size: ${({ theme }) => theme.FONT_SIZE["smallText2"]};
       cursor: pointer;
       transition: 0.15s;
+      font-family: inherit;
     }
 
     .cancel {
@@ -557,3 +538,57 @@ export const ModalBox = styled.div`
     }
   }
 `;
+
+// ✅ 좋아요 + 공유 버튼 세트 (댓글 위 영역)
+export const PostSocialBox = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: flex-end; /* 오른쪽 정렬 */
+  gap: 12px;
+  margin: 30px 0 24px; /* 위쪽 간격 확보 */
+`;
+
+// ✅ 버튼 공통 스타일 (좋아요/공유 동일)
+const SocialButtonBase = styled.button`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-width: 60px;
+  height: 28px;
+  border: 1px solid ${({ theme }) => theme.PALLETE.grey.greyScale2};
+  border-radius: 6px;
+  background: #fff;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  padding: 0 10px;
+  font-family: inherit;
+
+  /* ✅ 폰트 통일 */
+  color: ${({ theme }) => theme.PALLETE.grey.greyScale3};
+  font-size: ${({ theme }) => theme.FONT_SIZE["smallText2"]};
+  font-weight: ${({ theme }) => theme.FONT_WEIGHT["regular"]};
+  font-family: inherit;
+  line-height: 1;
+
+  img {
+    width: 14px;
+    height: 14px;
+    display: block;
+  }
+
+  span {
+    color: inherit;
+    font-size: inherit;
+    font-weight: inherit;
+    font-family: inherit;
+  }
+`;
+
+// ✅ 공유 버튼 (hover 효과 동일, active 없음)
+export const ShareButton = styled(SocialButtonBase)``;
+
+
+
+
+
