@@ -1,16 +1,16 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import * as S from "./style";
-import { useModal } from "../../../components/modal"; 
-
-// ✅ Toast UI Editor import
+import { useModal } from "../../../components/modal";
 import { Editor } from "@toast-ui/react-editor";
 import "@toast-ui/editor/dist/toastui-editor.css";
+
+const MAX_LENGTH = 1000; // ✅ 글자수 제한
 
 const PostWriteContent = () => {
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState("");
-  const [files, setFiles] = useState([{ file: null, preview: null }]);
+  const [charCount, setCharCount] = useState(0); // ✅ 글자수 카운트
   const { openModal } = useModal();
   const navigate = useNavigate();
   const editorRef = useRef();
@@ -25,11 +25,32 @@ const PostWriteContent = () => {
       if (editorRef.current) {
         editorRef.current.getInstance().setHTML(temp.content || "");
       }
-      setFiles(temp.files || [{ file: null, preview: null }]);
     }
   }, []);
 
-  // ✅ 이미지 업로드 훅 (백엔드와 연동)
+  // ✅ 글자수 카운트 및 제한
+  useEffect(() => {
+    const editorInstance = editorRef.current?.getInstance();
+    if (!editorInstance) return;
+
+    const handleContentChange = () => {
+      const contentText = editorInstance.getMarkdown();
+      const length = contentText.trim().length;
+
+      if (length > MAX_LENGTH) {
+        const trimmed = contentText.substring(0, MAX_LENGTH);
+        editorInstance.setMarkdown(trimmed);
+        setCharCount(MAX_LENGTH);
+      } else {
+        setCharCount(length);
+      }
+    };
+
+    editorInstance.on("change", handleContentChange);
+    return () => editorInstance.off("change", handleContentChange);
+  }, []);
+
+  // ✅ 이미지 업로드
   const handleImageUpload = async (blob, callback) => {
     try {
       const formData = new FormData();
@@ -40,22 +61,18 @@ const PostWriteContent = () => {
         body: formData,
       });
       const result = await response.json();
-
-      const imageUrl = result.imageUrl; // 서버가 반환한 이미지 경로
+      const imageUrl = result.imageUrl;
       callback(imageUrl, "업로드된 이미지");
-      console.log("이미지 업로드 성공:", imageUrl);
     } catch (error) {
-      console.error("이미지 업로드 실패:", error);
-
-      // 서버가 아직 없을 경우 — 임시 미리보기 대체
       const tempUrl = URL.createObjectURL(blob);
       callback(tempUrl, "임시 이미지");
     }
   };
 
+  // ✅ 임시 저장
   const handleTempSave = () => {
     const content = editorRef.current?.getInstance().getHTML() || "";
-    const tempData = { title, category, content, files };
+    const tempData = { title, category, content };
     localStorage.setItem("tempPost", JSON.stringify(tempData));
 
     openModal({
@@ -66,6 +83,7 @@ const PostWriteContent = () => {
     });
   };
 
+  // ✅ 작성 완료
   const handleSubmit = (e) => {
     e.preventDefault();
     const content = editorRef.current?.getInstance().getHTML() || "";
@@ -94,6 +112,7 @@ const PostWriteContent = () => {
     });
   };
 
+  // ✅ 취소
   const handleCancel = () => {
     openModal({
       title: "작성 중인 내용이 사라집니다.",
@@ -132,17 +151,22 @@ const PostWriteContent = () => {
           </select>
         </S.FormRow>
 
+        {/* ✅ Toast UI Editor + 글자수 */}
         <S.FormGroup>
           <Editor
             ref={editorRef}
             previewStyle="vertical"
             height="500px"
             initialEditType="wysiwyg"
+            placeholder="솜을 하면서 느낀 점이나 기록하고 싶은 순간을 자유롭게 적어주세요"
             useCommandShortcut={true}
             hooks={{
               addImageBlobHook: handleImageUpload,
             }}
           />
+          <div className="char-count">
+            {charCount}/{MAX_LENGTH}
+          </div>
         </S.FormGroup>
 
         <S.ButtonBox>

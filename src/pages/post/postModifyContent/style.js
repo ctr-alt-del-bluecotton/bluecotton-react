@@ -47,6 +47,7 @@ export const FormRow = styled.div`
     padding: 0 12px;
     outline: none;
     background-color: #fff;
+    transition: border-color 0.2s ease;
 
     &::placeholder {
       color: ${({ theme }) => theme.PALLETE.grey.greyScale3};
@@ -70,42 +71,33 @@ export const FormRow = styled.div`
   }
 `;
 
-/* === 본문 내용 (Toast UI Editor 통일 스타일) === */
+/* === 에디터 === */
 export const FormGroup = styled.div`
   display: flex;
   flex-direction: column;
   gap: 8px;
 
-  /* ✅ Toast UI Editor 전체 감싸는 영역 */
   .toastui-editor-defaultUI {
     border: 1px solid ${({ theme }) => theme.PALLETE.grey.greyScale2};
     border-radius: 6px;
     overflow: hidden;
+    transition: border-color 0.2s ease;
   }
 
-  /* ✅ 에디터 내부 본문 스타일 통일 (textarea와 동일하게) */
+  &:focus-within .toastui-editor-defaultUI {
+    border-color: ${({ theme }) => theme.PALLETE.primary.main};
+  }
+
   .toastui-editor-contents {
-    font-family: inherit;
     font-size: ${({ theme }) => theme.FONT_SIZE["smallText3"]};
-    line-height: 1.7;
     color: ${({ theme }) => theme.PALLETE.basic};
-    font-family: inherit;
-  
-    p,
-    li,
-    span {
-      font-family: inherit;
-      font-size: ${({ theme }) => theme.FONT_SIZE["smallText3"]};
-      color: ${({ theme }) => theme.PALLETE.basic};
-      line-height: 1.6;
-    }
   }
 
-  /* ✅ 카운터 */
   .char-count {
     font-size: ${({ theme }) => theme.FONT_SIZE["smallText3"]};
     color: ${({ theme }) => theme.PALLETE.grey.greyScale3};
     align-self: flex-end;
+    margin-top: 6px;
   }
 `;
 
@@ -131,15 +123,6 @@ export const ButtonBox = styled.div`
     color: ${({ theme }) => theme.PALLETE.basic};
     &:hover {
       background-color: ${({ theme }) => theme.PALLETE.grey.greyScale0};
-    }
-  }
-
-  .temp-save {
-    border: 1px solid ${({ theme }) => theme.PALLETE.primary.light1};
-    background-color: #fff;
-    color: ${({ theme }) => theme.PALLETE.basic};
-    &:hover {
-      background-color: ${({ theme }) => theme.PALLETE.primary.light0};
     }
   }
 

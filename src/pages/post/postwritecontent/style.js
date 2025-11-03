@@ -47,6 +47,7 @@ export const FormRow = styled.div`
     padding: 0 12px;
     outline: none;
     background-color: #fff;
+    transition: border-color 0.2s ease;
 
     &::placeholder {
       color: ${({ theme }) => theme.PALLETE.grey.greyScale3};
@@ -70,33 +71,52 @@ export const FormRow = styled.div`
   }
 `;
 
-/* === 본문 내용 === */
+/* === 본문 내용 (에디터 영역) === */
 export const FormGroup = styled.div`
   display: flex;
   flex-direction: column;
   gap: 8px;
 
-  /* ✅ Toast UI Editor container */
+  /* ✅ 기본 상태 */
   .toastui-editor-defaultUI {
     border: 1px solid ${({ theme }) => theme.PALLETE.grey.greyScale2};
     border-radius: 6px;
     overflow: hidden;
+    transition: border-color 0.2s ease;
+  }
+
+  &:focus-within .toastui-editor-defaultUI {
+    border-color: ${({ theme }) => theme.PALLETE.primary.main};
   }
 
   .toastui-editor-contents {
     font-family: inherit;
     font-size: ${({ theme }) => theme.FONT_SIZE["smallText3"]};
-    line-height: 1.7;
     color: ${({ theme }) => theme.PALLETE.basic};
-    font-family: inherit;
+
+    p, li, span {
+      font-family: inherit;
+      font-size: ${({ theme }) => theme.FONT_SIZE["smallText3"]};
+      color: ${({ theme }) => theme.PALLETE.basic};
+      line-height: 1.6;
+    }
   }
 
+  /* ✅ ✨ placeholder 색상 변경 (핵심 부분) */
+  .toastui-editor-contents::before {
+    color: ${({ theme }) => theme.PALLETE.grey.greyScale3} !important;
+    opacity: 1 !important;
+  }
+
+  /* ✅ 글자수 카운트 */
   .char-count {
     font-size: ${({ theme }) => theme.FONT_SIZE["smallText3"]};
     color: ${({ theme }) => theme.PALLETE.grey.greyScale3};
     align-self: flex-end;
+    margin-top: 6px;
   }
 `;
+
 
 /* === 버튼 === */
 export const ButtonBox = styled.div`
@@ -140,7 +160,4 @@ export const ButtonBox = styled.div`
       background-color: ${({ theme }) => theme.PALLETE.primary.dark};
     }
   }
-
 `;
-
-

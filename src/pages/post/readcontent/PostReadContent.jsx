@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import * as S from "./style";
 import Report from "../../../components/Report/Report";
@@ -59,8 +59,17 @@ const PostReadContent = () => {
     setPostLikeCount((prev) => (postLiked ? prev - 1 : prev + 1));
   };
 
-const handleShare = () => {
+  useEffect(() => {
+    if (window.Kakao && !window.Kakao.isInitialized()) {
+      window.Kakao.init("8205d77659532bf75b85e3424590d6bc");
+      console.log("✅ Kakao SDK Initialized");
+    } else {
+      console.warn("⚠️ Kakao SDK가 로드되지 않았습니다.");
+    }
+  }, []);
+  const handleShare = () => {
   const shareUrl = `${window.location.origin}/main/post/read/${id}`;
+
 
 
   window.Kakao.Share.sendDefault({

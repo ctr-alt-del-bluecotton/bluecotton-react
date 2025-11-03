@@ -1,20 +1,21 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import * as S from "./style";
-import { useModal } from "../../../components/modal"; // ✅ 전역 모달
-
-// ✅ Toast UI Editor import
+import { useModal } from "../../../components/modal";
 import { Editor } from "@toast-ui/react-editor";
 import "@toast-ui/editor/dist/toastui-editor.css";
+
+const MAX_LENGTH = 1000;
 
 const PostModifyContent = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { openModal } = useModal();
+  const editorRef = useRef();
 
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState("");
-  const editorRef = useRef();
+  const [charCount, setCharCount] = useState(0);
 
   // ✅ 더미 데이터 (수정용)
   const dummyPosts = [
@@ -43,8 +44,11 @@ const PostModifyContent = () => {
       setTimeout(() => {
         if (editorRef.current) {
           editorRef.current.getInstance().setHTML(post.content);
+          setCharCount(
+            editorRef.current.getInstance().getMarkdown().trim().length
+          );
         }
-      }, 100); // Editor 초기화 시점 보정
+      }, 100);
     } else {
       openModal({
         title: "존재하지 않는 게시글입니다.",
@@ -54,27 +58,60 @@ const PostModifyContent = () => {
     }
   }, [id, navigate, openModal]);
 
-  // ✅ 이미지 업로드 (백엔드 연동 훅)
+  // ✅ placeholder 색상 회색으로 (Toast UI 특성상 직접 조작)
+  useEffect(() => {
+    const editorEl = document.querySelector(".toastui-editor-contents");
+    if (!editorEl) return;
+
+    const observer = new MutationObserver(() => {
+      const placeholder = editorEl.querySelector(".toastui-placeholder");
+      if (placeholder) {
+        placeholder.style.color = "#9e9e9e"; // 회색
+        placeholder.style.opacity = "1";
+      }
+    });
+    observer.observe(editorEl, { childList: true, subtree: true });
+    return () => observer.disconnect();
+  }, []);
+
+  // ✅ 글자수 카운트 + 제한
+  useEffect(() => {
+    const editorInstance = editorRef.current?.getInstance();
+    if (!editorInstance) return;
+
+    const handleChange = () => {
+      const text = editorInstance.getMarkdown();
+      const len = text.trim().length;
+      if (len > MAX_LENGTH) {
+        editorInstance.setMarkdown(text.substring(0, MAX_LENGTH));
+        setCharCount(MAX_LENGTH);
+      } else {
+        setCharCount(len);
+      }
+    };
+
+    editorInstance.on("change", handleChange);
+    return () => editorInstance.off("change", handleChange);
+  }, []);
+
+  // ✅ 이미지 업로드
   const handleImageUpload = async (blob, callback) => {
     try {
       const formData = new FormData();
       formData.append("image", blob);
-
       const response = await fetch("http://localhost:8080/api/uploads", {
         method: "POST",
         body: formData,
       });
       const result = await response.json();
       callback(result.imageUrl, "업로드된 이미지");
-      console.log("✅ 이미지 업로드 성공:", result.imageUrl);
     } catch (error) {
-      console.error("❌ 이미지 업로드 실패:", error);
       const tempUrl = URL.createObjectURL(blob);
       callback(tempUrl, "임시 이미지");
     }
   };
 
-  // ✅ 수정 완료 버튼
+  // ✅ 수정 완료
   const handleSubmit = (e) => {
     e.preventDefault();
     const content = editorRef.current?.getInstance().getHTML() || "";
@@ -100,7 +137,7 @@ const PostModifyContent = () => {
     });
   };
 
-  // ✅ 취소 버튼
+  // ✅ 취소
   const handleCancel = () => {
     openModal({
       title: "수정 중인 내용이 사라집니다.",
@@ -116,7 +153,6 @@ const PostModifyContent = () => {
       <S.PageTitle>오늘의 솜 수정</S.PageTitle>
 
       <S.Form onSubmit={handleSubmit}>
-        {/* 제목 */}
         <S.FormRow>
           <label>제목</label>
           <input
@@ -127,7 +163,6 @@ const PostModifyContent = () => {
           />
         </S.FormRow>
 
-        {/* 카테고리 */}
         <S.FormRow>
           <label>카테고리</label>
           <select value={category} onChange={(e) => setCategory(e.target.value)}>
@@ -141,28 +176,21 @@ const PostModifyContent = () => {
           </select>
         </S.FormRow>
 
-        {/* ✅ Toast UI Editor */}
         <S.FormGroup>
           <Editor
             ref={editorRef}
             previewStyle="vertical"
             height="500px"
             initialEditType="wysiwyg"
+            placeholder="수정할 내용을 자유롭게 입력해주세요"
             useCommandShortcut={true}
-            toolbarItems={[
-              ["heading", "bold", "italic", "strike"],
-              ["hr", "quote"],
-              ["ul", "ol", "task", "indent", "outdent"],
-              ["table", "image", "link"],
-              ["code", "codeblock"],
-            ]}
-            hooks={{
-              addImageBlobHook: handleImageUpload,
-            }}
+            hooks={{ addImageBlobHook: handleImageUpload }}
           />
+          <div className="char-count">
+            {charCount}/{MAX_LENGTH}
+          </div>
         </S.FormGroup>
 
-        {/* 버튼 */}
         <S.ButtonBox>
           <button type="button" className="cancel" onClick={handleCancel}>
             취소
