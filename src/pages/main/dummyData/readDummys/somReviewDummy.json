@@ -1,0 +1,70 @@
+[
+    {
+        "memberId": 1,
+        "reviewContent": 2
+    },
+    {
+        "memberId": 1,
+        "reviewContent": 5
+    },
+    {
+        "memberId": 1,
+        "reviewContent": 4
+    },
+    {
+        "memberId": 1,
+        "reviewContent": 3
+    },
+    {
+        "memberId": 1,
+        "reviewContent": 1
+    },
+    {
+        "memberId": 1,
+        "reviewContent": 5
+    },
+    {
+        "memberId": 1,
+        "reviewContent": 4
+    },
+    {
+        "memberId": 1,
+        "reviewContent": 2
+    }, 
+    {
+        "memberId": 1,
+        "reviewContent": 5
+    },
+    {
+        "memberId": 1,
+        "reviewContent": 3
+    },
+    {
+        "memberId": 1,
+        "reviewContent": 4
+    },
+    {
+        "memberId": 1,
+        "reviewContent": 2
+    },
+    {
+        "memberId": 2,
+        "reviewContent": 1
+    },  
+    {
+        "memberId": 2,
+        "reviewContent": 5
+    },  
+    {
+        "memberId": 2,
+        "reviewContent": 4
+    },
+    {
+        "memberId": 2,
+        "reviewContent": 3
+    },
+    {
+        "memberId": 2,
+        "reviewContent": 2
+    }
+]
