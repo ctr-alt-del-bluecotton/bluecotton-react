@@ -1,11 +1,11 @@
 import React from 'react';
 import S from './style';
 
-const FloatingButton = () => {
+const FloatingButton = ({isFloatingSelect, setIsFloatingSelect}) => {
   return (
     <S.floatingActionButtonWrap>
       <S.menuButton>
-        <S.menuPlusIcon src="../../../assets/icons/plusIcon.svg" />
+        <S.menuPlusIcon active={isFloatingSelect} onClick={() => setIsFloatingSelect(!isFloatingSelect)} src="../../../assets/icons/plusIcon.svg" />
       </S.menuButton>
     </S.floatingActionButtonWrap>
   );
