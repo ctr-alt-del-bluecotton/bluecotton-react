@@ -35,6 +35,7 @@ S.CategoryButton = styled.button`
   color: ${({ theme }) => theme.PALLETE.basic};
   cursor: pointer;
   transition: all 0.15s ease;
+  font-family: inherit;
   box-sizing: border-box;
 
   ${({ $active, theme }) =>

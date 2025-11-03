@@ -45,12 +45,15 @@ const ReadContent = () => {
       const target = somInfoList.find((som) => String(som.id) === String(id));
       setSomInfo(target || null);
       setSomIsLike(isLikeData.find(({somId}) => String(somId) === String(id)).isLike);
-      setSomReviews(reviewData.filter(({memberId}) => String(memberId) === String(somLeader.memberId)));
       setSomLeader(leaderData.find(({somId}) => String(somId) === String(id)));
       setSomContent(somContentData.find(({somId}) => String(somId) === String(id)).somContent);  
       setSomMemberList(memberData.filter(({somId}) => String(somId) === String(id)));
     }
   }, [loading, somInfoList, id]); 
+
+  useEffect(() => {
+    setSomReviews(reviewData.filter(({memberId}) => String(memberId) === String(somLeader.memberId)));
+  }, [somLeader])
 
   console.log(somReviews);
 

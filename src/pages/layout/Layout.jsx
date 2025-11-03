@@ -4,6 +4,7 @@ import Header from '../../components/header/Header';
 import Footer from '../../components/footer/Footer';
 import HeaderCategory from '../../components/mainCategory/HeaderCategory';
 import ScrollToTop from '../../components/scrollTop/ScorllTop'; // ✅ 경로 주의!
+import FloatingAction from './floatingAciton/FloatingAction';
 
 const Layout = () => {
   return (
@@ -18,6 +19,7 @@ const Layout = () => {
         <Outlet />
       </main>
       <Footer />
+      <FloatingAction />
     </div>
   );
 };

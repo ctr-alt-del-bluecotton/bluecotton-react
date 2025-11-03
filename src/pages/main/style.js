@@ -29,6 +29,7 @@ S.BennerImageArea = styled.div`
 
 S.BennerImage = styled.img`
   width: 100%;
+  height: 250px;
   object-fit: cover;
 `
 
