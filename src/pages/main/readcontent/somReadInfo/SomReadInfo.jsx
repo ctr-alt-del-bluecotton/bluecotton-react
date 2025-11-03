@@ -14,12 +14,7 @@ const SomReadInfo = ({somInfo, somIsLike, setSomIsLike}) => {
 
   // 증가 쿼리 fetch 예정
   const somLikeButtonOnclick = () => {
-    setSomIsLike(
-      somIsLike.map((item) =>
-        String(item.somId) === String(somId)
-          ? { somIsLike, isLike: !item.isLike }
-          : item
-    ));
+    setSomIsLike(!somIsLike);
   } 
 
   const somLikeButton = somIsLike ?

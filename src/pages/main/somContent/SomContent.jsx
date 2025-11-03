@@ -51,8 +51,6 @@ const SomContent = ({ content, somisLike, setSomisLikeList, somisLikeList }) => 
   <S.SomButton onClick={isFullOnClick}>참여 ({somCount}/10)</S.SomButton> 
   ;
 
-  console.log("somImagePath:", somImagePath);
-
   return (
     <S.Card>
       <S.SomImage onClick={isFullOnClick} bgsrc={somImagePath} alt={somTitle} />
