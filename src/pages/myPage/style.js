@@ -101,6 +101,7 @@ export const NavLink = styled(Link)`
   color: ${props => props.$active ? props.theme.PALLETE.white : props.theme.PALLETE.basic};
   font-size: 14px;
   font-weight: ${props => props.$active ? '700' : '500'};
+  font-family: 'Daeojamjil', sans-serif;
   transition: all 0.2s;
   text-decoration: none;
   display: block;

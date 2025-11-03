@@ -19,18 +19,16 @@ const MySomAuthContainer = () => {
 
   const challenges = [
     {
-      type: '솔로',
-      title: '2km 런닝 뛰기 챌린지!!',
+      type: '건강',
+      title: '2km 런닝 뛰기 챌린지',
       date: '2025.09.01 ~ 2025.09.07',
       repeat: '[요일반복] [금]',
-      progress: '7회/7회'
     },
     {
-      type: '솔로',
-      title: '2km 런닝 뛰기 챌린지!!',
+      type: '학습',
+      title: '독서 30분 챌린지',
       date: '2025.09.01 ~ 2025.09.07',
       repeat: '[요일반복] [금]',
-      progress: '7회/7회'
     }
   ];
 
@@ -61,8 +59,7 @@ const MySomAuthContainer = () => {
               <ItemType>{challenge.type}</ItemType>
               <ItemTitle>{challenge.title}</ItemTitle>
               <ItemDetails>
-                <span>{challenge.date}</span>
-                <span>{challenge.repeat} {challenge.progress}</span>
+                <span>{challenge.date} {challenge.repeat}</span>
               </ItemDetails>
             </div>
           </ListItem>
