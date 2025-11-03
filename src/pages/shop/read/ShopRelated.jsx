@@ -14,7 +14,7 @@ const ShopRelated = () => {
     <S.RelatedSection>
       <S.RelatedTitleRow>
         <S.BrandLink>블루코튼</S.BrandLink>
-        <S.RelatedTitle>의 인형 인기상품</S.RelatedTitle>
+        <S.RelatedTitle>의 인기상품</S.RelatedTitle>
       </S.RelatedTitleRow>
 
       <S.RelatedGrid>

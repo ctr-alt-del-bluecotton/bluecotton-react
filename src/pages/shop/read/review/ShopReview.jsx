@@ -1,4 +1,3 @@
-// src/pages/shop/read/ShopReview.jsx
 import React, { useMemo, useState } from "react";
 import { useTheme } from "styled-components";
 import S from "./style";
@@ -23,14 +22,14 @@ const ShopReview = () => {
   const [sort, setSort] = useState("latest");
   const [type, setType] = useState("all");
 
-  // ✅ 신고 모달 상태
+
   const [showReportModal, setShowReportModal] = useState(false);
   const [reportTarget, setReportTarget] = useState(null);
 
   const reviewList = [
     {
       id: 1,
-      userName: "이태*",
+      userName: "이태이",
       date: "2025.09.20",
       rating: 5,
       content: "배송 빠르고 솜이 인형 너무 귀여워요 ㅎㅎ",
@@ -40,7 +39,7 @@ const ShopReview = () => {
     },
     {
       id: 2,
-      userName: "jys332*",
+      userName: "jys3325",
       date: "2025.09.20",
       rating: 4,
       content: "기대 그 이상의 이상 졸귀탱",
@@ -138,7 +137,7 @@ const ShopReview = () => {
                 <S.ReviewDate>{rv.date}</S.ReviewDate>
                 <S.Dot>·</S.Dot>
 
-                {/* ✅ 신고하기: 공용 Report 모달 오픈 */}
+
                 <S.ReportButton
                   onClick={() => {
                     setReportTarget({ type: "comment", id: rv.id });
@@ -169,7 +168,7 @@ const ShopReview = () => {
         </S.ReviewItem>
       ))}
 
-      {/* ✅ 공용 신고 모달 렌더링 */}
+      {/* 공통 신고 모달 렌더링 */}
       {showReportModal && (
         <Report
           target={reportTarget}
