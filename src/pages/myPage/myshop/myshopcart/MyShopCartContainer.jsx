@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useMemo, useState } from "react";
 import {
   ListHeader,
   FilterContainer,
@@ -18,163 +18,180 @@ import {
   PriceValue,
   OrderSummary,
   SummaryRow,
-  OrderButton
-} from '../style';
+  OrderButton,
+  Checkbox as SCheckbox
+} from "../style";
+import { Link, Navigate } from "react-router-dom";
 
 const MyShopCartContainer = () => {
-  const items = [
-    { id: 1, name: '솜이 레옹 키링', price: 5000 },
-    { id: 2, name: '솜이 메모지', price: 4000 }
-  ];
+  const generalData = useMemo(
+    () => [
+      { id: "g1", name: "솜이 레옹 키링", price: 5000 },
+      { id: "g2", name: "솜이 메모지", price: 4000 },
+      { id: "g3", name: "솜이 머그컵", price: 12000 },
+    ],
+    []
+  );
+  const candyData = useMemo(
+    () => [
+      { id: "c1", name: "솜이 스티커팩", price: 1200 },
+      { id: "c2", name: "솜이 뱃지", price: 2500 },
+    ],
+    []
+  );
 
-  const [selectedItems, setSelectedItems] = useState(new Set());
-  const [selectAll, setSelectAll] = useState(false);
-  const [quantities, setQuantities] = useState(() => {
-    const initialQuantities = {};
-    items.forEach(item => {
-      initialQuantities[item.id] = 1;
-    });
-    return initialQuantities;
-  });
+  /* 탭(일반/캔디) */
+  const [tab, setTab] = useState("general"); // 'general' | 'candy'
+  const currentItems = tab === "general" ? generalData : candyData;
+  const unit = tab === "general" ? "원" : "캔디";
+  const shippingText =
+    tab === "candy" ? "무료배송" : "3,000원";
 
-  // 전체 선택/해제 핸들러
-  const handleSelectAll = (e) => {
-    const isChecked = e.target.checked;
-    setSelectAll(isChecked);
-    if (isChecked) {
-      setSelectedItems(new Set(items.map(item => item.id)));
-    } else {
-      setSelectedItems(new Set());
-    }
-  };
+  /* 선택/수량 상태 (탭이 바뀌면 현재 탭 기준으로 초기화) */
+  const [checkedIds, setCheckedIds] = useState(new Set()); 
+  const [qtyMap, setQtyMap] = useState({}); 
 
-  // 개별 아이템 선택/해제 핸들러
-  const handleItemSelect = (itemId) => (e) => {
-    const isChecked = e.target.checked;
-    const newSelectedItems = new Set(selectedItems);
-    
-    if (isChecked) {
-      newSelectedItems.add(itemId);
-    } else {
-      newSelectedItems.delete(itemId);
-    }
-    
-    setSelectedItems(newSelectedItems);
-  };
-
-  // 전체 선택 상태 자동 업데이트
   useEffect(() => {
-    setSelectAll(selectedItems.size === items.length && items.length > 0);
-  }, [selectedItems, items.length]);
 
-  // 수량 증가 핸들러
-  const handleIncreaseQuantity = (itemId) => {
-    setQuantities(prev => ({
-      ...prev,
-      [itemId]: (prev[itemId] || 1) + 1
-    }));
+    const nextQty = {};
+    currentItems.forEach((it) => (nextQty[it.id] = 1));
+    setQtyMap(nextQty);
+    setCheckedIds(new Set());
+  }, [tab, currentItems]);
+
+  /* 전체선택/개별선택 */
+  const allChecked = checkedIds.size === currentItems.length && currentItems.length > 0;
+
+  const toggleAll = (e) => {
+    if (e.target.checked) {
+      setCheckedIds(new Set(currentItems.map((it) => it.id)));
+    } else {
+      setCheckedIds(new Set());
+    }
   };
 
-  // 수량 감소 핸들러
-  const handleDecreaseQuantity = (itemId) => {
-    setQuantities(prev => ({
-      ...prev,
-      [itemId]: Math.max(1, (prev[itemId] || 1) - 1)
-    }));
+  const toggleOne = (id) => (e) => {
+    setCheckedIds((prev) => {
+      const next = new Set(prev);
+      e.target.checked ? next.add(id) : next.delete(id);
+      return next;
+    });
   };
 
-  // 개별 아이템 금액 계산
-  const getItemTotalPrice = (item) => {
-    return (item.price || 0) * (quantities[item.id] || 1);
-  };
+  const inc = (id) => setQtyMap((p) => ({ ...p, [id]: (p[id] || 1) + 1 }));
+  const dec = (id) => setQtyMap((p) => ({ ...p, [id]: Math.max(1, (p[id] || 1) - 1) }));
 
-  // 선택된 상품 총 금액 계산
-  const getTotalPrice = () => {
-    return items
-      .filter(item => selectedItems.has(item.id))
-      .reduce((total, item) => total + getItemTotalPrice(item), 0);
-  };
+  const selectedTotal = currentItems
+    .filter((it) => checkedIds.has(it.id))
+    .reduce((sum, it) => sum + it.price * (qtyMap[it.id] || 1), 0);
+
+
 
   return (
     <div>
       <ListHeader>장바구니</ListHeader>
-      
-      <FilterContainer>
-        <FilterButton active>일반 상품</FilterButton>
-        <FilterButton>캔디 상품</FilterButton>
-      </FilterContainer>
 
+      {/* 탭 전환 */}
+      <FilterContainer>
+        <FilterButton active={tab === "general"} onClick={() => setTab("general")}>
+          일반 상품
+        </FilterButton>
+        <FilterButton active={tab === "candy"} onClick={() => setTab("candy")}>
+          캔디 상품
+        </FilterButton>
+      </FilterContainer>
+    
+      {/* 상단 전체선택/삭제(선택해제) */}
       <CartHeader>
         <SelectAll>
-          <input 
-            type="checkbox" 
-            checked={selectAll}
-            onChange={handleSelectAll}
-          /> 전체선택
+          <SCheckbox checked={allChecked} onChange={toggleAll} aria-label="전체선택" />
+          전체선택
         </SelectAll>
-        <button style={{ padding: '8px 16px', backgroundColor: '#E0E0E0', border: 'none', borderRadius: '8px' }}>삭제</button>
+        <button
+          style={{ padding: "8px 16px", backgroundColor: "#E0E0E0", border: "none", borderRadius: 8 }}
+          onClick={() => setCheckedIds(new Set())}
+        >
+          선택해제
+        </button>
       </CartHeader>
 
+      {/* 아이템 리스트 */}
       <ListContainer>
-        {items.map(item => (
-          <CartItem key={item.id}>
-            <input 
-              type="checkbox" 
-              checked={selectedItems.has(item.id)}
-              onChange={handleItemSelect(item.id)}
-            />
-            <ItemImage />
-            <ItemInfo>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                <div>
-                  <ItemName>{item.name}</ItemName>
-                  <div style={{ color: '#757575', fontSize: '14px', marginBottom: '8px' }}>삭제</div>
-                  <QuantityControl>
-                    <QuantityButton 
-                      onClick={() => handleDecreaseQuantity(item.id)}
-                      disabled={quantities[item.id] <= 1}
-                    >
-                      -
-                    </QuantityButton>
-                    <Quantity>{quantities[item.id] || 1}</Quantity>
-                    <QuantityButton 
-                      onClick={() => handleIncreaseQuantity(item.id)}
-                    >
-                      +
-                    </QuantityButton>
-                  </QuantityControl>
+        {currentItems.map((item) => {
+          const q = qtyMap[item.id] || 1;
+          const itemTotal = item.price * q;
+
+          return (
+            <CartItem key={item.id}>
+              <SCheckbox
+                checked={checkedIds.has(item.id)}
+                onChange={toggleOne(item.id)}
+                aria-label={`${item.name} 선택`}
+              />
+              <ItemImage />
+              <ItemInfo>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                  <div>
+                    <ItemName>{item.name}</ItemName>
+                    <div style={{ color: "#757575", fontSize: 14, marginBottom: 8, cursor: "pointer" }}>
+                      삭제
+                    </div>
+
+                    <QuantityControl>
+                      <QuantityButton onClick={() => dec(item.id)} disabled={q <= 1}>
+                        -
+                      </QuantityButton>
+                      <Quantity>{q}</Quantity>
+                      <QuantityButton onClick={() => inc(item.id)}>+</QuantityButton>
+                    </QuantityControl>
+                  </div>
+
+                  <PriceInfo>
+                    <PriceRow>
+                      상품금액({q}개) <PriceValue>{item.price.toLocaleString()}{unit}</PriceValue>
+                    </PriceRow>
+                    <PriceRow>
+                      할인금액 <PriceValue>0{unit}</PriceValue>
+                    </PriceRow>
+                    <PriceRow>
+                      주문금액 <PriceValue>{itemTotal.toLocaleString()}{unit}</PriceValue>
+                    </PriceRow>
+                  </PriceInfo>
                 </div>
-                <PriceInfo>
-                  <PriceRow>상품금액({quantities[item.id] || 1}개) <PriceValue>{item.price}캔디</PriceValue></PriceRow>
-                  <PriceRow>할인금액 <PriceValue>0캔디</PriceValue></PriceRow>
-                  <PriceRow>주문금액 <PriceValue>{getItemTotalPrice(item).toLocaleString()}캔디</PriceValue></PriceRow>
-                </PriceInfo>
-              </div>
-            </ItemInfo>
-          </CartItem>
-        ))}
+              </ItemInfo>
+            </CartItem>
+          );
+        })}
       </ListContainer>
 
       <OrderSummary>
         <SummaryRow>
           <span>선택 상품 금액</span>
-          <span>{getTotalPrice().toLocaleString()}캔디</span>
+          <span>
+            {selectedTotal.toLocaleString()}
+            {unit}
+          </span>
         </SummaryRow>
         <SummaryRow>
           <span>+ 총 배송비</span>
-          <span>무료배송</span>
+          <span>{shippingText}</span>
         </SummaryRow>
         <SummaryRow>
           <span>- 할인 예상 금액</span>
-          <span>0원</span>
+          <span>0{unit}</span>
         </SummaryRow>
         <SummaryRow>
-          <span>주문 금액</span>
-          <span>{getTotalPrice().toLocaleString()}캔디</span>
+          <span>주문 금액(배송비 별도)</span>
+          <span>
+            {selectedTotal.toLocaleString()}
+            {unit}
+          </span>
         </SummaryRow>
       </OrderSummary>
 
-      <OrderButton>주문하기</OrderButton>
+      <Link to="/main/shop/order" style={{ textDecoration: "none" }}>
+        <OrderButton>주문하기</OrderButton>
+      </Link>
     </div>
   );
 };

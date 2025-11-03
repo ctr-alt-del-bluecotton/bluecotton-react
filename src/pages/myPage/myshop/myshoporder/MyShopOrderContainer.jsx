@@ -10,8 +10,10 @@ import {
   ItemContent,
   OrderProductName,
   PurchaseDate,
-  OrderActionButton
+  OrderActionButton,
+  ReviewButton
 } from '../style';
+import ReviewModal from '../review/ReviewModal';
 
 const MyShopOrderContainer = () => {
   const orders = [
@@ -21,6 +23,25 @@ const MyShopOrderContainer = () => {
     { id: 4, name: '솜이 인형', date: '2025-09-11' },
     { id: 5, name: '솜이 인형', date: '2025-09-11' }
   ];
+
+  // 모달창 
+  const [open, setOpen] = React.useState(false);
+  const [target, setTarget] = React.useState(null); // { id, name, date }
+
+  const openReview = (order) => {
+    setTarget(order);
+    setOpen(true);
+  };
+  const closeReview = () => {
+    setOpen(false);
+    setTarget(null);
+  };
+
+
+  // 추후에 데이터 fectch로 요청함
+  const handleSubmit = async (formDataOrPayload) => {
+    closeReview();
+  };
 
   return (
     <div>
@@ -37,7 +58,9 @@ const MyShopOrderContainer = () => {
                 <div>구매 일자</div>
                 <PurchaseDate>{order.date}</PurchaseDate>
               </ItemContent>
-              <OrderActionButton>리뷰하기</OrderActionButton>
+
+
+              <OrderActionButton onClick={() => openReview(order)}>리뷰하기</OrderActionButton>
             </div>
           </ListItem>
         ))}
@@ -48,6 +71,15 @@ const MyShopOrderContainer = () => {
         <PageNumber>1</PageNumber>
         <PageButton disabled={false}>다음 &gt;</PageButton>
       </Pagination>
+
+      {/* 리뷰 모달: 렌더링 */}
+      <ReviewModal
+        open={open}
+        onClose={closeReview}
+        mode="create"
+        product={{ id: target?.id, name: target?.name }}
+        onSubmit={handleSubmit}/>
+
     </div>
   );
 };
