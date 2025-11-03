@@ -1,7 +1,6 @@
 import React from "react";
 import HeaderStyle from "./styleHeader.js";
 import { useLocation, useNavigate } from "react-router-dom";
-import { primary } from "../../styles/common.js";
 
 const Header = () => {
   const { pathname } = useLocation();
