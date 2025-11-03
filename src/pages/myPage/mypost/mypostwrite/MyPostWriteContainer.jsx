@@ -14,60 +14,44 @@ import {
 const MyPostWriteContainer = () => {
   const posts = [
     {
-      type: '솔로',
-      title: '2km 런닝 뛰기 챌린지!!',
-      date: '2025.09.01 ~ 2025.09.07',
-      repeat: '[요일반복] [금]',
-      progress: '7회/7회'
+      type: '건강',
+      title: '2km 런닝 뛰기 챌린지',
+      date: '2025.08.25',
     },
     {
-      type: '솔로',
-      title: '2km 런닝 뛰기 챌린지!!',
-      date: '2025.09.01 ~ 2025.09.07',
-      repeat: '[요일반복] [금]',
-      progress: '7회/7회'
+      type: '학습',
+      title: '매일 영어 단어 10개 외우기',
+      date: '2025.08.28',
     },
     {
-      type: '솔로',
-      title: '2km 런닝 뛰기 챌린지!!',
-      date: '2025.09.01 ~ 2025.09.07',
-      repeat: '[요일반복] [금]',
-      progress: '7회/7회'
+      type: '취미',
+      title: '그림 그리기 챌린지',
+      date: '2025.09.01',
     },
     {
-      type: '솔로',
-      title: '2km 런닝 뛰기 챌린지!!',
-      date: '2025.09.01 ~ 2025.09.07',
-      repeat: '[요일반복] [금]',
-      progress: '7회/7회'
+      type: '생활',
+      title: '친환경 생활 실천 챌린지',
+      date: '2025.09.03',
     },
     {
-      type: '솔로',
-      title: '2km 런닝 뛰기 챌린지!!',
-      date: '2025.09.01 ~ 2025.09.07',
-      repeat: '[요일반복] [금]',
-      progress: '7회/7회'
+      type: '소셜',
+      title: '가족과 대화 나누기',
+      date: '2025.09.05',
     },
     {
-      type: '솔로',
-      title: '2km 런닝 뛰기 챌린지!!',
-      date: '2025.09.01 ~ 2025.09.07',
-      repeat: '[요일반복] [금]',
-      progress: '7회/7회'
+      type: '건강',
+      title: '스트레칭 10분씩 하기',
+      date: '2025.09.07',
     },
     {
-      type: '솔로',
-      title: '2km 런닝 뛰기 챌린지!!',
-      date: '2025.09.01 ~ 2025.09.07',
-      repeat: '[요일반복] [금]',
-      progress: '7회/7회'
+      type: '학습',
+      title: '온라인 강의 듣기',
+      date: '2025.09.10',
     },
     {
-      type: '솔로',
-      title: '2km 런닝 뛰기 챌린지!!',
-      date: '2025.09.01 ~ 2025.09.07',
-      repeat: '[요일반복] [금]',
-      progress: '7회/7회'
+      type: '취미',
+      title: '요리 레시피 도전하기',
+      date: '2025.09.12',
     }
   ];
 
@@ -83,7 +67,6 @@ const MyPostWriteContainer = () => {
               <ItemTitle>{post.title}</ItemTitle>
               <ItemDetails>
                 <span>{post.date}</span>
-                <span>{post.repeat} {post.progress}</span>
               </ItemDetails>
             </div>
           </ListItem>

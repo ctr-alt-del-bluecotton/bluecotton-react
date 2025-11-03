@@ -14,32 +14,24 @@ import {
 const MyPostCommnetContainer = () => {
   const posts = [
     {
-      type: '솔로',
-      title: '2km 런닝 뛰기 챌린지!!',
-      date: '2025.09.01 ~ 2025.09.07',
-      repeat: '[요일반복] [금]',
-      progress: '7회/7회'
+      type: '건강',
+      title: '2km 런닝 뛰기 챌린지',
+      date: '2025.08.30',
     },
     {
-      type: '파티',
+      type: '소셜',
       title: '전국 플로깅 대회',
-      date: '2025.09.08 ~ 2025.09.15',
-      repeat: '[요일반복] [토]',
-      progress: '2회/7회'
+      date: '2025.09.05',
     },
     {
-      type: '솔로',
-      title: '매일 스쿼트 50개',
-      date: '2025.09.12 ~ 2025.09.19',
-      repeat: '[매일]',
-      progress: '5회/7회'
+      type: '건강',
+      title: '매일 스쿼트 50개 도전',
+      date: '2025.09.10',
     },
     {
-      type: '솔로',
-      title: '2km 런닝 뛰기 챌린지!!',
-      date: '2025.09.01 ~ 2025.09.07',
-      repeat: '[요일반복] [금]',
-      progress: '7회/7회'
+      type: '학습',
+      title: '공부 시간 기록 챌린지',
+      date: '2025.09.15',
     }
   ];
 
@@ -55,7 +47,6 @@ const MyPostCommnetContainer = () => {
               <ItemTitle>{post.title}</ItemTitle>
               <ItemDetails>
                 <span>{post.date}</span>
-                <span>{post.repeat} {post.progress}</span>
               </ItemDetails>
             </div>
           </ListItem>

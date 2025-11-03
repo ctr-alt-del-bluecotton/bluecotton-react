@@ -27,6 +27,7 @@ export const Tab = styled.button`
   border: none;
   font-size: 16px;
   font-weight: 700;
+  font-family: 'Daeojamjil', sans-serif;
   cursor: pointer;
   transition: all 0.2s;
   background-color: ${props => props.active ? props.theme.PALLETE.primary.main : props.theme.PALLETE.white};
@@ -135,5 +136,21 @@ export const PageButton = styled.button`
 export const PageNumber = styled.span`
   font-weight: 700;
   color: ${({ theme }) => theme.PALLETE.primary.main};
+`;
+
+export const DeleteButton = styled.button`
+  padding: 8px 16px;
+  background-color: ${({ theme }) => theme.PALLETE.primary.main};
+  color: ${({ theme }) => theme.PALLETE.white};
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  
+  &:hover {
+    background-color: ${({ theme }) => theme.PALLETE.primary.dark};
+  }
 `;
 
