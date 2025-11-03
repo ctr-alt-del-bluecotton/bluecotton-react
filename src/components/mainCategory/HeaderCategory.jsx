@@ -1,6 +1,7 @@
 import React from "react";
 import CategoryStyle from "./stylecategory";
 import { useLocation } from "react-router-dom";
+import SearchBar from "../searchBar/SearchBar";
 
 const HeaderCategory = () => {
 
@@ -20,6 +21,7 @@ const HeaderCategory = () => {
                     <CategoryStyle.CategoryLink to="/main/shop">블루코튼 샵</CategoryStyle.CategoryLink>
                     <CategoryStyle.CategoryLink to="/main/my-page/my-som/auth" className={isMyPageActive ? "active" : ""}>마이페이지</CategoryStyle.CategoryLink>
                 </CategoryStyle.CategoryBar>
+                <SearchBar />
             </CategoryStyle.Container>
         </CategoryStyle.Wrapper>
 
