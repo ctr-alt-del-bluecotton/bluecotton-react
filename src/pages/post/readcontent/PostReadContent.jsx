@@ -59,14 +59,32 @@ const PostReadContent = () => {
     setPostLikeCount((prev) => (postLiked ? prev - 1 : prev + 1));
   };
 
-  // ✅ 공유 버튼 (카카오 API 자리)
-  const handleShare = () => {
-    openModal({
-      title: "공유하기",
-      message: "공유 기능은 추후 업데이트될 예정입니다 😊",
-      confirmText: "확인",
-    });
-  };
+const handleShare = () => {
+  const shareUrl = `${window.location.origin}/main/post/read/${id}`;
+
+
+  window.Kakao.Share.sendDefault({
+    objectType: "feed",
+    content: {
+      title: "10일차 러닝 도전!",
+      description: `지존준서님의 오늘의 솜 기록 🌱`,
+      imageUrl: "https://yourdomain.com/assets/som-share-thumbnail.png",
+      link: {
+        mobileWebUrl: shareUrl,
+        webUrl: shareUrl,
+      },
+    },
+    buttons: [
+      {
+        title: "지금 참여하기",
+        link: {
+          mobileWebUrl: shareUrl,
+          webUrl: shareUrl,
+        },
+      },
+    ],
+  });
+};
 
   // 댓글/대댓글 좋아요
   const handleLike = (cid, isReply = false, parentId = null) => {

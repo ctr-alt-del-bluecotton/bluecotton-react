@@ -1,62 +1,60 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import * as S from "./style";
-import { useModal } from "../../../components/modal"; // ✅ 전역 모달
+import { useModal } from "../../../components/modal"; 
+
+// ✅ Toast UI Editor import
+import { Editor } from "@toast-ui/react-editor";
+import "@toast-ui/editor/dist/toastui-editor.css";
 
 const PostWriteContent = () => {
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState("");
-  const [content, setContent] = useState("");
   const [files, setFiles] = useState([{ file: null, preview: null }]);
   const { openModal } = useModal();
   const navigate = useNavigate();
+  const editorRef = useRef();
 
-  // ✅ 페이지 진입 시 임시저장 불러오기 (있을 때만)
+  // ✅ 페이지 진입 시 임시저장 불러오기
   useEffect(() => {
     const saved = localStorage.getItem("tempPost");
     if (saved) {
       const temp = JSON.parse(saved);
       setTitle(temp.title || "");
       setCategory(temp.category || "");
-      setContent(temp.content || "");
+      if (editorRef.current) {
+        editorRef.current.getInstance().setHTML(temp.content || "");
+      }
       setFiles(temp.files || [{ file: null, preview: null }]);
     }
   }, []);
 
-  // 파일 선택
-  const handleFileChange = (index, e) => {
-    const selectedFile = e.target.files[0];
-    const newFiles = [...files];
+  // ✅ 이미지 업로드 훅 (백엔드와 연동)
+  const handleImageUpload = async (blob, callback) => {
+    try {
+      const formData = new FormData();
+      formData.append("image", blob);
 
-    if (selectedFile) {
-      newFiles[index] = {
-        file: selectedFile,
-        preview: selectedFile.type.startsWith("image/")
-          ? URL.createObjectURL(selectedFile)
-          : null,
-      };
-    } else {
-      newFiles[index] = { file: null, preview: null };
-    }
-    setFiles(newFiles);
-  };
+      const response = await fetch("http://localhost:8080/api/uploads", {
+        method: "POST",
+        body: formData,
+      });
+      const result = await response.json();
 
-  // 파일 추가
-  const handleAddFile = () => {
-    setFiles([...files, { file: null, preview: null }]);
-  };
+      const imageUrl = result.imageUrl; // 서버가 반환한 이미지 경로
+      callback(imageUrl, "업로드된 이미지");
+      console.log("이미지 업로드 성공:", imageUrl);
+    } catch (error) {
+      console.error("이미지 업로드 실패:", error);
 
-  // 파일 삭제
-  const handleRemoveFile = () => {
-    if (files.length === 1) {
-      setFiles([{ file: null, preview: null }]);
-    } else {
-      setFiles(files.slice(0, -1));
+      // 서버가 아직 없을 경우 — 임시 미리보기 대체
+      const tempUrl = URL.createObjectURL(blob);
+      callback(tempUrl, "임시 이미지");
     }
   };
 
-  // ✅ 임시 저장 (모달 + 목록 이동)
   const handleTempSave = () => {
+    const content = editorRef.current?.getInstance().getHTML() || "";
     const tempData = { title, category, content, files };
     localStorage.setItem("tempPost", JSON.stringify(tempData));
 
@@ -68,20 +66,18 @@ const PostWriteContent = () => {
     });
   };
 
-  // ✅ 작성 완료 (유효성 검사 + 목록 이동)
   const handleSubmit = (e) => {
     e.preventDefault();
+    const content = editorRef.current?.getInstance().getHTML() || "";
 
     if (!title.trim()) {
       openModal({ title: "제목을 입력해주세요.", confirmText: "확인" });
       return;
     }
-
     if (!category.trim()) {
       openModal({ title: "카테고리를 선택해주세요.", confirmText: "확인" });
       return;
     }
-
     if (!content.trim()) {
       openModal({ title: "내용을 입력해주세요.", confirmText: "확인" });
       return;
@@ -98,7 +94,6 @@ const PostWriteContent = () => {
     });
   };
 
-  // ✅ 취소 (모달 + 목록 이동)
   const handleCancel = () => {
     openModal({
       title: "작성 중인 내용이 사라집니다.",
@@ -109,17 +104,11 @@ const PostWriteContent = () => {
     });
   };
 
-  // input 클릭 트리거
-  const triggerFileInput = (index) => {
-    document.getElementById(`file-${index}`).click();
-  };
-
   return (
     <S.Container>
       <S.PageTitle>오늘의 솜 작성</S.PageTitle>
 
       <S.Form onSubmit={handleSubmit}>
-        {/* 제목 */}
         <S.FormRow>
           <label>제목</label>
           <input
@@ -130,13 +119,9 @@ const PostWriteContent = () => {
           />
         </S.FormRow>
 
-        {/* 카테고리 */}
         <S.FormRow>
           <label>카테고리</label>
-          <select
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-          >
+          <select value={category} onChange={(e) => setCategory(e.target.value)}>
             <option value="">하고 있는 솜의 카테고리를 선택해주세요</option>
             <option value="study">학습</option>
             <option value="health">건강</option>
@@ -147,62 +132,19 @@ const PostWriteContent = () => {
           </select>
         </S.FormRow>
 
-        {/* 내용 */}
         <S.FormGroup>
-          <textarea
-            placeholder="솜을 하면서 어떤 점을 느끼셨나요? 도전하는 동안 기억에 남는 순간을 적어주세요"
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            maxLength={1000}
+          <Editor
+            ref={editorRef}
+            previewStyle="vertical"
+            height="500px"
+            initialEditType="wysiwyg"
+            useCommandShortcut={true}
+            hooks={{
+              addImageBlobHook: handleImageUpload,
+            }}
           />
-          <div className="char-count">{content.length}/1000</div>
         </S.FormGroup>
 
-        {/* 첨부파일 */}
-        <S.FileBox>
-          {files.map((f, index) => (
-            <div className="file-row" key={index}>
-              <label>{index === 0 ? "첨부" : ""}</label>
-              <div className="file-select">
-                <input
-                  type="file"
-                  id={`file-${index}`}
-                  style={{ display: "none" }}
-                  onChange={(e) => handleFileChange(index, e)}
-                />
-                <button type="button" onClick={() => triggerFileInput(index)}>
-                  파일 선택
-                </button>
-                <span className="file-name">
-                  {f.file ? f.file.name : "선택된 파일 없음"}
-                </span>
-
-                {f.preview && (
-                  <div className="thumb-wrap">
-                    <img src={f.preview} alt="썸네일 미리보기" />
-                  </div>
-                )}
-              </div>
-            </div>
-          ))}
-
-          <p className="file-info">용량이 50.0M 이하 파일만 업로드 가능</p>
-
-          <div className="file-actions">
-            <button type="button" className="add-btn" onClick={handleAddFile}>
-              파일 추가
-            </button>
-            <button
-              type="button"
-              className="remove-btn"
-              onClick={handleRemoveFile}
-            >
-              파일 삭제
-            </button>
-          </div>
-        </S.FileBox>
-
-        {/* 버튼 */}
         <S.ButtonBox>
           <button type="button" className="cancel" onClick={handleCancel}>
             취소
