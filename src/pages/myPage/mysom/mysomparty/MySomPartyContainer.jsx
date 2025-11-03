@@ -25,25 +25,26 @@ import {
 
 const feedbackOptions = [
   '챌린지 난이도가 적당했어요',
+  '챌린지 진행이 체계적이예요',
+  '챌린지 구성이 알차고 재밌어요',
+  '챌린지 목표가 명확해요',
+  '챌린지가 유익하고 배울 점이 많아요',
   '미션 설명이 이해하기 쉬웠어요',
-  '챌린지 기간이 적당했어요',
-  '굿즈, 리워드가 만족스러워요',
-  '팀장이 피드백을 자주 남겨줘요',
+  '팀장이 참여자 의견을 잘 반영해요',
+  '팀장의 피드백이 꼼꼼해요',
   '팀장이 응원과 칭찬을 많이 해줘요',
-  '팀장이 미션 질문에 잘 답해줘요',
-  '팀장이 전체 메시지를 잘 올려요',
-  '팀장이 활동기록을 잘 정리해줘요',
-  '팀장이 늦은 인증도 잘 관리해줘요',
-  '팀장이 나에게 관심을 가져줘요',
-  '팀장이 미션 실패자도 챙겨줘요',
+  '팀장이 질문에 잘 답해줘요',
+  '팀장이 공지를 잘 올려요',
+  '팀장이 활동기록을 잘 정리해요',
+  '팀장이 이해하기 쉽게 설명해요',
+  '팀장이 관심갖고 도와줘요',
+  '챌린지 분위기가 긍정적이예요',
   '팀장이 힘이 되어줘요',
-  '팀장이 나의 일상을 응원해줘요',
   '팀장이 꼼꼼하고 세심해요',
   '팀장이 재밌고 유쾌해요',
   '팀장이 소통이 잘돼요',
   '팀장이 사진/글을 정성껏 남겨줘요',
   '팀장이 규칙을 잘 안내해줘요',
-  '팀장이 팀원 참여율을 잘 관리해줘요',
 ];
 
 const MySomPartyContainer = () => {
@@ -63,18 +64,16 @@ const MySomPartyContainer = () => {
 
   const challenges = [
     {
-      type: '파티',
-      title: '2km 런닝 뛰기 챌린지!!',
+      type: '소셜',
+      title: '전국 플로깅 대회',
       date: '2025.09.01 ~ 2025.09.07',
       repeat: '[요일반복] [금]',
-      progress: '7회/7회'
     },
     {
-      type: '파티',
-      title: '2km 런닝 뛰기 챌린지!!',
+      type: '소셜',
+      title: '공원 조깅 모임',
       date: '2025.09.01 ~ 2025.09.07',
       repeat: '[요일반복] [금]',
-      progress: '7회/7회'
     }
   ];
 
@@ -125,8 +124,7 @@ const MySomPartyContainer = () => {
                 <ItemType>{challenge.type}</ItemType>
                 <ItemTitle>{challenge.title}</ItemTitle>
                 <ItemDetails>
-                  <span>{challenge.date}</span>
-                  <span>{challenge.repeat} {challenge.progress}</span>
+                  <span>{challenge.date} {challenge.repeat}</span>
                 </ItemDetails>
               </div>
 

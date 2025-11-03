@@ -27,6 +27,7 @@ export const Tab = styled.button`
   border: none;
   font-size: 16px;
   font-weight: 700;
+  font-family: 'Daeojamjil', sans-serif;
   cursor: pointer;
   transition: all 0.2s;
   background-color: ${props => props.active ? props.theme.PALLETE.primary.main : props.theme.PALLETE.white};
@@ -348,5 +349,22 @@ export const PopupFooter = styled.div`
   display: flex;
   justify-content: flex-end;
   gap: 10px;
+`;
+
+export const RankIcon = styled.div`
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background-color: ${({ $bgColor }) => $bgColor || '#E0E0E0'};
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 500;
+  color: white;
+  text-transform: lowercase;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.1);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  letter-spacing: 0;
 `;
 

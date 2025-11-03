@@ -14,39 +14,29 @@ import {
 const MyPostLikeContainer = () => {
   const posts = [
     {
-      type: '솔로',
-      title: '2km 런닝 뛰기 챌린지!!',
-      date: '2025.09.01 ~ 2025.09.07',
-      repeat: '[요일반복] [금]',
-      progress: '7회/7회'
+      type: '건강',
+      title: '매일 물 2L 마시기 챌린지',
+      date: '2025.09.01',
     },
     {
-      type: '솔로',
-      title: '2km 런닝 뛰기 챌린지!!',
-      date: '2025.09.01 ~ 2025.09.07',
-      repeat: '[요일반복] [금]',
-      progress: '7회/7회'
+      type: '학습',
+      title: '독서 30분 챌린지',
+      date: '2025.09.03',
     },
     {
-      type: '파티',
-      title: '플로깅 챌린지',
-      date: '2025.09.05 ~ 2025.09.12',
-      repeat: '[요일반복] [토]',
-      progress: '4회/7회'
+      type: '소셜',
+      title: '전국 플로깅 대회',
+      date: '2025.09.05',
     },
     {
-      type: '솔로',
-      title: '2km 런닝 뛰기 챌린지!!',
-      date: '2025.09.01 ~ 2025.09.07',
-      repeat: '[요일반복] [금]',
-      progress: '7회/7회'
+      type: '취미',
+      title: '사진 찍기 챌린지',
+      date: '2025.09.07',
     },
     {
-      type: '솔로',
+      type: '건강',
       title: '스쿼트 100회 도전',
-      date: '2025.09.10 ~ 2025.09.17',
-      repeat: '[매일]',
-      progress: '3회/7회'
+      date: '2025.09.10',
     }
   ];
 
@@ -62,7 +52,6 @@ const MyPostLikeContainer = () => {
               <ItemTitle>{post.title}</ItemTitle>
               <ItemDetails>
                 <span>{post.date}</span>
-                <span>{post.repeat} {post.progress}</span>
               </ItemDetails>
             </div>
           </ListItem>

@@ -28,6 +28,7 @@ export const Tab = styled.button`
   border: none;
   font-size: 16px;
   font-weight: 700;
+  font-family: 'Daeojamjil', sans-serif;
   cursor: pointer;
   transition: all 0.2s;
   background-color: ${props => props.active ? props.theme.PALLETE.primary.main : props.theme.PALLETE.white};

@@ -14,52 +14,34 @@ import {
 const MyPostRecentContainer = () => {
   const posts = [
     {
-      type: '솔로',
-      title: '2km 런닝 뛰기 챌린지!!',
-      date: '2025.09.01 ~ 2025.09.07',
-      repeat: '[요일반복] [금]',
-      progress: '7회/7회',
-      viewedAt: '2025.09.20'
+      type: '건강',
+      title: '2km 런닝 뛰기 챌린지',
+      date: '2025.08.28',
     },
     {
-      type: '파티',
+      type: '소셜',
       title: '전국 플로깅 대회',
-      date: '2025.09.08 ~ 2025.09.15',
-      repeat: '[요일반복] [토]',
-      progress: '2회/7회',
-      viewedAt: '2025.09.19'
+      date: '2025.09.05',
     },
     {
-      type: '솔로',
-      title: '매일 스쿼트 50개',
-      date: '2025.09.12 ~ 2025.09.19',
-      repeat: '[매일]',
-      progress: '5회/7회',
-      viewedAt: '2025.09.18'
+      type: '건강',
+      title: '매일 스쿼트 50개 도전',
+      date: '2025.09.10',
     },
     {
-      type: '솔로',
-      title: '2km 런닝 뛰기 챌린지!!',
-      date: '2025.09.01 ~ 2025.09.07',
-      repeat: '[요일반복] [금]',
-      progress: '7회/7회',
-      viewedAt: '2025.09.17'
+      type: '학습',
+      title: '언어 공부하기 챌린지',
+      date: '2025.09.12',
     },
     {
-      type: '솔로',
-      title: '친환경 생활 실천',
-      date: '2025.09.20 ~ 2025.09.27',
-      repeat: '[매일]',
-      progress: '3회/7회',
-      viewedAt: '2025.09.16'
+      type: '생활',
+      title: '친환경 생활 실천 챌린지',
+      date: '2025.09.15',
     },
     {
-      type: '파티',
+      type: '소셜',
       title: '공원 조깅 모임',
-      date: '2025.09.22 ~ 2025.09.29',
-      repeat: '[요일반복] [일]',
-      progress: '1회/7회',
-      viewedAt: '2025.09.15'
+      date: '2025.09.18',
     }
   ];
 
@@ -75,8 +57,6 @@ const MyPostRecentContainer = () => {
               <ItemTitle>{post.title}</ItemTitle>
               <ItemDetails>
                 <span>{post.date}</span>
-                <span>{post.repeat} {post.progress}</span>
-                <span>조회일: {post.viewedAt}</span>
               </ItemDetails>
             </div>
           </ListItem>
