@@ -3,7 +3,7 @@ import * as C from "../../../../styles/common";
 
 const S = {};
 
-/* 10) 하단 상세 정보 (ShopInfo.jsx용) */
+/* 하단 상세 정보 (ShopInfo.jsx) */
 S.InfoTextWrap = styled.div`
   margin-top: 20px;
   text-align: left;
@@ -37,7 +37,7 @@ S.InfoImage = styled.div`
   }
 `;
 
-/* 11) 상품 정보 섹션 (사진 하단) */
+/* 상품 정보 (사진 하단) */
 S.SpecSection = styled.section`
   width: 680px;
   margin: 60px 0 48px;
@@ -71,7 +71,7 @@ S.SpecValue = styled.div`
   color: ${({ theme }) => theme.PALLETE.basic};
 `;
 
-/* 유의사항 카드 */
+/* 유의사항 */
 S.CautionBox = styled.div`
   width: 100%;
   margin-top: 32px;
@@ -94,7 +94,7 @@ S.CautionText = styled.p`
   margin: 0;
 `;
 
-/* 12) 판매자 정보 섹션 */
+/* 판매자 정보 */
 S.SellerSection = styled.section`
   width: 680px;
   margin: 48px 0 40px;
@@ -140,7 +140,7 @@ S.SellerValue = styled.div`
   overflow-wrap: break-word;
 `;
 
-/* 14) 상세정보 토글 버튼 */
+/* 상세정보 토글 버튼 */
 S.ToggleBox = styled.button`
   width: 100%;
   padding: 14px 16px;

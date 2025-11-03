@@ -3,7 +3,7 @@ import * as C from "../../../styles/common";
 
 const S = {};
 
-/* 1) 페이지 레이아웃 */
+/*  페이지 전체 레이아웃 */
 S.Page = styled.div`
   width: 100%;
   display: flex;
@@ -12,7 +12,7 @@ S.Page = styled.div`
   background-color: #fff;
 `;
 
-/* 2) 상품 상세 페이지 비율 */
+/* 상품 상세 페이지 비율 */
 S.DetailContainer = styled.div`
   width: 1160px;
   margin: 60px auto;
@@ -31,7 +31,7 @@ S.Right = styled.div`
   height: fit-content;
 `;
 
-/* 3) 메인 / 서브 이미지 */
+/* 메인 / 서브 이미지 */
 S.MainImage = styled.div`
   width: 680px;
   height: 680px;
@@ -69,7 +69,7 @@ S.SubImage = styled.button`
   }
 `;
 
-/* 4) 상품 정보 (우측) */
+/* 상품 정보 (우측) */
 S.TagRow = styled.div`
   display: flex;
   gap: 4px;
@@ -90,14 +90,15 @@ S.DetailBestTag = styled.span`
 `;
 
 S.Title = styled.h1`
-  ${C.paragraphStrong};
+  ${C.paragraphRegular};
   ${C.basic};
-  margin: 16px 0;
+  margin-top: 16px;
+  margin-bottom: 8px;
 `;
 
 S.DetailPrice = styled.div`
-  ${C.paragraphStrong};
-  margin: 10px 0;
+  ${C.titleBold};
+  margin-bottom: 5px;
 `;
 
 S.DetailReviewWrap = styled.div`
@@ -116,10 +117,11 @@ S.Icon = styled.img`
 `;
 
 S.Text = styled.span`
-  ${C.smallText1Regular};
+  ${C.smallText2Light};
+  
 `;
 
-/* 5) 배송 정보 */
+/* 배송 정보 */
 S.DeliveryRow = styled.div`
   display: flex;
   align-items: center;
@@ -145,7 +147,7 @@ S.DeliveryInfo = styled.div`
   margin-bottom: 14px;
 `;
 
-/* 6) 수량 선택 */
+/* 수량 선택 */
 S.CountWrap = styled.div`
   display: flex;
   justify-content: space-between;
@@ -193,7 +195,7 @@ S.CountNum = styled.span`
   text-align: center;
 `;
 
-/* 7) 총 상품 금액 */
+/* 총 상품 금액 */
 S.ProductDetailBar = styled.div`
   width: 440px;
   height: 1px;
@@ -215,7 +217,7 @@ S.ProductTotalPrice = styled.div`
   ${C.basic};
 `;
 
-/* 8) 버튼 영역 */
+/* 버튼 */
 S.ButtonRow = styled.div`
   display: flex;
   gap: 8px;
@@ -268,9 +270,16 @@ S.PurchaseButton = styled.button`
   border: none;
   background: ${({ theme }) => theme.PALLETE.primary.main};
   cursor: pointer;
+  
+
+  &:hover {
+    background-color: #003DB8;
+    border-color: #003DB8;
+  }
+  
 `;
 
-/* 9) 하단 정보/리뷰 탭 (Shop.jsx용) */
+/* 정보/리뷰 탭 */
 S.InfoSection = styled.section`
   width: 680px;
   margin: 60px 0 120px;
@@ -282,6 +291,7 @@ S.InfoTabs = styled.div`
   display: flex;
   gap: 140px;
   justify-content: center;
+  margin-bottom: 0px;
 `;
 
 S.InfoTab = styled.button`
@@ -290,7 +300,9 @@ S.InfoTab = styled.button`
   border: none;
   cursor: pointer;
   position: relative;
+  gap: 14px;
   padding-bottom: 4px;
+  padding-bottom: 14px;
   color: ${({ $active, theme }) =>
     $active ? theme.PALLETE.basic : theme.PALLETE.grey.greyScale3};
 
@@ -315,7 +327,7 @@ S.InfoDivider = styled.div`
   margin: 4px 0 24px;
 `;
 
-/* 15) 관련 상품 섹션 (ShopRelated.jsx) */
+/* 관련 상품 (ShopRelated.jsx) */
 S.RelatedSection = styled.section`
   width: 680px;
   margin: 80px 0 120px;
@@ -377,7 +389,7 @@ S.RelatedPrice = styled.p`
   margin-top: 6px;
 `;
 
-/* 장바구니 모달창 */
+/* 장바구니 팝업창 */
 S.Overlay = styled.div`
   position: fixed;
   inset: 0;

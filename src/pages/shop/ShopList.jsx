@@ -11,9 +11,7 @@ const ShopList = ({ items }) => {
       return next;
     });
 
-
-  const data =
-    Array.isArray(items) && items.length > 0
+  const data = Array.isArray(items) && items.length > 0
       ? items
       : [...Array(8)].map((_, i) => ({
           id: i + 1,
@@ -43,14 +41,10 @@ const ShopList = ({ items }) => {
                 e.preventDefault();
                 e.stopPropagation();
                 toggleLike(id);
-              }}
-            />
+              }}/>
 
-            <Link
-              to={`/main/shop/read/${id}`}
-              aria-label="상품 상세보기"
-              style={{ display: "block", textDecoration: "none", color: "inherit" }}
-            >
+            <Link to={`/main/shop/read/${id}`} 
+            style={{ display: "block", textDecoration: "none", color: "inherit" }}>
               <S.ProductImageBox $bg={item.imageUrl} />
               <S.ProductTitleRow>
                 <S.ProductName>{item.name}</S.ProductName>

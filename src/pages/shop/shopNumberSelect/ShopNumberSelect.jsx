@@ -1,8 +1,10 @@
 import React from "react";
 import S from "./style";
 
+
+// 페이지네이션
 const ShopNumberSelect = ({ shopList, pageNumber, setPageNumber }) => {
-  const totalPages = Math.ceil(shopList.length / 8); // 실제 totalPages가 있다면 내려받으면 됨.
+  const totalPages = Math.ceil(shopList.length / 8); 
   const groupSize = 10;
 
   // 현재 페이지 그룹의 시작 번호 계산

@@ -72,8 +72,45 @@ S.SortTopLine = styled.div`
 S.SortBar = styled.div`
   width: 100%;
   display: flex;
-  align-items: center;
   justify-content: space-between;
+  align-items: center;
+  padding-bottom: 4px; 
+  padding-bottom: 0;
+`;
+
+S.SortSelect = styled.select`
+  min-width: 10px;
+  height: 30px;
+  border: 0;
+  background-color: transparent;
+  padding: 0 32px 0 10px;
+  font-size: ${({ theme }) => theme.FONT_SIZE["smallText2"]};
+  color: ${({ theme }) => theme.PALLETE.basic};
+  cursor: pointer;
+  appearance: none;
+  position: relative;
+  top: 2px; 
+
+
+  background-image: url("/assets/icons/drop_down.svg");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  background-size: 10px 5px;
+
+  &:focus {
+    border-color: ${({ theme }) => theme.PALLETE.primary.main};
+    outline: none;
+    background-image: url("/assets/icons/drop_down_acv.svg");
+    background-size: 10px 5px;
+  }
+
+  &:focus-visible {
+    outline: none;
+  }
+
+  &::-ms-expand {
+    display: none;
+  }
 `;
 
 S.DropdownWrap = styled.div`
@@ -83,6 +120,7 @@ S.DropdownWrap = styled.div`
 S.DropdownButton = styled.button`
   width: 120px;
   height: 30px;
+  
   ${C.smallText1Regular}
   ${C.basic}
   background: #fff;
@@ -146,6 +184,7 @@ S.SortRight = styled.div`
   display: flex;
   align-items: center;
   gap: 10px;
+  height: 30px;
   ${C.smallText1Regular}
   ${C.fontGreyScale3}
 `;
@@ -276,7 +315,7 @@ S.LikeButton = styled.button`
     content: "";
     display: block;
     width: 14px;
-    height: 14px;
+    height: 13px;
     margin: 0 auto;
     background: url("/assets/icons/favorite.svg") center/contain no-repeat;
     transition: background-image 0.2s ease;
