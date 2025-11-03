@@ -1,6 +1,8 @@
+// src/pages/shop/read/ShopReview.jsx
 import React, { useMemo, useState } from "react";
 import { useTheme } from "styled-components";
 import S from "./style";
+import Report from "../../../../components/Report/Report"; 
 
 const ShopReview = () => {
   const theme = useTheme();
@@ -20,6 +22,10 @@ const ShopReview = () => {
 
   const [sort, setSort] = useState("latest");
   const [type, setType] = useState("all");
+
+  // ✅ 신고 모달 상태
+  const [showReportModal, setShowReportModal] = useState(false);
+  const [reportTarget, setReportTarget] = useState(null);
 
   const reviewList = [
     {
@@ -45,7 +51,9 @@ const ShopReview = () => {
   ];
 
   const [helpfulState, setHelpfulState] = useState(
-    Object.fromEntries(reviewList.map((r) => [r.id, { active: false, count: r.helpfulCount }]))
+    Object.fromEntries(
+      reviewList.map((r) => [r.id, { active: false, count: r.helpfulCount }])
+    )
   );
 
   const toggleHelpful = (id) => {
@@ -61,9 +69,9 @@ const ShopReview = () => {
 
   return (
     <S.ReviewSection>
-        <S.ReviewTitle>리뷰 평점</S.ReviewTitle>
+      <S.ReviewTitle>리뷰 평점</S.ReviewTitle>
+
       <S.ReviewContainer>
-        
         <S.ReviewLeft>
           <S.ReviewAverage>{avgScore}</S.ReviewAverage>
           <S.ReviewCount>
@@ -74,7 +82,6 @@ const ShopReview = () => {
 
         <S.ReviewRight>
           {ratingBuckets.map(({ rating, count }) => {
-            // 퍼센트 계산: (개수 / 총합) * 100
             const percent = totalCount ? Math.round((count / totalCount) * 100) : 0;
             return (
               <S.ReviewRow key={rating}>
@@ -92,20 +99,18 @@ const ShopReview = () => {
       <S.ReviewProductWrap>
         <S.ReviewProduct>상품 리뷰</S.ReviewProduct>
 
-          <S.ReviewFilters>
-          {/* 리뷰 유형 선택 */}
+        <S.ReviewFilters>
           <S.ReviewSelect value={type} onChange={(e) => setType(e.target.value)}>
             <option value="all">전체 리뷰</option>
             <option value="photo">사진 리뷰</option>
           </S.ReviewSelect>
 
-          {/* 정렬 기준 선택 */}
           <S.ReviewSelect value={sort} onChange={(e) => setSort(e.target.value)}>
             <option value="latest">최신순</option>
             <option value="ratingHigh">별점 높은 순</option>
             <option value="ratingLow">별점 낮은 순</option>
           </S.ReviewSelect>
-          </S.ReviewFilters>
+        </S.ReviewFilters>
       </S.ReviewProductWrap>
 
       {reviewList.map((rv) => (
@@ -132,21 +137,45 @@ const ShopReview = () => {
                 <S.Dot>·</S.Dot>
                 <S.ReviewDate>{rv.date}</S.ReviewDate>
                 <S.Dot>·</S.Dot>
-                <S.ReportButton>신고하기</S.ReportButton>
+
+                {/* ✅ 신고하기: 공용 Report 모달 오픈 */}
+                <S.ReportButton
+                  onClick={() => {
+                    setReportTarget({ type: "comment", id: rv.id });
+                    setShowReportModal(true);
+                  }}
+                >
+                  신고하기
+                </S.ReportButton>
               </S.UserMeta>
             </S.UserInfoWrap>
+
             <S.HelpfulButton
               $active={helpfulState[rv.id]?.active}
-              onClick={() => toggleHelpful(rv.id)}>
-              <img src="/assets/icons/shop_smile.svg" alt="도움돼요" /> 도움돼요 {helpfulState[rv.id]?.count ?? 0}
+              onClick={() => toggleHelpful(rv.id)}
+            >
+              <img src="/assets/icons/shop_smile.svg" alt="도움돼요" /> 도움돼요{" "}
+              {helpfulState[rv.id]?.count ?? 0}
             </S.HelpfulButton>
           </S.ReviewHeader>
 
-          {rv.image && (<S.ReviewImage><img src={rv.image} alt="리뷰 이미지" /></S.ReviewImage>)}
+          {rv.image && (
+            <S.ReviewImage>
+              <img src={rv.image} alt="리뷰 이미지" />
+            </S.ReviewImage>
+          )}
           <S.ReviewText>{rv.content}</S.ReviewText>
           <S.ReviewDivider />
         </S.ReviewItem>
       ))}
+
+      {/* ✅ 공용 신고 모달 렌더링 */}
+      {showReportModal && (
+        <Report
+          target={reportTarget}
+          onClose={() => setShowReportModal(false)}
+        />
+      )}
     </S.ReviewSection>
   );
 };

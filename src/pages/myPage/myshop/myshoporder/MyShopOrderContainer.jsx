@@ -10,11 +10,14 @@ import {
   ItemContent,
   OrderProductName,
   PurchaseDate,
-  OrderActionButton,
-  ReviewButton
+  OrderActionButton
 } from '../style';
 import ReviewModal from '../review/ReviewModal';
 
+
+const formatDotDate = (str) => str.split('T')[0].replace(/-/g, '.');
+
+// 구매내역
 const MyShopOrderContainer = () => {
   const orders = [
     { id: 1, name: '솜이 인형', date: '2025-09-11' },
@@ -24,7 +27,7 @@ const MyShopOrderContainer = () => {
     { id: 5, name: '솜이 인형', date: '2025-09-11' }
   ];
 
-  // 모달창 
+  // 모달창
   const [open, setOpen] = React.useState(false);
   const [target, setTarget] = React.useState(null); // { id, name, date }
 
@@ -37,16 +40,15 @@ const MyShopOrderContainer = () => {
     setTarget(null);
   };
 
-
-  // 추후에 데이터 fectch로 요청함
-  const handleSubmit = async (formDataOrPayload) => {
+  // 추후에 데이터 fetch로 요청함
+  const handleSubmit = async () => {
     closeReview();
   };
 
   return (
     <div>
       <ListHeader>구매내역(5개)</ListHeader>
-      
+
       <ListContainer>
         {orders.map(order => (
           <ListItem key={order.id}>
@@ -56,9 +58,8 @@ const MyShopOrderContainer = () => {
                 <div>상품</div>
                 <OrderProductName>{order.name}</OrderProductName>
                 <div>구매 일자</div>
-                <PurchaseDate>{order.date}</PurchaseDate>
+                <PurchaseDate>{formatDotDate(order.date)}</PurchaseDate>
               </ItemContent>
-
 
               <OrderActionButton onClick={() => openReview(order)}>리뷰하기</OrderActionButton>
             </div>
@@ -69,7 +70,7 @@ const MyShopOrderContainer = () => {
       <Pagination>
         <PageButton disabled>&lt; 이전</PageButton>
         <PageNumber>1</PageNumber>
-        <PageButton disabled={false}>다음 &gt;</PageButton>
+        <PageButton>다음 &gt;</PageButton>
       </Pagination>
 
       {/* 리뷰 모달: 렌더링 */}
@@ -78,8 +79,8 @@ const MyShopOrderContainer = () => {
         onClose={closeReview}
         mode="create"
         product={{ id: target?.id, name: target?.name }}
-        onSubmit={handleSubmit}/>
-
+        onSubmit={handleSubmit}
+      />
     </div>
   );
 };

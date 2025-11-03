@@ -1,23 +1,37 @@
 import React, { useMemo, useState } from "react";
 import {
-  FilterContainer, FilterButton, ListHeader, ListContainer, ListItem,
-  ItemDetails, ItemTitle, Pagination, PageButton, PageNumber,
-  DeliveryItemImage, ActionButton
+  FilterContainer,
+  FilterButton,
+  ListHeader,
+  ListContainer,
+  ListItem,
+  Pagination,
+  PageButton,
+  PageNumber,
+  DeliveryItemImage,
+  ItemContent,
+  OrderProductName,
+  PurchaseDate,
+  ActionButton
 } from "../style";
 import ReviewModal from "../review/ReviewModal";
 
+const formatDotDate = (str) => str.split("T")[0].replace(/-/g, ".");
+
 export default function MyShopDeliveryContainer() {
-  //  구매완료(pending) / 배송 중(shipping) / 배송완료(completed)
   const [activeFilter, setActiveFilter] = useState("completed");
 
-
-  // 모달 상태
   const [open, setOpen] = useState(false);
-  const [target, setTarget] = useState(null); // { id, name }
+  const [target, setTarget] = useState(null);
 
-  // 모달 열기/닫기
-  const openReview = (item) => { setTarget(item); setOpen(true); };
-  const closeReview = () => { setOpen(false); setTarget(null); };
+  const openReview = (item) => {
+    setTarget(item);
+    setOpen(true);
+  };
+  const closeReview = () => {
+    setOpen(false);
+    setTarget(null);
+  };
 
   const allItems = [
     { id: 1, name: "솜이 인형", date: "2025-09-11", status: "completed" },
@@ -29,7 +43,6 @@ export default function MyShopDeliveryContainer() {
     { id: 7, name: "솜이 메모지", date: "2025-09-14", status: "pending" },
   ];
 
-  // 현재 탭에 맞는 목록만 출력
   const items = useMemo(
     () => allItems.filter((it) => it.status === activeFilter),
     [activeFilter]
@@ -43,20 +56,29 @@ export default function MyShopDeliveryContainer() {
 
   return (
     <div>
-      {/* 탭 */}
+      {/* 상태 필터 */}
       <FilterContainer>
-        <FilterButton active={activeFilter === "pending"} onClick={() => setActiveFilter("pending")}>
+        <FilterButton
+          active={activeFilter === "pending"}
+          onClick={() => setActiveFilter("pending")}
+        >
           {label.pending}
         </FilterButton>
-        <FilterButton active={activeFilter === "shipping"} onClick={() => setActiveFilter("shipping")}>
+        <FilterButton
+          active={activeFilter === "shipping"}
+          onClick={() => setActiveFilter("shipping")}
+        >
           {label.shipping}
         </FilterButton>
-        <FilterButton active={activeFilter === "completed"} onClick={() => setActiveFilter("completed")}>
+        <FilterButton
+          active={activeFilter === "completed"}
+          onClick={() => setActiveFilter("completed")}
+        >
           {label.completed}
         </FilterButton>
       </FilterContainer>
 
-      {/* 헤더(현재 탭 + 개수) */}
+      {/* 제목 */}
       <ListHeader>
         {label[activeFilter]}({items.length}개)
       </ListHeader>
@@ -65,34 +87,50 @@ export default function MyShopDeliveryContainer() {
       <ListContainer>
         {items.map((item) => (
           <ListItem key={item.id}>
-            <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                width: "100%",
+              }}
+            >
               <DeliveryItemImage />
-              <ItemDetails style={{ flex: 1 }}>
+              {/* 상품 정보 — 구매내역 스타일과 동일하게 세로 배치 */}
+              <ItemContent>
                 <div>상품</div>
-                <ItemTitle>{item.name}</ItemTitle>
+                <OrderProductName>{item.name}</OrderProductName>
                 <div>구매 일자</div>
-                <div>{item.date}</div>
-              </ItemDetails>
+                <PurchaseDate>{formatDotDate(item.date)}</PurchaseDate>
+              </ItemContent>
 
               <div>
-                {activeFilter === "pending" && <ActionButton>구매 취소</ActionButton>}
-                <ActionButton primary onClick={() => openReview(item)}>리뷰하기</ActionButton>
+                {activeFilter === "pending" && (
+                  <ActionButton>구매 취소</ActionButton>
+                )}
+                <ActionButton primary onClick={() => openReview(item)}>
+                  리뷰하기
+                </ActionButton>
               </div>
             </div>
           </ListItem>
         ))}
       </ListContainer>
 
+      {/* 페이지네이션 */}
       <Pagination>
         <PageButton disabled>&lt; 이전</PageButton>
         <PageNumber>1</PageNumber>
         <PageButton>다음 &gt;</PageButton>
       </Pagination>
 
-      {/* 모달창 렌더링 */}
-       <ReviewModal open={open} onClose={closeReview} mode="create" product={{ id: target?.id, name: target?.name }}
-        onSubmit={() => closeReview()}></ReviewModal>
-
+      {/* 리뷰 모달 */}
+      <ReviewModal
+        open={open}
+        onClose={closeReview}
+        mode="create"
+        product={{ id: target?.id, name: target?.name }}
+        onSubmit={() => closeReview()}
+      />
     </div>
   );
 }
