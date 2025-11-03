@@ -4,7 +4,7 @@ import * as S from "./style";
 const ReviewModal = ({
   open,
   onClose,
-  product = { id: 1, name: "솜이 인형", imageUrl: "/assets/images/sample_1.png" },
+  product = { id: 1, name: "솜이 인형", imageUrl: "/assets/images/shop_review_som_doll1.png" },
   mode = "create",
   onSubmit,
 }) => {
@@ -37,6 +37,10 @@ const ReviewModal = ({
       <S.Dialog onClick={(e) => e.stopPropagation()}>
         <S.Inner>
           <S.Title>리뷰 작성</S.Title>
+
+          <S.CloseIconButton onClick={onClose}>
+            <img src="/assets/icons/close.svg" alt="닫기"/>
+          </S.CloseIconButton>
 
           <S.ProductInfoBox>
             <S.ProductThumb src={product.imageUrl} alt={product.name} />
@@ -89,10 +93,6 @@ const ReviewModal = ({
 
           <S.Counter>{content.length}/300</S.Counter>
 
-          <S.CheckRow>
-            <input id="anon" type="checkbox" />
-            <label htmlFor="anon">프로필 사진/닉네임 비공개</label>
-          </S.CheckRow>
         </S.Inner>
 
       <S.ButtonRow>
