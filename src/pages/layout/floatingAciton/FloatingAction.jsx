@@ -4,7 +4,7 @@ import FloatingButton from './floatingButton/FloatingButton';
 
 
 const FloatingAction = () => {
-    const [isFloatingSelect, setIsFloatingSelect] = useState;
+    const [isFloatingSelect, setIsFloatingSelect] = useState(false);
     return (
         <S.floatingActionContainer>
             <S.floatingActionMenuWrap>
