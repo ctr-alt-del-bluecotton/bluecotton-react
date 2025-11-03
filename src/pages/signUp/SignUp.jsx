@@ -56,33 +56,6 @@ const SignUp = () => {
         {/* divider */}
         <S.Divider />
 
-        {/* social login */}
-        <S.SocialButtons>
-          <S.SocialButton to="/kakao-login">
-            <img
-              src={`${process.env.PUBLIC_URL}/assets/icons/kakao.png`}
-              alt="kakao"
-            />
-            카카오로 회원가입
-          </S.SocialButton>
-
-          <S.SocialButton to="/google-login">
-            <img
-              src={`${process.env.PUBLIC_URL}/assets/icons/google.png`}
-              alt="google"
-            />
-            구글로 회원가입
-          </S.SocialButton>
-
-          <S.SocialButton to="/naver-login">
-            <img
-              src={`${process.env.PUBLIC_URL}/assets/icons/naver.png`}
-              alt="naver"
-            />
-            네이버로 회원가입
-          </S.SocialButton>
-        </S.SocialButtons>
-
         {/* login */}
         <S.LoginText>
           계정이 있으신가요?{" "}

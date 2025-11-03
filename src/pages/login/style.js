@@ -4,18 +4,31 @@ import {
   basic,
   flexCenterColumn,
   headerLogo,
+  secondary,
+  smallText1Regular,
   smallText3Light,
   smallText3Regular,
   white,
 } from "../../styles/common";
 
+const S = {};
+
 // 로고
-export const Logo = styled.h1`
+S.Logo = styled.h1`
   ${headerLogo}
 `;
 
+// 로그인 폼
+S.LoginForm = styled.form`
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+  align-items: center;
+`
+
 // Login Container
-export const LoginContainer = styled.div`
+S.LoginContainer = styled.div`
   width: 100%;
   height: 100vh;
   display: flex;
@@ -23,7 +36,7 @@ export const LoginContainer = styled.div`
 `;
 
 // Background
-export const BackgroundBox = styled.div`
+S.BackgroundBox = styled.div`
   width: 70%;
   height: 100%;
   background-image: url(${process.env.PUBLIC_URL}/assets/images/login_image.png);
@@ -32,7 +45,7 @@ export const BackgroundBox = styled.div`
 `;
 
 // Login
-export const LoginBox = styled.div`
+S.LoginBox = styled.div`
   width: 30%;
   height: 100%;
   background-color: ${({ theme }) => theme.PALLETE.white};
@@ -41,7 +54,7 @@ export const LoginBox = styled.div`
 `;
 
 // Input
-export const Input = styled.input`
+S.Input = styled.input`
   /* 320 - 24 */
   width: 296px;
   height: 55px;
@@ -56,8 +69,13 @@ export const Input = styled.input`
   }
 `;
 
+S.InputErrorMessage = styled.p`
+  ${secondary};
+  ${smallText1Regular};
+`
+
 // Login Button
-export const LoginButton = styled(Link)`
+S.LoginButton = styled(Link)`
   width: 320px;
   height: 40px;
   background-color: ${({ theme }) => theme.PALLETE.primary.main};
@@ -76,7 +94,7 @@ export const LoginButton = styled(Link)`
 `;
 
 // Divider
-export const Divider = styled.div`
+S.Divider = styled.div`
   width: 320px;
   height: 1px;
   background-color: ${({ theme }) => theme.PALLETE.grey.greyScale3};
@@ -97,14 +115,14 @@ export const Divider = styled.div`
 `;
 
 // social login box
-export const SocialButtons = styled.div`
+S.SocialButtons = styled.div`
   ${flexCenterColumn};
   gap: 15px;
   width: 320px;
 `;
 
 // social login
-export const SocialButton = styled(Link)`
+S.SocialButton = styled(Link)`
   text-decoration: none;
   cursor: pointer;
   ${smallText3Light};
@@ -121,7 +139,7 @@ export const SocialButton = styled(Link)`
 `;
 
 //  find id/pwd
-export const FindInfoBox = styled.div`
+S.FindInfoBox = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -139,7 +157,7 @@ export const FindInfoBox = styled.div`
 `;
 
 // 회원가입
-export const SignUpText = styled.p`
+S.SignUpText = styled.p`
   color: ${({ theme }) => theme.PALLETE.basic};
   ${smallText3Light};
 
@@ -153,3 +171,5 @@ export const SignUpText = styled.p`
     }
   }
 `;
+
+export default S;
