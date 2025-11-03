@@ -23,7 +23,7 @@ export const Form = styled.form`
   gap: 30px;
 `;
 
-/* === 제목 / 카테고리 (가로 정렬) === */
+/* === 제목 / 카테고리 === */
 export const FormRow = styled.div`
   display: flex;
   align-items: center;
@@ -43,12 +43,10 @@ export const FormRow = styled.div`
     border: 1px solid ${({ theme }) => theme.PALLETE.grey.greyScale2};
     border-radius: 4px;
     font-size: ${({ theme }) => theme.FONT_SIZE["smallText3"]};
-    font-weight: ${({ theme }) => theme.FONT_WEIGHT["regular"]};
     color: ${({ theme }) => theme.PALLETE.basic};
     padding: 0 12px;
     outline: none;
     background-color: #fff;
-    transition: border-color 0.2s ease;
 
     &::placeholder {
       color: ${({ theme }) => theme.PALLETE.grey.greyScale3};
@@ -59,28 +57,15 @@ export const FormRow = styled.div`
     }
   }
 
-  /* ▼ 드롭다운 전용 화살표 */
   select {
     appearance: none;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-
     background-image: url("/assets/icons/drop_down.svg");
     background-repeat: no-repeat;
     background-position: right 10px center;
     background-size: 16px;
 
-    &::-ms-expand {
-      display: none;
-    }
-
     &:focus {
-      background-color: #fff;
       background-image: url("/assets/icons/drop_down_acv.svg");
-      background-repeat: no-repeat;
-      background-position: right 10px center;
-      background-size: 16px;
-      outline: none;
     }
   }
 `;
@@ -95,21 +80,16 @@ export const FormGroup = styled.div`
     border: 1px solid ${({ theme }) => theme.PALLETE.grey.greyScale2};
     border-radius: 4px;
     font-size: ${({ theme }) => theme.FONT_SIZE["smallText3"]};
-    font-weight: ${({ theme }) => theme.FONT_WEIGHT["regular"]};
     padding: 12px;
     height: 260px;
     resize: none;
     line-height: 1.6;
     color: ${({ theme }) => theme.PALLETE.basic};
     outline: none;
-
-    &::placeholder {
-      color: ${({ theme }) => theme.PALLETE.grey.greyScale3};
-    }
+    font-family: inherit;
 
     &:focus {
       border-color: ${({ theme }) => theme.PALLETE.primary.main};
-      color: ${({ theme }) => theme.PALLETE.basic};
     }
   }
 
@@ -138,19 +118,19 @@ export const FileBox = styled.div`
   .file-row > label {
     grid-column: 1;
     font-size: ${({ theme }) => theme.FONT_SIZE["h6"]};
-    font-weight: ${({ theme }) => theme.FONT_WEIGHT["regular"]};
     color: ${({ theme }) => theme.PALLETE.basic};
     align-self: center;
   }
 
-  .file-row > .file-select {
+  .file-select {
     grid-column: 2;
     display: flex;
     align-items: center;
+    gap: 10px;
     border: 1px solid ${({ theme }) => theme.PALLETE.grey.greyScale2};
     border-radius: 4px;
     background-color: #fff;
-    overflow: hidden;
+    padding-right: 8px;
 
     button {
       background-color: ${({ theme }) => theme.PALLETE.grey.greyScale0};
@@ -172,10 +152,17 @@ export const FileBox = styled.div`
       flex: 1;
       font-size: ${({ theme }) => theme.FONT_SIZE["smallText3"]};
       color: ${({ theme }) => theme.PALLETE.grey.greyScale3};
-      padding-left: 12px;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
+    }
+
+    .thumb-wrap img {
+      width: 60px;
+      height: 40px;
+      border-radius: 4px;
+      object-fit: cover;
+      border: 1px solid ${({ theme }) => theme.PALLETE.grey.greyScale2};
     }
   }
 
@@ -195,6 +182,7 @@ export const FileBox = styled.div`
     button {
       display: flex;
       align-items: center;
+      justify-content: center;
       gap: 6px;
       height: 34px;
       padding: 0 12px;
@@ -206,23 +194,27 @@ export const FileBox = styled.div`
       cursor: pointer;
       transition: background 0.2s ease;
 
-      img {
-        width: 14px;
-        height: 14px;
-      }
-
       &:hover {
         background-color: ${({ theme }) => theme.PALLETE.grey.greyScale0};
       }
-    }
 
-    /* 아이콘 연결 */
-    .add-btn img {
-      content: url("/assets/icons/add.svg");
-    }
+      &::before {
+        display: inline-block;
+        width: 14px;
+        height: 14px;
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: center;
+        content: "";
+      }
 
-    .remove-btn img {
-      content: url("/assets/icons/minus.svg");
+      &.add-btn::before {
+        background-image: url("/assets/icons/add.svg");
+      }
+
+      &.remove-btn::before {
+        background-image: url("/assets/icons/minus.svg");
+      }
     }
   }
 `;
@@ -252,6 +244,15 @@ export const ButtonBox = styled.div`
     }
   }
 
+  .temp-save {
+    border: 1px solid ${({ theme }) => theme.PALLETE.primary.light1};
+    background-color: #fff;
+    color: ${({ theme }) => theme.PALLETE.basic};
+    &:hover {
+      background-color: ${({ theme }) => theme.PALLETE.primary.light0};
+    }
+  }
+
   .submit {
     border: none;
     background-color: ${({ theme }) => theme.PALLETE.primary.main};
@@ -261,3 +262,5 @@ export const ButtonBox = styled.div`
     }
   }
 `;
+
+

@@ -1,19 +1,27 @@
 import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import * as S from "./style";
+import Report from "../../../components/Report/Report";
+import { useModal } from "../../../components/modal"; // ✅ 전역 모달 훅
 
 const PostReadContent = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { openModal } = useModal(); // ✅ 전역 모달 훅 사용
 
   const [showComments, setShowComments] = useState(true);
   const [comment, setComment] = useState("");
   const [replyInputs, setReplyInputs] = useState({});
-  const [showModal, setShowModal] = useState(false);
-  const [showCommentModal, setShowCommentModal] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [showReplyTarget, setShowReplyTarget] = useState(null);
+  const [showReportModal, setShowReportModal] = useState(false);
+  const [reportTarget, setReportTarget] = useState(null);
 
+  // ✅ 게시글 좋아요 상태
+  const [postLiked, setPostLiked] = useState(false);
+  const [postLikeCount, setPostLikeCount] = useState(8);
+
+  // ✅ 댓글 데이터
   const [comments, setComments] = useState([
     {
       id: 1,
@@ -45,7 +53,22 @@ const PostReadContent = () => {
   const goPrev = () => prevId && navigate(`/main/post/read/${prevId}`);
   const goNext = () => navigate(`/main/post/read/${nextId}`);
 
-  // ❤️ 좋아요 토글
+  // ✅ 게시글 좋아요 토글
+  const handlePostLike = () => {
+    setPostLiked((prev) => !prev);
+    setPostLikeCount((prev) => (postLiked ? prev - 1 : prev + 1));
+  };
+
+  // ✅ 공유 버튼 (카카오 API 자리)
+  const handleShare = () => {
+    openModal({
+      title: "공유하기",
+      message: "공유 기능은 추후 업데이트될 예정입니다 😊",
+      confirmText: "확인",
+    });
+  };
+
+  // 댓글/대댓글 좋아요
   const handleLike = (cid, isReply = false, parentId = null) => {
     setComments((prev) =>
       prev.map((c) => {
@@ -54,13 +77,21 @@ const PostReadContent = () => {
             ...c,
             replies: c.replies.map((r) =>
               r.id === cid
-                ? { ...r, liked: !r.liked, likes: r.liked ? r.likes - 1 : r.likes + 1 }
+                ? {
+                    ...r,
+                    liked: !r.liked,
+                    likes: r.liked ? r.likes - 1 : r.likes + 1,
+                  }
                 : r
             ),
           };
         }
         if (!isReply && c.id === cid)
-          return { ...c, liked: !c.liked, likes: c.liked ? c.likes - 1 : c.likes + 1 };
+          return {
+            ...c,
+            liked: !c.liked,
+            likes: c.liked ? c.likes - 1 : c.likes + 1,
+          };
         return c;
       })
     );
@@ -83,7 +114,7 @@ const PostReadContent = () => {
     setComment("");
   };
 
-  // 💬 대댓글 등록
+  // 🧩 대댓글 등록
   const handleReplySubmit = (parentId, targetId) => {
     const text = (replyInputs[targetId] || "").trim();
     if (!text) return;
@@ -115,7 +146,7 @@ const PostReadContent = () => {
     setShowReplyTarget(null);
   };
 
-  // 💬 답글 버튼 클릭 (댓글/대댓글 공통)
+  // 답글 버튼 클릭
   const handleReplyClick = (parentId, targetId, nickname) => {
     setShowReplyTarget((prev) =>
       prev && prev.targetId === targetId ? null : { parentId, targetId }
@@ -129,7 +160,6 @@ const PostReadContent = () => {
     }));
   };
 
-  // @닉네임 파란색 처리
   const renderTextWithTags = (text) => {
     const parts = text.split(/(@\S+)/g);
     return parts.map((part, i) =>
@@ -141,32 +171,45 @@ const PostReadContent = () => {
     );
   };
 
-  // 게시글 삭제
+  // 🗑 게시글 삭제
   const handleDelete = () => {
-    alert(`${id}번 게시글이 삭제되었습니다.`);
-    setShowModal(false);
-    navigate("/main/post/all");
+    openModal({
+      title: "게시글을 삭제하시겠습니까?",
+      message: "삭제된 게시글은 복구할 수 없습니다.",
+      confirmText: "삭제",
+      cancelText: "취소",
+      onConfirm: () => navigate("/main/post/all"),
+    });
   };
 
   // 댓글/답글 삭제
   const handleCommentDelete = () => {
     if (!deleteTarget) return;
-    setComments((prev) =>
-      prev
-        .map((c) => {
-          if (deleteTarget.type === "comment" && c.id === deleteTarget.id) return null;
-          if (deleteTarget.type === "reply") {
-            return {
-              ...c,
-              replies: c.replies.filter((r) => r.id !== deleteTarget.id),
-            };
-          }
-          return c;
-        })
-        .filter(Boolean)
-    );
-    setShowCommentModal(false);
-    setDeleteTarget(null);
+
+    openModal({
+      title: "댓글을 삭제하시겠습니까?",
+      message: "삭제된 댓글은 복구할 수 없습니다.",
+      confirmText: "삭제",
+      cancelText: "취소",
+      onConfirm: () => {
+        setComments((prev) =>
+          prev
+            .map((c) => {
+              if (deleteTarget.type === "comment" && c.id === deleteTarget.id)
+                return null;
+              if (deleteTarget.type === "reply") {
+                return {
+                  ...c,
+                  replies: c.replies.filter((r) => r.id !== deleteTarget.id),
+                };
+              }
+              return c;
+            })
+            .filter(Boolean)
+        );
+        setDeleteTarget(null);
+      },
+    });
   };
 
   return (
@@ -184,28 +227,31 @@ const PostReadContent = () => {
       <S.Content>
         <S.EditBox>
           <span onClick={() => navigate(`/main/post/modify/${id}`)}>수정</span> |{" "}
-          <span onClick={() => setShowModal(true)}>삭제</span>
+          <span onClick={handleDelete}>삭제</span>
         </S.EditBox>
         <p>{id}번 게시물 내용입니다.</p>
       </S.Content>
 
-      {/* 게시글 삭제 모달 */}
-      {showModal && (
-        <S.ModalBackdrop>
-          <S.ModalBox>
-            <h3>게시글을 삭제하시겠습니까?</h3>
-            <p>삭제된 게시글은 복구할 수 없습니다.</p>
-            <div className="button-row">
-              <button className="cancel" onClick={() => setShowModal(false)}>
-                취소
-              </button>
-              <button className="confirm" onClick={handleDelete}>
-                삭제
-              </button>
-            </div>
-          </S.ModalBox>
-        </S.ModalBackdrop>
-      )}
+      {/* ✅ 좋아요 + 공유 (댓글 위쪽으로 이동) */}
+      <S.PostSocialBox>
+        <S.LikeButton $liked={postLiked} onClick={handlePostLike}>
+          <img
+            src={
+              postLiked
+                ? "/assets/icons/favorite_acv.svg"
+                : "/assets/icons/favorite_gray.svg"
+            }
+            alt="좋아요"
+          />
+          <span>{postLikeCount}</span>
+        </S.LikeButton>
+
+        <S.ShareButton onClick={handleShare}>
+          <img src="/assets/icons/share_gray.svg" alt="공유하기" />
+          <span>공유</span>
+        </S.ShareButton>
+      </S.PostSocialBox>
+
 
       {/* 💬 댓글 섹션 */}
       <S.CommentSection>
@@ -230,30 +276,42 @@ const PostReadContent = () => {
             <S.CommentList>
               {comments.map((c) => (
                 <React.Fragment key={c.id}>
-                  {/* 댓글 */}
                   <S.CommentItem>
                     <div className="left">
                       <img src={c.profile} alt="프로필" className="profile" />
                       <div className="text-box">
                         <div className="writer">{c.name}</div>
-                        <div className="content">{renderTextWithTags(c.text)}</div>
+                        <div className="content">
+                          {renderTextWithTags(c.text)}
+                        </div>
                         <div className="meta-row">
-                          <span>{c.date}</span>|<span className="report">신고</span>|
+                          <span>{c.date}</span>|
+                          <span
+                            className="report"
+                            onClick={() => {
+                              setReportTarget({ type: "comment", id: c.id });
+                              setShowReportModal(true);
+                            }}
+                          >
+                            신고
+                          </span>
+                          |
                           <span
                             className="delete"
                             onClick={() => {
                               setDeleteTarget({ type: "comment", id: c.id });
-                              setShowCommentModal(true);
+                              handleCommentDelete();
                             }}
                           >
                             삭제
                           </span>
                         </div>
-
                         <div className="reply-row">
                           <button
                             className="reply"
-                            onClick={() => handleReplyClick(c.id, c.id, c.name)}
+                            onClick={() =>
+                              handleReplyClick(c.id, c.id, c.name)
+                            }
                           >
                             답글
                           </button>
@@ -278,7 +336,7 @@ const PostReadContent = () => {
                     </div>
                   </S.CommentItem>
 
-                  {/* 댓글의 답글 입력창 */}
+                  {/* ✅ 대댓글 입력창 */}
                   {showReplyTarget?.targetId === c.id && (
                     <S.CommentForm $indent>
                       <div className="avatar">
@@ -310,24 +368,44 @@ const PostReadContent = () => {
                     </S.CommentForm>
                   )}
 
-                  {/* 대댓글 */}
+                  {/* ✅ 대댓글 */}
                   {c.replies.map((r) => (
                     <React.Fragment key={r.id}>
                       <S.CommentItem indent>
                         <div className="left">
-                          <img src={r.profile} alt="프로필" className="profile" />
+                          <img
+                            src={r.profile}
+                            alt="프로필"
+                            className="profile"
+                          />
                           <div className="text-box">
                             <div className="writer">{r.name}</div>
                             <div className="content">
                               {renderTextWithTags(r.text)}
                             </div>
                             <div className="meta-row">
-                              <span>{r.date}</span>|<span className="report">신고</span>|
+                              <span>{r.date}</span>|
+                              <span
+                                className="report"
+                                onClick={() => {
+                                  setReportTarget({
+                                    type: "reply",
+                                    id: r.id,
+                                  });
+                                  setShowReportModal(true);
+                                }}
+                              >
+                                신고
+                              </span>
+                              |
                               <span
                                 className="delete"
                                 onClick={() => {
-                                  setDeleteTarget({ type: "reply", id: r.id });
-                                  setShowCommentModal(true);
+                                  setDeleteTarget({
+                                    type: "reply",
+                                    id: r.id,
+                                  });
+                                  handleCommentDelete();
                                 }}
                               >
                                 삭제
@@ -348,7 +426,9 @@ const PostReadContent = () => {
                         <div className="right">
                           <S.LikeButton
                             $liked={r.liked}
-                            onClick={() => handleLike(r.id, true, c.id)}
+                            onClick={() =>
+                              handleLike(r.id, true, c.id)
+                            }
                           >
                             <img
                               src={
@@ -363,11 +443,14 @@ const PostReadContent = () => {
                         </div>
                       </S.CommentItem>
 
-                      {/* ✅ 대댓글 아래 답글 입력창 (폭 줄이기 적용) */}
+                      {/* ✅ 대댓글 아래 또 답글 입력 */}
                       {showReplyTarget?.targetId === r.id && (
                         <S.CommentForm $indent $nested>
                           <div className="avatar">
-                            <img src="/postImages/profile.png" alt="내 프로필" />
+                            <img
+                              src="/postImages/profile.png"
+                              alt="내 프로필"
+                            />
                             <span className="nickname">지존준서</span>
                           </div>
                           <div className="input-wrap">
@@ -388,7 +471,9 @@ const PostReadContent = () => {
                           </div>
                           <button
                             className="submit-btn"
-                            onClick={() => handleReplySubmit(c.id, r.id)}
+                            onClick={() =>
+                              handleReplySubmit(c.id, r.id)
+                            }
                           >
                             등록
                           </button>
@@ -423,22 +508,20 @@ const PostReadContent = () => {
         )}
       </S.CommentSection>
 
-      {/* 댓글/답글 삭제 모달 */}
-      {showCommentModal && (
-        <S.ModalBackdrop>
-          <S.ModalBox>
-            <h3>댓글을 삭제하시겠습니까?</h3>
-            <p>삭제된 댓글은 복구할 수 없습니다.</p>
-            <div className="button-row">
-              <button className="cancel" onClick={() => setShowCommentModal(false)}>
-                취소
-              </button>
-              <button className="confirm" onClick={handleCommentDelete}>
-                삭제
-              </button>
-            </div>
-          </S.ModalBox>
-        </S.ModalBackdrop>
+      {/* ✅ 신고 모달 */}
+      {showReportModal && (
+        <Report
+          target={reportTarget}
+          onClose={() => setShowReportModal(false)}
+          onSubmit={(reason) => {
+            console.log("신고 완료:", {
+              target: reportTarget?.type,
+              id: reportTarget?.id,
+              reason,
+            });
+            setShowReportModal(false);
+          }}
+        />
       )}
 
       <S.NavList>
