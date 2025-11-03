@@ -1,0 +1,107 @@
+import React, { useEffect, useRef, useState } from "react";
+import * as S from "./style";
+
+const ReviewModal = ({
+  open,
+  onClose,
+  product = { id: 1, name: "솜이 인형", imageUrl: "/assets/images/sample_1.png" },
+  mode = "create",
+  onSubmit,
+}) => {
+  const [rating, setRating] = useState(5);
+  const [content, setContent] = useState("");
+  const [files, setFiles] = useState([]);
+  const fileInputRef = useRef(null);
+
+  useEffect(() => {
+    if (!open) return;
+    document.body.style.overflow = "hidden";
+    return () => (document.body.style.overflow = "auto");
+  }, [open]);
+
+  if (!open) return null;
+
+  const openFilePicker = () => fileInputRef.current?.click();
+
+  const onChangeFiles = (e) => {
+    const picked = Array.from(e.target.files || []);
+    const next = [...files, ...picked].slice(0, 5);
+    setFiles(next);
+    e.target.value = "";
+  };
+
+  const labelText = ["", "별로예요", "그저 그래요", "보통이에요", "좋아요!", "최고예요!"][rating];
+
+  return (
+    <S.Overlay>
+      <S.Dialog onClick={(e) => e.stopPropagation()}>
+        <S.Inner>
+          <S.Title>리뷰 작성</S.Title>
+
+          <S.ProductInfoBox>
+            <S.ProductThumb src={product.imageUrl} alt={product.name} />
+            <S.ProductName>{product.name}</S.ProductName>
+          </S.ProductInfoBox>
+
+          <S.Question>상품은 만족하셨나요?</S.Question>
+
+          <S.StarRow>
+            {[1, 2, 3, 4, 5].map((n) => (
+              <S.StarImg
+                key={n}
+                src="/assets/icons/review.svg"
+                alt={`${n}점`}
+                onClick={() => setRating(n)}
+                $active={n <= rating}
+              />
+            ))}
+          </S.StarRow>
+
+          <S.StarLabel>{labelText}</S.StarLabel>
+
+          <S.FileBox>
+            <S.FileText>
+              {files.length === 0
+                ? "선택한 파일이 없습니다"
+                : files.map((f) => f.name).join(", ")}
+            </S.FileText>
+            <S.FileButton type="button" onClick={openFilePicker}>
+              + 이미지 추가
+            </S.FileButton>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              multiple
+              hidden
+              onChange={onChangeFiles}
+            />
+          </S.FileBox>
+
+          <S.FileHint>※최대 5장의 이미지를 첨부할 수 있어요.</S.FileHint>
+
+          <S.TextArea
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            placeholder="리뷰를 작성해 주세요"
+            maxLength={300}>
+          </S.TextArea>
+
+          <S.Counter>{content.length}/300</S.Counter>
+
+          <S.CheckRow>
+            <input id="anon" type="checkbox" />
+            <label htmlFor="anon">프로필 사진/닉네임 비공개</label>
+          </S.CheckRow>
+        </S.Inner>
+
+      <S.ButtonRow>
+        <S.CloseButton onClick={() => onClose?.()}>닫기</S.CloseButton>
+        <S.PrimaryButton>등록</S.PrimaryButton>
+      </S.ButtonRow>
+      </S.Dialog>
+    </S.Overlay>
+  );
+};
+
+export default ReviewModal;
