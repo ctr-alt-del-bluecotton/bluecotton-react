@@ -19,11 +19,14 @@ import {
   OrderSummary,
   SummaryRow,
   OrderButton,
-  Checkbox as SCheckbox
+  Checkbox as SCheckbox,
 } from "../style";
-import { Link, Navigate } from "react-router-dom";
+import { Link } from "react-router-dom";
+import { useModal } from "../../../../components/modal/useModal"; // ✅ 공용 모달 훅 추가
 
 const MyShopCartContainer = () => {
+  const { openModal } = useModal(); // ✅ 전역 모달 훅 사용
+
   const generalData = useMemo(
     () => [
       { id: "g1", name: "솜이 레옹 키링", price: 5000 },
@@ -41,18 +44,20 @@ const MyShopCartContainer = () => {
   );
 
   /* 탭(일반/캔디) */
-  const [tab, setTab] = useState("general"); // 'general' | 'candy'
-  const currentItems = tab === "general" ? generalData : candyData;
-  const unit = tab === "general" ? "원" : "캔디";
-  const shippingText =
-    tab === "candy" ? "무료배송" : "3,000원";
+  const [tab, setTab] = useState("general");
+  const [generalItems, setGeneralItems] = useState(generalData);
+  const [candyItems, setCandyItems] = useState(candyData);
+  const currentItems = tab === "general" ? generalItems : candyItems;
+  const setCurrentItems = tab === "general" ? setGeneralItems : setCandyItems;
 
-  /* 선택/수량 상태 (탭이 바뀌면 현재 탭 기준으로 초기화) */
-  const [checkedIds, setCheckedIds] = useState(new Set()); 
-  const [qtyMap, setQtyMap] = useState({}); 
+  const unit = tab === "general" ? "원" : "캔디";
+  const shippingText = tab === "candy" ? "무료배송" : "3,000원";
+
+  /* 선택/수량 상태 */
+  const [checkedIds, setCheckedIds] = useState(new Set());
+  const [qtyMap, setQtyMap] = useState({});
 
   useEffect(() => {
-
     const nextQty = {};
     currentItems.forEach((it) => (nextQty[it.id] = 1));
     setQtyMap(nextQty);
@@ -85,7 +90,17 @@ const MyShopCartContainer = () => {
     .filter((it) => checkedIds.has(it.id))
     .reduce((sum, it) => sum + it.price * (qtyMap[it.id] || 1), 0);
 
-
+  /* ✅ 삭제 모달 (공용 모달 사용) */
+  const handleDelete = (id) => {
+    const item = currentItems.find((it) => it.id === id);
+    openModal({
+      title: "상품을 삭제하시겠습니까?",
+      message: `${item?.name ?? "선택한 상품"}을(를) 장바구니에서 삭제합니다.`,
+      confirmText: "삭제하기",
+      cancelText: "취소",
+      onConfirm: () => setCurrentItems((prev) => prev.filter((it) => it.id !== id)),
+    });
+  };
 
   return (
     <div>
@@ -100,7 +115,7 @@ const MyShopCartContainer = () => {
           캔디 상품
         </FilterButton>
       </FilterContainer>
-    
+
       {/* 상단 전체선택/삭제(선택해제) */}
       <CartHeader>
         <SelectAll>
@@ -108,7 +123,13 @@ const MyShopCartContainer = () => {
           전체선택
         </SelectAll>
         <button
-          style={{ padding: "8px 16px", backgroundColor: "#E0E0E0", border: "none", borderRadius: 8 }}
+          style={{
+            padding: "8px 16px",
+            backgroundColor: "#E0E0E0",
+            border: "none",
+            borderRadius: 8,
+            cursor: "pointer",
+          }}
           onClick={() => setCheckedIds(new Set())}
         >
           선택해제
@@ -133,7 +154,10 @@ const MyShopCartContainer = () => {
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
                   <div>
                     <ItemName>{item.name}</ItemName>
-                    <div style={{ color: "#757575", fontSize: 14, marginBottom: 8, cursor: "pointer" }}>
+                    <div
+                      style={{ color: "#757575", fontSize: 14, marginBottom: 8, cursor: "pointer" }}
+                      onClick={() => handleDelete(item.id)} // ✅ 삭제 버튼에 모달 연결
+                    >
                       삭제
                     </div>
 
@@ -167,10 +191,7 @@ const MyShopCartContainer = () => {
       <OrderSummary>
         <SummaryRow>
           <span>선택 상품 금액</span>
-          <span>
-            {selectedTotal.toLocaleString()}
-            {unit}
-          </span>
+          <span>{selectedTotal.toLocaleString()}{unit}</span>
         </SummaryRow>
         <SummaryRow>
           <span>+ 총 배송비</span>
@@ -182,10 +203,7 @@ const MyShopCartContainer = () => {
         </SummaryRow>
         <SummaryRow>
           <span>주문 금액(배송비 별도)</span>
-          <span>
-            {selectedTotal.toLocaleString()}
-            {unit}
-          </span>
+          <span>{selectedTotal.toLocaleString()}{unit}</span>
         </SummaryRow>
       </OrderSummary>
 
