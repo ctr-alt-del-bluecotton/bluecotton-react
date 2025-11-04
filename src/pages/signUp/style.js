@@ -3,27 +3,47 @@ import {
   basic,
   flexCenterColumn,
   headerLogo,
+  secondary,
+  smallText1Regular,
   smallText3Light,
   smallText3Regular,
   white,
 } from "../../styles/common";
 import { Link } from "react-router-dom";
 
+const S = {}
+
 // Logo
-export const Logo = styled.h1`
+S.Logo = styled.h1`
   ${headerLogo}
 `;
 
 // Sign-up Container
-export const SignUpContainer = styled.div`
+S.SignUpContainer = styled.div`
   width: 100%;
   height: 100vh;
   display: flex;
   background-color: ${({ theme }) => theme.PALLETE.white};
 `;
 
+// SignUpForm
+// 로그인 폼
+S.SignUpForm = styled.form`
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+  align-items: center;
+`
+
+S.InputErrorMessage = styled.p`
+  ${secondary};
+  ${smallText1Regular};
+`
+
+
 // Background
-export const BackgroundBox = styled.div`
+S.BackgroundBox = styled.div`
   width: 70%;
   height: 100%;
   background-image: url(${process.env.PUBLIC_URL}/assets/images/login_image.png);
@@ -32,7 +52,7 @@ export const BackgroundBox = styled.div`
 `;
 
 // Sign-up
-export const SignUpBox = styled.div`
+S.SignUpBox = styled.div`
   width: 30%;
   height: 100%;
   background-color: ${({ theme }) => theme.PALLETE.white};
@@ -41,7 +61,7 @@ export const SignUpBox = styled.div`
 `;
 
 // Input
-export const Input = styled.input`
+S.Input = styled.input`
   width: 296px;
   height: 55px;
   border: 1px solid ${({ theme }) => theme.PALLETE.grey.greyScale1};
@@ -57,7 +77,7 @@ export const Input = styled.input`
 `;
 
 // Address Box
-export const AddressBox = styled.div`
+S.AddressBox = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -66,7 +86,7 @@ export const AddressBox = styled.div`
 `;
 
 // Address Input
-export const AddressInput = styled.input`
+S.AddressInput = styled.input`
   flex: 1;
   height: 40px;
   border: 1px solid ${({ theme }) => theme.PALLETE.grey.greyScale1};
@@ -82,7 +102,7 @@ export const AddressInput = styled.input`
 `;
 
 // Small Button
-export const SmallButton = styled.button`
+S.SmallButton = styled.button`
   width: 85px;
   height: 40px;
   background-color: ${({ theme }) => theme.PALLETE.primary.main};
@@ -99,7 +119,7 @@ export const SmallButton = styled.button`
 `;
 
 // Gender Box
-export const GenderSelectBox = styled.div`
+S.GenderSelectBox = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -108,7 +128,7 @@ export const GenderSelectBox = styled.div`
 `;
 
 // Gender Input
-export const GenderOption = styled.div`
+S.GenderOption = styled.div`
   flex: 1;
   height: 40px;
   border: 1px solid
@@ -128,7 +148,7 @@ export const GenderOption = styled.div`
 `;
 
 // Birth Box
-export const DateInputBox = styled.div`
+S.DateInputBox = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -137,7 +157,7 @@ export const DateInputBox = styled.div`
 `;
 
 // Birth Input
-export const DateInput = styled.input.attrs({ type: "date" })`
+S.DateInput = styled.input.attrs({ type: "date" })`
   flex: 1;
   height: 40px;
   border: 1px solid ${({ theme }) => theme.PALLETE.grey.greyScale1};
@@ -158,7 +178,7 @@ export const DateInput = styled.input.attrs({ type: "date" })`
 `;
 
 // Sign-up Button
-export const SignUpButton = styled(Link)`
+S.SignUpButton = styled(Link)`
   width: 320px;
   height: 40px;
   background-color: ${({ theme }) => theme.PALLETE.primary.main};
@@ -177,7 +197,7 @@ export const SignUpButton = styled(Link)`
 `;
 
 // Divider
-export const Divider = styled.div`
+S.Divider = styled.div`
   width: 320px;
   height: 1px;
   background-color: ${({ theme }) => theme.PALLETE.grey.greyScale3};
@@ -198,13 +218,13 @@ export const Divider = styled.div`
 `;
 
 // Social Buttons
-export const SocialButtons = styled.div`
+S.SocialButtons = styled.div`
   ${flexCenterColumn};
   gap: 15px;
   width: 320px;
 `;
 
-export const SocialButton = styled(Link)`
+S.SocialButton = styled(Link)`
   text-decoration: none;
   cursor: pointer;
   ${smallText3Light};
@@ -221,7 +241,7 @@ export const SocialButton = styled(Link)`
 `;
 
 // 로그인 텍스트
-export const LoginText = styled.p`
+S.LoginText = styled.p`
   color: ${({ theme }) => theme.PALLETE.basic};
   ${smallText3Light};
 
@@ -235,3 +255,5 @@ export const LoginText = styled.p`
     }
   }
 `;
+
+export default S;
