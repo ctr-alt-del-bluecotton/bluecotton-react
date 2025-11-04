@@ -127,11 +127,11 @@ const MyShopCartContainer = () => {
             padding: "8px 16px",
             backgroundColor: "#E0E0E0",
             border: "none",
-            borderRadius: 8,
+            borderRadius: 4,
             cursor: "pointer",
+            
           }}
-          onClick={() => setCheckedIds(new Set())}
-        >
+          onClick={() => setCheckedIds(new Set())}>
           선택해제
         </button>
       </CartHeader>
