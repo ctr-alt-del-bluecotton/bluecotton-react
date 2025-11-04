@@ -12,40 +12,36 @@ const MapContainer = () => {
   // 로딩 상태 (모든 주소 변환이 끝나면 true)
   const [isLoaded, setIsLoaded] = useState(false);
 
-  // 직접 위도와 경도를 넣었을 때
-  // const [latitude, setLatitude] = useState(37.44937029089704);
-  // const [longitude, setLongitude] = useState(126.65436049042351);
+  // 백엔드에서 가져온 주소 리스트 상태 추가
+  const [addressList, setAddressList] = useState([]);
 
-  // 한 개의 주소를 받았을 때
-  // const address = "서울특별시 강남구 테헤란로 152";
-
-  // 여러 개의 주소를 받았을 때
-  const address = [
-    { address: "서울특별시 강남구 테헤란로 152" },
-    { address: "서울특별시 강남구 논현로 429" },
-    { address: "서울 강남구 테헤란로 134 P&S TOWER (역삼동)" },
-  ];
+  // DB에서 모든 회원 주소 가져오기
+  const fetchAddresses = async () => {
+    try {
+      const res = await fetch(`${process.env.REACT_APP_BACKEND_URL}/member/member-address`);
+      const result = await res.json();
+      setAddressList(result.data); // ["주소1", "주소2", ...]
+    } catch (error) {
+      console.error("주소 데이터를 불러오는 데 실패했습니다:", error);
+    }
+  };
 
   useEffect(() => {                                                      
+    fetchAddresses();  // mount 시 주소 fetch
+  }, []);
+
+  useEffect(() => {
+    if (addressList.length === 0) return; // 주소 없으면 실행X
+
     // geocoder객체 생성 -> 주소를 위도와 경도로 바꿔줌
     const geocoder = new window.kakao.maps.services.Geocoder();
 
     // 임시로 마커 좌표를 저장할 배열
     const tempMarkers = [];
 
-    // 한개주소 한개 마커 
-    // geocoder.addressSearch(address, function(result, status) { 
-    //   if(status === window.kakao.maps.services.Status.OK){ 
-    //     setLatitude(parseFloat(result[0].y)); 
-    //     setLongitude(parseFloat(result[0].x)); 
-    //   }else{ 
-    //     console.error("주소를 찾을 수 없습니다", status) 
-    //   } 
-    // });
-
-    // 여러 주소 여러 마커
-    address.forEach((item) => {
-      geocoder.addressSearch(item.address, (result, status) => {
+    // 백에서 받은 전체 주소 리스트 활용
+    addressList.forEach((addr) => {
+      geocoder.addressSearch(addr, (result, status) => {
         if (status === window.kakao.maps.services.Status.OK) {
           const latitude = parseFloat(result[0].y);
           const longitude = parseFloat(result[0].x);
@@ -54,7 +50,7 @@ const MapContainer = () => {
           tempMarkers.push({ latitude, longitude });
 
           // 모든 주소가 변환된 시점에만 실행
-          if (tempMarkers.length === address.length) {
+          if (tempMarkers.length === addressList.length) {
             setMarkers(tempMarkers); 
             setIsLoaded(true);      
 
@@ -67,11 +63,12 @@ const MapContainer = () => {
             }
           }
         } else {
-          console.error("주소를 찾을 수 없습니다:", item.address);
+          console.error("주소를 찾을 수 없습니다:", addr);
         }
       });
     });
-  }, []); // address 고정, center 재설정 X
+
+  }, [addressList]); // addressList 바뀔때만 실행
 
   if (!isLoaded || !center) return <div>지도 불러오는 중...</div>;
 
