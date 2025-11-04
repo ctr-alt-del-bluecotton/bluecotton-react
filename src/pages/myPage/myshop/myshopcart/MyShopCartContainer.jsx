@@ -22,10 +22,10 @@ import {
   Checkbox as SCheckbox,
 } from "../style";
 import { Link } from "react-router-dom";
-import { useModal } from "../../../../components/modal/useModal"; // ✅ 공용 모달 훅 추가
+import { useModal } from "../../../../components/modal/useModal"; 
 
 const MyShopCartContainer = () => {
-  const { openModal } = useModal(); // ✅ 전역 모달 훅 사용
+  const { openModal } = useModal(); 
 
   const generalData = useMemo(
     () => [
@@ -90,7 +90,7 @@ const MyShopCartContainer = () => {
     .filter((it) => checkedIds.has(it.id))
     .reduce((sum, it) => sum + it.price * (qtyMap[it.id] || 1), 0);
 
-  /* ✅ 삭제 모달 (공용 모달 사용) */
+ 
   const handleDelete = (id) => {
     const item = currentItems.find((it) => it.id === id);
     openModal({
@@ -156,7 +156,7 @@ const MyShopCartContainer = () => {
                     <ItemName>{item.name}</ItemName>
                     <div
                       style={{ color: "#757575", fontSize: 14, marginBottom: 8, cursor: "pointer" }}
-                      onClick={() => handleDelete(item.id)} // ✅ 삭제 버튼에 모달 연결
+                      onClick={() => handleDelete(item.id)} 
                     >
                       삭제
                     </div>

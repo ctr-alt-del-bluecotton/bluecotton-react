@@ -59,6 +59,7 @@ export const FilterButton = styled.button`
   transition: all 0.2s;
   background-color: ${props => props.active ? props.theme.PALLETE.primary.main : props.theme.PALLETE.grey.greyScale0};
   color: ${props => props.active ? props.theme.PALLETE.white : props.theme.PALLETE.basic};
+  font-family: 'Daeojamjil', sans-serif;
   
   &:hover {
     background-color: ${props => props.active ? props.theme.PALLETE.primary.main : props.theme.PALLETE.grey.greyScale1};
@@ -304,6 +305,7 @@ export const QuantityButton = styled.button`
   display: flex;
   align-items: center;
   justify-content: center;
+  font-family: 'Daeojamjil', sans-serif;
   
   &:hover:not(:disabled) {
     color: #333;
