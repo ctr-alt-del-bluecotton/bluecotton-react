@@ -50,9 +50,8 @@ export const CloseButton = styled.button`
   background: none;
   border: none;
   cursor: pointer;
-  font-size: 24px;
   line-height: 1;
-  ${mixin.smallText3Regular};
+  ${mixin.accent};
   ${mixin.fontGreyScale3};
 
   padding: 4px;
@@ -140,6 +139,8 @@ export const Textarea = styled.textarea`
   overflow-y: auto;
   line-height: 1.5;
   transition: 0.2s;
+  font-family: inherit;
+  
 
   ${mixin.smallText3Light};
   ${mixin.basic};
