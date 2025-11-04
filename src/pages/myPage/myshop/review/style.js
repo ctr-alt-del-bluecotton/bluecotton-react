@@ -13,21 +13,23 @@ export const Overlay = styled.div`
 
 
 export const Dialog = styled.div`
-  width: 420px;
+  width: 400px;
   height: 640px;
   background: ${({ theme }) => theme.PALLETE.white};
   border-radius: 20px;
-  padding: 18px;
+  padding: 18px 24px 28px;
   box-shadow: 0 8px 32px rgba(0,0,0,0.10);
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  position: relative;
 `;
 
 
 export const Inner = styled.div`
-  width: 380px;             
-  margin: 0 auto;
+  width: 100%;             
+  margin: 0;
+
   display: flex;
   flex-direction: column;
   gap: 8px;                 
@@ -40,7 +42,7 @@ export const Title = styled.h3`
   ${C.heading6}
   ${C.primary}
   text-align: center;
-  margin: 0 0 12px;
+  margin: 40px 0 18px;
 `;
 
 /* 상품 정보 박스 */
@@ -130,7 +132,7 @@ export const FileButton = styled.button`
 export const FileHint = styled.div`
   ${C.smallText1Light}
   color: ${({ theme }) => theme.PALLETE.grey.greyScale4};
-  margin: 4px 0 8px;
+  margin: 2px 0 22px;
 `;
 
 /*  텍스트 영역 : "리뷰를 작성해주세요" */
@@ -153,35 +155,27 @@ export const Counter = styled.div`
   margin-top: 4px;
 `;
 
-/* 체크박스 부분 */
-export const CheckRow = styled.div`
-  width: 380px;                        
-  display: flex;
-  align-items: center;                 
-  gap: 8px;
-  line-height: 1;                    
 
-  input {
-    width: 16px;
-    height: 16px;
-    margin: 0;                         
-  
-    flex: 0 0 16px;
-  }
-
-  label {
-    ${C.smallText1Regular}
-    color: ${({ theme }) => theme.PALLETE.basic};
-    display: inline-flex;
-    align-items: center;
-    user-select: none;
-  }
-`;
 
 /*버튼 영역 */
+
+export const CloseIconButton = styled.button`
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  right: 26px;
+  top: 20px;
+  border: 0;
+  outline: none;
+  background: none;
+  cursor: pointer;
+`;
+
+
+
 export const ButtonRow = styled.div`
-  width: 380px;                        
-  margin-top: auto;                   
+  width: 100%;                        
+  margin-top: 12px;               
   display: flex;
   justify-content: space-between;
   align-self: center;
@@ -190,24 +184,24 @@ export const ButtonRow = styled.div`
 `;
 
 export const PrimaryButton = styled.button`
-  width: 120px;  
+  width: 100px;  
   height: 40px;
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  ${C.smallText1Bold}
+  ${C.smallText2Regular}
   background: ${({ theme }) => theme.PALLETE.primary.main};
   color: ${({ theme }) => theme.PALLETE.white};
   &:hover { background: ${({ theme }) => theme.PALLETE.primary.dark}; }
 `;
 
 export const CloseButton = styled.button`
-  width: 120px;  
+  width: 100px;  
   height: 40px;
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  ${C.smallText1Bold}
+  ${C.smallText2Regular}
   background: ${({ theme }) => theme.PALLETE.primary.main};
   color: ${({ theme }) => theme.PALLETE.white};
   &:hover { background: ${({ theme }) => theme.PALLETE.primary.dark}; }

@@ -5,7 +5,7 @@ import ShopNumberSelect from "./shopNumberSelect/ShopNumberSelect";
 
 const ShopContainer = () => {
 
-  const [selected, setSelected] = useState("리뷰 많은 순");
+  const [selected, setSelected] = useState("신상품순");
   const options = ["신상품순", "리뷰 많은 순", "낮은 가격 순", "높은 가격 순", "판매순"];
 
   // 임의 데이터 18개
