@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import * as S from "./style";
 import Report from "../../../components/Report/Report";
@@ -59,14 +59,41 @@ const PostReadContent = () => {
     setPostLikeCount((prev) => (postLiked ? prev - 1 : prev + 1));
   };
 
-  // ✅ 공유 버튼 (카카오 API 자리)
+  useEffect(() => {
+    if (window.Kakao && !window.Kakao.isInitialized()) {
+      window.Kakao.init("8205d77659532bf75b85e3424590d6bc");
+      console.log("✅ Kakao SDK Initialized");
+    } else {
+      console.warn("⚠️ Kakao SDK가 로드되지 않았습니다.");
+    }
+  }, []);
   const handleShare = () => {
-    openModal({
-      title: "공유하기",
-      message: "공유 기능은 추후 업데이트될 예정입니다 😊",
-      confirmText: "확인",
-    });
-  };
+  const shareUrl = `${window.location.origin}/main/post/read/${id}`;
+
+
+
+  window.Kakao.Share.sendDefault({
+    objectType: "feed",
+    content: {
+      title: "10일차 러닝 도전!",
+      description: `지존준서님의 오늘의 솜 기록 🌱`,
+      imageUrl: "https://yourdomain.com/assets/som-share-thumbnail.png",
+      link: {
+        mobileWebUrl: shareUrl,
+        webUrl: shareUrl,
+      },
+    },
+    buttons: [
+      {
+        title: "지금 참여하기",
+        link: {
+          mobileWebUrl: shareUrl,
+          webUrl: shareUrl,
+        },
+      },
+    ],
+  });
+};
 
   // 댓글/대댓글 좋아요
   const handleLike = (cid, isReply = false, parentId = null) => {

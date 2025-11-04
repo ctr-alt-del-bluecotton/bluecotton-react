@@ -74,5 +74,19 @@ const GlobalStyle = createGlobalStyle`
     font-weight: 700;
     font-display: swap;
 }
+
+  .toastui-editor-contents,
+  .toastui-editor-contents * {
+    font-family: 'Daeojamjil', 'Pretendard', 'Noto Sans KR', sans-serif !important;
+    font-size: 15px !important;
+    color: #222 !important;
+    line-height: 1.6 !important;
+  }
+
+  .toastui-editor-defaultUI-toolbar,
+  .toastui-editor-defaultUI-toolbar * {
+    font-family: 'Daeojamjil', 'Pretendard', 'Noto Sans KR', sans-serif !important;
+  }
 `
+
 export default GlobalStyle;
