@@ -127,6 +127,7 @@ export const PageButton = styled.button`
   color: ${props => props.disabled ? props.theme.PALLETE.grey.greyScale2 : props.theme.PALLETE.basic};
   cursor: ${props => props.disabled ? 'not-allowed' : 'pointer'};
   font-size: 16px;
+  font-family: 'Daeojamjil', sans-serif;
   
   &:hover {
     color: ${props => props.disabled ? props.theme.PALLETE.grey.greyScale2 : props.theme.PALLETE.primary.main};
@@ -146,6 +147,7 @@ export const DeleteButton = styled.button`
   border-radius: 8px;
   font-size: 14px;
   font-weight: 500;
+  font-family: 'Daeojamjil', sans-serif;
   cursor: pointer;
   transition: background-color 0.2s;
   
