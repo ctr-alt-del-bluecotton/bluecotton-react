@@ -147,6 +147,23 @@ export const ActionButton = styled.button`
   }
 `;
 
+export const CancelButton = styled.button`
+  padding: 8px 16px;
+  background-color: #FF6B6B;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.2s;
+  margin-left: 8px;
+  
+  &:hover {
+    background-color: #FF5252;
+  }
+`;
+
 export const SummaryContainer = styled.div`
   display: flex;
   gap: 24px;

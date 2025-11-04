@@ -14,6 +14,7 @@ import {
   PageButton,
   PageNumber,
   ActionButton,
+  CancelButton,
   PopupModalOverlay,
   PopupModal,
   CloseButton,
@@ -130,15 +131,25 @@ const MySomPartyContainer = () => {
 
               {/* ✅ 진행예정은 버튼 숨김, 나머지는 상태에 따라 버튼 표시 */}
               {getButtonLabel() && (
-                activeFilter === 'progress' ? (
-                  <ActionButton onClick={()=>navigate('/main/my-page/my-som-check')}>
-                    {getButtonLabel()}
-                  </ActionButton>
-                ) : (
-                  <ActionButton onClick={()=>setShowPopup(true)}>
-                    {getButtonLabel()}
-                  </ActionButton>
-                )
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                  {activeFilter === 'progress' ? (
+                    <ActionButton onClick={()=>navigate('/main/my-page/my-som-check')}>
+                      {getButtonLabel()}
+                    </ActionButton>
+                  ) : (
+                    <ActionButton onClick={()=>setShowPopup(true)}>
+                      {getButtonLabel()}
+                    </ActionButton>
+                  )}
+                  {activeFilter === 'progress' && (
+                    <CancelButton onClick={() => {
+                      // 중단하기 로직 구현
+                      console.log('챌린지 중단');
+                    }}>
+                      중단하기
+                    </CancelButton>
+                  )}
+                </div>
               )}
             </div>
           </ListItem>

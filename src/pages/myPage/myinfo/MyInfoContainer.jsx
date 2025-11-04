@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   FormContainer,
   Title,
@@ -13,14 +13,19 @@ import {
   RadioGroup,
   RadioLabel,
   ImagePreview,
-  FileInput,
+  HiddenFileInput,
   FileInfo,
   ActionButtons,
   SubmitButton,
   DeleteButton
 } from './style';
+import { useModal } from '../../../components/modal';
 
 const MyInfoContainer = () => {
+  const { openModal } = useModal();
+  const fileInputRef = useRef(null);
+  const [previewImage, setPreviewImage] = useState(null);
+  const [selectedFile, setSelectedFile] = useState(null);
   const [formData, setFormData] = useState({
     email: 'garlemy@naver.com',
     nickname: '브로콜리',
@@ -42,9 +47,55 @@ const MyInfoContainer = () => {
     }));
   };
 
+  const handleImageClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // 파일 크기 체크 (50MB)
+      if (file.size > 50 * 1024 * 1024) {
+        openModal({
+          title: "파일 크기 초과",
+          message: "용량이 50.0M 이하 파일만 업로드 가능합니다.",
+          confirmText: "확인",
+        });
+        return;
+      }
+
+      setSelectedFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreviewImage(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log('Form submitted:', formData);
+    openModal({
+      title: "회원 정보 수정",
+      message: "회원정보가 수정되었습니다.",
+      confirmText: "확인",
+      onConfirm: () => {
+        console.log('Form submitted:', formData);
+        // 회원 정보 수정 로직 구현
+      },
+    });
+  };
+
+  const handleDeleteAccount = () => {
+    openModal({
+      title: "회원 탈퇴",
+      message: "정말 회원을 탈퇴하시겠습니까? 탈퇴 후 모든 정보가 삭제되며 복구할 수 없습니다.",
+      confirmText: "탈퇴",
+      cancelText: "취소",
+      // onConfirm: () => {
+      //   // 회원 탈퇴 로직 구현
+      // },
+    });
   };
 
   return (
@@ -84,7 +135,6 @@ const MyInfoContainer = () => {
               onChange={handleChange}
               style={{ flex: 1 }}
             />
-            <PrimaryButton type="button">전화번호 찾기</PrimaryButton>
           </ButtonGroup>
         </FormSection>
 
@@ -166,20 +216,35 @@ const MyInfoContainer = () => {
 
         <FormSection>
           <Label>프로필 이미지 설정</Label>
-          <ImagePreview>첨부</ImagePreview>
-          <FileInput type="file" accept="image/*" />
-          <FileInfo>선택된 파일 없음</FileInfo>
+          <ImagePreview 
+            onClick={handleImageClick}
+            $hasImage={!!previewImage}
+          >
+            {previewImage ? (
+              <img src={previewImage} alt="프로필 미리보기" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '8px' }} />
+            ) : (
+              '첨부'
+            )}
+          </ImagePreview>
+          <HiddenFileInput
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleFileChange}
+          />
+          <FileInfo>{selectedFile ? `선택된 파일: ${selectedFile.name}` : '선택된 파일 없음'}</FileInfo>
           <FileInfo>용량이 50.0M 이하 파일만 업로드 가능</FileInfo>
-          <div style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
-            <button type="button" style={{ color: '#0051FF', border: 'none', background: 'none', cursor: 'pointer' }}>+ 파일 추가</button>
-            <button type="button" style={{ color: '#FF6B6B', border: 'none', background: 'none', cursor: 'pointer' }}>- 파일 삭제</button>
-          </div>
-          <PrimaryButton type="button">저장</PrimaryButton>
+          {selectedFile && (
+            <PrimaryButton type="button" onClick={() => {
+              // 파일 저장 로직 구현
+              console.log('파일 저장:', selectedFile);
+            }}>저장</PrimaryButton>
+          )}
         </FormSection>
 
         <ActionButtons>
           <SubmitButton type="submit">수정완료</SubmitButton>
-          <DeleteButton type="button">회원 탈퇴</DeleteButton>
+          <DeleteButton type="button" onClick={handleDeleteAccount}>회원탈퇴</DeleteButton>
         </ActionButtons>
       </form>
     </FormContainer>
