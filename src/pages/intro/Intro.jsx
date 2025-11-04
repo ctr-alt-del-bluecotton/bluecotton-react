@@ -9,10 +9,12 @@ import IntroGrade from '../../components/intro/IntroGrade';
 import IntroPost from '../../components/intro/IntroPost';
 import IntroSom from '../../components/intro/IntroSom';
 import Footer from '../../components/footer/Footer';
+import FloatingAction from '../layout/floatingAciton/FloatingAction'
 
 const Intro = () => {
   return (
     <div>
+      <FloatingAction />
       <Header />
       {/* 소개페이지! */}
       <IntroBanner />
