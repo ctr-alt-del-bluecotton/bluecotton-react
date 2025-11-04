@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   FormContainer,
   Title,
@@ -24,79 +24,147 @@ import { useModal } from '../../../components/modal';
 const MyInfoContainer = () => {
   const { openModal } = useModal();
   const fileInputRef = useRef(null);
+
   const [previewImage, setPreviewImage] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
+
+  // ✅ 한 곳에서만 관리
   const [formData, setFormData] = useState({
-    email: 'garlemy@naver.com',
-    nickname: '브로콜리',
-    phone: '010-8795-4379',
-    birthYear: '2000',
-    birthMonth: '10',
-    birthDay: '21',
-    gender: 'male',
-    postcode: '08457',
-    address1: '서울 관악구 인헌12나길 26',
-    address2: '301호'
+    email: '',
+    nickname: '',
+    phone: '',
+    birthYear: '',
+    birthMonth: '',
+    birthDay: '',
+    gender: '',
+    postcode: '',
+    address1: '',
+    address2: ''
   });
 
+  useEffect(() => {
+    const fetchMemberInfo = async () => {
+      try {
+        const res = await fetch(`${process.env.REACT_APP_BACKEND_URL}/mypage/read-member?id=41`, {
+          headers: { "Content-Type": "application/json" },
+          method: "GET"
+        });
+  
+        if (!res.ok) {
+          throw new Error('회원 정보를 불러오는데 실패했습니다.');
+        }
+  
+        const result = await res.json();
+        console.log("서버 응답:", result);
+  
+        const memberVO = result.data; // ✅ data 안의 실제 회원 정보 꺼내기
+  
+        if (!memberVO) {
+          console.warn("회원 정보가 존재하지 않습니다.");
+          return;
+        }
+  
+        // ✅ 생년월일 변환
+        let birthYear = '';
+        let birthMonth = '';
+        let birthDay = '';
+  
+        if (memberVO.memberBirth) {
+          const birthDate = new Date(memberVO.memberBirth);
+          if (!isNaN(birthDate.getTime())) {
+            birthYear = birthDate.getFullYear().toString();
+            birthMonth = (birthDate.getMonth() + 1).toString().padStart(2, '0');
+            birthDay = birthDate.getDate().toString().padStart(2, '0');
+          }
+        }
+  
+        // ✅ 성별 변환
+        const gender =
+          memberVO.memberGender === 'M' ? 'male' :
+          memberVO.memberGender === 'F' ? 'female' :
+          '';
+  
+        // ✅ formData에 서버 데이터 세팅
+        setFormData({
+          email: memberVO.memberEmail || '',
+          nickname: memberVO.memberNickName || '',
+          phone: memberVO.memberPhone || '',
+          birthYear,
+          birthMonth,
+          birthDay,
+          gender,
+          postcode: memberVO.memberPostcode || '',
+          address1: memberVO.memberAddress || '',
+          address2: memberVO.memberAddressDetail || ''
+        });
+  
+      } catch (error) {
+        console.error('회원 정보 조회 오류:', error);
+        openModal({
+          title: "오류",
+          message: "회원 정보를 불러오는데 실패했습니다.",
+          confirmText: "확인"
+        });
+      }
+    };
+  
+    fetchMemberInfo();
+  }, [openModal]);
+  
+
+  // ✅ 인풋 공통 변경 핸들러
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleImageClick = () => {
-    fileInputRef.current?.click();
-  };
-
+  // 이미지 업로드
+  const handleImageClick = () => fileInputRef.current?.click();
   const handleFileChange = (e) => {
     const file = e.target.files?.[0];
-    if (file) {
-      // 파일 크기 체크 (50MB)
-      if (file.size > 50 * 1024 * 1024) {
-        openModal({
-          title: "파일 크기 초과",
-          message: "용량이 50.0M 이하 파일만 업로드 가능합니다.",
-          confirmText: "확인",
-        });
-        return;
-      }
+    if (!file) return;
 
-      setSelectedFile(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPreviewImage(reader.result);
-      };
-      reader.readAsDataURL(file);
+    if (file.size > 50 * 1024 * 1024) {
+      openModal({
+        title: '파일 크기 초과',
+        message: '용량이 50.0M 이하 파일만 업로드 가능합니다.',
+        confirmText: '확인'
+      });
+      return;
     }
+
+    setSelectedFile(file);
+    const reader = new FileReader();
+    reader.onloadend = () => setPreviewImage(reader.result);
+    reader.readAsDataURL(file);
   };
 
+  // 제출
   const handleSubmit = (e) => {
     e.preventDefault();
     openModal({
-      title: "회원 정보 수정",
-      message: "회원정보가 수정되었습니다.",
-      confirmText: "확인",
+      title: '회원 정보 수정',
+      message: '회원정보가 수정되었습니다.',
+      confirmText: '확인',
       onConfirm: () => {
         console.log('Form submitted:', formData);
-        // 회원 정보 수정 로직 구현
-      },
+        // TODO: PUT/PATCH로 formData 전송 로직
+      }
     });
   };
 
   const handleDeleteAccount = () => {
     openModal({
-      title: "회원 탈퇴",
-      message: "정말 회원을 탈퇴하시겠습니까? 탈퇴 후 모든 정보가 삭제되며 복구할 수 없습니다.",
-      confirmText: "탈퇴",
-      cancelText: "취소",
-      // onConfirm: () => {
-      //   // 회원 탈퇴 로직 구현
-      // },
+      title: '회원 탈퇴',
+      message:
+        '정말 회원을 탈퇴하시겠습니까? 탈퇴 후 모든 정보가 삭제되며 복구할 수 없습니다.',
+      confirmText: '탈퇴',
+      cancelText: '취소'
+      // onConfirm: () => { ... }
     });
   };
+
+  const currentYear = new Date().getFullYear();
 
   return (
     <FormContainer>
@@ -107,7 +175,7 @@ const MyInfoContainer = () => {
         <FormSection>
           <Label>ID (이메일)</Label>
           <Input
-            type="email"
+            type="email"  
             name="email"
             value={formData.email}
             onChange={handleChange}
@@ -142,18 +210,21 @@ const MyInfoContainer = () => {
           <Label>생년월일</Label>
           <DateRow>
             <Select name="birthYear" value={formData.birthYear} onChange={handleChange}>
-              {Array.from({ length: 100 }, (_, i) => 2024 - i).map(year => (
-                <option key={year} value={year}>{year}년</option>
+              <option value="">년도</option>
+              {Array.from({ length: 100 }, (_, i) => currentYear - i).map((year) => (
+                <option key={year} value={String(year)}>{year}년</option>
               ))}
             </Select>
             <Select name="birthMonth" value={formData.birthMonth} onChange={handleChange}>
-              {Array.from({ length: 12 }, (_, i) => i + 1).map(month => (
-                <option key={month} value={month.toString().padStart(2, '0')}>{month}월</option>
+              <option value="">월</option>
+              {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
+                <option key={m} value={String(m).padStart(2, '0')}>{m}월</option>
               ))}
             </Select>
             <Select name="birthDay" value={formData.birthDay} onChange={handleChange}>
-              {Array.from({ length: 31 }, (_, i) => i + 1).map(day => (
-                <option key={day} value={day.toString().padStart(2, '0')}>{day}일</option>
+              <option value="">일</option>
+              {Array.from({ length: 31 }, (_, i) => i + 1).map((d) => (
+                <option key={d} value={String(d).padStart(2, '0')}>{d}일</option>
               ))}
             </Select>
           </DateRow>
@@ -216,12 +287,13 @@ const MyInfoContainer = () => {
 
         <FormSection>
           <Label>프로필 이미지 설정</Label>
-          <ImagePreview 
-            onClick={handleImageClick}
-            $hasImage={!!previewImage}
-          >
+          <ImagePreview onClick={handleImageClick} $hasImage={!!previewImage}>
             {previewImage ? (
-              <img src={previewImage} alt="프로필 미리보기" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '8px' }} />
+              <img
+                src={previewImage}
+                alt="프로필 미리보기"
+                style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '8px' }}
+              />
             ) : (
               '첨부'
             )}
@@ -235,16 +307,23 @@ const MyInfoContainer = () => {
           <FileInfo>{selectedFile ? `선택된 파일: ${selectedFile.name}` : '선택된 파일 없음'}</FileInfo>
           <FileInfo>용량이 50.0M 이하 파일만 업로드 가능</FileInfo>
           {selectedFile && (
-            <PrimaryButton type="button" onClick={() => {
-              // 파일 저장 로직 구현
-              console.log('파일 저장:', selectedFile);
-            }}>저장</PrimaryButton>
+            <PrimaryButton
+              type="button"
+              onClick={() => {
+                console.log('파일 저장:', selectedFile);
+                // TODO: 파일 업로드 로직
+              }}
+            >
+              저장
+            </PrimaryButton>
           )}
         </FormSection>
 
         <ActionButtons>
           <SubmitButton type="submit">수정완료</SubmitButton>
-          <DeleteButton type="button" onClick={handleDeleteAccount}>회원탈퇴</DeleteButton>
+          <DeleteButton type="button" onClick={handleDeleteAccount}>
+            회원탈퇴
+          </DeleteButton>
         </ActionButtons>
       </form>
     </FormContainer>
