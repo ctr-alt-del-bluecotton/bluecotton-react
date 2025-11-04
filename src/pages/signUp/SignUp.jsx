@@ -20,15 +20,26 @@ const SignUp = () => {
   const handleSubmitForm = handleSubmit(async (data) => {
     const {memberPasswordConfirm, ...member} = data;
 
-    const res = await fetch(`${process.env.REACT_APP_BACKEND_URL}/member/sign-up`, {
+    const res = await fetch(`${process.env.REACT_APP_BACKEND_URL}/member/register`, {
       headers: {
         "Content-Type" : "application/json"
       },
       method: "POST",
       body: JSON.stringify(member)
     })
-
-    navigate("/login")
+    if (!res.ok) {
+      const errorData = await res.json();
+      openModal({
+      title: "이미 존재하는 이메일입니다",
+      confirmText: "확인",
+      });
+      return;
+    }
+    openModal({
+      title: "회원가입이 완료되었습니다.",
+      confirmText: "완료",
+      onConfirm: () => navigate("/login"),
+    });
   })
 
   const openPostcode = () => {
@@ -65,8 +76,8 @@ const SignUp = () => {
           {errors.memberName?.type === "required" && (
             <S.InputErrorMessage>이름을 입력하세요.</S.InputErrorMessage>
           )}          
-          <S.Input type="text" placeholder="닉네임을 작성해주세요(최대 8 글자)" name="memberNickName" maxLength={8}
-          {...register("memberNickName", {
+          <S.Input type="text" placeholder="닉네임을 작성해주세요(최대 8 글자)" name="memberNickname" maxLength={8}
+          {...register("memberNickname", {
             required : true,
             maxLength: {
               value: 8,
@@ -132,45 +143,43 @@ const SignUp = () => {
           {errors && errors?.memberAddress?.type === "required" && (
             <S.InputErrorMessage>주소를 입력해주세요.</S.InputErrorMessage>
           )}
-          {/* gender */}
           <S.GenderSelectBox>
-            <S.GenderOption selected={gender === "남"} onClick={() => setGender("남")}
-            {...register("memberGender", {
-              required: true
-            })}
+            <S.GenderOption selected={gender === "남"}
+              onClick={() => {
+                setGender("남");
+                setValue("memberGender", "남", { shouldValidate: true }); 
+              }}
             >
               남
             </S.GenderOption>
-            <S.GenderOption selected={gender === "여"} onClick={() => setGender("여")}
-            {...register("memberGender", {
-              required: true
-            })}            
+
+            <S.GenderOption selected={gender === "여"}
+              onClick={() => {
+                setGender("여");
+                setValue("memberGender", "여", { shouldValidate: true });
+              }}
             >
               여
             </S.GenderOption>
           </S.GenderSelectBox>
-          {errors && errors?.memberGender?.type === "required" && (
-            <S.InputErrorMessage>성별을 선택해주세요</S.InputErrorMessage>
-          )}               
+
+          <input type="hidden" {...register("memberGender", { required: true })} />
+          {errors.memberGender && <S.InputErrorMessage>성별을 선택해주세요</S.InputErrorMessage>} 
 
           {/* birth */}
           <S.DateInputBox>
-            <S.DateInput 
-            {...register("memberGender", {
-              required: true
-            })}              
+            <S.DateInput
+              type="date"
+              {...register("memberBirth", { required: true })} // ✅ 올바른 name
             />
-            <S.SmallButton>확인</S.SmallButton>
+            <S.SmallButton type="button">확인</S.SmallButton>
           </S.DateInputBox>
-          {errors && errors?.memberBirth?.type === "required" && (
-            <S.InputErrorMessage>생년월일을 선택해주세요</S.InputErrorMessage>
-          )}          
+          {errors.memberBirth && <S.InputErrorMessage>생년월일을 선택해주세요</S.InputErrorMessage>}
 
           {/* sign-up button */}
           <S.SignUpButton as="button" type="submit" disabled={isSubmitting}>회원가입 완료</S.SignUpButton>
 
         </S.SignUpForm>
-        
 
         {/* divider */}
         <S.Divider />
