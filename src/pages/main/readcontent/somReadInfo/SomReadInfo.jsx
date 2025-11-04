@@ -3,7 +3,6 @@ import S from './style'
 
 const SomReadInfo = ({somInfo, somIsLike, setSomIsLike}) => {
   const {
-    somId,
     somTitle,
     somCategory,
     somAddress,
@@ -12,10 +11,19 @@ const SomReadInfo = ({somInfo, somIsLike, setSomIsLike}) => {
     somLikeCount
   } = somInfo
 
+
   // 증가 쿼리 fetch 예정
   const somLikeButtonOnclick = () => {
     setSomIsLike(!somIsLike);
   } 
+
+  const isFull = somCount === 10;
+  const isFullOnClick = isFull ? () => { alert("참여 인원이 초과되었습니다.") } : () => { alert("참여쿼리 들어갈 곳") };
+
+  const isFullSomButton = isFull ? 
+  <S.fullSomButton onClick={isFullOnClick}>참여 ({somCount}/10)</S.fullSomButton> :
+  <S.somButton onClick={isFullOnClick}>참여 ({somCount}/10)</S.somButton> 
+  ;
 
   const somLikeButton = somIsLike ?
     <S.somLikeButton onClick={somLikeButtonOnclick}>
@@ -58,7 +66,7 @@ const SomReadInfo = ({somInfo, somIsLike, setSomIsLike}) => {
       </S.somAddressWrap>
       <S.somButtonWrap>
         <S.somButton>귓솜말하기</S.somButton>
-        <S.somButton>참여하기 {somCount}/10</S.somButton>
+        {isFullSomButton}
         {somLikeButton}
       </S.somButtonWrap>
     </S.somInfoWrap>
