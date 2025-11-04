@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { ThemeProvider } from "styled-components";
 import GlobalStyle from "./styles/global";
 import theme from "./styles/theme";
@@ -7,12 +8,13 @@ import { ModalProvider } from "./components/modal/useModal";
 import ConfirmModal from "./components/modal/ConfirmModal";
 
 function App() {
+
   return (
     <ThemeProvider theme={theme}>
       <GlobalStyle />
       <ModalProvider>
         <RouterProvider router={router} />
-        <ConfirmModal /> 
+        <ConfirmModal />
       </ModalProvider>
     </ThemeProvider>
   );

@@ -14,7 +14,7 @@ export const ModalBox = styled.div`
   background: #fff;
   border-radius: 12px;
   padding: 28px 30px;
-  width: 360px;
+  width: 300px;
   text-align: center;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
   z-index: 10001;
@@ -59,7 +59,7 @@ export const ModalBox = styled.div`
       color: #fff;
 
       &:hover {
-        background: ${({ theme }) => theme.PALLETE.primary.light1};
+        background: ${({ theme }) => theme.PALLETE.primary.dark};
       }
     }
   }

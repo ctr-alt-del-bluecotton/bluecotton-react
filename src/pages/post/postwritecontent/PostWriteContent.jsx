@@ -1,63 +1,78 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import * as S from "./style";
-import { useModal } from "../../../components/modal"; // ✅ 전역 모달
+import { useModal } from "../../../components/modal";
+import { Editor } from "@toast-ui/react-editor";
+import "@toast-ui/editor/dist/toastui-editor.css";
+
+const MAX_LENGTH = 1000; // ✅ 글자수 제한
 
 const PostWriteContent = () => {
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState("");
-  const [content, setContent] = useState("");
-  const [files, setFiles] = useState([{ file: null, preview: null }]);
+  const [charCount, setCharCount] = useState(0); // ✅ 글자수 카운트
   const { openModal } = useModal();
   const navigate = useNavigate();
+  const editorRef = useRef();
 
-  // ✅ 페이지 진입 시 임시저장 불러오기 (있을 때만)
+  // ✅ 페이지 진입 시 임시저장 불러오기
   useEffect(() => {
     const saved = localStorage.getItem("tempPost");
     if (saved) {
       const temp = JSON.parse(saved);
       setTitle(temp.title || "");
       setCategory(temp.category || "");
-      setContent(temp.content || "");
-      setFiles(temp.files || [{ file: null, preview: null }]);
+      if (editorRef.current) {
+        editorRef.current.getInstance().setHTML(temp.content || "");
+      }
     }
   }, []);
 
-  // 파일 선택
-  const handleFileChange = (index, e) => {
-    const selectedFile = e.target.files[0];
-    const newFiles = [...files];
+  // ✅ 글자수 카운트 및 제한
+  useEffect(() => {
+    const editorInstance = editorRef.current?.getInstance();
+    if (!editorInstance) return;
 
-    if (selectedFile) {
-      newFiles[index] = {
-        file: selectedFile,
-        preview: selectedFile.type.startsWith("image/")
-          ? URL.createObjectURL(selectedFile)
-          : null,
-      };
-    } else {
-      newFiles[index] = { file: null, preview: null };
+    const handleContentChange = () => {
+      const contentText = editorInstance.getMarkdown();
+      const length = contentText.trim().length;
+
+      if (length > MAX_LENGTH) {
+        const trimmed = contentText.substring(0, MAX_LENGTH);
+        editorInstance.setMarkdown(trimmed);
+        setCharCount(MAX_LENGTH);
+      } else {
+        setCharCount(length);
+      }
+    };
+
+    editorInstance.on("change", handleContentChange);
+    return () => editorInstance.off("change", handleContentChange);
+  }, []);
+
+  // ✅ 이미지 업로드
+  const handleImageUpload = async (blob, callback) => {
+    try {
+      const formData = new FormData();
+      formData.append("image", blob);
+
+      const response = await fetch("http://localhost:8080/api/uploads", {
+        method: "POST",
+        body: formData,
+      });
+      const result = await response.json();
+      const imageUrl = result.imageUrl;
+      callback(imageUrl, "업로드된 이미지");
+    } catch (error) {
+      const tempUrl = URL.createObjectURL(blob);
+      callback(tempUrl, "임시 이미지");
     }
-    setFiles(newFiles);
   };
 
-  // 파일 추가
-  const handleAddFile = () => {
-    setFiles([...files, { file: null, preview: null }]);
-  };
-
-  // 파일 삭제
-  const handleRemoveFile = () => {
-    if (files.length === 1) {
-      setFiles([{ file: null, preview: null }]);
-    } else {
-      setFiles(files.slice(0, -1));
-    }
-  };
-
-  // ✅ 임시 저장 (모달 + 목록 이동)
+  // ✅ 임시 저장
   const handleTempSave = () => {
-    const tempData = { title, category, content, files };
+    const content = editorRef.current?.getInstance().getHTML() || "";
+    const tempData = { title, category, content };
     localStorage.setItem("tempPost", JSON.stringify(tempData));
 
     openModal({
@@ -68,20 +83,19 @@ const PostWriteContent = () => {
     });
   };
 
-  // ✅ 작성 완료 (유효성 검사 + 목록 이동)
+  // ✅ 작성 완료
   const handleSubmit = (e) => {
     e.preventDefault();
+    const content = editorRef.current?.getInstance().getHTML() || "";
 
     if (!title.trim()) {
       openModal({ title: "제목을 입력해주세요.", confirmText: "확인" });
       return;
     }
-
     if (!category.trim()) {
       openModal({ title: "카테고리를 선택해주세요.", confirmText: "확인" });
       return;
     }
-
     if (!content.trim()) {
       openModal({ title: "내용을 입력해주세요.", confirmText: "확인" });
       return;
@@ -98,7 +112,7 @@ const PostWriteContent = () => {
     });
   };
 
-  // ✅ 취소 (모달 + 목록 이동)
+  // ✅ 취소
   const handleCancel = () => {
     openModal({
       title: "작성 중인 내용이 사라집니다.",
@@ -109,17 +123,11 @@ const PostWriteContent = () => {
     });
   };
 
-  // input 클릭 트리거
-  const triggerFileInput = (index) => {
-    document.getElementById(`file-${index}`).click();
-  };
-
   return (
     <S.Container>
       <S.PageTitle>오늘의 솜 작성</S.PageTitle>
 
       <S.Form onSubmit={handleSubmit}>
-        {/* 제목 */}
         <S.FormRow>
           <label>제목</label>
           <input
@@ -130,13 +138,9 @@ const PostWriteContent = () => {
           />
         </S.FormRow>
 
-        {/* 카테고리 */}
         <S.FormRow>
           <label>카테고리</label>
-          <select
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-          >
+          <select value={category} onChange={(e) => setCategory(e.target.value)}>
             <option value="">하고 있는 솜의 카테고리를 선택해주세요</option>
             <option value="study">학습</option>
             <option value="health">건강</option>
@@ -147,62 +151,24 @@ const PostWriteContent = () => {
           </select>
         </S.FormRow>
 
-        {/* 내용 */}
+        {/* ✅ Toast UI Editor + 글자수 */}
         <S.FormGroup>
-          <textarea
-            placeholder="솜을 하면서 어떤 점을 느끼셨나요? 도전하는 동안 기억에 남는 순간을 적어주세요"
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            maxLength={1000}
+          <Editor
+            ref={editorRef}
+            previewStyle="vertical"
+            height="500px"
+            initialEditType="wysiwyg"
+            placeholder="솜을 하면서 느낀 점이나 기록하고 싶은 순간을 자유롭게 적어주세요"
+            useCommandShortcut={true}
+            hooks={{
+              addImageBlobHook: handleImageUpload,
+            }}
           />
-          <div className="char-count">{content.length}/1000</div>
+          <div className="char-count">
+            {charCount}/{MAX_LENGTH}
+          </div>
         </S.FormGroup>
 
-        {/* 첨부파일 */}
-        <S.FileBox>
-          {files.map((f, index) => (
-            <div className="file-row" key={index}>
-              <label>{index === 0 ? "첨부" : ""}</label>
-              <div className="file-select">
-                <input
-                  type="file"
-                  id={`file-${index}`}
-                  style={{ display: "none" }}
-                  onChange={(e) => handleFileChange(index, e)}
-                />
-                <button type="button" onClick={() => triggerFileInput(index)}>
-                  파일 선택
-                </button>
-                <span className="file-name">
-                  {f.file ? f.file.name : "선택된 파일 없음"}
-                </span>
-
-                {f.preview && (
-                  <div className="thumb-wrap">
-                    <img src={f.preview} alt="썸네일 미리보기" />
-                  </div>
-                )}
-              </div>
-            </div>
-          ))}
-
-          <p className="file-info">용량이 50.0M 이하 파일만 업로드 가능</p>
-
-          <div className="file-actions">
-            <button type="button" className="add-btn" onClick={handleAddFile}>
-              파일 추가
-            </button>
-            <button
-              type="button"
-              className="remove-btn"
-              onClick={handleRemoveFile}
-            >
-              파일 삭제
-            </button>
-          </div>
-        </S.FileBox>
-
-        {/* 버튼 */}
         <S.ButtonBox>
           <button type="button" className="cancel" onClick={handleCancel}>
             취소
