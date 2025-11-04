@@ -252,6 +252,23 @@ export const SelectAll = styled.div`
   font-size: 14px;
 `;
 
+export const ResetButton = styled.button`
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: none;
+  font-size: 14px;
+  font-weight: ${props => props.active ? '700' : '500'};
+  cursor: pointer;
+  transition: all 0.2s;
+  background-color: ${props => props.active ? props.theme.PALLETE.primary.main : props.theme.PALLETE.grey.greyScale0};
+  color: ${props => props.active ? props.theme.PALLETE.white : props.theme.PALLETE.basic};
+  font-family: 'Daeojamjil', sans-serif;
+  
+  &:hover {
+    background-color: ${props => props.active ? props.theme.PALLETE.primary.main : props.theme.PALLETE.grey.greyScale1};
+  }
+`;
+
 export const CartItem = styled.div`
   display: flex;
   align-items: center;
@@ -369,7 +386,6 @@ export const OrderButton = styled.button`
   border: none;
   border-radius: 8px;
   font-size: 18px;
-  font-weight: 700;
   cursor: pointer;
   
   &:hover {
@@ -392,7 +408,7 @@ export const ActionButton = styled.button`
   background-color: ${props => props.primary ? '#0051FF' : '#fff'};
   color: ${props => props.primary ? '#fff' : '#111111'};
   font-size: 14px;
-  font-weight: 500;
+  font-family: 'Daeojamjil', sans-serif;
   cursor: pointer;
   margin-left: 8px;
   transition: all 0.2s;
@@ -435,8 +451,8 @@ export const OrderActionButton = styled.button`
   background-color: #0051FF;
   color: #fff;
   font-size: 14px;
-  font-weight: 500;
   cursor: pointer;
+  font-family: 'Daeojamjil', sans-serif;
   
   &:hover {
     background-color: #003BBF;
@@ -476,19 +492,18 @@ export const ReviewButton = styled.button`
   padding: 10px 16px;
   border-radius: 8px;
   font-size: 14px;
-  font-weight: 500;
   cursor: pointer;
   border: 1px solid ${props => props.primary ? '#0051FF' : '#E0E0E0'};
   background-color: ${props => props.primary ? '#0051FF' : '#fff'};
   color: ${props => props.primary ? '#fff' : '#111111'};
   transition: all 0.2s;
+  font-family: 'Daeojamjil', sans-serif;
   
   &:hover {
     background-color: ${props => props.primary ? '#003DB8' : '#F5F5F5'};
     border-color: ${props => props.primary ? '#003DB8' : '#E0E0E0'};
   }
 `;
-
 
 
 

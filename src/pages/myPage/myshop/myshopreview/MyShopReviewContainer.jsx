@@ -42,7 +42,7 @@ const MyShopReviewContainer = () => {
     openModal({
       title: "리뷰를 삭제하시겠습니까?",
       message: "삭제 후에는 되돌릴 수 없습니다.",
-      confirmText: "삭제하기",
+      confirmText: "삭제",
       cancelText: "취소",
       onConfirm: () => setReviews((prev) => prev.filter((r) => r.id !== id)),
     });

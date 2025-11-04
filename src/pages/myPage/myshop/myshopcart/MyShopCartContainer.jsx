@@ -20,6 +20,7 @@ import {
   SummaryRow,
   OrderButton,
   Checkbox as SCheckbox,
+  ResetButton,
 } from "../style";
 import { Link } from "react-router-dom";
 import { useModal } from "../../../../components/modal/useModal"; 
@@ -96,7 +97,7 @@ const MyShopCartContainer = () => {
     openModal({
       title: "상품을 삭제하시겠습니까?",
       message: `${item?.name ?? "선택한 상품"}을(를) 장바구니에서 삭제합니다.`,
-      confirmText: "삭제하기",
+      confirmText: "삭제",
       cancelText: "취소",
       onConfirm: () => setCurrentItems((prev) => prev.filter((it) => it.id !== id)),
     });
@@ -122,18 +123,10 @@ const MyShopCartContainer = () => {
           <SCheckbox checked={allChecked} onChange={toggleAll} aria-label="전체선택" />
           전체선택
         </SelectAll>
-        <button
-          style={{
-            padding: "8px 16px",
-            backgroundColor: "#E0E0E0",
-            border: "none",
-            borderRadius: 4,
-            cursor: "pointer",
-            
-          }}
-          onClick={() => setCheckedIds(new Set())}>
+
+      <ResetButton onClick={() => setCheckedIds(new Set())} >
           선택해제
-        </button>
+      </ResetButton>
       </CartHeader>
 
       {/* 아이템 리스트 */}
