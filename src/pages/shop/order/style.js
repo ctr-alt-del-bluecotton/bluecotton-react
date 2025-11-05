@@ -76,6 +76,10 @@ S.UserFix = styled.button`
   display: inline-flex;
   align-items: center;
   justify-content: center;
+
+  &:hover {
+    color: #0015FF;
+  }
 `;
 
 S.UserFixText = styled.div`
