@@ -413,10 +413,7 @@ export const ActionButton = styled.button`
   background-color: ${props => props.primary ? '#0051FF' : '#fff'};
   color: ${props => props.primary ? '#fff' : '#111111'};
   font-size: 14px;
-<<<<<<< HEAD
-=======
   font-weight: 500;
->>>>>>> 67357e45fb765386b1dd3467a61b0ca5ac9a3896
   font-family: 'Daeojamjil', sans-serif;
   cursor: pointer;
   margin-left: 8px;
@@ -460,11 +457,8 @@ export const OrderActionButton = styled.button`
   background-color: #0051FF;
   color: #fff;
   font-size: 14px;
-<<<<<<< HEAD
-=======
   font-weight: 500;
   font-family: 'Daeojamjil', sans-serif;
->>>>>>> 67357e45fb765386b1dd3467a61b0ca5ac9a3896
   cursor: pointer;
   font-family: 'Daeojamjil', sans-serif;
   
@@ -506,11 +500,8 @@ export const ReviewButton = styled.button`
   padding: 10px 16px;
   border-radius: 8px;
   font-size: 14px;
-<<<<<<< HEAD
-=======
   font-weight: 500;
   font-family: 'Daeojamjil', sans-serif;
->>>>>>> 67357e45fb765386b1dd3467a61b0ca5ac9a3896
   cursor: pointer;
   border: 1px solid ${props => props.primary ? '#0051FF' : '#E0E0E0'};
   background-color: ${props => props.primary ? '#0051FF' : '#fff'};
