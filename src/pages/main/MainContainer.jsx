@@ -23,12 +23,12 @@ const MainContainer = () => {
     life: "생활",
     rookie: "루키"
   }
-
+  
   useEffect(() => {
     setPageNumber(1);
-    setSomisLikeList(somIsLikeList);
   }, [category]);
-
+  
+  
   useEffect(() => {
     const loadSomList = async () => {
       const data = await fetchSomList(categoryMap[category], sortBy, pageNumber);
@@ -36,7 +36,11 @@ const MainContainer = () => {
     };
     loadSomList();
   }, [category, sortBy, pageNumber]);
-
+  
+  useEffect(() => {
+    setSomisLikeList(somIsLikeList);
+  }, [somList])
+  
   return (
     <S.Container>
       <S.Wrap>
