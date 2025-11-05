@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import S from "./style";
 import ShopList from "./ShopList";
 import ShopNumberSelect from "./shopNumberSelect/ShopNumberSelect";
@@ -7,31 +7,53 @@ const ShopContainer = () => {
 
   const [selected, setSelected] = useState("신상품순");
   const options = ["신상품순", "리뷰 많은 순", "낮은 가격 순", "높은 가격 순", "판매순"];
+  const [products, setProducts] = useState([]);
 
-  // 임의 데이터 18개
-  const ALL_ITEMS = useMemo(
-    () =>
-      Array.from({ length: 18 }, (_, i) => ({
-        id: i + 1,
-        name: `상품 ${i + 1}`,
-        imageUrl: `/assets/images/sample_${(i % 8) + 1}.png`,
-        priceText: "10,000원",
-        score: "4.8",
-        reviewCount: 22,
-        likeCount: 255,
-        isNew: true,
-        isBest: i % 2 === 0,
-      })),
-    []
-  );
+  
+useEffect(() => {
+  const fetchProduct = async () => {
+    try {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/shop/`, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+        method: "GET",
+      });
+      const json = await response.json();
+      setProducts(json.data || []);
+
+    } catch (error) {
+      console.error("상품 조회 실패:", error);
+    }
+  };
+
+  fetchProduct(); // 실행
+}, []);
+
+
+
+    const displayItems = useMemo(() => {
+    return products.map((p) => ({
+      id: p.id,
+      name: p.productName,
+      imageUrl: p.productImagePath,                // 이미지 경로
+      priceText: Number(p.productPrice).toLocaleString() + "원",  // 가격 
+      score: (p.avgRating ?? 0).toFixed(1),        // "4.8"  문자열
+      reviewCount: p.reviewCount ?? 0,
+      likeCount: p.likeCount ?? 0,
+      isNew: String(p.productType).includes("NEW"),
+      isBest: String(p.productType).includes("BEST"),
+    }));
+  }, [products]);
+
 
   const [pageNumber, setPageNumber] = useState(1);
   const pageSize = 8;
 
   const pagedItems = useMemo(() => {
     const start = (pageNumber - 1) * pageSize;
-    return ALL_ITEMS.slice(start, start + pageSize);
-  }, [ALL_ITEMS, pageNumber]);
+    return displayItems.slice(start, start + pageSize);
+  }, [displayItems, pageNumber]);
 
   return (
     <S.Page>
@@ -90,7 +112,7 @@ const ShopContainer = () => {
             <S.SortRight>
               <span>전체</span>
               <span>›</span>
-              <S.Total>{ALL_ITEMS.length}개 제품</S.Total>
+              <S.Total>{displayItems.length}개 제품</S.Total>
             </S.SortRight>
           </S.SortBar>
 
@@ -100,7 +122,7 @@ const ShopContainer = () => {
           <ShopList items={pagedItems} />
           <S.Pagination>
             <ShopNumberSelect
-              shopList={ALL_ITEMS}
+              shopList={displayItems}
               pageNumber={pageNumber}
               setPageNumber={setPageNumber}
             />

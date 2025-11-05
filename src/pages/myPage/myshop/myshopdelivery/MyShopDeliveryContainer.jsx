@@ -83,19 +83,12 @@ export default function MyShopDeliveryContainer() {
         {label[activeFilter]}({items.length}개)
       </ListHeader>
 
-      {/* 리스트 */}
       <ListContainer>
         {items.map((item) => (
           <ListItem key={item.id}>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                width: "100%",
-              }}
-            >
+            <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
               <DeliveryItemImage />
-              {/* 상품 정보 — 구매내역 스타일과 동일하게 세로 배치 */}
+
               <ItemContent>
                 <div>상품</div>
                 <OrderProductName>{item.name}</OrderProductName>
@@ -107,9 +100,13 @@ export default function MyShopDeliveryContainer() {
                 {activeFilter === "pending" && (
                   <ActionButton>구매 취소</ActionButton>
                 )}
-                <ActionButton primary onClick={() => openReview(item)}>
-                  리뷰하기
-                </ActionButton>
+
+                {activeFilter === "completed" && (
+                  <ActionButton primary onClick={() => openReview(item)}>
+                    리뷰하기
+                  </ActionButton>
+                )}
+                {/* 배송중은 버튼 없음 */}
               </div>
             </div>
           </ListItem>

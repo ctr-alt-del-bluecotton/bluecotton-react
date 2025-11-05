@@ -233,6 +233,7 @@ S.ProductLikeButton = styled.button`
   background: #fff;
   display: flex;
   flex-direction: column;
+  font-family: 'Daeojamjil', sans-serif;
   align-items: center;
   justify-content: center;
   cursor: pointer;
@@ -258,6 +259,7 @@ S.CartButton = styled.button`
   border-radius: 4px;
   border: 1px solid ${({ theme }) => theme.PALLETE.grey.greyScale1};
   background: #fff;
+  font-family: 'Daeojamjil', sans-serif;
   cursor: pointer;
 `;
 
@@ -269,6 +271,7 @@ S.PurchaseButton = styled.button`
   border-radius: 4px;
   border: none;
   background: ${({ theme }) => theme.PALLETE.primary.main};
+  font-family: 'Daeojamjil', sans-serif;
   cursor: pointer;
   
 
@@ -302,6 +305,7 @@ S.InfoTab = styled.button`
   position: relative;
   gap: 14px;
   padding-bottom: 4px;
+  font-family: 'Daeojamjil', sans-serif;
   padding-bottom: 14px;
   color: ${({ $active, theme }) =>
     $active ? theme.PALLETE.basic : theme.PALLETE.grey.greyScale3};

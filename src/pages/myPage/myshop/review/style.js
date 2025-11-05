@@ -128,6 +128,7 @@ export const FileButton = styled.button`
   font-family: 'Daeojamjil', sans-serif;
   cursor: pointer;
   &:hover { background: ${({ theme }) => theme.PALLETE.primary.dark}; }
+    font-family: 'Daeojamjil', sans-serif;
 `;
 
 export const FileHint = styled.div`
@@ -196,6 +197,7 @@ export const PrimaryButton = styled.button`
   background: ${({ theme }) => theme.PALLETE.primary.main};
   color: ${({ theme }) => theme.PALLETE.white};
   &:hover { background: ${({ theme }) => theme.PALLETE.primary.dark}; }
+    font-family: 'Daeojamjil', sans-serif;
 `;
 
 export const CloseButton = styled.button`
@@ -209,5 +211,5 @@ export const CloseButton = styled.button`
   background: ${({ theme }) => theme.PALLETE.primary.main};
   color: ${({ theme }) => theme.PALLETE.white};
   &:hover { background: ${({ theme }) => theme.PALLETE.primary.dark}; }
-
+  font-family: 'Daeojamjil', sans-serif;
 `;

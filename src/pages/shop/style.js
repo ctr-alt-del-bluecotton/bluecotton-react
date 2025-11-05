@@ -90,6 +90,7 @@ S.SortSelect = styled.select`
   appearance: none;
   position: relative;
   top: 2px; 
+  font-family: 'Daeojamjil', sans-serif;
 
 
   background-image: url("/assets/icons/drop_down.svg");
