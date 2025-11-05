@@ -34,8 +34,6 @@ const MySomAuthContainer = () => {
 
   return (
     <div>
-      <ContentTitle>솜 인증 현황이 궁금하세요?</ContentTitle>
-      <ContentSubtitle>솜 인증 현황을 확인할 수 있어요.</ContentSubtitle>
       
       <FilterContainer>
         <FilterButton

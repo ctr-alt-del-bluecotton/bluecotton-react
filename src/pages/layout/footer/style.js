@@ -1,15 +1,15 @@
 import styled from "styled-components";
-import { backgroundGreyScale0, basic, fontGreyScale0, fontGreyScale3, primary, smallText1Light, smallText3Light, smallText3Thin } from "../../styles/common";
+import { backgroundGreyScale0, basic, fontGreyScale0, fontGreyScale3, primary, smallText1Light, smallText3Light, smallText3Thin } from "../../../styles/common";
 
-const FooterStyle = {};
+const S = {};
 
-FooterStyle.Wrapper = styled.div `
+S.Wrapper = styled.div `
     width: 100%;
     height: 300px;
     ${backgroundGreyScale0};
 `
 
-FooterStyle.Container = styled.div `
+S.Container = styled.div `
     max-width: 1920px;
     margin: 0 auto;
     padding: 48px 20px 0 20px;
@@ -18,7 +18,7 @@ FooterStyle.Container = styled.div `
     align-items: center;
 `
 
-FooterStyle.Text1 = styled.div `
+S.Text1 = styled.div `
     ${basic}
     ${smallText3Light}
     & > p {
@@ -31,12 +31,12 @@ FooterStyle.Text1 = styled.div `
     margin-right: 250px;
 `
 
-FooterStyle.Text1Blue = styled.span `
+S.Text1Blue = styled.span `
     ${primary}
     ${smallText3Light}
 `
 
-FooterStyle.Text2 = styled.div `
+S.Text2 = styled.div `
     ${basic}
     ${smallText3Thin}
     & > p {
@@ -48,16 +48,16 @@ FooterStyle.Text2 = styled.div `
     }
 `
 
-FooterStyle.Text3 = styled.div `
+S.Text3 = styled.div `
     ${fontGreyScale3}
     ${smallText1Light}
 `
 
-FooterStyle.BottomContainer = styled.div `
+S.BottomContainer = styled.div `
     display: flex;
     justify-content: center;
     margin-top: 30px;
     margin-bottom: 50px;
 `
 
-export default FooterStyle;
+export default S;

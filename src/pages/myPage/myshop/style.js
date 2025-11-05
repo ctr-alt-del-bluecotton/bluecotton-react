@@ -18,7 +18,7 @@ export const TabContainer = styled.div`
   display: grid;
   grid-template-columns: repeat(5, 1fr);
   gap: 16px;
-  margin-bottom: 32px;
+  margin-bottom: 50px;
 `;
 
 export const Tab = styled.button`

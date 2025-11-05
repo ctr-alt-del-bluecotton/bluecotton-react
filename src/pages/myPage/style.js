@@ -26,7 +26,8 @@ export const ProfileContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-bottom: 16px;
+  margin: 30px 0 50px 0;
+  gap: 8px;
 `;
 
 export const ProfileImageWrapper = styled.div`
@@ -68,8 +69,8 @@ export const UserNameContainer = styled.div`
 `;
 
 export const GradeBadge = styled.div`
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
   background-color: #C0C0C0;
   display: flex;
@@ -81,7 +82,7 @@ export const GradeBadge = styled.div`
 `;
 
 export const UserName = styled.div`
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 500;
   color: ${({ theme }) => theme.PALLETE.basic};
 `;
@@ -90,7 +91,7 @@ export const NavigationList = styled.div`
   display: flex;
   flex-direction: column;
   width: 100%;
-  gap: 4px;
+  gap: 8px;
 `;
 
 export const NavLink = styled(Link)`
@@ -99,7 +100,7 @@ export const NavLink = styled(Link)`
   cursor: pointer;
   background-color: ${props => props.$active ? props.theme.PALLETE.primary.main : 'transparent'};
   color: ${props => props.$active ? props.theme.PALLETE.white : props.theme.PALLETE.basic};
-  font-size: 14px;
+  font-size: 16px;
   font-weight: ${props => props.$active ? '700' : '500'};
   font-family: 'Daeojamjil', sans-serif;
   transition: all 0.2s;

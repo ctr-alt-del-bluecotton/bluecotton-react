@@ -13,20 +13,20 @@ export const Title = styled.h1`
 
 export const Subtitle = styled.p`
   font-size: 18px;
-  color: ${({ theme }) => theme.PALLETE.basic};
+  color: ${({ theme }) => theme.PALLETE.grey.greyScale3};
   margin-bottom: 40px;
 `;
 
 export const FormSection = styled.div`
-  margin-bottom: 32px;
+  margin-bottom: 40px;
 `;
 
 export const Label = styled.label`
   display: block;
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 600;
   color: ${({ theme }) => theme.PALLETE.basic};
-  margin-bottom: 8px;
+  margin-bottom: 14px;
 `;
 
 export const Input = styled.input`
@@ -94,7 +94,7 @@ export const RadioGroup = styled.div`
 export const RadioLabel = styled.label`
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 4px;
   font-size: 16px;
   cursor: pointer;
 

@@ -10,18 +10,19 @@ export const Container = styled.div`
 `;
 
 export const Title = styled.h1`
-  font-size: ${({ theme }) => theme.FONT_SIZE["paragraph"]};
+  font-size: ${({ theme }) => theme.FONT_SIZE["title"]};
   font-weight: ${({ theme }) => theme.FONT_WEIGHT["bold"]};
-  margin-bottom: 16px;
+  margin-bottom: 12px;
   border-bottom: 1px solid ${({ theme }) => theme.PALLETE.grey.greyScale1};
   padding-bottom: 12px;
 `;
+
 
 export const MetaBox = styled.div`
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 8px 0 12px;
+  padding: 0 0 12px 0;
   border-bottom: 1px solid ${({ theme }) => theme.PALLETE.grey.greyScale1};
   font-size: ${({ theme }) => theme.FONT_SIZE["smallText3"]};
   .writer {

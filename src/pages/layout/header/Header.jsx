@@ -1,5 +1,5 @@
 import React from "react";
-import HeaderStyle from "./styleHeader.js";
+import S from "./style.js";
 import { useLocation, useNavigate } from "react-router-dom";
 
 const Header = () => {
@@ -26,37 +26,37 @@ const Header = () => {
 
   const Categories = (
     <>
-      <HeaderStyle.NavLink to="/main/som/all">솜</HeaderStyle.NavLink>
-      <HeaderStyle.NavLink to="/main/shop">블루코튼 샵</HeaderStyle.NavLink>
-      <HeaderStyle.NavLink to="/main/post/all">오늘의 솜</HeaderStyle.NavLink>
+      <S.NavLink to="/main/som/all">솜</S.NavLink>
+      <S.NavLink to="/main/shop">블루코튼 샵</S.NavLink>
+      <S.NavLink to="/main/post/all">오늘의 솜</S.NavLink>
     </>
   );
 
   return (
-    <HeaderStyle.HeaderWrap>
-      <HeaderStyle.HeaderContainer>
-        <HeaderStyle.HeaderRow>
-          <HeaderStyle.LeftGroup>
-            <HeaderStyle.Logo to="/">blue cotton</HeaderStyle.Logo>
+    <S.HeaderWrap>
+      <S.HeaderContainer>
+        <S.HeaderRow>
+          <S.LeftGroup>
+            <S.Logo to="/">blue cotton</S.Logo>
             {!isIntroPage && goToLinkName && (
               <>
-                <HeaderStyle.Bar>|</HeaderStyle.Bar>
-                <HeaderStyle.SectionName>{goToLinkName}</HeaderStyle.SectionName>
+                <S.Bar>|</S.Bar>
+                <S.SectionName>{goToLinkName}</S.SectionName>
               </>
             )}
-          </HeaderStyle.LeftGroup>
-          <HeaderStyle.CenterGroup>
+          </S.LeftGroup>
+          <S.CenterGroup>
             {isIntroPage && Categories}
-          </HeaderStyle.CenterGroup>
-          <HeaderStyle.RightGroup>
-            <HeaderStyle.LoginButton onClick={handleLoginClick}>
+          </S.CenterGroup>
+          <S.RightGroup>
+            <S.LoginButton onClick={handleLoginClick}>
               <span><img style={{width:"21px", height:"24px", marginTop:"5px"}} src="/assets/icons/login.svg" alt="프로필아이콘" /></span>
               <span style={{color:"#0051FF"}}>로그인</span>
-            </HeaderStyle.LoginButton>
-          </HeaderStyle.RightGroup>
-        </HeaderStyle.HeaderRow>
-      </HeaderStyle.HeaderContainer>
-    </HeaderStyle.HeaderWrap>
+            </S.LoginButton>
+          </S.RightGroup>
+        </S.HeaderRow>
+      </S.HeaderContainer>
+    </S.HeaderWrap>
   );
 };
 

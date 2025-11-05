@@ -1,0 +1,31 @@
+import React from "react";
+import S from "./style";
+import { useLocation } from "react-router-dom";
+import SearchBar from "../searchBar/SearchBar";
+
+const HeaderCategory = () => {
+
+    const {pathname} = useLocation();
+
+    const isPostActive = pathname === '/main/post/all' || pathname.startsWith("/main/post/");
+    const isSomActive = pathname === '/main/som/all' || pathname.startsWith("/main/som/");
+    const isMyPageActive = pathname === '/main/ny-page/my-som/auth' || pathname.startsWith("/main/my-page");
+
+    return (
+        <S.Wrapper>
+            <S.Container>
+                <S.CategoryBar>
+                    <S.CategoryLink to="/main/som/all" className={isSomActive ? "active" : ""}>홈</S.CategoryLink>
+                    <S.CategoryLink to="/main/map">주변 솜</S.CategoryLink>
+                    <S.CategoryLink to="/main/post/all" className={isPostActive ? "active" :""}>오늘의 솜</S.CategoryLink>
+                    <S.CategoryLink to="/main/shop">블루코튼 샵</S.CategoryLink>
+                    <S.CategoryLink to="/main/my-page/my-som/auth" className={isMyPageActive ? "active" : ""}>마이페이지</S.CategoryLink>
+                </S.CategoryBar>
+                <SearchBar />
+            </S.Container>
+        </S.Wrapper>
+
+    );
+};
+
+export default HeaderCategory;

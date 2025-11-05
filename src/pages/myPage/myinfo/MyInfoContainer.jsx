@@ -241,7 +241,7 @@ const MyInfoContainer = () => {
                 checked={formData.gender === 'male'}
                 onChange={handleChange}
               />
-              남성
+              남
             </RadioLabel>
             <RadioLabel>
               <input
@@ -251,7 +251,7 @@ const MyInfoContainer = () => {
                 checked={formData.gender === 'female'}
                 onChange={handleChange}
               />
-              여성
+              여
             </RadioLabel>
           </RadioGroup>
         </FormSection>
