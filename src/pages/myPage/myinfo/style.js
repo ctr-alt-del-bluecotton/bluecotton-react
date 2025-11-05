@@ -35,6 +35,7 @@ export const Input = styled.input`
   border: 1px solid ${({ theme }) => theme.PALLETE.grey.greyScale1};
   border-radius: 8px;
   font-size: 16px;
+  box-sizing: border-box;
   
   &:focus {
     outline: none;
@@ -45,17 +46,22 @@ export const Input = styled.input`
 export const ButtonGroup = styled.div`
   display: flex;
   gap: 12px;
+  align-items: stretch;
 `;
 
 export const PrimaryButton = styled.button`
-  padding: 8px 16px;
+  padding: 12px 16px;
   background-color: ${({ theme }) => theme.PALLETE.primary.main};
   color: ${({ theme }) => theme.PALLETE.white};
   border: none;
   border-radius: 8px;
   font-size: 14px;
   font-weight: 500;
+  font-family: 'Daeojamjil', sans-serif;
   cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  width: 140px;
   
   &:hover {
     background-color: ${({ theme }) => theme.PALLETE.primary.dark};
@@ -91,22 +97,63 @@ export const RadioLabel = styled.label`
   gap: 8px;
   font-size: 16px;
   cursor: pointer;
+
+  input[type="radio"] {
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border: 2px solid ${({ theme }) => theme.PALLETE.grey.greyScale1};
+    border-radius: 50%;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.2s;
+
+    &:checked {
+      border-color: ${({ theme }) => theme.PALLETE.primary.main};
+      
+      &::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background-color: ${({ theme }) => theme.PALLETE.primary.main};
+      }
+    }
+
+    &:hover {
+      border-color: ${({ theme }) => theme.PALLETE.primary.main};
+    }
+  }
 `;
 
 export const ImagePreview = styled.div`
   width: 200px;
   height: 200px;
-  border: 2px dashed ${({ theme }) => theme.PALLETE.grey.greyScale1};
+  border: 2px dashed ${({ theme, $hasImage }) => $hasImage ? 'transparent' : theme.PALLETE.grey.greyScale1};
   border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: ${({ theme }) => theme.PALLETE.grey.greyScale0};
+  background-color: ${({ theme, $hasImage }) => $hasImage ? 'transparent' : theme.PALLETE.grey.greyScale0};
   margin-bottom: 16px;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+  overflow: hidden;
+
+  &:hover {
+    border-color: ${({ theme }) => theme.PALLETE.primary.main};
+    background-color: ${({ theme, $hasImage }) => $hasImage ? 'transparent' : theme.PALLETE.grey.greyScale0};
+    opacity: ${({ $hasImage }) => $hasImage ? 0.9 : 1};
+  }
 `;
 
-export const FileInput = styled.input`
-  margin-bottom: 8px;
+export const HiddenFileInput = styled.input`
+  display: none;
 `;
 
 export const FileInfo = styled.div`
@@ -130,6 +177,7 @@ export const SubmitButton = styled.button`
   border-radius: 8px;
   font-size: 18px;
   font-weight: 700;
+  font-family: 'Daeojamjil', sans-serif;
   cursor: pointer;
   
   &:hover {

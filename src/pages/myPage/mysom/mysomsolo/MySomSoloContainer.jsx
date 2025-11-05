@@ -13,7 +13,8 @@ import {
   Pagination,
   PageButton,
   PageNumber,
-  ActionButton
+  ActionButton,
+  CancelButton
 } from '../style';
 
 const MySomSoloContainer = () => {
@@ -93,9 +94,17 @@ const MySomSoloContainer = () => {
 
               {/* ✅ 진행예정은 버튼 숨김, 진행중만 표시 */}
               {getButtonLabel() && (
-                <ActionButton onClick={() => navigate(getButtonPath())}>
-                  {getButtonLabel()}
-                </ActionButton>
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                  <ActionButton onClick={() => navigate(getButtonPath())}>
+                    {getButtonLabel()}
+                  </ActionButton>
+                  <CancelButton onClick={() => {
+                    // 중단하기 로직 구현
+                    console.log('챌린지 중단');
+                  }}>
+                    중단하기
+                  </CancelButton>
+                </div>
               )}
             </div>
           </ListItem>
