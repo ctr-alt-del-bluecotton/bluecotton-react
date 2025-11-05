@@ -55,6 +55,7 @@ export const FilterButton = styled.button`
   border: none;
   font-size: 14px;
   font-weight: ${props => props.active ? '700' : '500'};
+  font-family: 'Daeojamjil', sans-serif;
   cursor: pointer;
   transition: all 0.2s;
   background-color: ${props => props.active ? props.theme.PALLETE.primary.main : props.theme.PALLETE.grey.greyScale0};
@@ -128,6 +129,7 @@ export const PageButton = styled.button`
   color: ${props => props.disabled ? '#BDBDBD' : '#111111'};
   cursor: ${props => props.disabled ? 'not-allowed' : 'pointer'};
   font-size: 16px;
+  font-family: 'Daeojamjil', sans-serif;
   
   &:hover {
     color: ${props => props.disabled ? '#BDBDBD' : '${({ theme }) => theme.PALLETE.primary.main}'};
@@ -300,6 +302,7 @@ export const QuantityButton = styled.button`
   color: #666;
   font-size: 16px;
   font-weight: 500;
+  font-family: 'Daeojamjil', sans-serif;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -368,6 +371,7 @@ export const OrderButton = styled.button`
   border-radius: 8px;
   font-size: 18px;
   font-weight: 700;
+  font-family: 'Daeojamjil', sans-serif;
   cursor: pointer;
   
   &:hover {
@@ -391,6 +395,7 @@ export const ActionButton = styled.button`
   color: ${props => props.primary ? '#fff' : '#111111'};
   font-size: 14px;
   font-weight: 500;
+  font-family: 'Daeojamjil', sans-serif;
   cursor: pointer;
   margin-left: 8px;
   transition: all 0.2s;
@@ -434,6 +439,7 @@ export const OrderActionButton = styled.button`
   color: #fff;
   font-size: 14px;
   font-weight: 500;
+  font-family: 'Daeojamjil', sans-serif;
   cursor: pointer;
   
   &:hover {
@@ -475,6 +481,7 @@ export const ReviewButton = styled.button`
   border-radius: 8px;
   font-size: 14px;
   font-weight: 500;
+  font-family: 'Daeojamjil', sans-serif;
   cursor: pointer;
   border: 1px solid ${props => props.primary ? '#0051FF' : '#E0E0E0'};
   background-color: ${props => props.primary ? '#0051FF' : '#fff'};
@@ -524,6 +531,7 @@ export const LikeHeartBtn = styled.button`
   padding: 0;
   cursor: pointer;
   z-index: 2;
+  font-family: 'Daeojamjil', sans-serif;
 
   /* 바깥 원 */
   background: url("/assets/icons/circle.svg") center/contain no-repeat;

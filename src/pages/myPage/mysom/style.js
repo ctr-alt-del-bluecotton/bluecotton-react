@@ -54,6 +54,7 @@ export const FilterButton = styled.button`
   border: none;
   font-size: 14px;
   font-weight: ${props => props.active ? '700' : '500'};
+  font-family: 'Daeojamjil', sans-serif;
   cursor: pointer;
   transition: all 0.2s;
   background-color: ${props => props.active ? props.theme.PALLETE.primary.main : props.theme.PALLETE.grey.greyScale0};
@@ -120,6 +121,7 @@ export const PageButton = styled.button`
   color: ${props => props.disabled ? '#BDBDBD' : '#111111'};
   cursor: ${props => props.disabled ? 'not-allowed' : 'pointer'};
   font-size: 16px;
+  font-family: 'Daeojamjil', sans-serif;
   
   &:hover {
     color: ${props => props.disabled ? '#BDBDBD' : '${({ theme }) => theme.PALLETE.primary.main}'};
@@ -140,10 +142,29 @@ export const ActionButton = styled.button`
   cursor: pointer;
   font-size: 14px;
   font-weight: 500;
+  font-family: 'Daeojamjil', sans-serif;
   transition: background-color 0.2s;
   
   &:hover {
     background-color: #003DB8;
+  }
+`;
+
+export const CancelButton = styled.button`
+  padding: 8px 16px;
+  background-color: #FF6B6B;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  font-family: 'Daeojamjil', sans-serif;
+  transition: background-color 0.2s;
+  margin-left: 8px;
+  
+  &:hover {
+    background-color: #FF5252;
   }
 `;
 
@@ -309,6 +330,7 @@ export const CloseButton = styled.button`
   border: none;
   background: none;
   font-size: 32px;
+  font-family: 'Daeojamjil', sans-serif;
   color: #888;
   cursor: pointer;
 `;
@@ -337,6 +359,7 @@ export const OptionBtn = styled.button`
   background: ${({selected})=>selected ?'#0051FF':'#F1F3F6'};
   color: ${({selected})=>selected?'#fff':'#515151'};
   font-size: 15px;
+  font-family: 'Daeojamjil', sans-serif;
   margin-bottom: 6px;
   cursor: pointer;
   transition: background .15s, color .15s;

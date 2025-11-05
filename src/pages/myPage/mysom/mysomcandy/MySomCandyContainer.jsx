@@ -51,22 +51,22 @@ const MySomCandyContainer = () => {
           <TableRow>
             <TableCell>적립</TableCell>
             <TableCell>2025.09.19</TableCell>
-            <TableCell>+100</TableCell>
-            <TableCell>솔로</TableCell>
+            <TableCell style={{ color: '#F83BAA' }}>+100</TableCell>
+            <TableCell style={{ color: '#0051FF' }}>솔로</TableCell>
             <TableCell>2km 런닝 뛰기 챌린지!! 인증 (+100 캔디)</TableCell>
           </TableRow>
           <TableRow>
             <TableCell>적립</TableCell>
             <TableCell>2025.09.19</TableCell>
-            <TableCell>+500</TableCell>
-            <TableCell>파티</TableCell>
+            <TableCell style={{ color: '#F83BAA' }}>+500</TableCell>
+            <TableCell style={{ color: '#0051FF' }}>파티</TableCell>
             <TableCell>다같이 플로깅!!! 인증 (+500 캔디)</TableCell>
           </TableRow>
           <TableRow>
             <TableCell>적립</TableCell>
             <TableCell>2025.09.19</TableCell>
-            <TableCell>+500</TableCell>
-            <TableCell>파티</TableCell>
+            <TableCell style={{ color: '#F83BAA' }}>+500</TableCell>
+            <TableCell style={{ color: '#0051FF' }}>파티</TableCell>
             <TableCell>스터디그룹 코딩!!! 인증 (+500 캔디)</TableCell>
           </TableRow>
         </tbody>
