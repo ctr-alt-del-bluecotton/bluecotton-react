@@ -11,3 +11,35 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+/* 팝업 컨테이너 및 iframe 관련 스타일 */
+#portone-payment-popup,
+#portone-payment-popup iframe {
+  /* 기존 스타일 유지 */
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+  background: transparent !important;
+  
+  /* 추가적으로 IE/Edge 호환성을 위해 frameBorder 속성 제거 */
+  /* frameBorder는 CSS가 아니지만, 혹시 모를 경우를 대비 */
+  /* HTML 속성이므로 CSS로는 완벽 제어가 어렵지만, 아래와 같이 시도 */
+  -ms-overflow-style: none; /* IE, Edge 스크롤바 제거 */
+}
+
+/* iframe 내의 body 태그에도 overflow 숨김 적용 (가끔 필요함) */
+#portone-payment-popup iframe body {
+    overflow: hidden !important;
+}
+
+/* iframe이 가질 수 있는 기본 마진/패딩 제거 */
+#portone-payment-popup * {
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* iframe 내의 스크롤바 강제 제거 (크롬, 사파리) */
+#portone-payment-popup iframe::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+}

@@ -16,13 +16,38 @@ const OrderUserInfo = () => {
   const [select, setSelect] = useState(DELIVERY_OPTIONS[0]);
   const dropdown = useRef(null);
 
-  // ▼ 모달/배송지 상태 추가
   const [addrModalOpen, setAddrModalOpen] = useState(false);
   const [recipient, setRecipient] = useState("최준서");
   const [phone, setPhone] = useState("010-1234-5678");
   const [zip, setZip] = useState("");
   const [addr1, setAddr1] = useState("서울 서초구 강남대로 47-6");
   const [addr2, setAddr2] = useState("");
+
+  
+  const [customMemo, setCustomMemo] = useState("");
+  const deliveryRequest = select === "직접 입력" ? customMemo : select;
+
+  const applyCustomMemo = () => {
+  if (!customMemo.trim()) return;
+
+  setSelect(customMemo);
+  setOpen(false);
+};
+
+
+  const handleSelect = (text) => {
+  setSelect(text);
+
+  if (text !== "직접 입력") {
+    setCustomMemo("");
+    setOpen(false);
+  } else {
+    setOpen(true);
+  }
+};
+
+  const selectedLabel = select === "직접 입력" && customMemo ? customMemo : select;
+
 
   useEffect(() => {
     const onClickOutSide = (e) => {
@@ -42,12 +67,6 @@ const OrderUserInfo = () => {
     };
   }, [open]);
 
-  const handleSelect = (text) => {
-    setSelect(text);
-    setOpen(false);
-  };
-
-  // ▼ 모달에서 저장 눌렀을 때 값 반영
   const handleSaveAddress = (v) => {
     setRecipient(v.recipient);
     setPhone(v.phone);
@@ -66,14 +85,19 @@ const OrderUserInfo = () => {
             <S.UserInfoTag>
               <S.TagName>기본 배송지</S.TagName>
             </S.UserInfoTag>
-            <S.UserFix type="button" onClick={() => setAddrModalOpen(true)}>
+              <S.UserFix type="button" onClick={() => setAddrModalOpen(true)}>
               배송지 변경
             </S.UserFix>
           </S.UserInfoName>
 
           <S.UserAddressContainer>
-            <S.UserAddress>{addr1}{addr2 ? `, ${addr2}` : ""}</S.UserAddress>
-            <S.UserAddress>{phone}</S.UserAddress>
+            <S.UserAddress>
+              {addr1}
+              {addr2 ? `, ${addr2}` : ""}
+            </S.UserAddress>
+            <S.UserAddress>
+              {phone}
+            </S.UserAddress>
 
             <S.DropdownWrapper ref={dropdown}>
               <S.UserAddressButton
@@ -83,7 +107,7 @@ const OrderUserInfo = () => {
                 onClick={() => setOpen((v) => !v)}
                 $open={open}
               >
-                <S.UserAddress as="span">{select}</S.UserAddress>
+                <S.UserAddress as="span">{selectedLabel}</S.UserAddress>
               </S.UserAddressButton>
 
               {open && (
@@ -107,11 +131,29 @@ const OrderUserInfo = () => {
                 </S.DropdownMenu>
               )}
             </S.DropdownWrapper>
+
+            {select === "직접 입력" && (
+              <S.CustomMemoRow>
+                <S.CustomInput
+                  id="delivery-memo"
+                  type="text"
+                  value={customMemo}
+                  placeholder="예: 초인종 누르지 말아주세요"
+                  onChange={(e) => setCustomMemo(e.target.value)}
+                  onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    applyCustomMemo(); // 엔터 누르면 적용 및 닫기
+                  }
+                }}
+                  autoFocus
+                />
+              </S.CustomMemoRow>
+            )}
           </S.UserAddressContainer>
         </S.UserContainer>
       </S.UserInfoContainer>
 
-      {/* ▼ 모달 마운트 */}
       <DeliveryAddressModal
         open={addrModalOpen}
         onClose={() => setAddrModalOpen(false)}
@@ -120,6 +162,7 @@ const OrderUserInfo = () => {
       />
     </S.UserInfoWrapper>
   );
+
 };
 
 export default OrderUserInfo;
