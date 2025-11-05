@@ -125,6 +125,7 @@ export const FileButton = styled.button`
   border: 1px solid ${({ theme }) => theme.PALLETE.primary.main};
   background: ${({ theme }) => theme.PALLETE.primary.main};
   color: ${({ theme }) => theme.PALLETE.white};
+  font-family: 'Daeojamjil', sans-serif;
   cursor: pointer;
   &:hover { background: ${({ theme }) => theme.PALLETE.primary.dark}; }
     font-family: 'Daeojamjil', sans-serif;
@@ -169,6 +170,7 @@ export const CloseIconButton = styled.button`
   border: 0;
   outline: none;
   background: none;
+  font-family: 'Daeojamjil', sans-serif;
   cursor: pointer;
 `;
 
@@ -191,6 +193,7 @@ export const PrimaryButton = styled.button`
   border-radius: 4px;
   cursor: pointer;
   ${C.smallText2Regular}
+  font-family: 'Daeojamjil', sans-serif;
   background: ${({ theme }) => theme.PALLETE.primary.main};
   color: ${({ theme }) => theme.PALLETE.white};
   &:hover { background: ${({ theme }) => theme.PALLETE.primary.dark}; }
@@ -204,6 +207,7 @@ export const CloseButton = styled.button`
   border-radius: 4px;
   cursor: pointer;
   ${C.smallText2Regular}
+  font-family: 'Daeojamjil', sans-serif;
   background: ${({ theme }) => theme.PALLETE.primary.main};
   color: ${({ theme }) => theme.PALLETE.white};
   &:hover { background: ${({ theme }) => theme.PALLETE.primary.dark}; }

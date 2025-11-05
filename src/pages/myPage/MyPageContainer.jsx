@@ -30,7 +30,7 @@ const MyPageContainer = () => {
             마이 솜
           </NavLink>
           <NavLink to="/main/my-page/my-shop/like" $active={isActive('/main/my-page/my-shop')}>
-            마이샵
+            마이 샵
           </NavLink>
           <NavLink to="/main/my-page/my-post/write" $active={isActive('/main/my-page/my-post')}>
             게시판

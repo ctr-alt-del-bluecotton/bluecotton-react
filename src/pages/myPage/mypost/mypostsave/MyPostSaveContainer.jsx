@@ -11,8 +11,14 @@ import {
   PageNumber,
   DeleteButton
 } from '../style';
+import { useNavigate } from 'react-router-dom';
+import { useModal } from '../../../../components/modal';
+
+
 
 const MyPostSaveContainer = () => {
+  const { openModal } = useModal();
+  const navigate = useNavigate();
   const posts = [
     {
       id: 1,
@@ -52,8 +58,14 @@ const MyPostSaveContainer = () => {
               <ItemDetails>
                 <span>저장일: {post.date}</span>
                 <DeleteButton onClick={(e) => {
-                  e.stopPropagation();
-                  handleDelete(post.id);
+                  openModal({
+                    title: "임시저장한 게시글이 사라집니다.",
+                    message: "정말 게시글을 삭제제하시겠습니까?",
+                    confirmText: "삭제",
+                    cancelText: "취소",
+                    // onConfirm: () => handleDelete(post.id), 
+                    // 삭제 눌렀을때 TBL_POST_DRAFT 테이블에서 삭제되게 구현
+                  });
                 }}>
                   삭제
                 </DeleteButton>
