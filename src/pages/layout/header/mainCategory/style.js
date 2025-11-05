@@ -1,10 +1,10 @@
 import { NavLink } from "react-router-dom";
 import styled from "styled-components";
-import { basic, secondary, smallText3Regular } from "../../styles/common";
+import { basic, secondary, smallText3Regular } from "../../../../styles/common";
 
-const CategoryStyle = {};
+const S = {};
 
-CategoryStyle.Wrapper = styled.div`
+S.Wrapper = styled.div`
   width: 100%;
   height: 67px;
   display: flex;
@@ -24,26 +24,25 @@ CategoryStyle.Wrapper = styled.div`
   }
 `;
 
-CategoryStyle.Container = styled.div`
+S.Container = styled.div`
   width: 100%;
   max-width: 1160px;
   height: 100%;
   display: flex;
   align-items: center;
-  padding: 0 16px;
   box-sizing: border-box;
   justify-content: space-between; 
   position: relative;  
 `;
 
-CategoryStyle.CategoryBar = styled.div`
+S.CategoryBar = styled.div`
   display: flex;
   height: 100%;
   gap: 46px;
   align-items: center;
 `;
 
-CategoryStyle.CategoryLink = styled(NavLink)`
+S.CategoryLink = styled(NavLink)`
   ${smallText3Regular}
   ${basic}
   position: relative;            
@@ -73,4 +72,4 @@ CategoryStyle.CategoryLink = styled(NavLink)`
   }
 `;
 
-export default CategoryStyle;
+export default S;

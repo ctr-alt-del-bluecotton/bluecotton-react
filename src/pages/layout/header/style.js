@@ -1,33 +1,31 @@
 import styled from "styled-components";
 import { NavLink, Link } from "react-router-dom";
-import {headerLogo, subtitle, headerSubLogo, secondary, fontGreyScale1, smallText2Regular, smallText3Regular, basic} from "../../styles/common";
-import { borderCSS, shapeCSS, sizeCSS } from "../button/style";
+import {headerLogo, subtitle, headerSubLogo, secondary, fontGreyScale1, smallText3Regular, basic} from "../../../styles/common";
 
-const HeaderStyle = {};
+const S = {};
 
-HeaderStyle.HeaderWrap = styled.header`
+S.HeaderWrap = styled.header`
     width: 100%;
     display: flex;
     justify-content: center;
 `;
 
-HeaderStyle.HeaderContainer = styled.div`
+S.HeaderContainer = styled.div`
     width: 100%;
     max-width: 1160px;
     height: 72px;
-    padding: 0 16px;
     box-sizing: border-box;
     display: flex;
     align-items: center;
 `;
 
-HeaderStyle.HeaderRow = styled.div`
+S.HeaderRow = styled.div`
     width: 100%;
     display: flex;
     align-items: center;
 `;
 
-HeaderStyle.LeftGroup = styled.div`
+S.LeftGroup = styled.div`
     flex: 1 0 0;
     display: flex;
     align-items: center;
@@ -36,7 +34,7 @@ HeaderStyle.LeftGroup = styled.div`
     min-width: 0;
 `;
 
-HeaderStyle.CenterGroup = styled.nav`
+S.CenterGroup = styled.nav`
     position: absolute;
     left: 53%;
     transform: translateX(-50%);
@@ -47,31 +45,31 @@ HeaderStyle.CenterGroup = styled.nav`
     white-space: nowrap;
 `;
 
-HeaderStyle.RightGroup = styled.div`
+S.RightGroup = styled.div`
     display: flex;
     align-items: center;
     justify-self: flex-end;
     margin-left: auto;
 `;
 
-HeaderStyle.Logo = styled(Link)`
+S.Logo = styled(Link)`
     ${headerLogo}
     text-decoration: none;
 `;
 
-HeaderStyle.Bar = styled.span`
+S.Bar = styled.span`
     ${fontGreyScale1}
     ${smallText3Regular}
     margin-left: 8px;
     margin-right: 8px;
 `;
 
-HeaderStyle.SectionName = styled.span`
+S.SectionName = styled.span`
     ${headerSubLogo}
     ${secondary}
 `;
 
-HeaderStyle.NavLink = styled(NavLink)`
+S.NavLink = styled(NavLink)`
     ${subtitle}
     ${basic}
     text-decoration: none;
@@ -93,7 +91,7 @@ HeaderStyle.NavLink = styled(NavLink)`
     }
 `;
 
-HeaderStyle.LoginButton = styled.div`
+S.LoginButton = styled.div`
     width: 96px;
     height: 36px;
     border: solid 1px #E0E0E0;
@@ -108,4 +106,4 @@ HeaderStyle.LoginButton = styled.div`
     gap: 8px;
 `;
 
-export default HeaderStyle;
+export default S;

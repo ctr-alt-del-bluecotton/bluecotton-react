@@ -16,7 +16,6 @@ import MySomSoloContainer from "../pages/myPage/mysom/mysomsolo/MySomSoloContain
 import ShopContainer from "../pages/shop/ShopContainer";
 import ShopOrder from "../pages/shop/order/ShopOrder";
 import PostContainer from "../pages/post/PostContainer";
-import PostListContainer from "../pages/post/postcontent/PostContent";
 import MySomPartyContainer from "../pages/myPage/mysom/mysomparty/MySomPartyContainer";
 import MySomCandyContainer from "../pages/myPage/mysom/mysomcandy/MySomCandyContainer";
 import MySomRankContainer from "../pages/myPage/mysom/mysomrank/MySomRankContainer";
