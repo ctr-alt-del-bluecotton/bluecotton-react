@@ -186,6 +186,7 @@ S.SortRight = styled.div`
   align-items: center;
   gap: 10px;
   height: 30px;
+  padding-right: 10px;
   ${C.smallText1Regular}
   ${C.fontGreyScale3}
 `;
@@ -233,14 +234,14 @@ S.Label = styled.label`
   gap: 12px;
   margin: 10px 0;
   cursor: pointer;
-  ${C.smallText1Regular}
+  ${C.smallText2Regular}
   ${C.basic}
 `;
 
 S.Checkbox = styled.input.attrs({ type: "checkbox" })`
   appearance: none;
-  width: 19px;
-  height: 19px;
+  width: 20px;
+  height: 20px;
   border-radius: 1px;
   border: 1px solid ${({ theme }) => theme.PALLETE.grey.greyScale1};
   background-color: #fff;
@@ -339,18 +340,18 @@ S.ProductTitleRow = styled.div`
   display: flex;
   align-items: center;
   gap: 6px;
-  margin-top: 10px;
+  margin-top: 12px;
 `;
 
 S.ProductName = styled.p`
-  ${C.smallText1Bold}
+  ${C.smallText2Bold}
   ${C.basic}
 `;
 
 S.ProductPrice = styled.p`
-  margin-top: 10px;
-  margin-bottom: 10px;
-  ${C.smallText1Bold}
+  margin-top: 6px;
+  margin-bottom: 16px;
+  ${C.smallText3Bold}
   ${C.basic}
 `;
 
@@ -374,13 +375,13 @@ S.ProductSubInfo = styled.div`
   margin-top: 8px;
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 8px;
 `;
 
 S.IconText = styled.div`
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
     
   img {
     width: 12px;   

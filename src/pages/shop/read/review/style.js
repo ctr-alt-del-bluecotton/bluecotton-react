@@ -192,7 +192,7 @@ S.UserInfoWrap = styled.div`
 
 S.StarRow = styled.div`
   display: flex;
-  gap: 4px;
+  gap: 2px;
 `;
 
 S.StarIcon = styled.img`
@@ -209,7 +209,6 @@ S.StarIcon = styled.img`
 S.UserMeta = styled.div`
   display: flex;
   align-items: center;
-  gap: 8px;
   line-height: 1;
 `;
 

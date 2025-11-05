@@ -92,13 +92,13 @@ S.DetailBestTag = styled.span`
 S.Title = styled.h1`
   ${C.paragraphRegular};
   ${C.basic};
-  margin-top: 16px;
-  margin-bottom: 8px;
+  margin-top: 12px;
+  margin-bottom: 6px;
 `;
 
 S.DetailPrice = styled.div`
   ${C.titleBold};
-  margin-bottom: 5px;
+  margin-bottom: 8px;
 `;
 
 S.DetailReviewWrap = styled.div`
@@ -106,6 +106,7 @@ S.DetailReviewWrap = styled.div`
   align-items: center;
   gap: 6px;
   line-height: 1;
+  margin-bottom: 40px;
 `;
 
 S.Icon = styled.img`
@@ -126,7 +127,7 @@ S.DeliveryRow = styled.div`
   display: flex;
   align-items: center;
   gap: 10px;
-  margin-top: 12px;
+  margin-bottom: 6px;
 `;
 
 S.Divider = styled.div`
@@ -142,7 +143,7 @@ S.Delivery = styled.div`
 S.DeliveryCharge = styled.div``;
 
 S.DeliveryInfo = styled.div`
-  ${C.smallText1Light};
+  ${C.smallText2Light};
   ${C.fontGreyScale3};
   margin-bottom: 14px;
 `;
@@ -152,7 +153,7 @@ S.CountWrap = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: baseline;
-  margin: 12px 0 20px;
+  margin: 12px 0;
 `;
 
 S.DeliveryCount = styled.div`
@@ -246,14 +247,14 @@ S.ProductLikeButton = styled.button`
   }
 
   span {
-    ${C.smallText3Regular};
+    ${C.smallText2Regular};
     margin-top: 4px;
     color: #000;
   }
 `;
 
 S.CartButton = styled.button`
-  ${C.smallText2Regular};
+  ${C.subtitleRegular};
   flex: 1;
   height: 54px;
   border-radius: 4px;
@@ -264,7 +265,7 @@ S.CartButton = styled.button`
 `;
 
 S.PurchaseButton = styled.button`
-  ${C.smallText2Regular};
+  ${C.subtitleRegular};
   ${C.white};
   flex: 1;
   height: 54px;

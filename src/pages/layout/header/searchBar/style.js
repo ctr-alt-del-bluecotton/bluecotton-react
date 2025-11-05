@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { fontGreyScale4, smallText2Light } from "../../styles/common";
+import { fontGreyScale4, smallText2Light } from "../../../../styles/common";
 
 const S = {};
 
