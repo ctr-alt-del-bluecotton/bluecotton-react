@@ -14,7 +14,7 @@ const Login = () => {
   const handleSubmitForm = handleSubmit(async (data) => {
     const {memberPasswordConfirm, ...member} = data;
 
-    const res = await fetch(`${process.env.REACT_APP_BACKEND_URL}/member/login`,{
+    const res = await fetch(`${process.env.REACT_APP_BACKEND_URL}/auth/login`,{
       headers: {
         "Content-Type" : "application/json"
       },
@@ -23,10 +23,10 @@ const Login = () => {
     })
 
     // 백앤드 연결시 활성화
-    // if(!res.ok){
-    //   alert("이메일 또는 비밀번호가 일치하지 않습니다");
-    //   return;
-    // }
+    if(!res.ok){
+      alert("이메일 또는 비밀번호가 일치하지 않습니다");
+      return;
+    }
     navigate("/main/som/all")
   })
 
@@ -84,7 +84,7 @@ const Login = () => {
         {/* social login */}
         <S.SocialButtons>
           {/* kakao */}
-          <S.SocialButton to="/kakao-login">
+          <S.SocialButton to="http://localhost:10000/oauth2/authorization/kakao">
             <img
               src={`${process.env.PUBLIC_URL}/assets/icons/kakao.png`}
               alt="kakao"
@@ -93,7 +93,7 @@ const Login = () => {
           </S.SocialButton>
 
           {/* google */}          
-          <S.SocialButton to="/google-login">
+          <S.SocialButton to="http://localhost:10000/oauth2/authorization/google">
             <img
               src={`${process.env.PUBLIC_URL}/assets/icons/google.png`}
               alt="google"
@@ -102,7 +102,7 @@ const Login = () => {
           </S.SocialButton>
           
           {/* naver */}          
-          <S.SocialButton to="/naver-login">
+          <S.SocialButton to="http://localhost:10000/oauth2/authorization/naver">
             <img
               src={`${process.env.PUBLIC_URL}/assets/icons/naver.png`}
               alt="naver"

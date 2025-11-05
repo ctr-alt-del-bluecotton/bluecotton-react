@@ -37,6 +37,7 @@ import PostReadContent from "../pages/post/readcontent/PostReadContent";
 import PostWriteContent from "../pages/post/postwritecontent/PostWriteContent";
 import PostModifyContent from "../pages/post/postModifyContent/PostModifyContent";
 import MySomCheck from "../pages/myPage/mysom/mysomcheck/MySomCheck";
+import SocialRedirect from "../pages/login/success/SocialRedirect";
 
 const router = createBrowserRouter([
   {
@@ -184,6 +185,10 @@ const router = createBrowserRouter([
   {
     path : "/login",
     element : <Login></Login>
+  },
+  {
+    path : "/oauth2/success",
+    element: <SocialRedirect />
   },
   {
     path : "/sign-up",
