@@ -14,22 +14,28 @@ S.floatingActionButtonWrap = styled.div`
 
 S.toUpIcon = styled.img`
   width: 15px;
+  user-select: none;
 `
 
 S.chatBotIcon = styled.img`
   width: 45px;
+  user-select: none;
 `
 
 S.chattingIcon = styled.img`
   width: 24px;
+  user-select: none;
 `
 
 S.somWriteIcon = styled.img`
   width: 20px;
   padding-right: 1px;
+  user-select: none;
 `
 
-S.menuButton = styled.div`
+S.menuButton = styled.div.withConfig({
+  shouldForwardProp: (prop) => prop !== "activeState"
+})`
   ${flexCenterColumn}
   ${white}
   position: absolute;
@@ -44,7 +50,9 @@ S.menuButton = styled.div`
   transition: background-color 0.2s ease;
 `
 
-S.menuHideButtonWrap = styled.div`
+S.menuHideButtonWrap = styled.div.withConfig({
+  shouldForwardProp: (prop) => prop !== "activeState"
+})`
   ${flexCenterColumn}
   position: absolute;
   display: flex;
@@ -57,10 +65,12 @@ S.menuHideButtonWrap = styled.div`
   pointer-events: ${({ activeState }) => (activeState ? "auto" : "none")};
   transition: all 0.45s cubic-bezier(0.22, 1, 0.36, 1);
   transition: opacity 0.4s ease, transform 0.4s ease;
-  bottom: 62px; /* 메뉴 버튼 위에 붙게 */
-`
+  bottom: 62px;
+`;
 
-S.buttonTextBubble = styled.div`
+S.buttonTextBubble = styled.div.withConfig({
+  shouldForwardProp: (prop) => prop !== "hover"
+})`
   ${smallText3Light}
   display: flex;
   align-items: center; /* ✅ 텍스트 수직 중앙 */
@@ -80,7 +90,9 @@ S.buttonTextBubble = styled.div`
   transition-delay: ${({ hover }) => (hover ? "0.05s" : "0s")};
 `;
 
-S.buttonWrapper = styled.div`
+S.buttonWrapper = styled.div.withConfig({
+  shouldForwardProp: (prop) => prop !== "hover"
+})`
   ${white}
   display: flex;
   align-items: center; /* 세로 중앙 정렬 */
@@ -111,7 +123,9 @@ S.inner = styled.div`
   justify-content: flex-end;
 `;
 
-S.topButton = styled.div`
+S.topButton = styled.div.withConfig({
+  shouldForwardProp: (prop) => prop !== "activeState"
+})`
   ${flexCenter}
   ${white}
   position: absolute;
@@ -136,7 +150,9 @@ S.menuButtons = styled.div`
   background-color: ${({theme}) => theme.PALLETE.primary.main };
 `
 
-S.menuPlusIcon = styled.img`
+S.menuPlusIcon = styled.img.withConfig({
+  shouldForwardProp: (prop) => prop !== "activeState"
+})`
   width: 16px;
   height: 16px;
   filter: ${({ activeState }) =>
