@@ -7,6 +7,13 @@ export const flexCenter = css`
   align-items: center;
 `
 
+export const flexStartColumn = css`
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+`
+
 export const flexBetweenRow = css`
   display: flex;
   justify-content: space-between;

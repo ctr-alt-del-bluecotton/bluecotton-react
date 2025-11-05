@@ -22,13 +22,13 @@ const SomContent = ({ content, somisLike, setSomisLikeList, somisLikeList }) => 
     setSomisLikeList(
       somisLikeList.map((item) =>
         String(item.somId) === String(id)
-          ? { ...item, isLike: !item.isLike }
+          ? { ...item, isLike: !item?.isLike }
           : item
     ));
   }
 
 
-  const isLike = somisLike.isLike;
+  const isLike = somisLike?.isLike ?? false;
   const isLikeButton = isLike ?
   <S.LikeButton onClick={isLikeButtonOnclick} $isLike={true}>
     <S.somLikeIcon src="../../assets/icons/som_read_like_active.png" alt="좋아요 아이콘"/> {/* 여기 하트 아이콘 들어갈 자리 ♥ */}

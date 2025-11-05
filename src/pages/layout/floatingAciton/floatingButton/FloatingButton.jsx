@@ -4,7 +4,8 @@ import S from './style';
 const FloatingButton = ({
   isFloatingSelect, setIsFloatingSelect,
   isHoverButtons, setIsHoverButtons,
-  isDisplayFloatingMenu, setIsDisplayFloatingMenu
+  isDisplayFloatingMenu, setIsDisplayFloatingMenu,
+  somMenuSelect
 }) => {
 
   const buttons = [
@@ -22,7 +23,7 @@ const FloatingButton = ({
     onMouseLeave: () => setIsHoverButtons((prev) =>
       prev.map((isHover, i) => (i === 0 ? false : isHover))
     ),
-    onClick: () => setIsDisplayFloatingMenu(!isDisplayFloatingMenu)
+    onClick: () => somMenuSelect("chatBot")
   },
   {
     label: "채팅",
@@ -38,7 +39,7 @@ const FloatingButton = ({
     onMouseLeave: () => setIsHoverButtons((prev) =>
       prev.map((isHover, i) => (i === 1 ? false : isHover))
     ),
-    onClick: () => setIsDisplayFloatingMenu(!isDisplayFloatingMenu)
+    onClick: () => somMenuSelect("chatting")
   },
   {
     label: "솜작성",
@@ -54,7 +55,7 @@ const FloatingButton = ({
     onMouseLeave: () => setIsHoverButtons((prev) =>
       prev.map((isHover, i) => (i === 2 ? false : isHover))
     ),
-    onClick: () => setIsDisplayFloatingMenu(!isDisplayFloatingMenu)
+    onClick: () => somMenuSelect("somWrite")
   },
 ];
   return (
@@ -65,8 +66,8 @@ const FloatingButton = ({
         </S.topButton>
         <S.menuHideButtonWrap activeState={isFloatingSelect}>
           {
-            buttons.map(({label, onClick, iconGroup, isHover, onMouseEnter, onMouseLeave}) => 
-              <S.buttonWrapper onClick={onClick} hover={isHover} onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
+            buttons.map(({label, onClick, iconGroup, isHover, onMouseEnter, onMouseLeave}, index) => 
+              <S.buttonWrapper key={index} onClick={onClick} hover={isHover} onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
                 <S.buttonTextBubble hover={isHover}>
                   {label}
                 </S.buttonTextBubble>
