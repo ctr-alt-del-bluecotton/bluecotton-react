@@ -1,15 +1,5 @@
 import React from 'react';
-import {
-  ListHeader,
-  ListContainer,
-  ListItem,
-  ItemType,
-  ItemTitle,
-  ItemDetails,
-  Pagination,
-  PageButton,
-  PageNumber
-} from '../style';
+import S from '../style';
 
 const MyPostLikeContainer = () => {
   const posts = [
@@ -42,27 +32,27 @@ const MyPostLikeContainer = () => {
 
   return (
     <div>
-      <ListHeader>좋아요(5개)</ListHeader>
+      <S.ListHeader>좋아요(5개)</S.ListHeader>
       
-      <ListContainer>
+      <S.ListContainer>
         {posts.map((post, index) => (
-          <ListItem key={index}>
+          <S.ListItem key={index}>
             <div>
-              <ItemType>{post.type}</ItemType>
-              <ItemTitle>{post.title}</ItemTitle>
-              <ItemDetails>
+              <S.ItemType>{post.type}</S.ItemType>
+              <S.ItemTitle>{post.title}</S.ItemTitle>
+              <S.ItemDetails>
                 <span>{post.date}</span>
-              </ItemDetails>
+              </S.ItemDetails>
             </div>
-          </ListItem>
+          </S.ListItem>
         ))}
-      </ListContainer>
+      </S.ListContainer>
 
-      <Pagination>
-        <PageButton disabled>&lt; 이전</PageButton>
-        <PageNumber>1</PageNumber>
-        <PageButton disabled={false}>다음 &gt;</PageButton>
-      </Pagination>
+      <S.Pagination>
+        <S.PageButton disabled>&lt; 이전</S.PageButton>
+        <S.PageNumber>1</S.PageNumber>
+        <S.PageButton disabled={false}>다음 &gt;</S.PageButton>
+      </S.Pagination>
     </div>
   );
 };

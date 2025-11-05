@@ -1,19 +1,5 @@
 import React, { useMemo, useState } from "react";
-import {
-  FilterContainer,
-  FilterButton,
-  ListHeader,
-  ListContainer,
-  ListItem,
-  Pagination,
-  PageButton,
-  PageNumber,
-  DeliveryItemImage,
-  ItemContent,
-  OrderProductName,
-  PurchaseDate,
-  ActionButton
-} from "../style";
+import S from "../style";
 import ReviewModal from "../review/ReviewModal";
 
 const formatDotDate = (str) => str.split("T")[0].replace(/-/g, ".");
@@ -57,68 +43,68 @@ export default function MyShopDeliveryContainer() {
   return (
     <div>
       {/* 상태 필터 */}
-      <FilterContainer>
-        <FilterButton
+      <S.FilterContainer>
+        <S.FilterButton
           active={activeFilter === "pending"}
           onClick={() => setActiveFilter("pending")}
         >
           {label.pending}
-        </FilterButton>
-        <FilterButton
+        </S.FilterButton>
+        <S.FilterButton
           active={activeFilter === "shipping"}
           onClick={() => setActiveFilter("shipping")}
         >
           {label.shipping}
-        </FilterButton>
-        <FilterButton
+        </S.FilterButton>
+        <S.FilterButton
           active={activeFilter === "completed"}
           onClick={() => setActiveFilter("completed")}
         >
           {label.completed}
-        </FilterButton>
-      </FilterContainer>
+        </S.FilterButton>
+      </S.FilterContainer>
 
       {/* 제목 */}
-      <ListHeader>
+      <S.ListHeader>
         {label[activeFilter]}({items.length}개)
-      </ListHeader>
+      </S.ListHeader>
 
-      <ListContainer>
+      <S.ListContainer>
         {items.map((item) => (
-          <ListItem key={item.id}>
+          <S.ListItem key={item.id}>
             <div style={{ display: "flex", alignItems: "center", width: "100%" }}>
-              <DeliveryItemImage />
+              <S.DeliveryItemImage />
 
-              <ItemContent>
+              <S.ItemContent>
                 <div>상품</div>
-                <OrderProductName>{item.name}</OrderProductName>
+                <S.OrderProductName>{item.name}</S.OrderProductName>
                 <div>구매 일자</div>
-                <PurchaseDate>{formatDotDate(item.date)}</PurchaseDate>
-              </ItemContent>
+                <S.PurchaseDate>{formatDotDate(item.date)}</S.PurchaseDate>
+              </S.ItemContent>
 
               <div>
                 {activeFilter === "pending" && (
-                  <ActionButton>구매 취소</ActionButton>
+                  <S.ActionButton>구매 취소</S.ActionButton>
                 )}
 
                 {activeFilter === "completed" && (
-                  <ActionButton primary onClick={() => openReview(item)}>
+                  <S.ActionButton primary onClick={() => openReview(item)}>
                     리뷰하기
-                  </ActionButton>
+                  </S.ActionButton>
                 )}
                 {/* 배송중은 버튼 없음 */}
               </div>
             </div>
-          </ListItem>
+          </S.ListItem>
         ))}
-      </ListContainer>
+      </S.ListContainer>
 
       {/* 페이지네이션 */}
-      <Pagination>
-        <PageButton disabled>&lt; 이전</PageButton>
-        <PageNumber>1</PageNumber>
-        <PageButton>다음 &gt;</PageButton>
-      </Pagination>
+      <S.Pagination>
+        <S.PageButton disabled>&lt; 이전</S.PageButton>
+        <S.PageNumber>1</S.PageNumber>
+        <S.PageButton>다음 &gt;</S.PageButton>
+      </S.Pagination>
 
       {/* 리뷰 모달 */}
       <ReviewModal

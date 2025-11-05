@@ -1,6 +1,6 @@
 import React from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { TabContainer, Tab } from './style';
+import S from './style';
 
 const MyShopContainer = () => {
   const location = useLocation();
@@ -29,17 +29,17 @@ const MyShopContainer = () => {
 
   return (
     <div>
-      <TabContainer>
+      <S.TabContainer>
         {tabs.map(tab => (
-          <Tab
+          <S.Tab
             key={tab.id}
             active={getActiveTab() === tab.id}
             onClick={() => handleTabClick(tab.path)}
           >
             {tab.label}
-          </Tab>
+          </S.Tab>
         ))}
-      </TabContainer>
+      </S.TabContainer>
       
       <Outlet />
     </div>

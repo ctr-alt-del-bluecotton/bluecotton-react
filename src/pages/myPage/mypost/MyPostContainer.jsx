@@ -1,6 +1,6 @@
 import React from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { ContentTitle, ContentSubtitle, TabContainer, Tab } from './style';
+import S from './style';
 
 const MyPostContainer = () => {
   const location = useLocation();
@@ -29,20 +29,20 @@ const MyPostContainer = () => {
 
   return (
     <div>
-      <ContentTitle>오늘의 솜 현황이 궁금하세요?</ContentTitle>
-      <ContentSubtitle>게시판 현황을 확인할 수 있어요.</ContentSubtitle>
+      <S.ContentTitle>오늘의 솜 현황이 궁금하세요?</S.ContentTitle>
+      <S.ContentSubtitle>게시판 현황을 확인할 수 있어요.</S.ContentSubtitle>
       
-      <TabContainer>
+      <S.TabContainer>
         {tabs.map(tab => (
-          <Tab
+          <S.Tab
             key={tab.id}
             active={getActiveTab() === tab.id}
             onClick={() => handleTabClick(tab.path)}
           >
             {tab.label}
-          </Tab>
+          </S.Tab>
         ))}
-      </TabContainer>
+      </S.TabContainer>
       
       <Outlet />
     </div>

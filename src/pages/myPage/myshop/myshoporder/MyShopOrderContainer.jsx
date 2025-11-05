@@ -1,17 +1,5 @@
 import React from 'react';
-import {
-  ListHeader,
-  ListContainer,
-  ListItem,
-  Pagination,
-  PageButton,
-  PageNumber,
-  OrderItemImage,
-  ItemContent,
-  OrderProductName,
-  PurchaseDate,
-  OrderActionButton
-} from '../style';
+import S from '../style';
 import ReviewModal from '../review/ReviewModal';
 
 
@@ -47,31 +35,31 @@ const MyShopOrderContainer = () => {
 
   return (
     <div>
-      <ListHeader>구매내역(5개)</ListHeader>
+      <S.ListHeader>구매내역(5개)</S.ListHeader>
 
-      <ListContainer>
+      <S.ListContainer>
         {orders.map(order => (
-          <ListItem key={order.id}>
+          <S.ListItem key={order.id}>
             <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
-              <OrderItemImage />
-              <ItemContent>
+              <S.OrderItemImage />
+              <S.ItemContent>
                 <div>상품</div>
-                <OrderProductName>{order.name}</OrderProductName>
+                <S.OrderProductName>{order.name}</S.OrderProductName>
                 <div>구매 일자</div>
-                <PurchaseDate>{formatDotDate(order.date)}</PurchaseDate>
-              </ItemContent>
+                <S.PurchaseDate>{formatDotDate(order.date)}</S.PurchaseDate>
+              </S.ItemContent>
 
-              <OrderActionButton onClick={() => openReview(order)}>리뷰하기</OrderActionButton>
+              <S.OrderActionButton onClick={() => openReview(order)}>리뷰하기</S.OrderActionButton>
             </div>
-          </ListItem>
+          </S.ListItem>
         ))}
-      </ListContainer>
+      </S.ListContainer>
 
-      <Pagination>
-        <PageButton disabled>&lt; 이전</PageButton>
-        <PageNumber>1</PageNumber>
-        <PageButton>다음 &gt;</PageButton>
-      </Pagination>
+      <S.Pagination>
+        <S.PageButton disabled>&lt; 이전</S.PageButton>
+        <S.PageNumber>1</S.PageNumber>
+        <S.PageButton>다음 &gt;</S.PageButton>
+      </S.Pagination>
 
       {/* 리뷰 모달: 렌더링 */}
       <ReviewModal

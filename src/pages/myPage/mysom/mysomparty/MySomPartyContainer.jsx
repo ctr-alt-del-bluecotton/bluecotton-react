@@ -1,28 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  ContentTitle,
-  ContentSubtitle,
-  FilterContainer,
-  FilterButton,
-  ListContainer,
-  ListItem,
-  ItemType,
-  ItemTitle,
-  ItemDetails,
-  Pagination,
-  PageButton,
-  PageNumber,
-  ActionButton,
-  CancelButton,
-  PopupModalOverlay,
-  PopupModal,
-  CloseButton,
-  PopupTitle,
-  OptionGrid,
-  OptionBtn,
-  PopupFooter
-} from '../style';
+import S from '../style';
 
 const feedbackOptions = [
   '챌린지 난이도가 적당했어요',
@@ -93,94 +71,91 @@ const MySomPartyContainer = () => {
 
   return (
     <div>
-      <ContentTitle>파티 솜 현황이 궁금하세요?</ContentTitle>
-      <ContentSubtitle>파티 솜 현황을 확인할 수 있어요.</ContentSubtitle>
-      
-      <FilterContainer>
-        <FilterButton
+      <S.FilterContainer>
+        <S.FilterButton
           active={activeFilter === 'scheduled'}
           onClick={() => setActiveFilter('scheduled')}
         >
           진행예정 (2개)
-        </FilterButton>
-        <FilterButton
+        </S.FilterButton>
+        <S.FilterButton
           active={activeFilter === 'progress'}
           onClick={() => setActiveFilter('progress')}
         >
           진행중 (2개)
-        </FilterButton>
-        <FilterButton
+        </S.FilterButton>
+        <S.FilterButton
           active={activeFilter === 'completed'}
           onClick={() => setActiveFilter('completed')}
         >
           진행완료(15개)
-        </FilterButton>
-      </FilterContainer>
+        </S.FilterButton>
+      </S.FilterContainer>
       
-      <ListContainer>
+      <S.ListContainer>
         {challenges.map((challenge, index) => (
-          <ListItem key={index}>
+          <S.ListItem key={index}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
               <div>
-                <ItemType>{challenge.type}</ItemType>
-                <ItemTitle>{challenge.title}</ItemTitle>
-                <ItemDetails>
+                <S.ItemType>{challenge.type}</S.ItemType>
+                <S.ItemTitle>{challenge.title}</S.ItemTitle>
+                <S.ItemDetails>
                   <span>{challenge.date} {challenge.repeat}</span>
-                </ItemDetails>
+                </S.ItemDetails>
               </div>
 
               {/* ✅ 진행예정은 버튼 숨김, 나머지는 상태에 따라 버튼 표시 */}
               {getButtonLabel() && (
                 <div style={{ display: 'flex', alignItems: 'center' }}>
                   {activeFilter === 'progress' ? (
-                    <ActionButton onClick={()=>navigate('/main/my-page/my-som-check')}>
+                    <S.ActionButton onClick={()=>navigate('/main/my-page/my-som-check')}>
                       {getButtonLabel()}
-                    </ActionButton>
+                    </S.ActionButton>
                   ) : (
-                    <ActionButton onClick={()=>setShowPopup(true)}>
+                    <S.ActionButton onClick={()=>setShowPopup(true)}>
                       {getButtonLabel()}
-                    </ActionButton>
+                    </S.ActionButton>
                   )}
                   {activeFilter === 'progress' && (
-                    <CancelButton onClick={() => {
+                    <S.CancelButton onClick={() => {
                       // 중단하기 로직 구현
                       console.log('챌린지 중단');
                     }}>
                       중단하기
-                    </CancelButton>
+                    </S.CancelButton>
                   )}
                 </div>
               )}
             </div>
-          </ListItem>
+          </S.ListItem>
         ))}
-      </ListContainer>
+      </S.ListContainer>
 
-      <Pagination>
-        <PageButton disabled>&lt; 이전</PageButton>
-        <PageNumber>1</PageNumber>
-        <PageButton disabled={false}>다음 &gt;</PageButton>
-      </Pagination>
+      <S.Pagination>
+        <S.PageButton disabled>&lt; 이전</S.PageButton>
+        <S.PageNumber>1</S.PageNumber>
+        <S.PageButton disabled={false}>다음 &gt;</S.PageButton>
+      </S.Pagination>
 
       {/* 팝업 모달 */}
       {showPopup && (
-        <PopupModalOverlay>
-          <PopupModal>
-            <CloseButton onClick={()=>setShowPopup(false)}>×</CloseButton>
-            <PopupTitle>{teamLeaderName}팀장의 어떤 점이 좋았는지 선택해주세요! <span style={{fontSize:'14px',fontWeight:'normal',color:'#222'}}>(최대 3개, 복수선택가능)</span></PopupTitle>
+        <S.PopupModalOverlay>
+          <S.PopupModal>
+            <S.CloseButton onClick={()=>setShowPopup(false)}>×</S.CloseButton>
+            <S.PopupTitle>{teamLeaderName}팀장의 어떤 점이 좋았는지 선택해주세요! <span style={{fontSize:'14px',fontWeight:'normal',color:'#222'}}>(최대 3개, 복수선택가능)</span></S.PopupTitle>
             <div style={{fontSize:'13px',color:'#AAB6BF',margin:'0 0 8px'}}>설문은 익명으로 저장되며 더 나은 소식지를 위해 활용됩니다.</div>
-            <OptionGrid>
+            <S.OptionGrid>
               {feedbackOptions.map((option, i) => (
-                <OptionBtn key={i} selected={selected.includes(i)} onClick={()=>handleOptionClick(i)}>
+                <S.OptionBtn key={i} selected={selected.includes(i)} onClick={()=>handleOptionClick(i)}>
                   {option}
-                </OptionBtn>
+                </S.OptionBtn>
               ))}
-            </OptionGrid>
-            <PopupFooter>
-              <ActionButton type="button" onClick={()=>{setShowPopup(false);setSelected([]);}}>완료</ActionButton>
-            </PopupFooter>
-          </PopupModal>
-        </PopupModalOverlay>
+            </S.OptionGrid>
+            <S.PopupFooter>
+              <S.ActionButton type="button" onClick={()=>{setShowPopup(false);setSelected([]);}}>완료</S.ActionButton>
+            </S.PopupFooter>
+          </S.PopupModal>
+        </S.PopupModalOverlay>
       )}
     </div>
   );

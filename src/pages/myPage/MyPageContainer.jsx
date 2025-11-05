@@ -1,6 +1,6 @@
 import React from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
-import { MyPageWrapper, MainContentContainer, SidebarContainer, ProfileContainer, ProfileImageWrapper, ProfileImage, SomBadge, UserNameContainer, GradeBadge, UserName, NavigationList, NavLink } from './style';
+import S from './style';
 
 const MyPageContainer = () => {
   const location = useLocation();
@@ -14,36 +14,36 @@ const MyPageContainer = () => {
   };
 
   return (
-    <MyPageWrapper>
-      <SidebarContainer>
-        <ProfileContainer>
-          <ProfileImageWrapper>
-            <ProfileImage />
-          </ProfileImageWrapper>
-          <UserNameContainer>
-            <GradeBadge>S</GradeBadge>
-            <UserName>zl존준서</UserName>
-          </UserNameContainer>
-        </ProfileContainer>
-        <NavigationList>
-          <NavLink to="/main/my-page/my-som/auth" $active={isActive('/main/my-page/my-som')}>
+    <S.MyPageWrapper>
+      <S.SidebarContainer>
+        <S.ProfileContainer>
+          <S.ProfileImageWrapper>
+            <S.ProfileImage />
+          </S.ProfileImageWrapper>
+          <S.UserNameContainer>
+            <S.GradeBadge>S</S.GradeBadge>
+            <S.UserName>zl존준서</S.UserName>
+          </S.UserNameContainer>
+        </S.ProfileContainer>
+        <S.NavigationList>
+          <S.NavLink to="/main/my-page/my-som/auth" $active={isActive('/main/my-page/my-som')}>
             마이 솜
-          </NavLink>
-          <NavLink to="/main/my-page/my-shop/like" $active={isActive('/main/my-page/my-shop')}>
+          </S.NavLink>
+          <S.NavLink to="/main/my-page/my-shop/like" $active={isActive('/main/my-page/my-shop')}>
             마이 샵
-          </NavLink>
-          <NavLink to="/main/my-page/my-post/write" $active={isActive('/main/my-page/my-post')}>
+          </S.NavLink>
+          <S.NavLink to="/main/my-page/my-post/write" $active={isActive('/main/my-page/my-post')}>
             게시판
-          </NavLink>
-          <NavLink to="/main/my-page/my-info" $active={isActive('/main/my-page/my-info')}>
+          </S.NavLink>
+          <S.NavLink to="/main/my-page/my-info" $active={isActive('/main/my-page/my-info')}>
             회원관리
-          </NavLink>
-        </NavigationList>
-      </SidebarContainer>
-      <MainContentContainer>
+          </S.NavLink>
+        </S.NavigationList>
+      </S.SidebarContainer>
+      <S.MainContentContainer>
         <Outlet />
-      </MainContentContainer>
-    </MyPageWrapper>
+      </S.MainContentContainer>
+    </S.MyPageWrapper>
   );
 };
 
