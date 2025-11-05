@@ -20,12 +20,13 @@ import {
   SummaryRow,
   OrderButton,
   Checkbox as SCheckbox,
+  ResetButton,
 } from "../style";
 import { Link } from "react-router-dom";
-import { useModal } from "../../../../components/modal/useModal"; // ✅ 공용 모달 훅 추가
+import { useModal } from "../../../../components/modal/useModal"; 
 
 const MyShopCartContainer = () => {
-  const { openModal } = useModal(); // ✅ 전역 모달 훅 사용
+  const { openModal } = useModal(); 
 
   const generalData = useMemo(
     () => [
@@ -90,13 +91,13 @@ const MyShopCartContainer = () => {
     .filter((it) => checkedIds.has(it.id))
     .reduce((sum, it) => sum + it.price * (qtyMap[it.id] || 1), 0);
 
-  /* ✅ 삭제 모달 (공용 모달 사용) */
+ 
   const handleDelete = (id) => {
     const item = currentItems.find((it) => it.id === id);
     openModal({
       title: "상품을 삭제하시겠습니까?",
       message: `${item?.name ?? "선택한 상품"}을(를) 장바구니에서 삭제합니다.`,
-      confirmText: "삭제하기",
+      confirmText: "삭제",
       cancelText: "취소",
       onConfirm: () => setCurrentItems((prev) => prev.filter((it) => it.id !== id)),
     });
@@ -122,18 +123,10 @@ const MyShopCartContainer = () => {
           <SCheckbox checked={allChecked} onChange={toggleAll} aria-label="전체선택" />
           전체선택
         </SelectAll>
-        <button
-          style={{
-            padding: "8px 16px",
-            backgroundColor: "#E0E0E0",
-            border: "none",
-            borderRadius: 8,
-            cursor: "pointer",
-          }}
-          onClick={() => setCheckedIds(new Set())}
-        >
+
+      <ResetButton onClick={() => setCheckedIds(new Set())} >
           선택해제
-        </button>
+      </ResetButton>
       </CartHeader>
 
       {/* 아이템 리스트 */}
@@ -156,7 +149,7 @@ const MyShopCartContainer = () => {
                     <ItemName>{item.name}</ItemName>
                     <div
                       style={{ color: "#757575", fontSize: 14, marginBottom: 8, cursor: "pointer" }}
-                      onClick={() => handleDelete(item.id)} // ✅ 삭제 버튼에 모달 연결
+                      onClick={() => handleDelete(item.id)} 
                     >
                       삭제
                     </div>
