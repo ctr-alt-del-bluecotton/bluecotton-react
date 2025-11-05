@@ -14,7 +14,6 @@ const IntroBanner = () => {
     return (
         <IntroStyle.IntroBannerWarp>
             <IntroStyle.IntroBannerContainer>
-                {/* <IntroStyle.IntroBannerImage src="/assets/images/intro_main.png" alt="배너이미지" /> */}
                 <IntroStyle.IntroBannerText1>
                     <p>함께 <IntroStyle.IntroBannerText2>'솜'</IntroStyle.IntroBannerText2>하며 도전하는 우리</p>
                     <p>블루코튼에서 쉽고 간편하게</p>

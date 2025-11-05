@@ -1,7 +1,6 @@
 import styled from "styled-components";
-import { backgroundGreyScale0, basic, fontGreyScale0, fontGreyScale3, heading1, heading2, heading3, heading4, heading6, paragraphLight, paragraphRegular, paragraphStrong, primary, primaryLight1, secondary, secondaryDark, secondaryLight, smallText3Regular, subtitle, subtitleRegular, titleBold, white } from "../../styles/common";
-import {fontCSS, shapeCSS, sizeCSS } from "../button/style";
-import { faStickyNote } from "@fortawesome/free-solid-svg-icons";
+import { basic, fontGreyScale0, fontGreyScale3, heading1, heading2, heading3, heading4, paragraphLight, paragraphRegular, paragraphStrong, primary, primaryLight1, secondary, secondaryDark, secondaryLight, smallText3Regular, subtitle, subtitleRegular, titleBold, white } from "../../styles/common";
+import {shapeCSS, sizeCSS } from "../button/style";
 
 const IntroStyle = {};
 
@@ -25,17 +24,6 @@ IntroStyle.IntroBannerContainer = styled.div `
     position: relative;
     z-index: 1;
 `
-
-// IntroStyle.IntroBannerImage = styled.img `
-//     position: absolute;
-//     /* transform: translateX(-50%); */
-//     top: 0;
-//     left: 50%;
-//     z-index: 1;
-//     width: 1920px;
-//     height: 1177px;
-//     object-fit: cover;
-// `
 
 IntroStyle.IntroBannerText1 = styled.div `
     ${heading2}
@@ -285,7 +273,7 @@ IntroStyle.IntroGradeTextContainer = styled.div `
 IntroStyle.IntroGradeCard = styled.div `
   background: #FFFFFF;
   border-radius: 10px;
-  box-shadow: 0 15px 22px rgba(0,0,0,0.4), 0 2px 6px rgba(0,0,0,0.1);
+  box-shadow: 0 15px 22px rgba(0,0,0,0.1);
 `
 
 IntroStyle.IntroGradeUpCard = styled(IntroStyle.IntroGradeCard) `
