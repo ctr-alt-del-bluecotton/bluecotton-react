@@ -11,19 +11,7 @@ const ShopList = ({ items }) => {
       return next;
     });
 
-  const data = Array.isArray(items) && items.length > 0
-      ? items
-      : [...Array(8)].map((_, i) => ({
-          id: i + 1,
-          name: `상품 ${i + 1}`,
-          imageUrl: `products/sample_${i + 1}.png`,
-          priceText: "10,000원",
-          score: "4.8",
-          reviewCount: 22,
-          likeCount: 255,
-          isNew: true,
-          isBest: i % 2 === 0,
-        }));
+  const data = items;
 
   return (
     <S.CardGrid>
