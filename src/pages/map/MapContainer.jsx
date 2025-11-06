@@ -18,8 +18,9 @@ const MapContainer = () => {
   // DB에서 모든 회원 주소 가져오기
   const fetchAddresses = async () => {
     try {
-      const res = await fetch(`${process.env.REACT_APP_BACKEND_URL}/member/member-address`);
+      const res = await fetch(`${process.env.REACT_APP_BACKEND_URL}/som/address`);
       const result = await res.json();
+      console.log("응답", result);
       setAddressList(result.data); // ["주소1", "주소2", ...]
     } catch (error) {
       console.error("주소 데이터를 불러오는 데 실패했습니다:", error);
