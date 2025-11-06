@@ -1,21 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import {
-  ContentTitle,
-  ContentSubtitle,
-  FilterContainer,
-  FilterButton,
-  ListContainer,
-  ListItem,
-  ItemType,
-  ItemTitle,
-  ItemDetails,
-  Pagination,
-  PageButton,
-  PageNumber,
-  ActionButton,
-  CancelButton
-} from '../style';
+import S from '../style';
 
 const MySomSoloContainer = () => {
   const navigate = useNavigate();
@@ -51,33 +36,30 @@ const MySomSoloContainer = () => {
 
   return (
     <div>
-      <ContentTitle>솔로 솜 현황이 궁금하세요?</ContentTitle>
-      <ContentSubtitle>솔로 솜 현황을 확인할 수 있어요.</ContentSubtitle>
-      
-      <FilterContainer>
-        <FilterButton
+      <S.FilterContainer>
+        <S.FilterButton
           active={activeFilter === 'scheduled'}
           onClick={() => setActiveFilter('scheduled')}
         >
           진행예정 (2개)
-        </FilterButton>
-        <FilterButton
+        </S.FilterButton>
+        <S.FilterButton
           active={activeFilter === 'progress'}
           onClick={() => setActiveFilter('progress')}
         >
           진행중 (2개)
-        </FilterButton>
-        <FilterButton
+        </S.FilterButton>
+        <S.FilterButton
           active={activeFilter === 'completed'}
           onClick={() => setActiveFilter('completed')}
         >
           진행완료 (15개)
-        </FilterButton>
-      </FilterContainer>
+        </S.FilterButton>
+      </S.FilterContainer>
       
-      <ListContainer>
+      <S.ListContainer>
         {challenges.map((challenge, index) => (
-          <ListItem key={index}>
+          <S.ListItem key={index}>
             <div style={{
               display: 'flex',
               justifyContent: 'space-between',
@@ -85,37 +67,37 @@ const MySomSoloContainer = () => {
               width: '100%'
             }}>
               <div>
-                <ItemType>{challenge.type}</ItemType>
-                <ItemTitle>{challenge.title}</ItemTitle>
-                <ItemDetails>
+                <S.ItemType>{challenge.type}</S.ItemType>
+                <S.ItemTitle>{challenge.title}</S.ItemTitle>
+                <S.ItemDetails>
                   <span>{challenge.date} {challenge.repeat}</span>
-                </ItemDetails>
+                </S.ItemDetails>
               </div>
 
               {/* ✅ 진행예정은 버튼 숨김, 진행중만 표시 */}
               {getButtonLabel() && (
                 <div style={{ display: 'flex', alignItems: 'center' }}>
-                  <ActionButton onClick={() => navigate(getButtonPath())}>
+                  <S.ActionButton onClick={() => navigate(getButtonPath())}>
                     {getButtonLabel()}
-                  </ActionButton>
-                  <CancelButton onClick={() => {
+                  </S.ActionButton>
+                  <S.CancelButton onClick={() => {
                     // 중단하기 로직 구현
                     console.log('챌린지 중단');
                   }}>
                     중단하기
-                  </CancelButton>
+                  </S.CancelButton>
                 </div>
               )}
             </div>
-          </ListItem>
+          </S.ListItem>
         ))}
-      </ListContainer>
+      </S.ListContainer>
 
-      <Pagination>
-        <PageButton disabled>&lt; 이전</PageButton>
-        <PageNumber>1</PageNumber>
-        <PageButton disabled={false}>다음 &gt;</PageButton>
-      </Pagination>
+      <S.Pagination>
+        <S.PageButton disabled>&lt; 이전</S.PageButton>
+        <S.PageNumber>1</S.PageNumber>
+        <S.PageButton disabled={false}>다음 &gt;</S.PageButton>
+      </S.Pagination>
     </div>
   );
 };

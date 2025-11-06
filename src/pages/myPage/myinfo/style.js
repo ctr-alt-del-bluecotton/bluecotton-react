@@ -1,40 +1,42 @@
 import styled from 'styled-components';
+import * as C from '../../../styles/common';
 
-export const FormContainer = styled.div`
+const S = {};
+
+S.FormContainer = styled.div`
   max-width: 800px;
 `;
 
-export const Title = styled.h1`
-  font-size: 32px;
-  font-weight: bold;
+S.Title = styled.h1`
+  ${C.heading5}
   color: ${({ theme }) => theme.PALLETE.basic};
   margin-bottom: 12px;
 `;
 
-export const Subtitle = styled.p`
-  font-size: 18px;
+S.Subtitle = styled.p`
+  ${C.subtitleRegular}
   color: ${({ theme }) => theme.PALLETE.grey.greyScale3};
   margin-bottom: 40px;
 `;
 
-export const FormSection = styled.div`
+S.FormSection = styled.div`
   margin-bottom: 40px;
 `;
 
-export const Label = styled.label`
+S.Label = styled.label`
   display: block;
-  font-size: 18px;
+  ${C.subtitleRegular}
   font-weight: 600;
   color: ${({ theme }) => theme.PALLETE.basic};
   margin-bottom: 14px;
 `;
 
-export const Input = styled.input`
+S.Input = styled.input`
   width: 100%;
   padding: 12px 16px;
   border: 1px solid ${({ theme }) => theme.PALLETE.grey.greyScale1};
   border-radius: 8px;
-  font-size: 16px;
+  ${C.smallText3Regular}
   box-sizing: border-box;
   
   &:focus {
@@ -43,20 +45,19 @@ export const Input = styled.input`
   }
 `;
 
-export const ButtonGroup = styled.div`
+S.ButtonGroup = styled.div`
   display: flex;
   gap: 12px;
   align-items: stretch;
 `;
 
-export const PrimaryButton = styled.button`
+S.PrimaryButton = styled.button`
   padding: 12px 16px;
   background-color: ${({ theme }) => theme.PALLETE.primary.main};
   color: ${({ theme }) => theme.PALLETE.white};
   border: none;
   border-radius: 8px;
-  font-size: 14px;
-  font-weight: 500;
+  ${C.smallText2Regular}
   font-family: 'Daeojamjil', sans-serif;
   cursor: pointer;
   white-space: nowrap;
@@ -68,17 +69,17 @@ export const PrimaryButton = styled.button`
   }
 `;
 
-export const DateRow = styled.div`
+S.DateRow = styled.div`
   display: flex;
   gap: 12px;
   align-items: center;
 `;
 
-export const Select = styled.select`
+S.Select = styled.select`
   padding: 12px 16px;
   border: 1px solid ${({ theme }) => theme.PALLETE.grey.greyScale1};
   border-radius: 8px;
-  font-size: 16px;
+  ${C.smallText3Regular}
   
   &:focus {
     outline: none;
@@ -86,16 +87,16 @@ export const Select = styled.select`
   }
 `;
 
-export const RadioGroup = styled.div`
+S.RadioGroup = styled.div`
   display: flex;
   gap: 16px;
 `;
 
-export const RadioLabel = styled.label`
+S.RadioLabel = styled.label`
   display: flex;
   align-items: center;
   gap: 4px;
-  font-size: 16px;
+  ${C.smallText3Regular}
   cursor: pointer;
 
   input[type="radio"] {
@@ -130,7 +131,7 @@ export const RadioLabel = styled.label`
   }
 `;
 
-export const ImagePreview = styled.div`
+S.ImagePreview = styled.div`
   width: 200px;
   height: 200px;
   border: 2px dashed ${({ theme, $hasImage }) => $hasImage ? 'transparent' : theme.PALLETE.grey.greyScale1};
@@ -152,30 +153,30 @@ export const ImagePreview = styled.div`
   }
 `;
 
-export const HiddenFileInput = styled.input`
+S.HiddenFileInput = styled.input`
   display: none;
 `;
 
-export const FileInfo = styled.div`
-  font-size: 14px;
+S.FileInfo = styled.div`
+  ${C.smallText2Regular}
   color: ${({ theme }) => theme.PALLETE.grey.greyScale4};
   margin-bottom: 8px;
 `;
 
-export const ActionButtons = styled.div`
+S.ActionButtons = styled.div`
   display: flex;
   gap: 16px;
   margin-top: 40px;
 `;
 
-export const SubmitButton = styled.button`
+S.SubmitButton = styled.button`
   flex: 1;
   padding: 16px;
   background-color: ${({ theme }) => theme.PALLETE.primary.main};
   color: ${({ theme }) => theme.PALLETE.white};
   border: none;
   border-radius: 8px;
-  font-size: 18px;
+  ${C.subtitleRegular}
   font-weight: 700;
   font-family: 'Daeojamjil', sans-serif;
   cursor: pointer;
@@ -185,11 +186,13 @@ export const SubmitButton = styled.button`
   }
 `;
 
-export const DeleteButton = styled(SubmitButton)`
+S.DeleteButton = styled(S.SubmitButton)`
   background-color: ${({ theme }) => theme.PALLETE.warning};
   
   &:hover {
     opacity: 0.9;
   }
 `;
+
+export default S;
 
