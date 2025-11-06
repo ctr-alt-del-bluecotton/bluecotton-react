@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import * as S from "./style";
+import S from "./style";
 import { useModal } from "../../../components/modal";
 import { Editor } from "@toast-ui/react-editor";
 import "@toast-ui/editor/dist/toastui-editor.css";
@@ -180,8 +180,9 @@ const PostModifyContent = () => {
           <Editor
             ref={editorRef}
             previewStyle="vertical"
-            height="500px"
+            height="400px"
             initialEditType="wysiwyg"
+            hideModeSwitch={true}
             placeholder="수정할 내용을 자유롭게 입력해주세요"
             useCommandShortcut={true}
             hooks={{ addImageBlobHook: handleImageUpload }}
