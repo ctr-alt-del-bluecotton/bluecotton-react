@@ -1,12 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import {
-  ListHeader,
-  LikeGrid, LikeCard,
-  ProductImageBox, LikeHeartBtn,
-  ProductTitleRow, ProductShopName, NewTag, BestTag,
-  PriceText, MetaRow, IconText, Spacer, Pagination, PageButton, PageNumber
-} from "../style";
+import S from "../style";
 
 const MyShopLikeContainer = () => {
   const initialItems = useMemo(
@@ -44,16 +38,16 @@ const MyShopLikeContainer = () => {
 
   return (
     <>
-      <ListHeader>찜한상품({items.length}개)</ListHeader>
+      <S.ListHeader>찜한상품({items.length}개)</S.ListHeader>
 
-      <LikeGrid>
+      <S.LikeGrid>
         {items.map(item => {
           const active = liked.has(item.id);
 
           return (
-            <LikeCard key={item.id}>
+            <S.LikeCard key={item.id}>
 
-              <LikeHeartBtn
+              <S.LikeHeartBtn
                 aria-label={active ? "찜 취소" : "찜하기"}
                 aria-pressed={active}
                 $active={active}
@@ -71,40 +65,40 @@ const MyShopLikeContainer = () => {
                 style={{ display: "block", textDecoration: "none", color: "inherit" }}
               >
                 {/* 218×290 세로 직사각형 이미지 타일 */}
-                <ProductImageBox $bg={item.imageUrl} />
+                <S.ProductImageBox $bg={item.imageUrl} />
 
-                <ProductTitleRow>
-                  <ProductShopName title={item.name}>{item.name}</ProductShopName>
-                  {item.isNew && <NewTag>NEW</NewTag>}
-                  {item.isBest && <BestTag>BEST</BestTag>}
-                </ProductTitleRow>
+                <S.ProductTitleRow>
+                  <S.ProductShopName title={item.name}>{item.name}</S.ProductShopName>
+                  {item.isNew && <S.NewTag>NEW</S.NewTag>}
+                  {item.isBest && <S.BestTag>BEST</S.BestTag>}
+                </S.ProductTitleRow>
 
                 {/* 가격 */}
-                <PriceText>{item.priceText}</PriceText>
+                <S.PriceText>{item.priceText}</S.PriceText>
 
-                <MetaRow>
-                  <IconText>
+                <S.MetaRow>
+                  <S.IconText>
                     <img src="/assets/icons/review.svg" alt="리뷰 아이콘" />
                     <span>{item.score} ({item.reviewCount})</span>
-                  </IconText>
-                  <Spacer />
-                  <IconText>
+                  </S.IconText>
+                  <S.Spacer />
+                  <S.IconText>
                     <img src="/assets/icons/filedlike.svg" alt="찜 아이콘" />
                     <span>{item.likeCount}</span>
-                  </IconText>
-                </MetaRow>
+                  </S.IconText>
+                </S.MetaRow>
               </Link>
 
-            </LikeCard>
+            </S.LikeCard>
           );
         })}
-      </LikeGrid>
+      </S.LikeGrid>
 
-      <Pagination>
-        <PageButton disabled>&lt; 이전</PageButton>
-        <PageNumber>1</PageNumber>
-        <PageButton disabled={false}>다음 &gt;</PageButton>
-      </Pagination>
+      <S.Pagination>
+        <S.PageButton disabled>&lt; 이전</S.PageButton>
+        <S.PageNumber>1</S.PageNumber>
+        <S.PageButton disabled={false}>다음 &gt;</S.PageButton>
+      </S.Pagination>
       
       
     </>

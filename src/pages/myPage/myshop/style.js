@@ -1,33 +1,33 @@
 import styled from 'styled-components';
 import * as C from "../../../styles/common"
 
-export const ContentTitle = styled.h1`
-  font-size: 32px;
-  font-weight: bold;
+const S = {};
+
+S.ContentTitle = styled.h1`
+  ${C.heading5}
   color: ${({ theme }) => theme.PALLETE.basic};
   margin-bottom: 12px;
 `;
 
-export const ContentSubtitle = styled.p`
-  font-size: 18px;
+S.ContentSubtitle = styled.p`
+  ${C.subtitleRegular}
   color: ${({ theme }) => theme.PALLETE.basic};
   margin-bottom: 32px;
 `;
 
-export const TabContainer = styled.div`
+S.TabContainer = styled.div`
   display: grid;
   grid-template-columns: repeat(5, 1fr);
   gap: 16px;
   margin-bottom: 50px;
 `;
 
-export const Tab = styled.button`
+S.Tab = styled.button`
   aspect-ratio: 1;
   width: 100%;
   border-radius: 8px;
   border: none;
-  font-size: 16px;
-  font-weight: 700;
+  ${C.smallText3Bold}
   font-family: 'Daeojamjil', sans-serif;
   cursor: pointer;
   transition: all 0.2s;
@@ -43,18 +43,17 @@ export const Tab = styled.button`
   }
 `;
 
-export const FilterContainer = styled.div`
+S.FilterContainer = styled.div`
   display: flex;
   gap: 12px;
   margin-bottom: 24px;
 `;
 
-export const FilterButton = styled.button`
+S.FilterButton = styled.button`
   padding: 10px 20px;
   border-radius: 8px;
   border: none;
-  font-size: 14px;
-  font-weight: ${props => props.active ? '700' : '500'};
+  ${props => props.active ? C.smallText2Bold : C.smallText2Regular}
   font-family: 'Daeojamjil', sans-serif;
   cursor: pointer;
   transition: all 0.2s;
@@ -67,20 +66,20 @@ export const FilterButton = styled.button`
   }
 `;
 
-export const ListHeader = styled.div`
-  font-size: 18px;
+S.ListHeader = styled.div`
+  ${C.subtitleRegular}
   font-weight: 700;
   color: ${({ theme }) => theme.PALLETE.basic};
   margin-bottom: 16px;
 `;
 
-export const ListContainer = styled.div`
+S.ListContainer = styled.div`
   display: flex;
   flex-direction: column;
   gap: 16px;
 `;
 
-export const ListItem = styled.div`
+S.ListItem = styled.div`
   padding: 20px;
   border-bottom: 1px solid ${({ theme }) => theme.PALLETE.grey.greyScale1};
   cursor: pointer;
@@ -91,45 +90,44 @@ export const ListItem = styled.div`
   }
 `;
 
-export const ItemType = styled.span`
-  font-size: 14px;
+S.ItemType = styled.span`
+  ${C.smallText2Bold}
   color: ${({ theme }) => theme.PALLETE.primary.main};
-  font-weight: 600;
   margin-right: 8px;
 `;
 
-export const ItemTitle = styled.div`
-  font-size: 18px;
+S.ItemTitle = styled.div`
+  ${C.subtitleRegular}
   font-weight: 700;
   color: ${({ theme }) => theme.PALLETE.basic};
   margin: 8px 0;
 `;
 
-export const ItemDetails = styled.div`
+S.ItemDetails = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 14px;
+  ${C.smallText2Regular}
   color: ${({ theme }) => theme.PALLETE.grey.greyScale4};
   flex-wrap: wrap;
   gap: 8px;
 `;
 
-export const Pagination = styled.div`
+S.Pagination = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
   gap: 16px;
   margin-top: 40px;
-  font-size: 16px;
+  ${C.smallText3Regular}
 `;
 
-export const PageButton = styled.button`
+S.PageButton = styled.button`
   background: none;
   border: none;
   color: ${props => props.disabled ? '#BDBDBD' : '#111111'};
   cursor: ${props => props.disabled ? 'not-allowed' : 'pointer'};
-  font-size: 16px;
+  ${C.smallText3Regular}
   font-family: 'Daeojamjil', sans-serif;
   
   &:hover {
@@ -137,19 +135,19 @@ export const PageButton = styled.button`
   }
 `;
 
-export const PageNumber = styled.span`
-  font-weight: 700;
+S.PageNumber = styled.span`
+  ${C.smallText3Bold}
   color: ${({ theme }) => theme.PALLETE.primary.main};
 `;
 
-export const ProductGrid = styled.div`
+S.ProductGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 24px;
   margin-bottom: 32px;
 `;
 
-export const ProductCard = styled.div`
+S.ProductCard = styled.div`
   background-color: ${({ theme }) => theme.PALLETE.white};
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
@@ -162,7 +160,7 @@ export const ProductCard = styled.div`
   }
 `;
 
-export const ProductImage = styled.div`
+S.ProductImage = styled.div`
   width: 100%;
   padding-top: 100%;
   background-color: ${({ theme }) => theme.PALLETE.grey.greyScale1};
@@ -178,7 +176,7 @@ export const ProductImage = styled.div`
   }
 `;
 
-export const HeartIcon = styled.div`
+S.HeartIcon = styled.div`
   position: absolute;
   top: 12px;
   right: 12px;
@@ -189,77 +187,74 @@ export const HeartIcon = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 18px;
+  ${C.subtitleRegular}
   color: #FF6B6B;
   z-index: 10;
 `;
 
-export const ProductInfo = styled.div`
+S.ProductInfo = styled.div`
   padding: 16px;
 `;
 
-export const ProductName = styled.div`
-  font-size: 16px;
-  font-weight: 600;
+S.ProductName = styled.div`
+  ${C.smallText3Bold}
   color: ${({ theme }) => theme.PALLETE.basic};
   margin-bottom: 4px;
 `;
 
-export const ProductPrice = styled.div`
-  font-size: 18px;
+S.ProductPrice = styled.div`
+  ${C.subtitleRegular}
   font-weight: 700;
   color: ${({ theme }) => theme.PALLETE.primary.main};
 `;
 
-export const Label = styled.span`
+S.Label = styled.span`
   display: inline-block;
   padding: 2px 8px;
-  font-size: 12px;
-  font-weight: 600;
+  ${C.smallText1Bold}
   border-radius: 4px;
   margin-right: 4px;
   background-color: ${props => props.type === 'BEST' ? '#FF6B6B' : '${({ theme }) => theme.PALLETE.primary.main}'};
   color: white;
 `;
 
-export const Rating = styled.div`
+S.Rating = styled.div`
   display: flex;
   align-items: center;
   gap: 4px;
-  font-size: 14px;
+  ${C.smallText2Regular}
   color: ${({ theme }) => theme.PALLETE.grey.greyScale4};
   margin-top: 4px;
 `;
 
-export const Stars = styled.span`
+S.Stars = styled.span`
   color: #FFD700;
 `;
 
-export const Likes = styled.span`
+S.Likes = styled.span`
   margin-left: auto;
   color: ${({ theme }) => theme.PALLETE.grey.greyScale4};
 `;
 
-export const CartHeader = styled.div`
+S.CartHeader = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 16px;
 `;
 
-export const SelectAll = styled.div`
+S.SelectAll = styled.div`
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 14px;
+  ${C.smallText2Regular}
 `;
 
-export const ResetButton = styled.button`
+S.ResetButton = styled.button`
   padding: 10px 20px;
   border-radius: 8px;
   border: none;
-  font-size: 14px;
-  font-weight: ${props => props.active ? '700' : '500'};
+  ${props => props.active ? C.smallText2Bold : C.smallText2Regular}
   cursor: pointer;
   transition: all 0.2s;
   background-color: ${props => props.active ? props.theme.PALLETE.primary.main : props.theme.PALLETE.grey.greyScale0};
@@ -271,7 +266,7 @@ export const ResetButton = styled.button`
   }
 `;
 
-export const CartItem = styled.div`
+S.CartItem = styled.div`
   display: flex;
   align-items: center;
   padding: 20px;
@@ -282,24 +277,23 @@ export const CartItem = styled.div`
   gap: 16px;
 `;
 
-export const ItemImage = styled.div`
+S.ItemImage = styled.div`
   width: 100px;
   height: 100px;
   background-color: #E0E0E0;
   border-radius: 8px;
 `;
 
-export const ItemInfo = styled.div`
+S.ItemInfo = styled.div`
   flex: 1;
 `;
 
-export const ItemName = styled.div`
-  font-size: 16px;
-  font-weight: 600;
+S.ItemName = styled.div`
+  ${C.smallText3Bold}
   margin-bottom: 8px;
 `;
 
-export const QuantityControl = styled.div`
+S.QuantityControl = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -312,14 +306,13 @@ export const QuantityControl = styled.div`
   padding: 0 8px;
 `;
 
-export const QuantityButton = styled.button`
+S.QuantityButton = styled.button`
   width: 20px;
   height: 20px;
   border: none;
   background-color: transparent;
   color: #666;
-  font-size: 16px;
-  font-weight: 500;
+  ${C.smallText3Regular}
   font-family: 'Daeojamjil', sans-serif;
   cursor: pointer;
   display: flex;
@@ -337,29 +330,28 @@ export const QuantityButton = styled.button`
   }
 `;
 
-export const Quantity = styled.span`
-  font-size: 16px;
-  font-weight: 500;
+S.Quantity = styled.span`
+  ${C.smallText3Regular}
   color: #333;
 `;
 
-export const PriceInfo = styled.div`
+S.PriceInfo = styled.div`
   text-align: right;
 `;
 
-export const PriceRow = styled.div`
-  font-size: 14px;
+S.PriceRow = styled.div`
+  ${C.smallText2Regular}
   color: #757575;
   margin-bottom: 4px;
 `;
 
-export const PriceValue = styled.span`
+S.PriceValue = styled.span`
   margin-left: 8px;
-  font-weight: 600;
+  ${C.smallText2Bold}
   color: #111111;
 `;
 
-export const OrderSummary = styled.div`
+S.OrderSummary = styled.div`
   background-color: #F9F9F9;
   padding: 24px;
   border-radius: 8px;
@@ -367,28 +359,28 @@ export const OrderSummary = styled.div`
   margin-bottom: 16px;
 `;
 
-export const SummaryRow = styled.div`
+S.SummaryRow = styled.div`
   display: flex;
   justify-content: space-between;
   margin-bottom: 8px;
-  font-size: 14px;
+  ${C.smallText2Regular}
   
   &:last-child {
-    font-size: 18px;
+    ${C.subtitleRegular}
     font-weight: 700;
     color: #0051FF;
     margin-bottom: 0;
   }
 `;
 
-export const OrderButton = styled.button`
+S.OrderButton = styled.button`
   width: 100%;
   padding: 16px;
   background-color: #0051FF;
   color: white;
   border: none;
   border-radius: 8px;
-  font-size: 18px;
+  ${C.subtitleRegular}
   font-weight: 700;
   font-family: 'Daeojamjil', sans-serif;
   cursor: pointer;
@@ -398,7 +390,7 @@ export const OrderButton = styled.button`
   }
 `;
 
-export const DeliveryItemImage = styled.img`
+S.DeliveryItemImage = styled.img`
   width: 60px;
   height: 60px;
   border-radius: 8px;
@@ -406,14 +398,13 @@ export const DeliveryItemImage = styled.img`
   margin-right: 16px;
 `;
 
-export const ActionButton = styled.button`
+S.ActionButton = styled.button`
   padding: 10px 16px;
   border-radius: 8px;
   border: ${props => props.primary ? 'none' : '1px solid #E0E0E0'};
   background-color: ${props => props.primary ? '#0051FF' : '#fff'};
   color: ${props => props.primary ? '#fff' : '#111111'};
-  font-size: 14px;
-  font-weight: 500;
+  ${C.smallText2Regular}
   font-family: 'Daeojamjil', sans-serif;
   cursor: pointer;
   margin-left: 8px;
@@ -424,7 +415,7 @@ export const ActionButton = styled.button`
   }
 `;
 
-export const OrderItemImage = styled.div`
+S.OrderItemImage = styled.div`
   width: 80px;
   height: 80px;
   background-color: #E0E0E0;
@@ -432,32 +423,31 @@ export const OrderItemImage = styled.div`
   margin-right: 16px;
 `;
 
-export const ItemContent = styled.div`
+S.ItemContent = styled.div`
   flex: 1;
   display: flex;
   flex-direction: column;
   gap: 4px;
 `;
 
-export const OrderProductName = styled.div`
-  font-size: 18px;
+S.OrderProductName = styled.div`
+  ${C.subtitleRegular}
   font-weight: 600;
   margin-bottom: 4px;
 `;
 
-export const PurchaseDate = styled.div`
-  font-size: 14px;
+S.PurchaseDate = styled.div`
+  ${C.smallText2Regular}
   color: #757575;
 `;
 
-export const OrderActionButton = styled.button`
+S.OrderActionButton = styled.button`
   padding: 10px 16px;
   border-radius: 8px;
   border: none;
   background-color: #0051FF;
   color: #fff;
-  font-size: 14px;
-  font-weight: 500;
+  ${C.smallText2Regular}
   font-family: 'Daeojamjil', sans-serif;
   cursor: pointer;
   font-family: 'Daeojamjil', sans-serif;
@@ -467,40 +457,39 @@ export const OrderActionButton = styled.button`
   }
 `;
 
-export const ReviewProductInfo = styled.div`
+S.ReviewProductInfo = styled.div`
   display: flex;
   flex-direction: column;
   gap: 4px;
 `;
 
-export const ReviewStars = styled.span`
+S.ReviewStars = styled.span`
   color: #FFD700;
-  font-size: 20px;
+  ${C.titleBold}
 `;
 
-export const ReviewDate = styled.div`
-  font-size: 14px;
+S.ReviewDate = styled.div`
+  ${C.smallText2Regular}
   color: #757575;
   margin-top: 4px;
 `;
 
-export const ReviewText = styled.div`
-  font-size: 16px;
+S.ReviewText = styled.div`
+  ${C.smallText3Regular}
   color: #111111;
   margin-top: 8px;
 `;
 
-export const ReviewActionButtons = styled.div`
+S.ReviewActionButtons = styled.div`
   display: flex;
   flex-direction: column;
   gap: 8px;
 `;
 
-export const ReviewButton = styled.button`
+S.ReviewButton = styled.button`
   padding: 10px 16px;
   border-radius: 8px;
-  font-size: 14px;
-  font-weight: 500;
+  ${C.smallText2Regular}
   font-family: 'Daeojamjil', sans-serif;
   cursor: pointer;
   border: 1px solid ${props => props.primary ? '#0051FF' : '#E0E0E0'};
@@ -516,21 +505,20 @@ export const ReviewButton = styled.button`
 `;
 
 
-
 //  MyShopLikeContainer 스타일
-export const LikeGrid = styled.div`
+S.LikeGrid = styled.div`
   display: flex;
   flex-wrap: wrap;
   gap: 40px 16px;
   justify-content: flex-start;
 `;
 
-export const LikeCard = styled.div`
+S.LikeCard = styled.div`
   width: calc((100% - 48px) / 4);
   position: relative;
 `;
 
-export const ProductImageBox = styled.div`
+S.ProductImageBox = styled.div`
   position: relative;
   width: 100%;
   aspect-ratio: 218 / 290;              
@@ -541,7 +529,7 @@ export const ProductImageBox = styled.div`
   transition: transform .2s;
 `;
 
-export const LikeHeartBtn = styled.button`
+S.LikeHeartBtn = styled.button`
   position: absolute;
   top: 8px;
   right: 8px;
@@ -574,7 +562,7 @@ export const LikeHeartBtn = styled.button`
   `}
 `;
 
-export const ProductTitleRow = styled.div`
+S.ProductTitleRow = styled.div`
   display: flex;
   align-items: baseline;
   gap: 6px;
@@ -582,12 +570,12 @@ export const ProductTitleRow = styled.div`
   flex-wrap: nowrap;
 `;
 
-export const ProductShopName = styled.p`
+S.ProductShopName = styled.p`
   ${C.smallText1Bold}
   ${C.basic}
 `;
 
-export const NewTag = styled.span`
+S.NewTag = styled.span`
   ${C.smallText0Bold}
   padding: 1px 4px;
   display: inline-block;
@@ -595,7 +583,7 @@ export const NewTag = styled.span`
   background-color: rgba(248, 59, 170, 0.1);
 `;
 
-export const BestTag = styled.span`
+S.BestTag = styled.span`
   ${C.smallText0Bold}
   padding: 1px 4px;
   display: inline-block;
@@ -603,20 +591,20 @@ export const BestTag = styled.span`
   background-color: rgba(0, 81, 255, 0.1);
 `;
 
-export const PriceText = styled.p`
+S.PriceText = styled.p`
   ${C.smallText1Bold}
   color: ${({ theme }) => theme.PALLETE.primary.main};
   margin: 6px 0 8px;
 `;
 
-export const MetaRow = styled.div`
+S.MetaRow = styled.div`
   display: flex;
   align-items: center;
   gap: 20px;
   margin-top: 6px;
 `;
 
-export const IconText = styled.div`
+S.IconText = styled.div`
   display: flex;
   align-items: center;
   gap: 6px;
@@ -634,13 +622,13 @@ export const IconText = styled.div`
   }
 `;
 
-export const Spacer = styled.span`
+S.Spacer = styled.span`
   margin-left: auto;
 `;
 
 
 // 커스텀 체크박스
-export const Checkbox = styled.input.attrs({ type: "checkbox" })`
+S.Checkbox = styled.input.attrs({ type: "checkbox" })`
   appearance: none;
   width: 19px;
   height: 19px;
@@ -664,3 +652,5 @@ export const Checkbox = styled.input.attrs({ type: "checkbox" })`
     background-size: 11px 9px;
   }
 `;
+
+export default S;

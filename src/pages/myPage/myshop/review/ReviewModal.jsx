@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import * as S from "./style";
+import S from "./style";
 
 const ReviewModal = ({
   open,
