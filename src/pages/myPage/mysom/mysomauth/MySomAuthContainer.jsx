@@ -1,18 +1,5 @@
 import React, { useState } from 'react';
-import {
-  ContentTitle,
-  ContentSubtitle,
-  FilterContainer,
-  FilterButton,
-  ListContainer,
-  ListItem,
-  ItemType,
-  ItemTitle,
-  ItemDetails,
-  Pagination,
-  PageButton,
-  PageNumber
-} from '../style';
+import S from '../style';
 
 const MySomAuthContainer = () => {
   const [activeFilter, setActiveFilter] = useState('pending');
@@ -35,40 +22,40 @@ const MySomAuthContainer = () => {
   return (
     <div>
       
-      <FilterContainer>
-        <FilterButton
+      <S.FilterContainer>
+        <S.FilterButton
           active={activeFilter === 'pending'}
           onClick={() => setActiveFilter('pending')}
         >
           인증대기 (2개)
-        </FilterButton>
-        <FilterButton
+        </S.FilterButton>
+        <S.FilterButton
           active={activeFilter === 'completed'}
           onClick={() => setActiveFilter('completed')}
         >
           인증완료 (5개)
-        </FilterButton>
-      </FilterContainer>
+        </S.FilterButton>
+      </S.FilterContainer>
       
-      <ListContainer>
+      <S.ListContainer>
         {challenges.map((challenge, index) => (
-          <ListItem key={index}>
+          <S.ListItem key={index}>
             <div>
-              <ItemType>{challenge.type}</ItemType>
-              <ItemTitle>{challenge.title}</ItemTitle>
-              <ItemDetails>
+              <S.ItemType>{challenge.type}</S.ItemType>
+              <S.ItemTitle>{challenge.title}</S.ItemTitle>
+              <S.ItemDetails>
                 <span>{challenge.date} {challenge.repeat}</span>
-              </ItemDetails>
+              </S.ItemDetails>
             </div>
-          </ListItem>
+          </S.ListItem>
         ))}
-      </ListContainer>
+      </S.ListContainer>
 
-      <Pagination>
-        <PageButton disabled>&lt; 이전</PageButton>
-        <PageNumber>1</PageNumber>
-        <PageButton disabled={false}>다음 &gt;</PageButton>
-      </Pagination>
+      <S.Pagination>
+        <S.PageButton disabled>&lt; 이전</S.PageButton>
+        <S.PageNumber>1</S.PageNumber>
+        <S.PageButton disabled={false}>다음 &gt;</S.PageButton>
+      </S.Pagination>
     </div>
   );
 };

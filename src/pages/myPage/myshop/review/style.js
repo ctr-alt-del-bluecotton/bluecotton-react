@@ -1,9 +1,9 @@
 import styled from "styled-components";
 import * as C from "../../../../styles/common";
 
+const S = {};
 
-
-export const Overlay = styled.div`
+S.Overlay = styled.div`
   ${C.flexCenter}
   position: fixed;
   inset: 0;
@@ -12,7 +12,7 @@ export const Overlay = styled.div`
 `;
 
 
-export const Dialog = styled.div`
+S.Dialog = styled.div`
   width: 400px;
   height: 640px;
   background: ${({ theme }) => theme.PALLETE.white};
@@ -26,7 +26,7 @@ export const Dialog = styled.div`
 `;
 
 
-export const Inner = styled.div`
+S.Inner = styled.div`
   width: 100%;             
   margin: 0;
 
@@ -38,7 +38,7 @@ export const Inner = styled.div`
 `;
 
 
-export const Title = styled.h3`
+S.Title = styled.h3`
   ${C.heading6}
   ${C.primary}
   text-align: center;
@@ -46,7 +46,7 @@ export const Title = styled.h3`
 `;
 
 /* 상품 정보 박스 */
-export const ProductInfoBox = styled.div`
+S.ProductInfoBox = styled.div`
   display: flex;
   align-items: center;
   gap: 8px;
@@ -56,33 +56,33 @@ export const ProductInfoBox = styled.div`
   padding: 8px 10px;
 `;
 
-export const ProductThumb = styled.img`
+S.ProductThumb = styled.img`
   width: 28px;
   height: 28px;
   border-radius: 6px;
   object-fit: cover;
 `;
 
-export const ProductName = styled.span`
+S.ProductName = styled.span`
   ${C.smallText3Light}
   color: ${({ theme }) => theme.PALLETE.basic};
 `;
 
 /*  질문/별점 */
-export const Question = styled.div`
+S.Question = styled.div`
   text-align: center;
   ${C.paragraphRegular}
   margin: 18px 0 8px;
 `;
 
-export const StarRow = styled.div`
+S.StarRow = styled.div`
   display: flex;
   justify-content: center;
   gap: 6px;
   margin-bottom: 6px;
 `;
 
-export const StarImg = styled.img`
+S.StarImg = styled.img`
   width: 24px;
   height: 24px;
   cursor: pointer;
@@ -90,7 +90,7 @@ export const StarImg = styled.img`
   transition: opacity 0.2s ease;
 `;
 
-export const StarLabel = styled.div`
+S.StarLabel = styled.div`
   ${C.smallText2Regular}
   ${C.primary}
   text-align: center;
@@ -98,7 +98,7 @@ export const StarLabel = styled.div`
 `;
 
 /*  파일 업로드 */
-export const FileBox = styled.div`
+S.FileBox = styled.div`
   display: flex;
   align-items: center;
   gap: 8px;
@@ -108,7 +108,7 @@ export const FileBox = styled.div`
 `;
 
 /* 파일 입출력  "선택한 피알이 없습니다" */
-export const FileText = styled.div`
+S.FileText = styled.div`
   flex: 1;
   ${C.smallText2Light}
   color: ${({ theme }) => theme.PALLETE.grey.greyScale2};
@@ -117,7 +117,7 @@ export const FileText = styled.div`
   text-overflow: ellipsis;
 `;
 
-export const FileButton = styled.button`
+S.FileButton = styled.button`
   ${C.smallText1Light}
   height: 24px;                
   padding: 0 10px;
@@ -131,14 +131,14 @@ export const FileButton = styled.button`
     font-family: 'Daeojamjil', sans-serif;
 `;
 
-export const FileHint = styled.div`
+S.FileHint = styled.div`
   ${C.smallText1Light}
   color: ${({ theme }) => theme.PALLETE.grey.greyScale4};
   margin: 2px 0 22px;
 `;
 
 /*  텍스트 영역 : "리뷰를 작성해주세요" */
-export const TextArea = styled.textarea`
+S.TextArea = styled.textarea`
   width: 100%;
   min-height: 140px;
   border: 1px solid ${({ theme }) => theme.PALLETE.grey.greyScale1};
@@ -150,7 +150,7 @@ export const TextArea = styled.textarea`
   ::placeholder { color: ${({ theme }) => theme.PALLETE.grey.greyScale2}; }
 `;
 
-export const Counter = styled.div`
+S.Counter = styled.div`
   ${C.smallText1Light}
   text-align: right;
   color: ${({ theme }) => theme.PALLETE.grey.greyScale4};
@@ -161,7 +161,7 @@ export const Counter = styled.div`
 
 /*버튼 영역 */
 
-export const CloseIconButton = styled.button`
+S.CloseIconButton = styled.button`
   position: absolute;
   width: 16px;
   height: 16px;
@@ -176,7 +176,7 @@ export const CloseIconButton = styled.button`
 
 
 
-export const ButtonRow = styled.div`
+S.ButtonRow = styled.div`
   width: 100%;                        
   margin-top: 12px;               
   display: flex;
@@ -186,7 +186,7 @@ export const ButtonRow = styled.div`
   padding-top: 10px;
 `;
 
-export const PrimaryButton = styled.button`
+S.PrimaryButton = styled.button`
   width: 100px;  
   height: 40px;
   border: none;
@@ -200,7 +200,7 @@ export const PrimaryButton = styled.button`
     font-family: 'Daeojamjil', sans-serif;
 `;
 
-export const CloseButton = styled.button`
+S.CloseButton = styled.button`
   width: 100px;  
   height: 40px;
   border: none;
@@ -213,3 +213,5 @@ export const CloseButton = styled.button`
   &:hover { background: ${({ theme }) => theme.PALLETE.primary.dark}; }
   font-family: 'Daeojamjil', sans-serif;
 `;
+
+export default S;

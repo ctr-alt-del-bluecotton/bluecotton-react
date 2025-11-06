@@ -1,16 +1,5 @@
 import React from 'react';
-import {
-  ListHeader,
-  ListContainer,
-  ListItem,
-  ItemType,
-  ItemTitle,
-  ItemDetails,
-  Pagination,
-  PageButton,
-  PageNumber,
-  DeleteButton
-} from '../style';
+import S from '../style';
 import { useNavigate } from 'react-router-dom';
 import { useModal } from '../../../../components/modal';
 
@@ -47,39 +36,40 @@ const MyPostSaveContainer = () => {
 
   return (
     <div>
-      <ListHeader>임시저장한 글(3개)</ListHeader>
+      <S.ListHeader>임시저장한 글(3개)</S.ListHeader>
       
-      <ListContainer>
+      <S.ListContainer>
         {posts.map((post, index) => (
-          <ListItem key={index}>
-            <div>
-              <ItemType>{post.type}</ItemType>
-              <ItemTitle>{post.title}</ItemTitle>
-              <ItemDetails>
+          <S.ListItem key={index}>
+            <div style={{ flex: 1 }}>
+              <S.ItemType>{post.type}</S.ItemType>
+              <S.ItemTitle>{post.title}</S.ItemTitle>
+              <S.ItemDetails>
                 <span>저장일: {post.date}</span>
-                <DeleteButton onClick={(e) => {
-                  openModal({
-                    title: "임시저장한 게시글이 사라집니다.",
-                    message: "정말 게시글을 삭제제하시겠습니까?",
-                    confirmText: "삭제",
-                    cancelText: "취소",
-                    // onConfirm: () => handleDelete(post.id), 
-                    // 삭제 눌렀을때 TBL_POST_DRAFT 테이블에서 삭제되게 구현
-                  });
-                }}>
-                  삭제
-                </DeleteButton>
-              </ItemDetails>
+              </S.ItemDetails>
             </div>
-          </ListItem>
+            <S.DeleteButton onClick={(e) => {
+              e.stopPropagation();
+              openModal({
+                title: "임시저장한 게시글이 사라집니다.",
+                message: "정말 게시글을 삭제제하시겠습니까?",
+                confirmText: "삭제",
+                cancelText: "취소",
+                // onConfirm: () => handleDelete(post.id), 
+                // 삭제 눌렀을때 TBL_POST_DRAFT 테이블에서 삭제되게 구현
+              });
+            }}>
+              삭제
+            </S.DeleteButton>
+          </S.ListItem>
         ))}
-      </ListContainer>
+      </S.ListContainer>
 
-      <Pagination>
-        <PageButton disabled>&lt; 이전</PageButton>
-        <PageNumber>1</PageNumber>
-        <PageButton disabled={false}>다음 &gt;</PageButton>
-      </Pagination>
+      <S.Pagination>
+        <S.PageButton disabled>&lt; 이전</S.PageButton>
+        <S.PageNumber>1</S.PageNumber>
+        <S.PageButton disabled={false}>다음 &gt;</S.PageButton>
+      </S.Pagination>
     </div>
   );
 };
