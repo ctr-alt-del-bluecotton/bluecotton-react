@@ -1,9 +1,11 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import S from "./style";
 import CandyPayment from "./CandyPayment";
 
 const PaymentMethod = ({ value, onChange }) => {
   const handleChange = (e) => onChange(e.target.value);
+  
+  
 
   return (
     <S.PaymentWrap>
