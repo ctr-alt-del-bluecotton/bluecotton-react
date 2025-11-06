@@ -1,7 +1,10 @@
+// 📄 style.js
 import styled from "styled-components";
+const S = {};
 
 /* === 카드 컨테이너 === */
-export const Card = styled.article`
+S.Card = styled.article`
+  position: relative;
   width: 100%;
   border: 1px solid ${({ theme }) => theme.PALLETE.grey.greyScale1};
   border-radius: 10px;
@@ -11,7 +14,7 @@ export const Card = styled.article`
 `;
 
 /* === 썸네일 === */
-export const ThumbWrap = styled.div`
+S.ThumbWrap = styled.div`
   width: 100%;
   height: 210px;
   background: ${({ theme }) => theme.PALLETE.grey.greyScale0};
@@ -24,14 +27,14 @@ export const ThumbWrap = styled.div`
 `;
 
 /* === 본문 === */
-export const Body = styled.div`
+S.Body = styled.div`
   padding: 18px 20px 22px 20px;
   display: flex;
   flex-direction: column;
 `;
 
-/* === 상단 메타 (건강 | 도전 10일) === */
-export const MetaTop = styled.div`
+/* === 상단 메타 === */
+S.MetaTop = styled.div`
   display: flex;
   align-items: center;
   gap: 6px;
@@ -45,7 +48,7 @@ export const MetaTop = styled.div`
 
   .bar {
     color: ${({ theme }) => theme.PALLETE.grey.greyScale2};
-    font-size: 12px;
+    font-size: ${({ theme }) => theme.FONT_SIZE["smallText2"]};
     font-weight: 300;
   }
 
@@ -57,7 +60,7 @@ export const MetaTop = styled.div`
 `;
 
 /* === 제목 === */
-export const Title = styled.h3`
+S.Title = styled.h3`
   color: ${({ theme }) => theme.PALLETE.basic};
   font-size: 17.5px;
   font-weight: ${({ theme }) => theme.FONT_WEIGHT["bold"]};
@@ -69,7 +72,7 @@ export const Title = styled.h3`
 `;
 
 /* === 요약문 === */
-export const Excerpt = styled.p`
+S.Excerpt = styled.p`
   color: ${({ theme }) => theme.PALLETE.grey.greyScale3};
   font-size: ${({ theme }) => theme.FONT_SIZE["smallText2"]};
   line-height: 1.6;
@@ -83,11 +86,13 @@ export const Excerpt = styled.p`
 `;
 
 /* === 하단 정보 === */
-export const MetaBottom = styled.div`
+S.MetaBottom = styled.div`
   display: flex;
   justify-content: space-between;
-  align-items: flex-end;
+  align-items: center;
   margin-top: auto;
+  margin: 0 -20px;
+  padding: 0 20px;
 
   .left {
     display: flex;
@@ -101,37 +106,67 @@ export const MetaBottom = styled.div`
       object-fit: cover;
     }
 
-    .nick,
-    .date {
+    .bar {
       color: ${({ theme }) => theme.PALLETE.grey.greyScale3};
       font-size: ${({ theme }) => theme.FONT_SIZE["smallText2"]};
-    }
-
-    .bar {
-      color: ${({ theme }) => theme.PALLETE.grey.greyScale2};
-      font-size: 12px;
       font-weight: 300;
     }
 
-    .stat {
-      display: flex;
-      align-items: center;
-      gap: 4px;
+    .date,
+    .nick {
       color: ${({ theme }) => theme.PALLETE.grey.greyScale3};
       font-size: ${({ theme }) => theme.FONT_SIZE["smallText2"]};
     }
   }
 
   .right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
     font-size: ${({ theme }) => theme.FONT_SIZE["smallText2"]};
     color: ${({ theme }) => theme.PALLETE.grey.greyScale3};
-    cursor: pointer;
 
-    &:hover {
-      text-decoration: underline;
+    .stat {
+      display: flex;
+      align-items: center;
+      gap: 4px;
     }
   }
 `;
+
+/* === 찜 하기 버튼 === */
+S.LikeButton = styled.button`
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 28px;
+  height: 28px;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  z-index: 2;
+
+  background: url("/assets/icons/circle.svg") center/contain no-repeat;
+
+  &::after {
+    content: "";
+    display: block;
+    width: 14px;
+    height: 13px;
+    margin: 0 auto;
+    background: url("/assets/icons/favorite.svg") center/contain no-repeat;
+    transition: background-image 0.2s ease;
+  }
+
+  ${({ $liked }) =>
+    $liked &&
+    `
+      &::after {
+        background-image: url("/assets/icons/favorite_acv.svg");
+      }
+    `}
+`;
+
 
 /* === 아이콘 === */
 const IconBase = styled.i`
@@ -143,14 +178,18 @@ const IconBase = styled.i`
   background-position: center;
 `;
 
-export const IconComment = styled(IconBase)`
+S.IconComment = styled(IconBase)`
   background-image: url("/assets/icons/chat_gray.svg");
 `;
 
-export const IconHeart = styled(IconBase)`
+S.IconHeart = styled(IconBase)`
   background-image: url("/assets/icons/favorite_gray.svg");
 `;
 
-export const IconEye = styled(IconBase)`
+S.IconEye = styled(IconBase)`
   background-image: url("/assets/icons/eye_gray.svg");
 `;
+
+
+
+export default S;

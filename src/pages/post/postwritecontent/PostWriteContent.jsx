@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import * as S from "./style";
+import S from "./style";
 import { useModal } from "../../../components/modal";
 import { Editor } from "@toast-ui/react-editor";
 import "@toast-ui/editor/dist/toastui-editor.css";
+
 
 const MAX_LENGTH = 1000; // ✅ 글자수 제한
 
@@ -124,6 +125,7 @@ const PostWriteContent = () => {
   };
 
   return (
+
     <S.Container>
       <S.PageTitle>오늘의 솜 작성</S.PageTitle>
 
@@ -156,8 +158,9 @@ const PostWriteContent = () => {
           <Editor
             ref={editorRef}
             previewStyle="vertical"
-            height="500px"
+            height="400px"
             initialEditType="wysiwyg"
+            hideModeSwitch={true}
             placeholder="솜을 하면서 느낀 점이나 기록하고 싶은 순간을 자유롭게 적어주세요"
             useCommandShortcut={true}
             hooks={{

@@ -1,6 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom";
-import * as S from "./style";
+import S from "./style";
 import { useModal } from "./useModal";
 
 const ConfirmModal = () => {
@@ -10,12 +10,12 @@ const ConfirmModal = () => {
 
   const handleConfirm = () => {
     modalState.onConfirm?.();
-    closeModal(); // ✅ 확인 후 자동 닫기
+    closeModal();
   };
 
   const handleCancel = () => {
     modalState.onCancel?.();
-    closeModal(); // ✅ 취소 후 닫기
+    closeModal();
   };
 
   return ReactDOM.createPortal(

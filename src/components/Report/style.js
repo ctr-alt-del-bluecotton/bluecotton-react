@@ -1,8 +1,9 @@
 import styled from "styled-components";
 import * as mixin from "../../styles/common";
+const S = {};
 
 /* === 최상위 오버레이: 신고 모달 보다 아래(7000), confirm 모달은 9000으로 덮어써짐 === */
-export const Backdrop = styled.div`
+S.Backdrop = styled.div`
   position: fixed;
   inset: 0;
   background-color: rgba(0, 0, 0, 0.4);
@@ -14,7 +15,7 @@ export const Backdrop = styled.div`
 `;
 
 /* === 신고 모달 상자 === */
-export const Container = styled.div`
+S.Container = styled.div`
   width: 420px;
   background-color: ${({ theme }) => theme.PALLETE.white};
   border-radius: 12px;
@@ -35,7 +36,7 @@ export const Container = styled.div`
 `;
 
 /* === 헤더 === */
-export const Header = styled.div`
+S.Header = styled.div`
   ${mixin.flexBetweenRow};
   padding: 20px 24px;
   border-bottom: 1px solid ${({ theme }) => theme.PALLETE.grey.greyScale1};
@@ -46,7 +47,7 @@ export const Header = styled.div`
   }
 `;
 
-export const CloseButton = styled.button`
+S.CloseButton = styled.button`
   background: none;
   border: none;
   cursor: pointer;
@@ -59,12 +60,12 @@ export const CloseButton = styled.button`
 `;
 
 /* === 본문 전체 === */
-export const Body = styled.div`
+S.Body = styled.div`
   padding: 0 24px;
 `;
 
 /* === 라디오 기본행 (기타 제외) === */
-export const RadioRow = styled.label`
+S.RadioRow = styled.label`
   display: flex;
   align-items: flex-start;
   gap: 10px;
@@ -89,13 +90,12 @@ export const RadioRow = styled.label`
 /* === 기타 블럭 전체 (라디오 + textarea 세트) ===
    핵심: padding-left를 주고 내부에서 전부 width:100%로 맞춤
 */
-export const OtherBlock = styled.div`
-  border-bottom: 1px solid ${({ theme }) => theme.PALLETE.grey.greyScale1};
+S.OtherBlock = styled.div`
   padding: 16px 0 20px 0;
 `;
 
 /* "기타 o 라벨" 라인 */
-export const OtherHeaderRow = styled.div`
+S.OtherHeaderRow = styled.div`
   display: flex;
   align-items: flex-start;
   gap: 10px;
@@ -117,17 +117,17 @@ export const OtherHeaderRow = styled.div`
 
 /* textarea를 들여쓰기해서 정렬해 주는 래퍼
    -> 왼쪽 라디오 자리(26px 정도) + gap(10px) 합쳐서 대략 36px~40px 들여쓰기 */
-export const OtherContent = styled.div`
+S.OtherContent = styled.div`
   padding-left: 36px;
 `;
 
 /* textarea + 글자수 영역 */
-export const TextareaWrap = styled.div`
+S.TextareaWrap = styled.div`
   position: relative;
   width: 100%;
 `;
 
-export const Textarea = styled.textarea`
+S.Textarea = styled.textarea`
   width: 100%;
   height: 120px;
   box-sizing: border-box;
@@ -156,7 +156,7 @@ export const Textarea = styled.textarea`
   }
 `;
 
-export const Count = styled.span`
+S.Count = styled.span`
   position: absolute;
   right: 12px;
   bottom: 10px;
@@ -166,7 +166,7 @@ export const Count = styled.span`
 `;
 
 /* === 푸터 버튼 영역 === */
-export const Footer = styled.div`
+S.Footer = styled.div`
   display: flex;
   gap: 12px;
   padding: 16px 24px;
@@ -174,7 +174,7 @@ export const Footer = styled.div`
   background-color: ${({ theme }) => theme.PALLETE.white};
 `;
 
-export const Button = styled.button`
+S.Button = styled.button`
   flex: 1;
   height: 44px;
   border-radius: 8px;
@@ -202,3 +202,5 @@ export const Button = styled.button`
     }
   }
 `;
+
+export default S;
