@@ -10,6 +10,9 @@ const HeaderCategory = () => {
     const isPostActive = pathname === '/main/post/all' || pathname.startsWith("/main/post/");
     const isSomActive = pathname === '/main/som/all' || pathname.startsWith("/main/som/");
     const isMyPageActive = pathname === '/main/ny-page/my-som/auth' || pathname.startsWith("/main/my-page");
+    const isMapPageActive = pathname === '/main/map' || pathname.startsWith("/main/map");
+
+    const isHiddenSearchBar = isMyPageActive || isMapPageActive;
 
     return (
         <S.Wrapper>
@@ -21,7 +24,7 @@ const HeaderCategory = () => {
                     <S.CategoryLink to="/main/shop">블루코튼 샵</S.CategoryLink>
                     <S.CategoryLink to="/main/my-page/my-som/auth" className={isMyPageActive ? "active" : ""}>마이페이지</S.CategoryLink>
                 </S.CategoryBar>
-                <SearchBar />
+                {!isHiddenSearchBar && <SearchBar />}
             </S.Container>
         </S.Wrapper>
 
