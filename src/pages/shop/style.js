@@ -294,7 +294,7 @@ S.ProductImageBox = styled.div`
   width: 218px;
   height: 290px;
   position: relative;
-  background: ${({ $bg }) => `url("/assets/${$bg}") center/cover no-repeat`};
+background-image: url(${props => props.$bg});
   border: 1px solid ${({ theme }) => theme.PALLETE.grey.greyScale1};
   overflow: hidden;
 `;
