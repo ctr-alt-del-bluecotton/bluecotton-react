@@ -5,132 +5,192 @@ import ShopNumberSelect from "./shopNumberSelect/ShopNumberSelect";
 
 const ShopContainer = () => {
 
-  const [selected, setSelected] = useState("신상품순");
-  const options = ["신상품순", "리뷰 많은 순", "낮은 가격 순", "높은 가격 순", "판매순"];
-  const [products, setProducts] = useState([]);
+    const [categories, setCategories] = useState({
+        clothing: false,
+        keyring: false,
+        bag: false,
+        stationery: false,
+        living: false,
+        doll: false,
+        digital: false,
+        travel: false,
+    });
 
-  
-useEffect(() => {
-  const fetchProduct = async () => {
-    try {
-      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/shop/`, {
-        headers: {
-          "Content-Type": "application/json",
-        },
-        method: "GET",
-      });
-      const json = await response.json();
-      setProducts(json.data || []);
+    const [productTypes, setProductTypes] = useState({
+        new: false,
+        best: false,
+    });
 
-    } catch (error) {
-      console.error("상품 조회 실패:", error);
-    }
-  };
+    const [purchaseTypes, setPurchaseTypes] = useState({
+        candy: false,
+        cash: false,
+    });
 
-  fetchProduct(); // 실행
-}, []);
+    const [selected, setSelected] = useState("신상품순");
+    const options = ["신상품순", "리뷰 많은 순", "낮은 가격 순", "높은 가격 순", "판매순"];
+    const [products, setProducts] = useState([]);
+    const [pageNumber, setPageNumber] = useState(1);
+    const pageSize = 8;
 
 
+    useEffect(() => {
+
+        const fetchFilterProduct = async () => {
+
+            const filterParams = {};
+
+            Object.keys(categories).forEach(key => {
+                if (categories[key]) {
+                    // 'clothing' -> 'CLOTHING' (DB ENUM 값)
+                    filterParams[key] = key.toUpperCase();
+                }
+            });
+
+            // 상품 타입
+            //  XML :  'newType'
+            if (productTypes.new) filterParams.newType = 'NEW';
+            if (productTypes.best) filterParams.best = 'BEST';
+
+            // 구매 타입:
+            Object.keys(purchaseTypes).forEach(key => {
+                if (purchaseTypes[key]) {
+                    // 'candy' -> 'CANDY'
+                    filterParams[key] = key.toUpperCase();
+                }
+            });
+
+            filterParams.order = selected;
+
+            console.log("필터링한 데이터 :", filterParams);
+
+
+            //fetch
+            try {
+                const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/shop/`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify(filterParams),
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP 에러! 상태: ${response.status}`);
+                }
+
+                const json = await response.json();
+                setProducts(json.data || []); //state에 상품 목록 저장
+                setPageNumber(1); // 새 검색 결과이므로 1페이지로 리셋
+
+            } catch (error) {
+                console.error("상품 조회 실패:", error);
+
+            }
+        };
+
+        fetchFilterProduct(); // 함수 실행
+
+    }, [categories, productTypes, purchaseTypes, selected]); 
+
+    
 
     const displayItems = useMemo(() => {
-    return products.map((p) => ({
-      id: p.id,
-      name: p.productName,
-      imageUrl: p.productImagePath,                // 이미지 경로
-      priceText: Number(p.productPrice).toLocaleString() + "원",  // 가격 
-      score: (p.avgRating ?? 0).toFixed(1),        // "4.8"  문자열
-      reviewCount: p.reviewCount ?? 0,
-      likeCount: p.likeCount ?? 0,
-      isNew: String(p.productType).includes("NEW"),
-      isBest: String(p.productType).includes("BEST"),
-    }));
-  }, [products]);
+        return products.map((p) => ({
+            id: p.id,
+            name: p.productName,
+            imageUrl: p.productImageUrl,
+            priceText: Number(p.productPrice).toLocaleString() + "원",
+            score: (p.productAvgRating ?? 0).toFixed(1),
+            reviewCount: p.productReviewCount ?? 0,
+            likeCount: p.productLikeCount ?? 0,
+            isNew: String(p.productType).includes("NEW"),
+            isBest: String(p.productType).includes("BEST"),
+        }));
+    }, [products]);
 
+    const pagedItems = useMemo(() => {
+        const start = (pageNumber - 1) * pageSize;
+        return displayItems.slice(start, start + pageSize);
+    }, [displayItems, pageNumber]);
 
-  const [pageNumber, setPageNumber] = useState(1);
-  const pageSize = 8;
+    return (
+        <S.Page>
+            <S.Banner>
+                <S.BannerTextBox>
+                    <S.BannerTitle>신제품</S.BannerTitle>
+                    <S.BannerDesc>지금 많은 사랑을 받고 있는 제품들을 만나보세요!</S.BannerDesc>
+                </S.BannerTextBox>
+            </S.Banner>
 
-  const pagedItems = useMemo(() => {
-    const start = (pageNumber - 1) * pageSize;
-    return displayItems.slice(start, start + pageSize);
-  }, [displayItems, pageNumber]);
+            <S.Container>
+                <S.LeftFilter>
 
-  return (
-    <S.Page>
-      <S.Banner>
-        <S.BannerTextBox>
-          <S.BannerTitle>신제품</S.BannerTitle>
-          <S.BannerDesc>지금 많은 사랑을 받고 있는 제품들을 만나보세요!</S.BannerDesc>
-        </S.BannerTextBox>
-      </S.Banner>
+                    <S.FilterGroup>
+                        <S.CatagoryTopBar />
+                        <S.FilterTitle>카테고리</S.FilterTitle>
+                        {/* setCategories */}
+                        <S.Label><S.Checkbox checked={categories.clothing} onClick={() => setCategories(prev => ({...prev, clothing: !prev.clothing}))} /> 의류</S.Label>
+                        <S.Label><S.Checkbox checked={categories.keyring} onClick={() => setCategories(prev => ({...prev, keyring: !prev.keyring}))}/> 키링</S.Label>
+                        <S.Label><S.Checkbox checked={categories.bag} onClick={() => setCategories(prev => ({...prev, bag: !prev.bag}))}/> 가방</S.Label>
+                        <S.Label><S.Checkbox checked={categories.stationery} onClick={() => setCategories(prev => ({...prev, stationery: !prev.stationery}))}/> 문구</S.Label>
+                        <S.Label><S.Checkbox checked={categories.living} onClick={() => setCategories(prev => ({...prev, living: !prev.living}))}/> 리빙</S.Label>
+                        <S.Label><S.Checkbox checked={categories.doll} onClick={() => setCategories(prev => ({...prev, doll: !prev.doll}))}/> 인형</S.Label>
+                        <S.Label><S.Checkbox checked={categories.digital} onClick={() => setCategories(prev => ({...prev, digital: !prev.digital}))}/> 디지털</S.Label>
+                        <S.Label><S.Checkbox checked={categories.travel} onClick={() => setCategories(prev => ({...prev, travel: !prev.travel}))}/> 여행</S.Label>
+                    </S.FilterGroup>
 
-      <S.Container>
-        <S.LeftFilter>
-          <S.FilterGroup>
-            <S.CatagoryTopBar />
-            <S.FilterTitle>카테고리</S.FilterTitle>
-            <S.Label><S.Checkbox /> 의류</S.Label>
-            <S.Label><S.Checkbox /> 키링</S.Label>
-            <S.Label><S.Checkbox /> 가방</S.Label>
-            <S.Label><S.Checkbox /> 문구</S.Label>
-            <S.Label><S.Checkbox /> 리빙</S.Label>
-            <S.Label><S.Checkbox /> 인형</S.Label>
-            <S.Label><S.Checkbox /> 디지털</S.Label>
-            <S.Label><S.Checkbox /> 여행</S.Label>
-          </S.FilterGroup>
+                    <S.FilterGroup>
+                        <S.FilterTitle>상품 타입</S.FilterTitle>
+                        {/* setProductTypes */}
+                        <S.Label><S.Checkbox checked={productTypes.new} onClick={() => setProductTypes(prev => ({...prev, new: !prev.new}))}/> NEW</S.Label>
+                        <S.Label><S.Checkbox checked={productTypes.best} onClick={() => setProductTypes(prev => ({...prev, best: !prev.best}))}/> BEST</S.Label>
+                    </S.FilterGroup>
 
-          <S.FilterGroup>
-            <S.FilterTitle>상품 타입</S.FilterTitle>
-            <S.Label><S.Checkbox /> NEW</S.Label>
-            <S.Label><S.Checkbox /> BEST</S.Label>
-          </S.FilterGroup>
+                    <S.FilterGroup>
+                        <S.FilterTitle>구매 타입</S.FilterTitle>
+                        {/* setPurchaseTypes */}
+                        <S.Label><S.Checkbox checked={purchaseTypes.candy} onClick={() => setPurchaseTypes(prev => ({...prev, candy: !prev.candy}))}/> 캔디</S.Label>
+                        <S.Label><S.Checkbox checked={purchaseTypes.cash} onClick={() => setPurchaseTypes(prev => ({...prev, cash: !prev.cash}))}/> 일반</S.Label>
+                    </S.FilterGroup>
+                </S.LeftFilter>
 
-          <S.FilterGroup>
-            <S.FilterTitle>구매 타입</S.FilterTitle>
-            <S.Label><S.Checkbox /> 캔디</S.Label>
-            <S.Label><S.Checkbox /> 일반</S.Label>
-          </S.FilterGroup>
-        </S.LeftFilter>
+                <S.Main>
+                    <S.SortTopLine />
 
-        <S.Main>
-          <S.SortTopLine />
+                    <S.SortBar>
+                        <S.SortSelect
+                            value={selected}
+                            onChange={(e) => setSelected(e.target.value)}
+                            aria-label="정렬 선택"
+                        >
+                            {options.map((opt) => (
+                                <option key={opt} value={opt}>
+                                    {opt}
+                                </option>
+                            ))}
+                        </S.SortSelect>
 
-          <S.SortBar>
+                        <S.SortRight>
+                            <span>전체</span>
+                            <span>›</span>
+                            <S.Total>{displayItems.length}개 제품</S.Total>
+                        </S.SortRight>
+                    </S.SortBar>
 
-            <S.SortSelect
-              value={selected}
-              onChange={(e) => setSelected(e.target.value)}
-              aria-label="정렬 선택"
-            >
-              {options.map((opt) => (
-                <option key={opt} value={opt}>
-                  {opt}
-                </option>
-              ))}
-            </S.SortSelect>
+                    <S.SortBottomLine />
 
-            <S.SortRight>
-              <span>전체</span>
-              <span>›</span>
-              <S.Total>{displayItems.length}개 제품</S.Total>
-            </S.SortRight>
-          </S.SortBar>
-
-          <S.SortBottomLine />
-
-          {/* 현재 페이지 8개 상품 보여줌 (마지막 페이지는 2개) */}
-          <ShopList items={pagedItems} />
-          <S.Pagination>
-            <ShopNumberSelect
-              shopList={displayItems}
-              pageNumber={pageNumber}
-              setPageNumber={setPageNumber}
-            />
-          </S.Pagination>
-        </S.Main>
-      </S.Container>
-    </S.Page>
-  );
+                    <ShopList items={pagedItems} />
+                    <S.Pagination>
+                        <ShopNumberSelect
+                            shopList={displayItems}
+                            pageNumber={pageNumber}
+                            setPageNumber={setPageNumber}
+                        />
+                    </S.Pagination>
+                </S.Main>
+            </S.Container>
+        </S.Page>
+    );
 };
 
 export default ShopContainer;
