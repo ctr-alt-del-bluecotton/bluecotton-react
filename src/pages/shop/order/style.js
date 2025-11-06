@@ -4,6 +4,7 @@ import {
   fontGreyScale4,
   smallText0Light,
   smallText1Regular,
+  smallText3Bold,
   smallText3Regular,
 } from "../../../styles/common";
 import { motion } from "framer-motion";
@@ -41,8 +42,9 @@ S.UserInfoName = styled.div`
 `;
 
 S.UserName = styled.div`
-  ${smallText3Regular}
+  /* ${smallText3Regular} */
   color: ${basic};
+  font-size: 18px;
 `;
 
 S.UserInfoTag = styled.button`
@@ -91,19 +93,21 @@ S.UserFixText = styled.div`
 S.UserAddressContainer = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 17px;
+  gap: 5px;
   margin-top: 27px;
-  margin-bottom: 31px;
+  margin-bottom: 28px;
 `;
 
 S.UserAddress = styled.div`
   ${basic}
-  ${smallText1Regular}
+  /* ${smallText1Regular} */
+  font-size: 16px;
 `;
 
 /* 드롭다운 */
 S.DropdownWrapper = styled.div`
   position: relative;
+  padding-top: 20px;
   width: 100%;
 `;
 
@@ -173,6 +177,47 @@ S.DropdownItem = styled.li`
   }
 `;
 
+/* 직접 입력 영역 */
+S.CustomMemoRow = styled.div`
+  width: 720px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-top: 10px;
+`;
+
+S.CustomInput = styled.input`
+  flex: 1 1 auto;
+  height: 38px;
+  padding: 0 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  outline: none;
+  font-family: inherit;
+
+  &:focus {
+    border-color: var(--brand-main);
+  }
+`;
+
+S.CustomApply = styled.button`
+  height: 38px;
+  padding: 0 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  background: #f7f7f7;
+  cursor: pointer;
+  white-space: nowrap;
+  font-family: inherit;
+  transition: 0.2s;
+
+  &:hover {
+    border-color: var(--brand-main);
+    background: #ffffff;
+  }
+`;
+
+
 /* 상품정보 */
 S.OrderProductWrap = styled.div`
   width: 100%;
@@ -213,10 +258,17 @@ S.ProductContent = styled.div`
   justify-content: center;
 `;
 
-S.ContentText = styled.div`
+S.ContentText1 = styled.div`
   ${smallText1Regular}
+  font-size: 16px;
   ${basic}
 `;
+
+S.ContentText2 = styled.div`
+  ${smallText3Bold}
+  ${basic}
+  font-size: 14px;
+`
 
 /* 결제 선택*/
 S.PaymentWrap = styled.div`
@@ -227,6 +279,7 @@ S.PaymentWrap = styled.div`
 
 S.PaymentContainer = styled.div`
   width: 1120px;
+  height: 280px;
   display: flex;
   flex-direction: column;
   padding-top: 29px;
@@ -382,7 +435,7 @@ S.OrderMainSection = styled.div`
 
 S.OrderSideSection = styled.div`
   width: 360px;
-  /* position: sticky; */
+  position: sticky;
   top: 120px;
 `;
 
