@@ -1,16 +1,12 @@
 import React, { useState } from "react";
-import {
-  ListHeader, ListContainer, ListItem, Pagination, PageButton, PageNumber,
-  OrderItemImage, ItemContent, ReviewProductInfo, OrderProductName,
-  PurchaseDate, ReviewStars, ReviewDate, ReviewText, ReviewActionButtons, ReviewButton,
-} from "../style";
+import S from "../style";
 import { useModal } from "../../../../components/modal/useModal"; 
 import ReviewModal from "../review/ReviewModal";
 
 const formatDotDate = (str) => (str.includes(".") ? str : str.replace(/-/g, "."));
 
 const StarRating = ({ rating = 0, size = 19 }) => (
-  <ReviewStars>
+  <S.ReviewStars>
     {Array.from({ length: 5 }).map((_, i) => (
       <img
         key={i}
@@ -24,7 +20,7 @@ const StarRating = ({ rating = 0, size = 19 }) => (
         }}
       />
     ))}
-  </ReviewStars>
+  </S.ReviewStars>
 );
 
 const MyShopReviewContainer = () => {
@@ -78,45 +74,45 @@ const MyShopReviewContainer = () => {
 
   return (
     <div>
-      <ListHeader>마이리뷰(5개)</ListHeader>
+      <S.ListHeader>마이리뷰(5개)</S.ListHeader>
 
-      <ListContainer>
+      <S.ListContainer>
         {reviews.map((review) => (
-          <ListItem key={review.id}>
+          <S.ListItem key={review.id}>
             <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
-              <OrderItemImage />
-              <ItemContent>
-                <ReviewProductInfo>
-                  <OrderProductName>{review.name}</OrderProductName>
+              <S.OrderItemImage />
+              <S.ItemContent>
+                <S.ReviewProductInfo>
+                  <S.OrderProductName>{review.name}</S.OrderProductName>
 
                   {typeof review.rating === "number" ? (
                     <>
                       <StarRating rating={review.rating} />
-                      <ReviewDate>{formatDotDate(review.date)}</ReviewDate>
-                      {review.text && <ReviewText>{review.text}</ReviewText>}
+                      <S.ReviewDate>{formatDotDate(review.date)}</S.ReviewDate>
+                      {review.text && <S.ReviewText>{review.text}</S.ReviewText>}
                     </>
                   ) : (
                     review.purchaseDate && (
-                      <PurchaseDate>구매 일자: {formatDotDate(review.purchaseDate)}</PurchaseDate>
+                      <S.PurchaseDate>구매 일자: {formatDotDate(review.purchaseDate)}</S.PurchaseDate>
                     )
                   )}
-                </ReviewProductInfo>
-              </ItemContent>
+                </S.ReviewProductInfo>
+              </S.ItemContent>
 
-              <ReviewActionButtons>
-                <ReviewButton primary onClick={() => openEdit(review)}>리뷰 수정</ReviewButton>
-                <ReviewButton onClick={() => handleDelete(review.id)}>리뷰 삭제</ReviewButton>
-              </ReviewActionButtons>
+              <S.ReviewActionButtons>
+                <S.ReviewButton primary onClick={() => openEdit(review)}>리뷰 수정</S.ReviewButton>
+                <S.ReviewButton onClick={() => handleDelete(review.id)}>리뷰 삭제</S.ReviewButton>
+              </S.ReviewActionButtons>
             </div>
-          </ListItem>
+          </S.ListItem>
         ))}
-      </ListContainer>
+      </S.ListContainer>
 
-      <Pagination>
-        <PageButton disabled>&lt; 이전</PageButton>
-        <PageNumber>{pageNumber}</PageNumber>
-        <PageButton>다음 &gt;</PageButton>
-      </Pagination>
+      <S.Pagination>
+        <S.PageButton disabled>&lt; 이전</S.PageButton>
+        <S.PageNumber>{pageNumber}</S.PageNumber>
+        <S.PageButton>다음 &gt;</S.PageButton>
+      </S.Pagination>
 
       {/* 리뷰하기 모달 그대로 사용 mode="edit", initial 전달 */}
       <ReviewModal

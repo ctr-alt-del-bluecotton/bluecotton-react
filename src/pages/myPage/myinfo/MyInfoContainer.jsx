@@ -1,24 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import {
-  FormContainer,
-  Title,
-  Subtitle,
-  FormSection,
-  Label,
-  Input,
-  ButtonGroup,
-  PrimaryButton,
-  DateRow,
-  Select,
-  RadioGroup,
-  RadioLabel,
-  ImagePreview,
-  HiddenFileInput,
-  FileInfo,
-  ActionButtons,
-  SubmitButton,
-  DeleteButton
-} from './style';
+import S from './style';
 import { useModal } from '../../../components/modal';
 
 const MyInfoContainer = () => {
@@ -167,73 +148,73 @@ const MyInfoContainer = () => {
   const currentYear = new Date().getFullYear();
 
   return (
-    <FormContainer>
-      <Title>회원 정보를 수정하시겠어요?</Title>
-      <Subtitle>회원 정보 수정 후 확인 버튼을 눌러주세요!</Subtitle>
+    <S.FormContainer>
+      <S.Title>회원 정보를 수정하시겠어요?</S.Title>
+      <S.Subtitle>회원 정보 수정 후 확인 버튼을 눌러주세요!</S.Subtitle>
 
       <form onSubmit={handleSubmit}>
-        <FormSection>
-          <Label>ID (이메일)</Label>
-          <Input
+        <S.FormSection>
+          <S.Label>ID (이메일)</S.Label>
+          <S.Input
             type="email"  
             name="email"
             value={formData.email}
             onChange={handleChange}
             readOnly
           />
-        </FormSection>
+        </S.FormSection>
 
-        <FormSection>
-          <Label>닉네임</Label>
-          <Input
+        <S.FormSection>
+          <S.Label>닉네임</S.Label>
+          <S.Input
             type="text"
             name="nickname"
             value={formData.nickname}
             onChange={handleChange}
           />
-        </FormSection>
+        </S.FormSection>
 
-        <FormSection>
-          <Label>휴대전화</Label>
-          <ButtonGroup>
-            <Input
+        <S.FormSection>
+          <S.Label>휴대전화</S.Label>
+          <S.ButtonGroup>
+            <S.Input
               type="tel"
               name="phone"
               value={formData.phone}
               onChange={handleChange}
               style={{ flex: 1 }}
             />
-          </ButtonGroup>
-        </FormSection>
+          </S.ButtonGroup>
+        </S.FormSection>
 
-        <FormSection>
-          <Label>생년월일</Label>
-          <DateRow>
-            <Select name="birthYear" value={formData.birthYear} onChange={handleChange}>
+        <S.FormSection>
+          <S.Label>생년월일</S.Label>
+          <S.DateRow>
+            <S.Select name="birthYear" value={formData.birthYear} onChange={handleChange}>
               <option value="">년도</option>
               {Array.from({ length: 100 }, (_, i) => currentYear - i).map((year) => (
                 <option key={year} value={String(year)}>{year}년</option>
               ))}
-            </Select>
-            <Select name="birthMonth" value={formData.birthMonth} onChange={handleChange}>
+            </S.Select>
+            <S.Select name="birthMonth" value={formData.birthMonth} onChange={handleChange}>
               <option value="">월</option>
               {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
                 <option key={m} value={String(m).padStart(2, '0')}>{m}월</option>
               ))}
-            </Select>
-            <Select name="birthDay" value={formData.birthDay} onChange={handleChange}>
+            </S.Select>
+            <S.Select name="birthDay" value={formData.birthDay} onChange={handleChange}>
               <option value="">일</option>
               {Array.from({ length: 31 }, (_, i) => i + 1).map((d) => (
                 <option key={d} value={String(d).padStart(2, '0')}>{d}일</option>
               ))}
-            </Select>
-          </DateRow>
-        </FormSection>
+            </S.Select>
+          </S.DateRow>
+        </S.FormSection>
 
-        <FormSection>
-          <Label>성별</Label>
-          <RadioGroup>
-            <RadioLabel>
+        <S.FormSection>
+          <S.Label>성별</S.Label>
+          <S.RadioGroup>
+            <S.RadioLabel>
               <input
                 type="radio"
                 name="gender"
@@ -242,8 +223,8 @@ const MyInfoContainer = () => {
                 onChange={handleChange}
               />
               남
-            </RadioLabel>
-            <RadioLabel>
+            </S.RadioLabel>
+            <S.RadioLabel>
               <input
                 type="radio"
                 name="gender"
@@ -252,42 +233,42 @@ const MyInfoContainer = () => {
                 onChange={handleChange}
               />
               여
-            </RadioLabel>
-          </RadioGroup>
-        </FormSection>
+            </S.RadioLabel>
+          </S.RadioGroup>
+        </S.FormSection>
 
-        <FormSection>
-          <Label>주소</Label>
+        <S.FormSection>
+          <S.Label>주소</S.Label>
           <div style={{ marginBottom: '8px' }}>
-            <ButtonGroup>
-              <Input
+            <S.ButtonGroup>
+              <S.Input
                 type="text"
                 name="postcode"
                 value={formData.postcode}
                 readOnly
                 style={{ flex: 1 }}
               />
-              <PrimaryButton type="button">우편번호 찾기</PrimaryButton>
-            </ButtonGroup>
+              <S.PrimaryButton type="button">우편번호 찾기</S.PrimaryButton>
+            </S.ButtonGroup>
           </div>
-          <Input
+          <S.Input
             type="text"
             name="address1"
             value={formData.address1}
             readOnly
             style={{ marginBottom: '8px' }}
           />
-          <Input
+          <S.Input
             type="text"
             name="address2"
             value={formData.address2}
             onChange={handleChange}
           />
-        </FormSection>
+        </S.FormSection>
 
-        <FormSection>
-          <Label>프로필 이미지 설정</Label>
-          <ImagePreview onClick={handleImageClick} $hasImage={!!previewImage}>
+        <S.FormSection>
+          <S.Label>프로필 이미지 설정</S.Label>
+          <S.ImagePreview onClick={handleImageClick} $hasImage={!!previewImage}>
             {previewImage ? (
               <img
                 src={previewImage}
@@ -297,17 +278,17 @@ const MyInfoContainer = () => {
             ) : (
               '첨부'
             )}
-          </ImagePreview>
-          <HiddenFileInput
+          </S.ImagePreview>
+          <S.HiddenFileInput
             ref={fileInputRef}
             type="file"
             accept="image/*"
             onChange={handleFileChange}
           />
-          <FileInfo>{selectedFile ? `선택된 파일: ${selectedFile.name}` : '선택된 파일 없음'}</FileInfo>
-          <FileInfo>용량이 50.0M 이하 파일만 업로드 가능</FileInfo>
+          <S.FileInfo>{selectedFile ? `선택된 파일: ${selectedFile.name}` : '선택된 파일 없음'}</S.FileInfo>
+          <S.FileInfo>용량이 50.0M 이하 파일만 업로드 가능</S.FileInfo>
           {selectedFile && (
-            <PrimaryButton
+            <S.PrimaryButton
               type="button"
               onClick={() => {
                 console.log('파일 저장:', selectedFile);
@@ -315,18 +296,18 @@ const MyInfoContainer = () => {
               }}
             >
               저장
-            </PrimaryButton>
+            </S.PrimaryButton>
           )}
-        </FormSection>
+        </S.FormSection>
 
-        <ActionButtons>
-          <SubmitButton type="submit">수정완료</SubmitButton>
-          <DeleteButton type="button" onClick={handleDeleteAccount}>
+        <S.ActionButtons>
+          <S.SubmitButton type="submit">수정완료</S.SubmitButton>
+          <S.DeleteButton type="button" onClick={handleDeleteAccount}>
             회원탈퇴
-          </DeleteButton>
-        </ActionButtons>
+          </S.DeleteButton>
+        </S.ActionButtons>
       </form>
-    </FormContainer>
+    </S.FormContainer>
   );
 };
 

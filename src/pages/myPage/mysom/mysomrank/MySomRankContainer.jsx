@@ -1,20 +1,5 @@
 import React from 'react';
-import {
-  ContentTitle,
-  ContentSubtitle,
-  StatusBox,
-  StatusText,
-  StatusTitle,
-  StatusValue,
-  StatusLabel,
-  RequirementBox,
-  RankTableHeader,
-  InfoSection,
-  InfoTitle,
-  InfoList,
-  BulletList,
-  RankIcon
-} from '../style';
+import S from '../style';
 
 const MySomRankContainer = () => {
   // 등급별 아이콘 설정
@@ -28,21 +13,18 @@ const MySomRankContainer = () => {
 
   return (
     <div>
-      <ContentTitle>솜 등급 현황이 궁금하세요?</ContentTitle>
-      <ContentSubtitle>솜 등급 현황을 확인할 수 있어요.</ContentSubtitle>
-      
-      <StatusBox>
-        <StatusText>
-          <StatusTitle>회원 등급 현황입니다.</StatusTitle>
-          <StatusValue>zl존준서 님의 등급은 Silver 입니다.</StatusValue>
-          <StatusLabel>현재 기준 6솜</StatusLabel>
-        </StatusText>
-        <RequirementBox>
+      <S.StatusBox>
+        <S.StatusText>
+          <S.StatusTitle>회원 등급 현황입니다.</S.StatusTitle>
+          <S.StatusValue>zl존준서 님의 등급은 Silver 입니다.</S.StatusValue>
+          <S.StatusLabel>현재 기준 6솜</S.StatusLabel>
+        </S.StatusText>
+        <S.RequirementBox>
           Gold 등급이 되려면, 4 솜이 필요해요.
-        </RequirementBox>
-      </StatusBox>
+        </S.RequirementBox>
+      </S.StatusBox>
 
-      <RankTableHeader>회원 레벨 기준</RankTableHeader>
+      <S.RankTableHeader>회원 레벨 기준</S.RankTableHeader>
       <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '32px' }}>
         <thead>
           <tr style={{ backgroundColor: '#F9F9F9' }}>
@@ -60,7 +42,7 @@ const MySomRankContainer = () => {
             <td style={{ padding: '12px', borderBottom: '1px solid #E0E0E0' }}>0%</td>
             <td style={{ padding: '12px', borderBottom: '1px solid #E0E0E0' }}>0%</td>
             <td style={{ padding: '12px', borderBottom: '1px solid #E0E0E0' }}>
-              <RankIcon $bgColor={rankConfig.rookie.color}>{rankConfig.rookie.letter}</RankIcon>
+              <S.RankIcon $bgColor={rankConfig.rookie.color}>{rankConfig.rookie.letter}</S.RankIcon>
             </td>
           </tr>
           <tr>
@@ -69,7 +51,7 @@ const MySomRankContainer = () => {
             <td style={{ padding: '12px', borderBottom: '1px solid #E0E0E0' }}>10%</td>
             <td style={{ padding: '12px', borderBottom: '1px solid #E0E0E0' }}>5%</td>
             <td style={{ padding: '12px', borderBottom: '1px solid #E0E0E0' }}>
-              <RankIcon $bgColor={rankConfig.silver.color}>{rankConfig.silver.letter}</RankIcon>
+              <S.RankIcon $bgColor={rankConfig.silver.color}>{rankConfig.silver.letter}</S.RankIcon>
             </td>
           </tr>
           <tr>
@@ -78,7 +60,7 @@ const MySomRankContainer = () => {
             <td style={{ padding: '12px', borderBottom: '1px solid #E0E0E0' }}>20%</td>
             <td style={{ padding: '12px', borderBottom: '1px solid #E0E0E0' }}>10%</td>
             <td style={{ padding: '12px', borderBottom: '1px solid #E0E0E0' }}>
-              <RankIcon $bgColor={rankConfig.gold.color}>{rankConfig.gold.letter}</RankIcon>
+              <S.RankIcon $bgColor={rankConfig.gold.color}>{rankConfig.gold.letter}</S.RankIcon>
             </td>
           </tr>
           <tr>
@@ -87,7 +69,7 @@ const MySomRankContainer = () => {
             <td style={{ padding: '12px', borderBottom: '1px solid #E0E0E0' }}>30%</td>
             <td style={{ padding: '12px', borderBottom: '1px solid #E0E0E0' }}>15%</td>
             <td style={{ padding: '12px', borderBottom: '1px solid #E0E0E0' }}>
-              <RankIcon $bgColor={rankConfig.diamond.color}>{rankConfig.diamond.letter}</RankIcon>
+              <S.RankIcon $bgColor={rankConfig.diamond.color}>{rankConfig.diamond.letter}</S.RankIcon>
             </td>
           </tr>
           <tr>
@@ -96,27 +78,27 @@ const MySomRankContainer = () => {
             <td style={{ padding: '12px', borderBottom: '1px solid #E0E0E0' }}>50%</td>
             <td style={{ padding: '12px', borderBottom: '1px solid #E0E0E0' }}>25%</td>
             <td style={{ padding: '12px', borderBottom: '1px solid #E0E0E0' }}>
-              <RankIcon $bgColor={rankConfig.master.color}>{rankConfig.master.letter}</RankIcon>
+              <S.RankIcon $bgColor={rankConfig.master.color}>{rankConfig.master.letter}</S.RankIcon>
             </td>
           </tr>
         </tbody>
       </table>
 
-      <InfoSection>
-        <InfoTitle>솜 적립 방법</InfoTitle>
-        <InfoList>
+      <S.InfoSection>
+        <S.InfoTitle>솜 적립 방법</S.InfoTitle>
+        <S.InfoList>
           <li>솔로 솜을 실천하고 사진 인증을 해주세요.</li>
           <li>파티 솜을 실천하고 사진 인증을 해주세요.</li>
           <li>이벤트에 참여하여 보너스 캔디를 받아보세요.</li>
-        </InfoList>
-      </InfoSection>
+        </S.InfoList>
+      </S.InfoSection>
 
-      <InfoSection>
-        <InfoTitle>캔디 사용 방법</InfoTitle>
-        <BulletList>
+      <S.InfoSection>
+        <S.InfoTitle>캔디 사용 방법</S.InfoTitle>
+        <S.BulletList>
           <li>블루코튼 샵에서 다양한 굿즈들을 구매 할 수 있어요.</li>
-        </BulletList>
-      </InfoSection>
+        </S.BulletList>
+      </S.InfoSection>
     </div>
   );
 };
