@@ -14,8 +14,8 @@ const OrderProduct = () => {
             alt="솜이 레옹 키링"
           />
           <S.ProductContent>
-            <S.ContentText>솜이 레옹 키링</S.ContentText>
-            <S.ContentText>9,000원</S.ContentText>
+            <S.ContentText1>솜이 레옹 키링</S.ContentText1>
+            <S.ContentText2>9,000원</S.ContentText2>
           </S.ProductContent>
         </S.ProductRow>
 
@@ -25,8 +25,8 @@ const OrderProduct = () => {
             alt="솜이 메모지"
           />
           <S.ProductContent>
-            <S.ContentText>솜이 메모지</S.ContentText>
-            <S.ContentText>4,000원</S.ContentText>
+            <S.ContentText1>솜이 메모지</S.ContentText1>
+            <S.ContentText2>4,000원</S.ContentText2>
           </S.ProductContent>
         </S.ProductRow>
       </S.OrderProductContainer>
