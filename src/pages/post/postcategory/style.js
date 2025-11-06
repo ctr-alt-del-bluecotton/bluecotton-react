@@ -1,8 +1,9 @@
 import styled, { css } from "styled-components";
 import { Link } from "react-router-dom";
+const S = {};
 
 /* === 상단 컨테이너 === */
-export const TopBar = styled.div`
+S.TopBar = styled.div`
   width: 1160px;
   display: flex;
   justify-content: space-between;
@@ -11,14 +12,14 @@ export const TopBar = styled.div`
 `;
 
 /* === 카테고리 리스트 === */
-export const CategoryList = styled.div`
+S.CategoryList = styled.div`
   display: flex;
   gap: 11px;
   flex-wrap: wrap;
 `;
 
 /* === Link 기반 버튼 === */
-export const CategoryLink = styled(Link)`
+S.CategoryLink = styled(Link)`
   display: flex;
   align-items: center;
   justify-content: center;
@@ -30,7 +31,7 @@ export const CategoryLink = styled(Link)`
   background-color: #fff;
   text-decoration: none;
   font-size: ${({ theme }) => theme.FONT_SIZE["smallText2"]};
-  font-weight: ${({ theme }) => theme.FONT_WEIGHT["medium"]};
+  font-weight: ${({ theme }) => theme.FONT_WEIGHT["regular"]};
   color: ${({ theme }) => theme.PALLETE.basic};
   cursor: pointer;
   transition: all 0.15s ease;
@@ -50,14 +51,14 @@ export const CategoryLink = styled(Link)`
 `;
 
 /* === 드롭다운 영역 === */
-export const FilterBox = styled.div`
+S.FilterBox = styled.div`
   display: flex;
   align-items: center;
   justify-content: flex-end;
 `;
 
 /* === 드롭다운 셀렉트 === */
-export const FilterSelect = styled.select`
+S.FilterSelect = styled.select`
   min-width: 120px;
   height: 30px;
   border-radius: 4px;
@@ -91,3 +92,5 @@ export const FilterSelect = styled.select`
     display: none;
   }
 `;
+
+export default S;

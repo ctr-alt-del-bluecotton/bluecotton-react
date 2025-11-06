@@ -9,6 +9,7 @@ import ConfirmModal from "./components/modal/ConfirmModal";
 
 function App() {
 
+
   return (
     <ThemeProvider theme={theme}>
       <GlobalStyle />
