@@ -1,6 +1,7 @@
 import styled from "styled-components";
+const S = {};
 
-export const ModalBackdrop = styled.div`
+S.ModalBackdrop = styled.div`
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.45);
@@ -10,7 +11,7 @@ export const ModalBackdrop = styled.div`
   justify-content: center;
 `;
 
-export const ModalBox = styled.div`
+S.ModalBox = styled.div`
   background: #fff;
   border-radius: 12px;
   padding: 28px 30px;
@@ -64,3 +65,5 @@ export const ModalBox = styled.div`
     }
   }
 `;
+
+export default S;

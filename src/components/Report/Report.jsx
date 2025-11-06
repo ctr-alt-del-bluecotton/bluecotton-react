@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import * as S from "./style";
+import S from "./style";
 import { useModal } from "../../components/modal";
 
 /*

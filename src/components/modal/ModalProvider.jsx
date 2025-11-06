@@ -4,15 +4,26 @@ import ConfirmModal from "./ConfirmModal";
 export const ModalContext = createContext();
 
 export const ModalProvider = ({ children }) => {
-  const [modalProps, setModalProps] = useState(null);
+  const [modalState, setModalState] = useState(null);
 
-  const openModal = (props) => setModalProps(props);
-  const closeModal = () => setModalProps(null);
+  const openModal = (props) => {
+    setModalState({
+      ...props,
+      isOpen: true,
+    });
+  };
+
+  const closeModal = () => {
+    setModalState((prev) => ({
+      ...prev,
+      isOpen: false,
+    }));
+  };
 
   return (
-    <ModalContext.Provider value={{ openModal, closeModal }}>
+    <ModalContext.Provider value={{ openModal, closeModal, modalState }}>
       {children}
-      {modalProps && <ConfirmModal {...modalProps} onClose={closeModal} />}
+      <ConfirmModal />
     </ModalContext.Provider>
   );
 };
