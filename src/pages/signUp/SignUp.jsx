@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useModal } from "../../components/modal/useModal";
 import { useForm } from "react-hook-form";
 import S from "./style";
+import { openPostcode } from "../../commons/address";
 
 const SignUp = () => {
   const [gender,setGender] = useState("");
@@ -42,14 +43,11 @@ const SignUp = () => {
     });
   })
 
-  const openPostcode = () => {
-    new window.daum.Postcode({
-      oncomplete: function(data) {
-        const address = data.roadAddress;
-        setValue("memberAddress", address,{shouldValidate:true});
-      }
-    }).open();
-  };
+  const handleOpendPostCode = () => {
+    openPostcode((address) => {
+      setValue("memberAddress", address)
+    })
+  }
   
   
 
@@ -138,7 +136,7 @@ const SignUp = () => {
               required: true
             })}
             />
-            <S.SmallButton type="button" onClick={openPostcode}>검색</S.SmallButton>
+            <S.SmallButton type="button" onClick={handleOpendPostCode}>검색</S.SmallButton>
           </S.AddressBox>
           {errors && errors?.memberAddress?.type === "required" && (
             <S.InputErrorMessage>주소를 입력해주세요.</S.InputErrorMessage>
