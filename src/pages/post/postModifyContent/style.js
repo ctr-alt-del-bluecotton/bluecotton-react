@@ -1,7 +1,8 @@
 import styled from "styled-components";
+const S = {};
 
 /* === 전체 컨테이너 === */
-export const Container = styled.div`
+S.Container = styled.div`
   width: 1160px;
   margin: 80px auto 120px;
   display: flex;
@@ -9,7 +10,7 @@ export const Container = styled.div`
 `;
 
 /* === 페이지 타이틀 === */
-export const PageTitle = styled.h1`
+S.PageTitle = styled.h1`
   font-size: ${({ theme }) => theme.FONT_SIZE["h5"]};
   font-weight: ${({ theme }) => theme.FONT_WEIGHT["bold"]};
   color: ${({ theme }) => theme.PALLETE.primary.main};
@@ -17,14 +18,14 @@ export const PageTitle = styled.h1`
 `;
 
 /* === 폼 전체 === */
-export const Form = styled.form`
+S.Form = styled.form`
   display: flex;
   flex-direction: column;
   gap: 30px;
 `;
 
 /* === 제목 / 카테고리 === */
-export const FormRow = styled.div`
+S.FormRow = styled.div`
   display: flex;
   align-items: center;
   gap: 16px;
@@ -72,7 +73,7 @@ export const FormRow = styled.div`
 `;
 
 /* === 에디터 === */
-export const FormGroup = styled.div`
+S.FormGroup = styled.div`
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -102,7 +103,7 @@ export const FormGroup = styled.div`
 `;
 
 /* === 버튼 === */
-export const ButtonBox = styled.div`
+S.ButtonBox = styled.div`
   display: flex;
   justify-content: center;
   gap: 16px;
@@ -135,3 +136,5 @@ export const ButtonBox = styled.div`
     }
   }
 `;
+
+export default S;

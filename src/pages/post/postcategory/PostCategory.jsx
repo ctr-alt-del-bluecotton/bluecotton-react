@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import * as S from "./style";
+import S from "./style";
 
+// ✅ 카테고리 목록
 const categories = [
   { name: "전체", path: "/main/post/all" },
   { name: "학습", path: "/main/post/study" },
@@ -12,6 +13,7 @@ const categories = [
   { name: "루키", path: "/main/post/rookie" },
 ];
 
+// ✅ 정렬 필터
 const filters = [
   { value: "latest", label: "최신순" },
   { value: "view", label: "조회순" },
@@ -19,9 +21,9 @@ const filters = [
   { value: "popular", label: "좋아요순" },
 ];
 
-const PostCategory = () => {
+// ✅ 부모(PostContainer)로부터 orderType, setOrderType 받음
+const PostCategory = ({ orderType, setOrderType }) => {
   const [activeCat, setActiveCat] = useState("전체");
-  const [filter, setFilter] = useState("latest");
 
   return (
     <S.TopBar>
@@ -39,11 +41,11 @@ const PostCategory = () => {
         ))}
       </S.CategoryList>
 
-      {/* === 드롭다운 === */}
+      {/* === 정렬 드롭다운 === */}
       <S.FilterBox>
         <S.FilterSelect
-          value={filter}
-          onChange={(e) => setFilter(e.target.value)}
+          value={orderType}
+          onChange={(e) => setOrderType(e.target.value)}
         >
           {filters.map((f) => (
             <option key={f.value} value={f.value}>

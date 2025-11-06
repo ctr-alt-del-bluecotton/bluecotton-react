@@ -1,8 +1,9 @@
 import styled from "styled-components";
 import * as C from "../../styles/common";
+const S = {};
 
 /* === 전체 컨테이너 === */
-export const Container = styled.div`
+S.Container = styled.div`
   width: 100%;
   display: flex;
   flex-direction: column;
@@ -12,7 +13,7 @@ export const Container = styled.div`
 `;
 
 /* === 배너 === */
-export const Banner = styled.div`
+S.Banner = styled.div`
   width: 100%;
   display: flex;
   justify-content: center; /* ✅ 중앙 기준으로 정렬 */
@@ -47,7 +48,7 @@ export const Banner = styled.div`
 `;
 
 /* === 카드 그리드 === */
-export const Grid = styled.div`
+S.Grid = styled.div`
   width: 1160px;
   margin: 0 auto 60px;
   display: grid;
@@ -58,7 +59,7 @@ export const Grid = styled.div`
 `;
 
 /* === 페이지네이션 및 작성 버튼 === */
-export const Pagination = styled.div`
+S.Pagination = styled.div`
   width: 1160px;
   margin: 0 auto 40px;
   display: flex;
@@ -117,7 +118,7 @@ export const Pagination = styled.div`
   }
 `;
 
-export const WriteButtonWrapper = styled.div`
+S.WriteButtonWrapper = styled.div`
   width: 1160px; /* ✅ 그리드 너비에 맞춤 */
   display: flex;
   justify-content: flex-end; /* ✅ 우측 끝 정렬 */
@@ -142,3 +143,4 @@ export const WriteButtonWrapper = styled.div`
   }
 `;
 
+export default S;
