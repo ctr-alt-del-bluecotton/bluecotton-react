@@ -8,7 +8,9 @@ const S = {};
 S.floatingMenuWrap = styled.div`
   ${primary};
   position: relative;
+  width: 100%;
   height: 850px;
+  margin: 0 30px;
   display: flex;
   flex-direction: column;
   justify-content: space-between; /* ✅ 위, 아래 고정 */
@@ -28,14 +30,14 @@ S.floatingFormWrap = styled.form`
 `
 
 S.floatingPageWrap = styled.div`
-  flex: 1;
   width: 100%;
   display: flex;
+  margin-top: 30px;
+  height: calc(100% - 30px);
   flex-direction: column;
-  justify-content: center;
-  align-items: center;
+  justify-content: flex-start;
+  align-items: flex-start;
   overflow-y: auto;
-  padding: 20px 0;
 `;
 
 S.floatingTitle = styled.div`

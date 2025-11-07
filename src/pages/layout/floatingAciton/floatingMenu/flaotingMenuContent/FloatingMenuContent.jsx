@@ -1,11 +1,10 @@
 import React from 'react';
 import FloatingSomWrite from './floatingSomWrite/FloatingSomWrite';
 import S from './style';
+import { useFloatingAction } from '../../../../../context/FloatingActionContext';
 
-const FloatingMenuContent = ({
-  somMenuPage ,setSomMenuPage,
-  somMenuContent, setSomMenuContent
-}) => {
+const FloatingMenuContent = () => {
+  const { somMenuContent } = useFloatingAction();
 
   const contents = [
     {
@@ -18,11 +17,10 @@ const FloatingMenuContent = ({
     },
     {
       label: "somWrite",
-      output: <FloatingSomWrite 
-        somMenuPage={somMenuPage} setSomMenuPage={setSomMenuPage}/>
+      output: <FloatingSomWrite />
     },
   ]
-  const displayContent = contents.filter((content) => content.label == somMenuContent)[0].output
+  const displayContent = contents.find((content) => content.label === somMenuContent)?.output;
 
 
   return (

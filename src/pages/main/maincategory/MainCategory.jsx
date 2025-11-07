@@ -1,31 +1,24 @@
 import React from "react";
 import S from "./style";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { useMain } from "../../../context/MainContext";
 
-const categoryMap = {
-  all: "전체",
-  study: "학습",
-  health: "건강",
-  social: "소셜",
-  hobbies: "취미",
-  "life-style": "생활",
-  rookie: "루키",
-};
-
-const reverseMap = Object.fromEntries(
-  Object.entries(categoryMap).map(([k, v]) => [v, k])
+const reverseMap = (obj) => Object.fromEntries(
+  Object.entries(obj).map(([k, v]) => [v, k])
 );
 
-const categories = Object.values(categoryMap);
 const sortOptions = [
   { value: "latest", label: "전체" },
   { value: "popular", label: "솔로솜" },
   { value: "closing", label: "파티솜" },
 ];
 
-const MainCategory = ({ sortBy, setSortBy }) => {
-  const { category } = useParams();
+const MainCategory = () => {
+  const { category, sortBy, setSortBy, categoryMap } = useMain();
   const navigate = useNavigate();
+  
+  const categories = Object.values(categoryMap);
+  const reversedCategoryMap = reverseMap(categoryMap);
 
   return (
     <S.TopBar>
@@ -35,7 +28,7 @@ const MainCategory = ({ sortBy, setSortBy }) => {
           <S.CategoryButton
             key={cat}
             $active={categoryMap[category] === cat}
-            onClick={() => navigate(`/main/som/${reverseMap[cat]}`)}
+            onClick={() => navigate(`/main/som/${reversedCategoryMap[cat]}`)}
           >
             {cat}
           </S.CategoryButton>
