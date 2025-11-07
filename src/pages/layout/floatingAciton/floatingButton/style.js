@@ -161,7 +161,7 @@ S.menuPlusIcon = styled.img.withConfig({
       : 'invert(0%) brightness(100%) contrast(100%)'}; // → 흰색
   
   transform: ${({ activeState }) => (activeState ? "rotate(-45deg)" : "rotate(0deg)")};
-  transition: transition 0.2s ease;
+  transition: all 0.2s ease;
   -webkit-user-select:none;
   -moz-user-select:none;
   -ms-user-select:none;

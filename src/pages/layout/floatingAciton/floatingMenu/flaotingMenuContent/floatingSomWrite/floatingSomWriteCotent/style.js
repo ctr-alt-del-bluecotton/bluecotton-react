@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { basic, flexCenter, primary, smallText3Regular, title, white } from "../../../../../../../styles/common";
+import { basic } from "../../../../../../../styles/common";
 
 const S = {};
 
@@ -13,8 +13,10 @@ S.floatingPageContainer = styled.div`
   align-items: flex-start;
 `
 
-S.floatingFormWrap = styled.div`
-  display: ${({index, somMenuPage}) => index == somMenuPage ? "flex" : "none"};
+S.floatingFormWrap = styled.div.withConfig({
+  shouldForwardProp: (prop) => prop !== "somMenuPage"
+})`
+  display: ${({index, $somMenuPage}) => index === $somMenuPage ? "flex" : "none"};
   width: 100%;
   height: 100%;
   flex-direction: column;
