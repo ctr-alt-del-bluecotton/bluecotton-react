@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { flexCenter, flexCenterColumn, primary, smallText3Regular, title, white } from "../../../../styles/common";
+import {  } from "../../../../styles/common";
 
 const S = {};
 
@@ -8,10 +8,9 @@ S.floatingMenuContainer = styled.div`
   position: relative;
   justify-content: center;
   align-items: flex-start;
-  width: 500px;
   overflow: visible;
+  width: 500px;
   height: 850px;
-  border-radius: 30px;
   box-shadow: -15px 15px 20px 0px #00000030;
   background-color: white;
 `

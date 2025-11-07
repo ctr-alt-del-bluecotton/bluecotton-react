@@ -1,12 +1,15 @@
 import React from 'react';
 import S from './style';
+import { useFloatingAction } from '../../../../context/FloatingActionContext';
 
-const FloatingButton = ({
-  isFloatingSelect, setIsFloatingSelect,
-  isHoverButtons, setIsHoverButtons,
-  isDisplayFloatingMenu, setIsDisplayFloatingMenu,
-  somMenuSelect
-}) => {
+const FloatingButton = () => {
+  const {
+    isFloatingSelect,
+    setIsFloatingSelect,
+    isHoverButtons,
+    setIsHoverButtons,
+    somMenuSelect,
+  } = useFloatingAction();
 
   const buttons = [
   {
@@ -61,7 +64,7 @@ const FloatingButton = ({
   return (
     <S.floatingActionButtonWrap>
       <S.inner>  
-        <S.topButton activeState={isFloatingSelect}>
+        <S.topButton activeState={isFloatingSelect} onClick={() => window.scrollTo({top:0, behavior: 'smooth'})}>
           <S.toUpIcon src={`${process.env.PUBLIC_URL}/assets/icons/top_icon.png`} />
         </S.topButton>
         <S.menuHideButtonWrap activeState={isFloatingSelect}>

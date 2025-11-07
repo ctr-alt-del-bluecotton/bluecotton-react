@@ -1,5 +1,5 @@
 import styled, { css } from "styled-components";
-import { smallText1Regular, smallText2Regular } from "../../../styles/common";
+import { smallText2Regular } from "../../../styles/common";
 
 /* === 상단 컨테이너 === */
 const S = {};
@@ -30,8 +30,6 @@ S.CategoryButton = styled.button`
   border-radius: 4px;
   border: 1px solid ${({ theme }) => theme.PALLETE.grey.greyScale2};
   background-color: #fff;
-  font-size: ${({ theme }) => theme.FONT_SIZE["smallText2"]};
-  font-weight: ${({ theme }) => theme.FONT_WEIGHT["medium"]};
   color: ${({ theme }) => theme.PALLETE.basic};
   cursor: pointer;
   transition: all 0.15s ease;

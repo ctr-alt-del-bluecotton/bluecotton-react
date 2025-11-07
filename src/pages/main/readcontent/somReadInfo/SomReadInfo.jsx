@@ -1,7 +1,9 @@
 import React from 'react';
 import S from './style'
+import { useRead } from '../../../../context/ReadContext';
 
-const SomReadInfo = ({somInfo, somIsLike, setSomIsLike}) => {
+const SomReadInfo = () => {
+  const { somInfo, somIsLike, setSomIsLike } = useRead();
   const {
     somTitle,
     somCategory,
@@ -17,23 +19,16 @@ const SomReadInfo = ({somInfo, somIsLike, setSomIsLike}) => {
     setSomIsLike(!somIsLike);
   } 
 
-  const isFull = somCount === 10;
-  const isFullOnClick = isFull ? () => { alert("참여 인원이 초과되었습니다.") } : () => { alert("참여쿼리 들어갈 곳") };
+  const somOnClick = () => { alert("참여쿼리 들어갈 곳") };
 
-  const isFullSomButton = isFull ? 
-  <S.fullSomButton onClick={isFullOnClick}>참여 ({somCount}/10)</S.fullSomButton> :
-  <S.somButton onClick={isFullOnClick}>참여 ({somCount}/10)</S.somButton> 
+  const somButton = <S.somButton onClick={somOnClick}>참여 ({somCount}/10)</S.somButton> 
   ;
 
-  const somLikeButton = somIsLike ?
+  const somLikeButton =
     <S.somLikeButton onClick={somLikeButtonOnclick}>
       <S.somLikeIcon src='../../../../assets/icons/som_read_like_active.png' alt='솜 좋아요 true'/>
       <S.somLikeCount>{somLikeCount}</S.somLikeCount>
-    </S.somLikeButton> : 
-    <S.somLikeButton onClick={somLikeButtonOnclick}>
-      <S.somLikeIcon src='../../../../assets/icons/som_read_like_inactive.png' alt='솜 좋아요 false'/>
-      <S.somLikeCount>{somLikeCount}</S.somLikeCount>
-    </S.somLikeButton> ;
+    </S.somLikeButton>
 
   return (
     <S.somInfoWrap>
@@ -66,7 +61,7 @@ const SomReadInfo = ({somInfo, somIsLike, setSomIsLike}) => {
       </S.somAddressWrap>
       <S.somButtonWrap>
         <S.somButton>귓솜말하기</S.somButton>
-        {isFullSomButton}
+        {somButton}
         {somLikeButton}
       </S.somButtonWrap>
     </S.somInfoWrap>

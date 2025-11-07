@@ -1,19 +1,44 @@
-// export const fetchSomList = async (category, sortBy, page) => {
-//   const res = await fetch(
-//     `/api/soms?category=${category}&sortBy=${sortBy}&page=${page}`
-//   );
-//   if (!res.ok) throw new Error("Failed to fetch som list");
-//   return await res.json();
-// };
+const BASE_URL = process.env.REACT_APP_BACKEND_URL;
+
+// 솜 리스트를 가져오는 API
+export const fetchSomList = async (category, sortBy, page) => {
+  // 예시: /api/soms?category=학습&sortBy=최신순&page=1
+  const res = await fetch(
+    `${BASE_URL}/api/soms?category=${category}&sortBy=${sortBy}&page=${page}`
+  );
+
+  if (!res.ok) {
+    // 에러 응답 처리
+    const errorData = await res.json();
+    throw new Error(errorData.message || "솜 리스트를 가져오는데 실패했습니다.");
+  }
+  
+  return await res.json();
+};
+
+// 특정 솜의 상세 정보를 가져오는 API
+export const fetchSomRead = async (somId) => {
+  // 예시: /api/soms/1
+  const res = await fetch(`${BASE_URL}/api/soms/${somId}`);
+
+  if (!res.ok) {
+    const errorData = await res.json();
+    throw new Error(errorData.message || "솜 상세 정보를 가져오는데 실패했습니다.");
+  }
+
+  return await res.json();
+}
 
 
+/*
+// 기존 더미 데이터 로직
 import somDummy from "../dummyData/sqlDummy.json";
 
 export const fetchSomList = async (category, sortBy, page) => {
   // 실제 API처럼 delay 효과
   await new Promise((resolve) => setTimeout(resolve, 200));
 
-  let data = somDummy;
+  let data = [...somDummy];
 
   // 🔹 카테고리 필터링 (전체 제외)
   if (category !== "전체") {
@@ -37,3 +62,4 @@ export const fetchSomList = async (category, sortBy, page) => {
 
   return data;
 };
+*/
