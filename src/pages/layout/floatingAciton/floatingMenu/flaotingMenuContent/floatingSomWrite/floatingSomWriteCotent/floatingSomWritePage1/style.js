@@ -155,7 +155,7 @@ S.floatingSomDateSelectWrap = styled.div`
   justify-content: start;
   align-items: start;
   gap: 20px;
-  box-sizing: border-box;
+  box-sizing: border-box; 
 `
 
 S.floatingDateInputs = styled.input.withConfig({
