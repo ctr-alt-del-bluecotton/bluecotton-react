@@ -2,14 +2,10 @@ import React from 'react';
 import S from './style';
 import SomMemberList from './somMemberList/SomMemberList'
 import SomLeaderInfo from './somLeader/SomLeaderInfo';
+import { useRead } from '../../../../../context/ReadContext';
 
-const SomInfoContent = ({
-  infoMenuSelect, 
-  somMemberList, 
-  somLeader, 
-  somReviews, 
-  somContent
-}) => {
+const SomInfoContent = () => {
+  const { infoMenuSelect, somContent } = useRead();
   let content = ""
 
   if(infoMenuSelect === "info"){
@@ -19,11 +15,11 @@ const SomInfoContent = ({
     );
   } else if (infoMenuSelect === "memberList") {
     content = (
-      <SomMemberList somMemberList={somMemberList} />
+      <SomMemberList />
     )
   } else if (infoMenuSelect === "leader") {
     content = (
-      <SomLeaderInfo somReviews={somReviews} somLeader={somLeader}/>
+      <SomLeaderInfo />
     );
   } else {
     content = ( 
