@@ -54,7 +54,7 @@ const ShopContainer = () => {
             // 구매 타입:
             Object.keys(purchaseTypes).forEach(key => {
                 if (purchaseTypes[key]) {
-                    // 'candy' -> 'CANDY'
+
                     filterParams[key] = key.toUpperCase();
                 }
             });
@@ -79,8 +79,8 @@ const ShopContainer = () => {
                 }
 
                 const json = await response.json();
-                setProducts(json.data || []); //state에 상품 목록 저장
-                setPageNumber(1); // 새 검색 결과이므로 1페이지로 리셋
+                setProducts(json.data || []); 
+                setPageNumber(1); 
 
             } catch (error) {
                 console.error("상품 조회 실패:", error);
@@ -88,7 +88,7 @@ const ShopContainer = () => {
             }
         };
 
-        fetchFilterProduct(); // 함수 실행
+        fetchFilterProduct(); 
 
     }, [categories, productTypes, purchaseTypes, selected]); 
 
@@ -129,28 +129,28 @@ const ShopContainer = () => {
                         <S.CatagoryTopBar />
                         <S.FilterTitle>카테고리</S.FilterTitle>
                         {/* setCategories */}
-                        <S.Label><S.Checkbox checked={categories.clothing} onClick={() => setCategories(prev => ({...prev, clothing: !prev.clothing}))} /> 의류</S.Label>
-                        <S.Label><S.Checkbox checked={categories.keyring} onClick={() => setCategories(prev => ({...prev, keyring: !prev.keyring}))}/> 키링</S.Label>
-                        <S.Label><S.Checkbox checked={categories.bag} onClick={() => setCategories(prev => ({...prev, bag: !prev.bag}))}/> 가방</S.Label>
-                        <S.Label><S.Checkbox checked={categories.stationery} onClick={() => setCategories(prev => ({...prev, stationery: !prev.stationery}))}/> 문구</S.Label>
-                        <S.Label><S.Checkbox checked={categories.living} onClick={() => setCategories(prev => ({...prev, living: !prev.living}))}/> 리빙</S.Label>
-                        <S.Label><S.Checkbox checked={categories.doll} onClick={() => setCategories(prev => ({...prev, doll: !prev.doll}))}/> 인형</S.Label>
-                        <S.Label><S.Checkbox checked={categories.digital} onClick={() => setCategories(prev => ({...prev, digital: !prev.digital}))}/> 디지털</S.Label>
-                        <S.Label><S.Checkbox checked={categories.travel} onClick={() => setCategories(prev => ({...prev, travel: !prev.travel}))}/> 여행</S.Label>
+                        <S.Label><S.Checkbox checked={categories.clothing} onChange={() => setCategories(prev => ({...prev, clothing: !prev.clothing}))} /> 의류</S.Label>
+                        <S.Label><S.Checkbox checked={categories.keyring} onChange={() => setCategories(prev => ({...prev, keyring: !prev.keyring}))}/> 키링</S.Label>
+                        <S.Label><S.Checkbox checked={categories.bag} onChange={() => setCategories(prev => ({...prev, bag: !prev.bag}))}/> 가방</S.Label>
+                        <S.Label><S.Checkbox checked={categories.stationery} onChange={() => setCategories(prev => ({...prev, stationery: !prev.stationery}))}/> 문구</S.Label>
+                        <S.Label><S.Checkbox checked={categories.living} onChange={() => setCategories(prev => ({...prev, living: !prev.living}))}/> 리빙</S.Label>
+                        <S.Label><S.Checkbox checked={categories.doll} onChange={() => setCategories(prev => ({...prev, doll: !prev.doll}))}/> 인형</S.Label>
+                        <S.Label><S.Checkbox checked={categories.digital} onChange={() => setCategories(prev => ({...prev, digital: !prev.digital}))}/> 디지털</S.Label>
+                        <S.Label><S.Checkbox checked={categories.travel} onChange={() => setCategories(prev => ({...prev, travel: !prev.travel}))}/> 여행</S.Label>
                     </S.FilterGroup>
 
                     <S.FilterGroup>
                         <S.FilterTitle>상품 타입</S.FilterTitle>
                         {/* setProductTypes */}
-                        <S.Label><S.Checkbox checked={productTypes.new} onClick={() => setProductTypes(prev => ({...prev, new: !prev.new}))}/> NEW</S.Label>
-                        <S.Label><S.Checkbox checked={productTypes.best} onClick={() => setProductTypes(prev => ({...prev, best: !prev.best}))}/> BEST</S.Label>
+                        <S.Label><S.Checkbox checked={productTypes.new} onChange={() => setProductTypes(prev => ({...prev, new: !prev.new}))}/> NEW</S.Label>
+                        <S.Label><S.Checkbox checked={productTypes.best} onChange={() => setProductTypes(prev => ({...prev, best: !prev.best}))}/> BEST</S.Label>
                     </S.FilterGroup>
 
                     <S.FilterGroup>
                         <S.FilterTitle>구매 타입</S.FilterTitle>
                         {/* setPurchaseTypes */}
-                        <S.Label><S.Checkbox checked={purchaseTypes.candy} onClick={() => setPurchaseTypes(prev => ({...prev, candy: !prev.candy}))}/> 캔디</S.Label>
-                        <S.Label><S.Checkbox checked={purchaseTypes.cash} onClick={() => setPurchaseTypes(prev => ({...prev, cash: !prev.cash}))}/> 일반</S.Label>
+                        <S.Label><S.Checkbox checked={purchaseTypes.candy} onChange={() => setPurchaseTypes(prev => ({...prev, candy: !prev.candy}))}/> 캔디</S.Label>
+                        <S.Label><S.Checkbox checked={purchaseTypes.cash} onChange={() => setPurchaseTypes(prev => ({...prev, cash: !prev.cash}))}/> 일반</S.Label>
                     </S.FilterGroup>
                 </S.LeftFilter>
 
