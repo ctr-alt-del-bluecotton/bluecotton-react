@@ -26,15 +26,16 @@ const PostContainer = () => {
   const keyword = (searchParams.get("q") || "").trim();
   const urlPage = parseInt(searchParams.get("page") || "1", 10);
   const pageNumber = Number.isNaN(urlPage) || urlPage < 1 ? 1 : urlPage;
+  
 
   // ✅ 한글 매핑 객체
   const categoryMap = {
-    STUDY: "학습",
-    HEALTH: "건강",
-    SOCIAL: "소셜",
-    LIFE: "생활",
-    HOBBIES: "취미",
-    ROOKIE: "루키",
+    study: "학습",
+    health: "건강",
+    social: "소셜",
+    life: "생활",
+    hobby: "취미",
+    rookie: "루키",
   };
 
   // ✅ 검색/정렬/카테고리 바뀌면 page=1로 (URL 동기화)
@@ -62,7 +63,7 @@ const PostContainer = () => {
         const baseUrl =
           (typeof import.meta !== "undefined" && import.meta.env && import.meta.env.VITE_BACKEND_URL) ||
           process.env.REACT_APP_BACKEND_URL ||
-          "http://localhost:8080";
+          "http://localhost:10000";
 
         const params = new URLSearchParams();
         params.set("page", String(pageNumber - 1)); // 프론트 1-based → 서버 0-based
@@ -72,7 +73,6 @@ const PostContainer = () => {
         if (category !== "all") params.set("somCategory", category.toUpperCase());
 
         const endpoint = `${baseUrl}/main/post/all?${params.toString()}`;
-        console.log("📡 요청 URL:", endpoint);
 
         const response = await fetch(endpoint, {
           method: "GET",
@@ -82,17 +82,14 @@ const PostContainer = () => {
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
         const result = await response.json();
-        console.log("📦 API 응답:", result);
 
         const mappedPosts = (result.data || []).map((post) => ({
           ...post,
           somCategory:
             categoryMap[post.somCategory?.trim()] || post.somCategory || "기타",
         }));
-
         setPosts(mappedPosts);
       } catch (err) {
-        console.error("❌ 게시글 불러오기 실패:", err);
       }
     };
 
@@ -147,6 +144,7 @@ const PostContainer = () => {
             <PostCard
               key={post.postId}
               id={post.postId}
+              somTitle={post.somTitle}
               category={post.somCategory}
               challengeDay={post.postSomDay}
               title={post.postTitle}
