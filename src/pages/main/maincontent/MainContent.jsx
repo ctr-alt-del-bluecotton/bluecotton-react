@@ -3,11 +3,11 @@ import S from "./style";
 import SomContentList from "../somContentList/SomContentList";
 import PageNumberSelect from "../somNumberSelect/SomNumberSelect";
 
-const MainContent = ({ somList, pageNumber, setPageNumber, somisLikeList, setSomisLikeList }) => {
+const MainContent = () => {
   return (
     <S.Wrapper>
-      <SomContentList somList={somList} pageNumber={pageNumber} somisLikeList={somisLikeList} setSomisLikeList={setSomisLikeList} />
-      <PageNumberSelect somList={somList} pageNumber={pageNumber} setPageNumber={setPageNumber} />
+      <SomContentList />
+      <PageNumberSelect />
     </S.Wrapper>
   );
 };

@@ -1,7 +1,9 @@
 import React from 'react';
 import S from './style';
+import { useRead } from '../../../../../../context/ReadContext';
 
-const SomLeaderInfo = ({somLeader, somReviews}) => {
+const SomLeaderInfo = () => {
+    const { somLeader, somReviews } = useRead();
     const {
         memberName,
         memberInfo,
