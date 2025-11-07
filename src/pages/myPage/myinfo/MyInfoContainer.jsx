@@ -1,13 +1,33 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import S from './style';
 import { useModal } from '../../../components/modal';
+import { openPostcode } from '../../../commons/address';
+import { useForm } from 'react-hook-form';
+import LoginStyle from '../../login/style';
 
 const MyInfoContainer = () => {
   const { openModal } = useModal();
   const fileInputRef = useRef(null);
+  const [searchParams] = useSearchParams();
+
+  // URL 쿼리 파라미터에서 id 가져오기, 없으면 기본값 1
+  const memberId = searchParams.get('id') || '1';
 
   const [previewImage, setPreviewImage] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
+
+  // LoginForm을 위한 react-hook-form 설정
+  const {
+    register,
+    handleSubmit: handleLoginSubmit,
+    formState: { errors: loginErrors, isSubmitting }
+  } = useForm({ mode: "onChange" });
+
+  // 이메일/비밀번호 유효성 검사
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  const passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[!@#])[\da-zA-Z!@#]{8,}$/;
+
 
   // ✅ 한 곳에서만 관리
   const [formData, setFormData] = useState({
@@ -20,13 +40,15 @@ const MyInfoContainer = () => {
     gender: '',
     postcode: '',
     address1: '',
-    address2: ''
+    address2: '',
+    picturePath: '',
+    pictureName: ''
   });
 
   useEffect(() => {
     const fetchMemberInfo = async () => {
       try {
-        const res = await fetch(`${process.env.REACT_APP_BACKEND_URL}/mypage/read-member?id=41`, {
+        const res = await fetch(`${process.env.REACT_APP_BACKEND_URL}/my-page/read-member?id=${memberId}`, {
           headers: { "Content-Type": "application/json" },
           method: "GET"
         });
@@ -60,15 +82,27 @@ const MyInfoContainer = () => {
         }
   
         // ✅ 성별 변환
-        const gender =
-          memberVO.memberGender === 'M' ? 'male' :
-          memberVO.memberGender === 'F' ? 'female' :
-          '';
-  
+        let gender = '';
+        const memberGender = memberVO.memberGender;
+        console.log('받아온 성별 값:', memberGender);
+        
+        if (memberGender) {
+          const genderUpper = String(memberGender).toUpperCase();
+          const genderLower = String(memberGender).toLowerCase();
+          
+          if (genderUpper === 'M' || genderLower === '남' || genderUpper === 'MALE') {
+            gender = 'male';
+          } else if (genderUpper === 'F' || genderLower === '여' || genderUpper === 'FEMALE') {
+            gender = 'female';
+          }
+        }
+        
+        console.log('변환된 성별 값:', gender);
+
         // ✅ formData에 서버 데이터 세팅
         setFormData({
           email: memberVO.memberEmail || '',
-          nickname: memberVO.memberNickName || '',
+          nickname: memberVO.memberNickName || memberVO.memberNickname || '',
           phone: memberVO.memberPhone || '',
           birthYear,
           birthMonth,
@@ -76,8 +110,18 @@ const MyInfoContainer = () => {
           gender,
           postcode: memberVO.memberPostcode || '',
           address1: memberVO.memberAddress || '',
-          address2: memberVO.memberAddressDetail || ''
+          address2: memberVO.memberAddressDetail || '',
+          picturePath: memberVO.memberPicturePath || '',
+          pictureName: memberVO.memberPictureName || ''
         });
+        
+        console.log('설정된 formData.gender:', gender);
+
+        // 서버에서 받아온 프로필 이미지가 있으면 미리보기 설정
+        if (memberVO.memberPicturePath && memberVO.memberPictureName) {
+          const imageUrl = `${process.env.REACT_APP_BACKEND_URL}${memberVO.memberPicturePath}${memberVO.memberPictureName}`;
+          setPreviewImage(imageUrl);
+        }
   
       } catch (error) {
         console.error('회원 정보 조회 오류:', error);
@@ -90,9 +134,18 @@ const MyInfoContainer = () => {
     };
   
     fetchMemberInfo();
-  }, [openModal]);
-  
+  }, [openModal, memberId]);
 
+  // 우편번호 찾기 버튼 클릭 핸들러
+  const handleOpenPostcode = () => {
+    openPostcode(({ address, postcode }) => {
+      setFormData((prev) => ({
+        ...prev,
+        postcode: postcode || '',
+        address1: address || ''
+      }));
+    });
+  };
   // ✅ 인풋 공통 변경 핸들러
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -145,6 +198,7 @@ const MyInfoContainer = () => {
     });
   };
 
+  
   const currentYear = new Date().getFullYear();
 
   return (
@@ -246,9 +300,12 @@ const MyInfoContainer = () => {
                 name="postcode"
                 value={formData.postcode}
                 readOnly
+                placeholder="우편번호"
                 style={{ flex: 1 }}
               />
-              <S.PrimaryButton type="button">우편번호 찾기</S.PrimaryButton>
+              <S.PrimaryButton type="button" onClick={handleOpenPostcode}>
+                우편번호 찾기
+              </S.PrimaryButton>
             </S.ButtonGroup>
           </div>
           <S.Input
@@ -256,6 +313,7 @@ const MyInfoContainer = () => {
             name="address1"
             value={formData.address1}
             readOnly
+            placeholder="주소"
             style={{ marginBottom: '8px' }}
           />
           <S.Input
@@ -263,6 +321,7 @@ const MyInfoContainer = () => {
             name="address2"
             value={formData.address2}
             onChange={handleChange}
+            placeholder="상세주소"
           />
         </S.FormSection>
 
