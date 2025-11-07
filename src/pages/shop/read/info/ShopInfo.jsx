@@ -1,8 +1,55 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import S from "./style.js";
+import { useParams } from "react-router-dom";
 
 const ShopInfo = () => {
   const [open, setOpen] = useState(true);
+
+
+  const {id} = useParams();
+
+
+  const [name, setName] = useState("");
+  const [mainDesc, setMainDesc] = useState("");
+  const [subDesc, setSubDesc] = useState("");
+  const [weight, setWeight] = useState("");
+  const [size, setSize] = useState("");
+  const [material, setMaterial] = useState("");
+
+
+  // 메인 이미지 : 1장
+  // 서브 이미지 : 여러장
+  const [infoMainImage, setInfoMainImage] = useState("");
+  const [infoSubImages, setInfoSubImages] = useState([]);
+
+  
+  useEffect(() => {
+
+    const fetchProductInfo = async () => {
+      const res = await fetch(`${process.env.REACT_APP_BACKEND_URL}/shop/read/${id}/info`,{
+        headers: { "Content-Type": "application/json" },
+        method: "GET",
+      })
+
+
+
+    }
+
+      const body = res.json(); 
+      const data = body?.data;
+
+      setName(data.productName || "");
+      setMainDesc(data.productMainDescription || "");
+      setSubDesc(data.productSubDescription || "");
+      setWeight(data.productWeight || "");
+      setSize(data.productSize || "");
+      setMaterial(data.productMaterial || "");
+      setInfoMainImage(data.productMainImageUrl || "");
+
+
+  },[id])
+
+
 
   return (
     <>
@@ -12,20 +59,20 @@ const ShopInfo = () => {
         <S.InfoDesc>따뜻하고 포근함을 주는 귀여운 솜이 인형을 소개합니다.</S.InfoDesc>
       </S.InfoTextWrap>
 
-      <S.InfoImage>
-        <img src="/assets/images/shop_detailSub_doll.png" alt="상품 상세 이미지" />
+      <S.InfoImage>          
+        <img src={infoMainImage} alt="상품 상세 메인 이미지" />
       </S.InfoImage>
 
       {open && (
         <>
           <S.InfoImage>
-            <img src="/assets/images/shop_detailSub_doll2.png" alt="상품 상세 이미지2" />
+           이미지 부분
           </S.InfoImage>
           <S.InfoImage>
-            <img src="/assets/images/shop_detailSub_doll3.png" alt="상품 상세 이미지3" />
+           이미지 부분
           </S.InfoImage>
           <S.InfoImage>
-            <img src="/assets/images/shop_detailSub_doll4.png" alt="상품 상세 이미지4" />
+            이미지 부분
           </S.InfoImage>
 
           {/* 상품 정보 */}
