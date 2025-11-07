@@ -1,7 +1,9 @@
 import React from "react";
 import S from "./style";
+import { useMain } from "../../../context/MainContext";
 
-const SomNumberSelect = ({ somList, pageNumber, setPageNumber }) => {
+const SomNumberSelect = () => {
+  const { somList, pageNumber, setPageNumber } = useMain();
   const totalPages = Math.ceil(somList.length / 9); 
   const groupSize = 10;
 

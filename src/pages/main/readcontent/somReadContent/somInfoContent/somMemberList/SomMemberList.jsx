@@ -1,11 +1,13 @@
 import React from 'react';
 import S from './style';
 import SomMemberContent from '../somMemberContent/SomMemberContent';
+import { useRead } from '../../../../../../context/ReadContext';
 
-const SomMemberList = ({somMemberList}) => {
+const SomMemberList = () => {
+  const { somMemberList } = useRead();
 
-  const list = somMemberList.map((data) => (
-    <SomMemberContent memberData={data}/>
+  const list = somMemberList.map((data, index) => (
+    <SomMemberContent key={index} memberData={data}/>
   ));
 
   return (

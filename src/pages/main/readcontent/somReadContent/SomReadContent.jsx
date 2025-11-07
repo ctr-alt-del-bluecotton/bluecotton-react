@@ -1,17 +1,10 @@
 import React from 'react';
 import S from './style'
 import SomInfoContent from './somInfoContent/SomInfoContent';
+import { useRead } from '../../../../context/ReadContext';
 
-const SomReadContent = ({
-  somMemberList,
-  infoMenuSelect, 
-  setInfoMenuSelect,
-  somLeader,
-  somInfo,
-  somContent,
-  somReviews
-}) => {
-
+const SomReadContent = () => {
+  const { somInfo, infoMenuSelect, setInfoMenuSelect } = useRead();
   const { somImageName, somImagePath } = somInfo;
 
   const somInfoMenu = [
@@ -31,7 +24,7 @@ const SomReadContent = ({
         </S.somInfoMenu>
 
       </S.somInfoMenuWrap>
-      <SomInfoContent somLeader={somLeader} somContent={somContent} somReviews={somReviews} infoMenuSelect={infoMenuSelect} somMemberList={somMemberList} setSomMemberList={somMemberList}/>
+      <SomInfoContent />
     </S.somReadContentContainer>
   );
 };
