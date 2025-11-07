@@ -44,7 +44,7 @@ const SignUp = () => {
   })
 
   const handleOpendPostCode = () => {
-    openPostcode((address) => {
+    openPostcode(({ address }) => {
       setValue("memberAddress", address)
     })
   }
