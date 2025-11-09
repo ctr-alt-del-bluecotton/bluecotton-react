@@ -1,32 +1,84 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import S from "./style.js";
+import { useParams } from "react-router-dom";
 
 const ShopInfo = () => {
   const [open, setOpen] = useState(true);
 
+
+  const {id} = useParams();
+
+
+  const [name, setName] = useState("");
+  const [mainDesc, setMainDesc] = useState("");
+  const [subDesc, setSubDesc] = useState("");
+  const [weight, setWeight] = useState("");
+  const [size, setSize] = useState("");
+  const [material, setMaterial] = useState("");
+
+
+  // 메인 이미지 : 1장
+  // 서브 이미지 : 여러장
+  const [infoMainImage, setInfoMainImage] = useState("");
+  const [infoSubImages, setInfoSubImages] = useState([]);
+
+  
+  useEffect(() => {
+
+    const fetchProductInfo = async () => {
+      const res = await fetch(`${process.env.REACT_APP_BACKEND_URL}/shop/read/${id}/info`,{
+        headers: { "Content-Type": "application/json" },
+        method: "GET",
+      }
+    );
+
+
+      if (!res.ok) {
+        console.error("응답 에러:", res.status);
+        return;
+      }
+
+      const body = await res.json(); 
+      const data = body?.data;
+
+      setName(data.productName || "");
+      setMainDesc(data.productMainDescription || "");
+      setSubDesc(data.productSubDescription || "");
+      setWeight(data.productWeight || "");
+      setSize(data.productSize || "");
+      setMaterial(data.productMaterial || "");
+      setInfoMainImage(data.productMainImageUrl || "");
+
+        const subs = typeof data.productSubImageUrl === "string"
+            ? data.productSubImageUrl.split(",").map((s) => s.trim()).filter(Boolean) : []
+
+        setInfoSubImages(subs)
+    }
+
+    if(id) fetchProductInfo();
+
+  },[id])
+
+
   return (
     <>
       <S.InfoTextWrap>
-        <S.InfoKicker>따뜻하고 포근한 솜이 인형</S.InfoKicker>
-        <S.InfoTitle>솜이 인형</S.InfoTitle>
-        <S.InfoDesc>따뜻하고 포근함을 주는 귀여운 솜이 인형을 소개합니다.</S.InfoDesc>
+        <S.InfoKicker>{mainDesc}</S.InfoKicker>
+        <S.InfoTitle>{name}</S.InfoTitle>
+        {subDesc && <S.InfoDesc>{subDesc}</S.InfoDesc>}
       </S.InfoTextWrap>
 
-      <S.InfoImage>
-        <img src="/assets/images/shop_detailSub_doll.png" alt="상품 상세 이미지" />
+      <S.InfoImage>          
+        <img src={infoMainImage} alt="상품 상세 메인 이미지" />
       </S.InfoImage>
 
       {open && (
         <>
-          <S.InfoImage>
-            <img src="/assets/images/shop_detailSub_doll2.png" alt="상품 상세 이미지2" />
+        {infoSubImages.map((src, i) => (
+          <S.InfoImage key={i}>
+            <img src={src} alt={`상품 서브 이미지 ${i + 1}`}/>
           </S.InfoImage>
-          <S.InfoImage>
-            <img src="/assets/images/shop_detailSub_doll3.png" alt="상품 상세 이미지3" />
-          </S.InfoImage>
-          <S.InfoImage>
-            <img src="/assets/images/shop_detailSub_doll4.png" alt="상품 상세 이미지4" />
-          </S.InfoImage>
+        ))}
 
           {/* 상품 정보 */}
           <S.SpecSection>
@@ -34,15 +86,15 @@ const ShopInfo = () => {
             <S.SpecList>
               <S.SpecRow>
                 <S.SpecLabel>무게:</S.SpecLabel>
-                <S.SpecValue>330g</S.SpecValue>
+                <S.SpecValue>{weight}</S.SpecValue>
               </S.SpecRow>
               <S.SpecRow>
                 <S.SpecLabel>제품 크기:</S.SpecLabel>
-                <S.SpecValue>270 × 350 × 200 (mm)</S.SpecValue>
+                <S.SpecValue>{size}</S.SpecValue>
               </S.SpecRow>
               <S.SpecRow>
                 <S.SpecLabel>재질:</S.SpecLabel>
-                <S.SpecValue>POLYESTER, COTTON</S.SpecValue>
+                <S.SpecValue>{material}</S.SpecValue>
               </S.SpecRow>
             </S.SpecList>
           </S.SpecSection>
