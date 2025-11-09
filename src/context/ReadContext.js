@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import { createContext, useState, useContext, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 // import readData from '../pages/main/dummyData/readDummys/readDummy.json';
 import memberData from '../pages/main/dummyData/readDummys/joinMemberDummy.json';
