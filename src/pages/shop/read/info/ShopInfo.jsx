@@ -74,11 +74,11 @@ const ShopInfo = () => {
 
       {open && (
         <>
-        {infoSubImages.map((src, i) => {
-          <S.InfoImage>
-            <img src={src}/>
+        {infoSubImages.map((src, i) => (
+          <S.InfoImage key={i}>
+            <img src={src} alt={`상품 서브 이미지 ${i + 1}`}/>
           </S.InfoImage>
-        })}
+        ))}
 
           {/* 상품 정보 */}
           <S.SpecSection>
