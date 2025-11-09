@@ -1,11 +1,11 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import S from './style';
 import OrderUserInfo from './OrderUserInfo';
 import OrderProduct from './OrderProduct';
 import PaymentMethod from './PaymentMathod';
+import { useModal } from "../../../components/modal/useModal";
 
 const PORTONE_IMP_KEY = process.env.REACT_APP_PORTONE_IMP_KEY;
-
 
 const getIMP = (() => {
   let promise;
@@ -23,8 +23,8 @@ const getIMP = (() => {
             reject(new Error('PORTONE 식별키 없음 (REACT_APP_PORTONE_IMP_KEY)'));
             return;
           }
-          window.IMP.init(PORTONE_IMP_KEY); 
-          resolve(window.IMP);             
+          window.IMP.init(PORTONE_IMP_KEY);
+          resolve(window.IMP);
         } else {
           reject(new Error('PortOne SDK 로드 실패'));
         }
@@ -55,9 +55,11 @@ const enforceIframeStyles = () => {
 };
 
 const ShopOrderMenu = () => {
+  const { openModal } = useModal();
+
   const [payType, setPayType] = useState(null);
-  const [generalMethod, setGeneralMethod] = useState('card'); 
-  const [payLoading, setPayLoading] = useState(false);       
+  const [generalMethod, setGeneralMethod] = useState('card');
+  const [payLoading, setPayLoading] = useState(false);
   const isCandy = payType === 'candy';
 
   const productAmount = 13000;
@@ -72,21 +74,37 @@ const ShopOrderMenu = () => {
     postcode: '06234',
   };
 
-  
   useEffect(() => {
-    getIMP().catch(console.error);
-  }, []);
+    getIMP().catch((e) => {
+      console.error(e);
+      openModal({
+        title: '결제 준비 실패',
+        message: e.message || 'PortOne SDK를 불러오지 못했습니다.',
+        confirmText: '확인',
+      });
+    });
+  }, [openModal]);
 
   const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
 
   const handlePortOnePay = async () => {
     if (payLoading) return;
+
     if (payType === 'candy') {
-      alert('캔디 결제는 별도 차감 로직으로 처리됩니다.');
+      openModal({
+        title: '캔디 결제 안내',
+        message: '캔디 결제는 별도의 내부 차감 로직으로 처리됩니다.',
+        confirmText: '확인',
+      });
       return;
     }
+
     if (!payType) {
-      alert('결제 수단을 선택해 주세요.');
+      openModal({
+        title: '결제 수단 선택',
+        message: '결제 수단을 선택해 주세요.',
+        confirmText: '확인',
+      });
       return;
     }
 
@@ -94,16 +112,14 @@ const ShopOrderMenu = () => {
     try {
       const IMP = await getIMP();
 
-      
       const merchant_uid = `BC_${Date.now()}`;
 
-     
       let pg = '';
       let pay_method = '';
 
       switch (payType) {
         case 'toss':
-          pg = 'uplus.tlgdacomxpay'; 
+          pg = 'uplus.tlgdacomxpay';
           pay_method = 'card';
           break;
         case 'kakao':
@@ -111,11 +127,16 @@ const ShopOrderMenu = () => {
           pay_method = 'card';
           break;
         case 'general':
-          pg = 'nice_v2'; 
-          pay_method = generalMethod; 
+          pg = 'nice_v2';
+          pay_method = generalMethod;
           break;
         default:
-          alert('결제 수단을 확인해 주세요.');
+          openModal({
+            title: '오류',
+            message: '결제 수단을 확인해 주세요.',
+            confirmText: '확인',
+          });
+          setPayLoading(false);
           return;
       }
 
@@ -131,25 +152,37 @@ const ShopOrderMenu = () => {
           buyer_tel: buyer.tel,
           buyer_addr: buyer.addr,
           buyer_postcode: buyer.postcode,
-          ...(isMobile ? { m_redirect_url: window.location.href } : {}), 
+          ...(isMobile ? { m_redirect_url: window.location.href } : {}),
         },
         (rsp) => {
-          
           requestAnimationFrame(enforceIframeStyles);
 
           if (rsp.success) {
             console.log('결제 성공: ', rsp);
-            alert('결제가 완료되었습니다.');
+            openModal({
+              title: '결제 완료',
+              message: '결제가 완료되었습니다.',
+              confirmText: '확인',
+              // onConfirm: () => navigate('/orders/complete') 같은 후처리 가능
+            });
           } else {
             console.error('결제 실패: ', rsp);
-            alert('결제가 실패했습니다.');
+            openModal({
+              title: '결제 실패',
+              message: `사유: ${rsp.error_msg || '알 수 없는 오류'}`,
+              confirmText: '확인',
+            });
           }
           setPayLoading(false);
         }
       );
     } catch (e) {
       console.error(e);
-      alert('결제 준비 중 오류가 발생했습니다.');
+      openModal({
+        title: '결제 오류',
+        message: e.message || '결제 준비 중 오류가 발생했습니다.',
+        confirmText: '확인',
+      });
       setPayLoading(false);
     }
   };
@@ -160,8 +193,10 @@ const ShopOrderMenu = () => {
         <OrderUserInfo />
         <OrderProduct />
         <PaymentMethod value={payType} onChange={setPayType} />
-        {payType === 'general' /* 일반결제 하위 옵션 렌더링 영역 */ }
+        {/* payType === 'general' 일 때 일반결제 상세 옵션을 보여줄 컴포넌트가 있으면 여기에 렌더 */}
+        {/* {payType === 'general' && <GeneralMethod value={generalMethod} onChange={setGeneralMethod} />} */}
       </S.OrderMainSection>
+
       <S.OrderSideSection>
         <S.SideContainer>
           <S.SideTitle>결제 예정금액</S.SideTitle>
