@@ -11,9 +11,8 @@ const formatPrice = (type, value) => {
   const n = Number(value) || 0;
   return `${n.toLocaleString()}${type === "CANDY" ? "캔디" : "원"}`;
 };
-
 const parseSubs = (s) =>
-  typeof s === "string" ? s.split(",").map(v => v.trim()).filter(Boolean) : [];
+  typeof s === "string" ? s.split(",").map((v) => v.trim()).filter(Boolean) : [];
 
 const Shop = () => {
   const { id } = useParams();
@@ -21,11 +20,15 @@ const Shop = () => {
   const { openModal } = useModal();
 
 
-  const [title, setTitle] = useState("");
-  const [price, setPrice] = useState(0);
-  const [purchaseType, setPurchaseType] = useState("CASH"); 
-  const [avgRating, setAvgRating] = useState(0);
-  const [reviewCount, setReviewCount] = useState(0);
+  const [headerData, setHeaderData] = useState(null); // 상품 상단 헤더
+  const [reviewStats, setReviewStats] = useState(null); // "리뷰 평점"
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+
+  const [activeTab, setActiveTab] = useState("info");
+  const [count, setCount] = useState(1);
+  const [isLiked, setIsLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
   const [selectedImage, setSelectedImage] = useState(null);
   const [subImages, setSubImages] = useState([]);
@@ -37,59 +40,96 @@ const Shop = () => {
   const [activeTab, setActiveTab] = useState("info");
   const [count, setCount] = useState(1);
 
-  const [goCart, setGoCart] = useState([]);
-  const [error, setError] = useState(null);
-
 
   const totalText = useMemo(
     () => formatPrice(purchaseType, price * count),
     [purchaseType, price, count]
   );
 
-
+  // useEffect 1개로 2개 fetch 날리기
   useEffect(() => {
-    const load = async () => {
+    const loadAllHeaderData = async () => {
+      setLoading(true);
+      setError(null);
+      setHeaderData(null); 
+      setReviewStats(null);
 
-        const res = await fetch(`${process.env.REACT_APP_BACKEND_URL}/shop/read/${id}`, {
-          headers: { "Content-Type": "application/json" },
-          method: "GET",
-        });
+      try {
+        // 상품 헤더 (read/{id})
+        const headerRes = await fetch(
+          `${process.env.REACT_APP_BACKEND_URL}/shop/read/${id}`,
+          {
+            headers: { "Content-Type": "application/json" },
+            method: "GET",
+          }
+        );
+        if (!headerRes.ok) throw new Error("상품 정보 로딩 실패");
+        const headerJson = await headerRes.json();
 
-        const body = await res.json(); 
-        const data = body?.data;
+        // 리뷰 평점 (review/status)
+        const statsRes = await fetch(
+          `${process.env.REACT_APP_BACKEND_URL}/shop/read/${id}/review/status`,
+          {
+            headers: { "Content-Type": "application/json" },
+            method: "GET",
+          }
+        );
+        if (!statsRes.ok) throw new Error("리뷰 통계 로딩 실패");
+        const statsJson = await statsRes.json();
 
-        setTitle(data.productName || "");
-        setPrice(Number(data.productPrice) || 0);
-        setPurchaseType(data.productPurchaseType || "CASH");
-        setAvgRating(Number(data.productAvgRating) || 0);
-        setReviewCount(Number(data.productReviewCount) || 0);
-        setLikeCount(Number(data.productLikeCount) || 0);
+        // 상태 저장
+        setHeaderData(headerJson.data);
+        setReviewStats(statsJson.data);
 
-        const subs = parseSubs(data.productSubImageUrl);
-        setSubImages(subs);
-        setSelectedImage(data.productMainImageUrl || subs[0] || "/assets/images/fallback.png");
-
-        const t = String(data.productType || "").toUpperCase();
-        setIsNew(t.includes("NEW"));
-        setIsBest(t.includes("BEST"));
-
+        setLikeCount(Number(headerJson.data.productLikeCount) || 0);
+        const subs = parseSubs(headerJson.data.productSubImageUrl);
+        setSelectedImage(
+          headerJson.data.productMainImageUrl || subs[0] || "/assets/images/fallback.png"
+        );
+        
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
     };
 
-    if (id) load(); 
-  }, [id, openModal]);
+    if (id) {
+      loadAllHeaderData();
+    }
+  }, [id]);
+
 
   const toggleLike = () => {
-    setIsLiked(prev => {
-      setLikeCount(v => (prev ? v - 1 : v + 1));
+    setIsLiked((prev) => {
+      setLikeCount((v) => (prev ? v - 1 : v + 1));
       return !prev;
     });
   };
-
-  // 수량
   const changeCount = (type) => {
-    if (type === "minus") setCount(v => Math.max(1, v - 1));
-    if (type === "plus") setCount(v => v + 1);
+    if (type === "minus") setCount((v) => Math.max(1, v - 1));
+    if (type === "plus") setCount((v) => v + 1);
   };
+
+
+  if (!headerData || !reviewStats) {
+    return <S.Page>데이터를 표시할 수 없습니다.</S.Page>;
+  }
+
+
+  const {
+    productName,
+    productPrice,
+    productPurchaseType,
+    productSubImageUrl,
+    productType,
+  } = headerData;
+  
+  const { avgScore, totalCount: reviewCount } = reviewStats;
+
+  const subImages = parseSubs(productSubImageUrl);
+  const isNew = String(productType || "").includes("NEW");
+  const isBest = String(productType || "").includes("BEST");
 
 
   const handleAddToCart = async () => {
@@ -152,30 +192,33 @@ const Shop = () => {
             </S.SubImageArea>
           )}
 
-          {/* 정보/리뷰 */}
+          {/* 정보/리뷰 탭 */}
           <S.InfoSection>
             <S.InfoTabs>
-              <S.InfoTab $active={activeTab === "info"} onClick={() => setActiveTab("info")}>
+              <S.InfoTab
+                $active={activeTab === "info"}
+                onClick={() => setActiveTab("info")}
+              >
                 정보
               </S.InfoTab>
-              <S.InfoTab $active={activeTab === "review"} onClick={() => setActiveTab("review")}>
+              <S.InfoTab
+                $active={activeTab === "review"}
+                onClick={() => setActiveTab("review")}
+              >
                 리뷰 {reviewCount}
               </S.InfoTab>
             </S.InfoTabs>
 
             <S.InfoDivider />
 
-            {activeTab === "info" ? (
-              <>
-                <ShopInfo />
-                <ShopRelated />
-              </>
-            ) : (
-              <>
-                <ShopReview />
-                <ShopRelated />
-              </>
-            )}
+            {/* 정보 탭 */}
+            <div style={{ display: activeTab === "info" ? "block" : "none" }}>
+              <ShopInfo />
+            </div>
+            {/* 리뷰 탭 */}
+            <div style={{ display: activeTab === "review" ? "block" : "none" }}>
+              <ShopReview stats={reviewStats} />
+            </div>
           </S.InfoSection>
         </S.Left>
 
@@ -186,15 +229,15 @@ const Shop = () => {
             {isBest && <S.DetailBestTag>BEST</S.DetailBestTag>}
           </S.TagRow>
 
-          <S.Title>{title}</S.Title>
-          <S.DetailPrice>{formatPrice(purchaseType, price)}</S.DetailPrice>
+          <S.Title>{productName}</S.Title>
+          <S.DetailPrice>{formatPrice(productPurchaseType, productPrice)}</S.DetailPrice>
 
           <S.DetailReviewWrap>
             <S.Icon src="/assets/icons/review.svg" alt="리뷰 아이콘" />
-            <S.Text>{avgRating} ({reviewCount})</S.Text>
+            <S.Text>{avgScore.toFixed(1)} ({reviewCount})</S.Text>
           </S.DetailReviewWrap>
-
-          {purchaseType === "CASH" ? (
+          
+          {productPurchaseType === "CASH" ? (
             <>
               <S.DeliveryRow>
                 <S.Delivery>배송</S.Delivery>

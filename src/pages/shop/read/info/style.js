@@ -150,6 +150,7 @@ S.ToggleBox = styled.button`
   background: #fff;
   display: flex;
   align-items: center;
+  font-family: 'Daeojamjil', sans-serif;
   justify-content: center;
   gap: 8px;
   cursor: pointer;
