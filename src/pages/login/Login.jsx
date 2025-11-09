@@ -11,25 +11,36 @@ const Login = () => {
     formState: {errors, isSubmitting}
   } = useForm({mode: "onChange"});
 
-  const handleSubmitForm = handleSubmit(async (data) => {
-    const {memberPasswordConfirm, ...member} = data;
+  const handleSubmitForm = handleSubmit((data) => {
+  const { memberPasswordConfirm, ...member } = data;
 
-    const res = await fetch(`${process.env.REACT_APP_BACKEND_URL}/auth/login`,{
-      headers: {
-        "Content-Type" : "application/json"
-      },
-      method: "POST",
-      body: JSON.stringify(member)
-    })
-
-    // 백앤드 연결시 활성화
-    if(!res.ok){
-      alert("이메일 또는 비밀번호가 일치하지 않습니다");
-      return;
-    }
-    navigate("/main/som/all")
+  fetch(`${process.env.REACT_APP_BACKEND_URL}/auth/login`, {
+    headers: { "Content-Type": "application/json" },
+    method: "POST",
+    body: JSON.stringify(member),
+    credentials: "include"
   })
-
+    .then((res) => {
+      if (!res.ok) {
+        alert("이메일 또는 비밀번호가 일치하지 않습니다");
+        throw new Error("로그인 실패");
+      }
+      return res.json();
+    })
+    .then((result) => {
+      const accessToken = result.data && result.data.accessToken;
+      if (accessToken) {
+        localStorage.setItem("accessToken", accessToken);
+        navigate("/main/som/all");
+      } else {
+        alert("로그인 실패: accessToken이 없습니다");
+      }
+    })
+    .catch((err) => {
+      console.error("로그인 요청 중 에러:", err);
+      alert("서버 연결에 문제가 있습니다");
+    });
+});
   //  로그인 유효성검사
   const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
   const passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[!@#])[\da-zA-Z!@#]{8,}$/;

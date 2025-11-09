@@ -19,7 +19,7 @@ const SocialRedirect = () => {
       try {
         // key로 access token 가져오기
         const res = await fetch(
-          `${process.env.REACT_APP_BACKEND_URL}/auth/social/token?key=${key}`,
+          `${process.env.REACT_APP_BACKEND_URL}/auth/oauth2/success?key=${key}`,
           { credentials: "include" } // refreshToken 쿠키 포함
         );
 
