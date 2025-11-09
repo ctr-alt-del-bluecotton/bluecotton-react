@@ -29,21 +29,49 @@ const PostReadContent = () => {
   const goPrev = () => prevId && navigate(`/main/post/read/${prevId}`);
   const goNext = () => navigate(`/main/post/read/${nextId}`);
 
-  // ✅ 게시글 상세조회
+  // ✅ Kakao SDK 초기화
+  useEffect(() => {
+    const initKakao = () => {
+      if (window.Kakao && !window.Kakao.isInitialized()) {
+        window.Kakao.init("8cb2100ec330f00d05688be83f2361af");
+        console.log("✅ Kakao SDK Initialized:", window.Kakao.isInitialized());
+      }
+    };
+
+    if (window.Kakao) {
+      initKakao();
+    } else {
+      const check = setInterval(() => {
+        if (window.Kakao) {
+          clearInterval(check);
+          initKakao();
+        }
+      }, 300);
+      return () => clearInterval(check);
+    }
+  }, []);
+
+  // ✅ 게시글 상세조회 (좋아요 여부 포함)
   useEffect(() => {
     const fetchPostDetail = async () => {
       try {
         const BASE_URL =
           process.env.REACT_APP_BACKEND_URL || "http://localhost:10000";
-        const response = await fetch(`${BASE_URL}/main/post/read/${id}`);
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        const memberId = 1; // ✅ 임시 로그인 (테스트용)
+        const response = await fetch(
+          `${BASE_URL}/main/post/read/${id}?memberId=${memberId}`
+        );
+        if (!response.ok)
+          throw new Error(`HTTP error! status: ${response.status}`);
 
         const result = await response.json();
         if (result.data) {
           setPost(result.data);
           setComments(result.data.comments || []);
         } else {
-          throw new Error(result.message || "게시글 데이터를 불러오지 못했습니다.");
+          throw new Error(
+            result.message || "게시글 데이터를 불러오지 못했습니다."
+          );
         }
       } catch (err) {
         console.error("게시글 상세 불러오기 실패:", err);
@@ -131,7 +159,7 @@ const PostReadContent = () => {
 
           let result = {};
           try {
-            result = await response.json(); // ✅ 빈 body일 때도 안전하게
+            result = await response.json();
           } catch {
             result = {};
           }
@@ -160,7 +188,6 @@ const PostReadContent = () => {
   if (loading) return <S.Container>로딩 중...</S.Container>;
   if (!post) return <S.Container>게시글을 찾을 수 없습니다.</S.Container>;
 
-  // ✅ 날짜 포맷 (2025.11.02 → 마지막 점 제거)
   const formatDate = (dateString) => {
     const d = new Date(dateString);
     if (isNaN(d)) return "";
@@ -171,12 +198,15 @@ const PostReadContent = () => {
         day: "2-digit",
       })
       .replace(/\.\s?/g, ".")
-      .replace(/\.$/, ""); // ✅ 마지막 점 제거
+      .replace(/\.$/, "");
   };
 
-  // ✅ 카카오 공유
   const handleShare = () => {
-    if (!window.Kakao) return;
+    if (!window.Kakao || !window.Kakao.Share) {
+      alert("카카오 SDK가 아직 초기화되지 않았습니다.");
+      return;
+    }
+
     const shareUrl = `${window.location.origin}/main/post/read/${id}`;
     window.Kakao.Share.sendDefault({
       objectType: "feed",
@@ -216,21 +246,23 @@ const PostReadContent = () => {
           <span onClick={handleDelete}>삭제</span>
         </S.EditBox>
 
-      {/* ✅ 기본이미지는 상세에서 표시하지 않음 */}
-      {post.postImageUrl &&
-        !post.postImageUrl.includes("default_post.jpg") && (
-          <img
-            src={
-              post.postImageUrl.startsWith("/upload/")
-                ? `http://localhost:10000${post.postImageUrl}`
-                : post.postImageUrl
-            }
-            alt="게시글 이미지"
-            style={{ width: "100%", marginBottom: "20px" }}
-          />
-        )}
+        {post.postImageUrl &&
+          !post.postImageUrl.includes("default_post.jpg") && (
+            <img
+              src={
+                post.postImageUrl.startsWith("/upload/")
+                  ? `http://localhost:10000${post.postImageUrl}`
+                  : post.postImageUrl
+              }
+              alt="게시글 이미지"
+              style={{ width: "100%", marginBottom: "20px" }}
+              onError={(e) => {
+                e.target.src =
+                  "http://localhost:10000/upload/default/default_post.jpg";
+              }}
+            />
+          )}
 
-        {/* ✅ HTML 태그 포함 내용 렌더링 */}
         <div
           className="post-content"
           dangerouslySetInnerHTML={{ __html: post.postContent }}
@@ -254,7 +286,6 @@ const PostReadContent = () => {
         </S.ShareButton>
       </S.PostSocialBox>
 
-      {/* ✅ 댓글 영역 */}
       <PostComment
         showComments={showComments}
         setShowComments={setShowComments}
@@ -278,10 +309,9 @@ const PostReadContent = () => {
         setShowReportModal={setShowReportModal}
         reportTarget={reportTarget}
         setReportTarget={setReportTarget}
-        postId={id}  
+        postId={id}
       />
 
-      {/* ✅ 이전 / 다음 글 */}
       <S.NavList>
         <S.NavItem onClick={goNext}>
           <div className="label">

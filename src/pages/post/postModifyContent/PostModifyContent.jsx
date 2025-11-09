@@ -9,12 +9,12 @@ const MAX_LENGTH = 1000;
 
 // ✅ 영어 → 한글 매핑 테이블
 const categoryMap = {
-  STUDY: "학습",
-  HEALTH: "건강",
-  SOCIAL: "소셜",
-  HOBBY: "취미",
-  LIFE: "생활",
-  ROOKIE: "루키",
+  study: "학습",
+  health: "건강",
+  social: "소셜",
+  hobby: "취미",
+  life: "생활",
+  rookie: "루키",
 };
 
 const PostModifyContent = () => {

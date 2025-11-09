@@ -2,7 +2,7 @@
 import React from "react";
 import S from "./style";
 import Report from "../../../components/Report/Report";
-import { useModal } from "../../../components/modal"; // ✅ 모달 훅 추가
+import { useModal } from "../../../components/modal";
 
 const PostComment = ({
   showComments,
@@ -17,7 +17,6 @@ const PostComment = ({
   setShowReplyTarget,
   deleteTarget,
   setDeleteTarget,
-  handleLike,
   showReportModal,
   setShowReportModal,
   reportTarget,
@@ -27,17 +26,65 @@ const PostComment = ({
   const BASE_URL =
     process.env.REACT_APP_BACKEND_URL || "http://localhost:10000";
 
-  const { openModal } = useModal(); // ✅ 전역 모달 사용
+  const { openModal } = useModal();
+
+  /* ✅ 댓글/답글 좋아요 토글 */
+ const handleLike = async (targetId, isReply = false, parentCommentId = null) => {
+  const endpoint = isReply
+    ? `${BASE_URL}/main/post/reply/like/toggle`
+    : `${BASE_URL}/main/post/comment/like/toggle`;
+
+  try {
+    const res = await fetch(endpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        memberId: 1, // 로그인 가정
+        ...(isReply ? { replyId: targetId } : { commentId: targetId }),
+      }),
+    });
+
+    if (!res.ok) throw new Error("좋아요 요청 실패");
+
+    setComments((prev) =>
+      prev.map((c) => {
+        // 댓글
+        if (!isReply && c.commentId === targetId) {
+          const liked = !c.liked;
+          return {
+            ...c,
+            liked,
+            commentLikeCount: c.commentLikeCount + (liked ? 1 : -1),
+          };
+        }
+
+        // 대댓글
+        if (isReply && c.replies) {
+          const updatedReplies = c.replies.map((r) =>
+            r.replyId === targetId
+              ? {
+                  ...r,
+                  liked: !r.liked,
+                  replyLikeCount: r.replyLikeCount + (!r.liked ? 1 : -1),
+                }
+              : r
+          );
+          return { ...c, replies: updatedReplies };
+        }
+        return c;
+      })
+    );
+  } catch (err) {
+    console.error("좋아요 토글 실패:", err);
+  }
+};
+
 
   /* ✅ 멘션 강조 렌더링 */
   const renderTextWithTags = (text = "") => {
     const parts = text.split(/(@\S+)/g);
     return parts.map((part, i) =>
-      part.startsWith("@") ? (
-        <S.Mention key={i}>{part}</S.Mention>
-      ) : (
-        part
-      )
+      part.startsWith("@") ? <S.Mention key={i}>{part}</S.Mention> : part
     );
   };
 
@@ -59,7 +106,6 @@ const PostComment = ({
       if (!res.ok) throw new Error("댓글 등록 실패");
       const result = await res.json();
 
-      // 새로고침 없이 즉시 반영
       setComments((prev) => [
         ...prev,
         {
@@ -69,6 +115,7 @@ const PostComment = ({
           memberNickname: "지존준서",
           memberProfileUrl: "/images/default_profile.png",
           commentLikeCount: 0,
+          liked: false,
           replies: [],
         },
       ]);
@@ -102,7 +149,6 @@ const PostComment = ({
       if (!res.ok) throw new Error("답글 등록 실패");
       const result = await res.json();
 
-      // ✅ 즉시 반영
       setComments((prev) =>
         prev.map((c) =>
           c.commentId === parentId
@@ -117,6 +163,7 @@ const PostComment = ({
                     memberNickname: "지존준서",
                     memberProfileUrl: "/images/default_profile.png",
                     replyLikeCount: 0,
+                    liked: false,
                   },
                 ],
               }
@@ -238,8 +285,26 @@ const PostComment = ({
                     />
 
                     <div className="text-box">
-                      <div className="writer">
-                        {c.memberNickname || "익명"}
+                      <div className="header-row">
+                        <div className="writer">
+                          {c.memberNickname || "익명"}
+                        </div>
+
+                        {/* ✅ 댓글 좋아요 */}
+                        <S.LikeButton
+                          $liked={c.liked}
+                          onClick={() => handleLike(c.commentId, false)}
+                        >
+                          <img
+                            src={
+                              c.liked
+                                ? "/assets/icons/favorite_acv.svg"
+                                : "/assets/icons/favorite_gray.svg"
+                            }
+                            alt="좋아요"
+                          />
+                          {c.commentLikeCount}
+                        </S.LikeButton>
                       </div>
 
                       <div className="content">
@@ -327,7 +392,7 @@ const PostComment = ({
                   </S.CommentForm>
                 )}
 
-                {/* ✅ 대댓글 리스트 */}
+                {/* ✅ 대댓글 */}
                 {c.replies?.map((r) => (
                   <S.CommentItem key={r.replyId} indent>
                     <div className="left">
@@ -343,12 +408,34 @@ const PostComment = ({
                         className="profile"
                       />
                       <div className="text-box">
-                        <div className="writer">
-                          {r.memberNickname || "익명"}
+                        <div className="header-row">
+                          <div className="writer">
+                            {r.memberNickname || "익명"}
+                          </div>
+
+                          {/* ✅ 대댓글 좋아요 */}
+                          <S.LikeButton
+                            $liked={r.liked}
+                            onClick={() =>
+                              handleLike(r.replyId, true, c.commentId)
+                            }
+                          >
+                            <img
+                              src={
+                                r.liked
+                                  ? "/assets/icons/favorite_acv.svg"
+                                  : "/assets/icons/favorite_gray.svg"
+                              }
+                              alt="좋아요"
+                            />
+                            {r.replyLikeCount}
+                          </S.LikeButton>
                         </div>
+
                         <div className="content">
                           {renderTextWithTags(r.replyContent)}
                         </div>
+
                         <div className="meta-row">
                           <span>{formatDate(r.replyCreateAt)}</span> |{" "}
                           <span

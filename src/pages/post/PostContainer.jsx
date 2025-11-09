@@ -33,8 +33,8 @@ const PostContainer = () => {
     study: "학습",
     health: "건강",
     social: "소셜",
-    life: "생활",
     hobby: "취미",
+    life: "생활",
     rookie: "루키",
   };
 
