@@ -37,6 +37,9 @@ const Shop = () => {
   const [activeTab, setActiveTab] = useState("info");
   const [count, setCount] = useState(1);
 
+  const [goCart, setGoCart] = useState([]);
+  const [error, setError] = useState(null);
+
 
   const totalText = useMemo(
     () => formatPrice(purchaseType, price * count),
@@ -87,6 +90,48 @@ const Shop = () => {
     if (type === "minus") setCount(v => Math.max(1, v - 1));
     if (type === "plus") setCount(v => v + 1);
   };
+
+
+  const handleAddToCart = async () => {
+    const itemData = {
+      memberId: 11,
+      productId: id,
+      quantity : count,
+    };
+
+    const url = `${process.env.REACT_APP_BACKEND_URL}/cart/add`;
+
+    setError(null);
+
+    try {
+      const res = await fetch(url, {
+        method: "POST",
+        headers : {
+          'Content-Type' : 'application/json',
+        },
+        body: JSON.stringify(itemData),
+      });
+
+      if(!res.ok) {
+        throw new Error("장바구니 담기 에러");
+      }
+      const data = await res.json();
+      
+      setGoCart(data);
+      
+      openModal({
+        title: "장바구니에 상품을 담았습니다.",
+        message: "",
+        cancelText: "닫기",
+        confirmText: "이동",
+        onConfirm: () => navigate("/main/my-page/my-shop/cart"),
+      });
+    } catch (error) {
+      setError(error);
+      console.log("장바구니 추가 중 오류 발생");
+    }
+  };
+  
 
   return (
     <S.Page>
@@ -204,15 +249,7 @@ const Shop = () => {
             </S.ProductLikeButton>
 
             <S.CartButton
-              onClick={() =>
-                openModal({
-                  title: "장바구니에 상품을 담았습니다.",
-                  message: "",
-                  cancelText: "닫기",
-                  confirmText: "이동",
-                  onConfirm: () => navigate("/main/my-page/my-shop/cart"),
-                })
-              }
+              onClick={handleAddToCart}
             >
               장바구니
             </S.CartButton>
