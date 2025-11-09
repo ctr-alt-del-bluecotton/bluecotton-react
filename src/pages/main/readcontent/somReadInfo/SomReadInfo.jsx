@@ -3,14 +3,15 @@ import S from './style'
 import { useRead } from '../../../../context/ReadContext';
 
 const SomReadInfo = () => {
-  const { somInfo, somIsLike, setSomIsLike } = useRead();
+  const { somInfo, somIsLike, setSomIsLike, formatDate } = useRead();
   const {
     somTitle,
     somCategory,
     somAddress,
     somStartDate,
+    somEndDate,
     somCount,
-    somLikeCount
+    somLike
   } = somInfo
 
 
@@ -21,13 +22,12 @@ const SomReadInfo = () => {
 
   const somOnClick = () => { alert("참여쿼리 들어갈 곳") };
 
-  const somButton = <S.somButton onClick={somOnClick}>참여 ({somCount}/10)</S.somButton> 
-  ;
+  const somButton = <S.somButton onClick={somOnClick}>참여 ({somCount}/10)</S.somButton> ;
 
   const somLikeButton =
     <S.somLikeButton onClick={somLikeButtonOnclick}>
       <S.somLikeIcon src='../../../../assets/icons/som_read_like_active.png' alt='솜 좋아요 true'/>
-      <S.somLikeCount>{somLikeCount}</S.somLikeCount>
+      <S.somLikeCount>{somLike}</S.somLikeCount>
     </S.somLikeButton>
 
   return (
@@ -47,12 +47,12 @@ const SomReadInfo = () => {
         <S.somStartDateWrap>
           <S.somDateIcon src='../../../../assets/icons/som_read_calendar.png'/>
           <S.somStartDateTitle>시작 날짜</S.somStartDateTitle>
-          <S.somStartDate>{somStartDate}</S.somStartDate>
+          <S.somStartDate>{formatDate(somStartDate)}</S.somStartDate>
         </S.somStartDateWrap>
         <S.somEndDateWrap>
           <S.somDateIcon src='../../../../assets/icons/som_read_calendar.png'/>
           <S.somEndDateTitle>종료 날짜</S.somEndDateTitle>
-          <S.somEndDate>{somStartDate}</S.somEndDate>
+          <S.somEndDate>{formatDate(somEndDate)}</S.somEndDate>
         </S.somEndDateWrap>
       </S.somDateWrap>
       <S.somAddressWrap>
