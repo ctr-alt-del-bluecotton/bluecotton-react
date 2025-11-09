@@ -4,7 +4,6 @@ import S from './style';
 import { useModal } from '../../../components/modal';
 import { openPostcode } from '../../../commons/address';
 import { useForm } from 'react-hook-form';
-import LoginStyle from '../../login/style';
 
 const MyInfoContainer = () => {
   const { openModal } = useModal();
