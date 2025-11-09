@@ -7,7 +7,7 @@ import "@toast-ui/editor/dist/toastui-editor.css";
 
 const MAX_LENGTH = 1000;
 
-// ✅ 영어 → 한글 매핑 테이블
+// 영어 → 한글 매핑 테이블
 const categoryMap = {
   STUDY: "학습",
   HEALTH: "건강",

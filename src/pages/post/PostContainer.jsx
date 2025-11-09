@@ -60,10 +60,7 @@ const PostContainer = () => {
 
     const fetchPosts = async () => {
       try {
-        const baseUrl =
-          (typeof import.meta !== "undefined" && import.meta.env && import.meta.env.VITE_BACKEND_URL) ||
-          process.env.REACT_APP_BACKEND_URL ||
-          "http://localhost:10000";
+        const baseUrl = process.env.REACT_APP_BACKEND_URL;
 
         const params = new URLSearchParams();
         params.set("page", String(pageNumber - 1)); // 프론트 1-based → 서버 0-based
