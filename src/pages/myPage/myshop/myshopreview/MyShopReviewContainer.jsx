@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import S from "../style";
-import { useModal } from "../../../../components/modal/useModal"; 
+import { useModal } from "../../../../components/modal/useModal";
 import ReviewModal from "../review/ReviewModal";
 
 const formatDotDate = (str) => (str.includes(".") ? str : str.replace(/-/g, "."));
@@ -23,17 +23,48 @@ const StarRating = ({ rating = 0, size = 19 }) => (
   </S.ReviewStars>
 );
 
+
+const toClient = (dto) => ({
+  id: dto.id,
+  name: dto.productName || "상품명 없음",
+  date: dto.productReviewDate || "",
+  rating: dto.productReviewRating || 0,
+  text: dto.productReviewContent || "",
+  imageUrl: dto.productImageUrl || "/assets/images/abc.png",
+});
+
 const MyShopReviewContainer = () => {
   const { openModal } = useModal();
 
-  // 임의 데이터
-  const [reviews, setReviews] = useState([
-    { id: 1, name: "솜이 레옹 키링", date: "2025-09-20", rating: 5, text: "기대 그 이상의 이상이에요 가방에 차고 다니니까 예뻐요!" },
-    { id: 2, name: "솜이 레옹 키링", date: "2025-09-20", rating: 3, text: "기대 그 이상의 이상이에요 가방에 차고 다니니까 예뻐요!" },
-    { id: 3, name: "솜이 쿠션",   date: "2025-09-28", rating: 4, text: "폭신폭신해서 좋아요!" }
-  ]);
+  const [reviews, setReviews] = useState([]);
+  const [error, setError] = useState(null);
 
-  // 리뷰 삭제
+  // 마이리뷰 조회
+  useEffect(() => {
+    const fetchMyReviews = async () => {
+      setError(null);
+      try {
+        const memberId = 1; // 로그인을 멤버 ID = 1로 했다고 가정
+        const url = `${process.env.REACT_APP_BACKEND_URL}/mypage/myshop/review/${memberId}`;
+
+        const res = await fetch(url, {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+        });
+        if (!res.ok) throw new Error("리뷰 조회 실패");
+
+        const json = await res.json();
+        const list = Array.isArray(json.data) ? json.data.map(toClient) : [];
+        setReviews(list);
+      } catch (err) {
+        setError(err.message || "에러가 발생했습니다.");
+      }
+    };
+
+    fetchMyReviews();
+  }, []);
+
+  // 리뷰 삭제 - 아직 미구현
   const handleDelete = (id) => {
     openModal({
       title: "리뷰를 삭제하시겠습니까?",
@@ -44,9 +75,9 @@ const MyShopReviewContainer = () => {
     });
   };
 
-  // 리뷰 수정하기 모달 열기
+  // 리뷰 수정 모달
   const [editOpen, setEditOpen] = useState(false);
-  const [editing, setEditing] = useState(null); // 선택된 리뷰
+  const [editing, setEditing] = useState(null);
 
   const openEdit = (review) => {
     setEditing(review);
@@ -54,19 +85,10 @@ const MyShopReviewContainer = () => {
   };
   const closeEdit = () => setEditOpen(false);
 
-  // ReviewModal의 onSubmit에서 값을 받음
-  const handleEditSubmit = ({ rating, content  }) => {
+
+  const handleEditSubmit = ({ rating, content }) => {
     setReviews((prev) =>
-      prev.map((r) =>
-        r.id === editing.id
-          ? {
-              ...r,
-              rating,
-              text: content,
-             
-            }
-          : r
-      )
+      prev.map((r) => (r.id === editing.id ? { ...r, rating, text: content } : r))
     );
   };
 
@@ -74,39 +96,47 @@ const MyShopReviewContainer = () => {
 
   return (
     <div>
-      <S.ListHeader>마이리뷰(5개)</S.ListHeader>
+      <S.ListHeader>마이리뷰({reviews.length}개)</S.ListHeader>
+
+      {error && (
+        <div style={{ padding: 12, color: "red" }}>
+          에러: {error}
+        </div>
+      )}
 
       <S.ListContainer>
         {reviews.map((review) => (
           <S.ListItem key={review.id}>
             <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
-              <S.OrderItemImage />
+  
+              <S.OrderItemImage style={{ backgroundImage: `url(${review.imageUrl})` }} />
+
               <S.ItemContent>
                 <S.ReviewProductInfo>
                   <S.OrderProductName>{review.name}</S.OrderProductName>
 
-                  {typeof review.rating === "number" ? (
-                    <>
-                      <StarRating rating={review.rating} />
-                      <S.ReviewDate>{formatDotDate(review.date)}</S.ReviewDate>
-                      {review.text && <S.ReviewText>{review.text}</S.ReviewText>}
-                    </>
-                  ) : (
-                    review.purchaseDate && (
-                      <S.PurchaseDate>구매 일자: {formatDotDate(review.purchaseDate)}</S.PurchaseDate>
-                    )
-                  )}
+                  <StarRating rating={review.rating} />
+                  <S.ReviewDate>{formatDotDate(review.date)}</S.ReviewDate>
+                  {review.text && <S.ReviewText>{review.text}</S.ReviewText>}
                 </S.ReviewProductInfo>
               </S.ItemContent>
 
               <S.ReviewActionButtons>
-                <S.ReviewButton primary onClick={() => openEdit(review)}>리뷰 수정</S.ReviewButton>
-                <S.ReviewButton onClick={() => handleDelete(review.id)}>리뷰 삭제</S.ReviewButton>
+                <S.ReviewButton primary onClick={() => openEdit(review)}>
+                  리뷰 수정
+                </S.ReviewButton>
+                <S.ReviewButton onClick={() => handleDelete(review.id)}>
+                  리뷰 삭제
+                </S.ReviewButton>
               </S.ReviewActionButtons>
             </div>
           </S.ListItem>
         ))}
       </S.ListContainer>
+
+      {reviews.length === 0 && !error && (
+        <div style={{ padding: 20, textAlign: "center" }}>작성한 리뷰가 없습니다.</div>
+      )}
 
       <S.Pagination>
         <S.PageButton disabled>&lt; 이전</S.PageButton>
@@ -114,7 +144,7 @@ const MyShopReviewContainer = () => {
         <S.PageButton>다음 &gt;</S.PageButton>
       </S.Pagination>
 
-      {/* 리뷰하기 모달 그대로 사용 mode="edit", initial 전달 */}
+      {/* 리뷰 수정 모달 */}
       <ReviewModal
         open={editOpen}
         onClose={closeEdit}
@@ -122,7 +152,7 @@ const MyShopReviewContainer = () => {
         product={{
           id: editing?.id ?? 0,
           name: editing?.name ?? "상품명",
-          imageUrl: "/assets/images/shop_review_som_doll1.png",
+          imageUrl: editing?.imageUrl || "/assets/images/shop_review_som_doll1.png",
         }}
         initial={{
           rating: editing?.rating ?? 0,
