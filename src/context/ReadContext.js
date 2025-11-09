@@ -66,7 +66,6 @@ export const ReadProvider = ({ children }) => {
         return `${year}-${month}-${day} ${hours}:${minutes}`;
     };
     
-    
     const value = {
         somInfo,
         somLeader,
