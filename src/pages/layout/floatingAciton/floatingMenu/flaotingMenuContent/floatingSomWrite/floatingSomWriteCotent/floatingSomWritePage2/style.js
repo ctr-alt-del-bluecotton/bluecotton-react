@@ -19,4 +19,4 @@ S.editerWrap = styled.div`
 `
 
 
-export default S; 
+export default S;

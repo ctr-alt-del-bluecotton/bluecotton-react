@@ -19,7 +19,8 @@ export const FloatingActionProvider = ({ children }) => {
         party: false
     });
     const formMethods = useForm({ mode: "onChange" });
-
+    const [isAllError, setIsAllError] = useState(false);
+    
     const somMenuSelect = (contentName) => {
         if (isDisplayFloatingMenu === false) {
             setIsDisplayFloatingMenu(true);
@@ -34,6 +35,7 @@ export const FloatingActionProvider = ({ children }) => {
             }
         }
     };
+
 
     const value = {
         isFloatingSelect,
@@ -54,7 +56,8 @@ export const FloatingActionProvider = ({ children }) => {
         setFormData,
         ...formMethods,
         somMenuSelect,
-        somType, setSomType
+        somType, setSomType,
+        isAllError, setIsAllError
     };
 
     return (

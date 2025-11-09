@@ -5,12 +5,12 @@ import SomLeaderInfo from './somLeader/SomLeaderInfo';
 import { useRead } from '../../../../../context/ReadContext';
 
 const SomInfoContent = () => {
-  const { infoMenuSelect, somContent } = useRead();
+  const { infoMenuSelect, somInfo } = useRead();
   let content = ""
 
   if(infoMenuSelect === "info"){
     content = ( 
-    <S.somContent dangerouslySetInnerHTML={{ __html: somContent }}>
+    <S.somContent dangerouslySetInnerHTML={{ __html: somInfo.somContent }}>
     </S.somContent> 
     );
   } else if (infoMenuSelect === "memberList") {
@@ -23,7 +23,7 @@ const SomInfoContent = () => {
     );
   } else {
     content = ( 
-    <S.somContent dangerouslySetInnerHTML={{ __html: somContent }}>
+    <S.somContent dangerouslySetInnerHTML={{ __html: somInfo.somContent }}>
     </S.somContent> 
     );
   }
