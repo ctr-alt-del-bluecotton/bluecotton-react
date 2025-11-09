@@ -6,28 +6,62 @@ import { useModal } from "../../../../components/modal/useModal";
 const MyShopCartContainer = () => {
   const { openModal } = useModal(); 
 
-  const generalData = useMemo(
-    () => [
-      { id: "g1", name: "솜이 레옹 키링", price: 5000 },
-      { id: "g2", name: "솜이 메모지", price: 4000 },
-      { id: "g3", name: "솜이 머그컵", price: 12000 },
-    ],
-    []
-  );
-  const candyData = useMemo(
-    () => [
-      { id: "c1", name: "솜이 스티커팩", price: 1200 },
-      { id: "c2", name: "솜이 뱃지", price: 2500 },
-    ],
-    []
-  );
 
   /* 탭(일반/캔디) */
   const [tab, setTab] = useState("general");
-  const [generalItems, setGeneralItems] = useState(generalData);
-  const [candyItems, setCandyItems] = useState(candyData);
+  const [generalItems, setGeneralItems] = useState([]);
+  const [candyItems, setCandyItems] = useState([]);
   const currentItems = tab === "general" ? generalItems : candyItems;
   const setCurrentItems = tab === "general" ? setGeneralItems : setCandyItems;
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [productName, setProductName] = useState('');
+  const [productPrice, setProductPrice] = useState('');
+  const [productPurchaseType, setProductPurchaseType] = useState('');
+
+  useEffect(() => {
+    const url = `${process.env.REACT_APP_BACKEND_URL}/cart/list?memberId=1`
+
+    setLoading(true);
+    setError(null);
+    
+    fetch (url , {
+      method : "GET",
+      headers: {
+        'Content-Type' : 'application/json',
+      },
+    })
+    .then((res) => {
+      if(!res.ok) {
+        throw new Error('네트워크 응답 실패');
+      }
+      return res.json();
+    })
+    .then((data) => {
+      setProducts(data);
+      setLoading(false);
+      
+    
+      const mappedData = data.map(item => ({
+        id: item.productId,
+        name : item.productName,
+        price : item.productPrice,
+        productPurchaseType : item.productPurchaseType,
+      }));
+      
+      const general = data.filter(item => item.productPurchaseType === 'general');
+      const candy = data.filter(item => item.productPurchaseType === 'candy');
+
+
+      setGeneralItems(general);
+      setCandyItems(candy);
+    })
+    .catch((error) => {
+      setError(error);
+      setLoading(false);
+    })
+  },[])
 
   const unit = tab === "general" ? "원" : "캔디";
   const shippingText = tab === "candy" ? "무료배송" : "3,000원";
@@ -107,24 +141,25 @@ const MyShopCartContainer = () => {
       </S.ResetButton>
       </S.CartHeader>
 
+
       {/* 아이템 리스트 */}
       <S.ListContainer>
         {currentItems.map((item) => {
           const q = qtyMap[item.id] || 1;
-          const itemTotal = item.price * q;
+          const itemTotal = item.productPrice *q;
 
           return (
             <S.CartItem key={item.id}>
               <S.Checkbox
                 checked={checkedIds.has(item.id)}
                 onChange={toggleOne(item.id)}
-                aria-label={`${item.name} 선택`}
+                aria-label={`${item.productName} 선택`}
               />
               <S.ItemImage />
               <S.ItemInfo>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
                   <div>
-                    <S.ItemName>{item.name}</S.ItemName>
+                    <S.ItemName>{item.productName}</S.ItemName>
                     <div
                       style={{ color: "#757575", fontSize: 14, marginBottom: 8, cursor: "pointer" }}
                       onClick={() => handleDelete(item.id)} 
@@ -143,7 +178,7 @@ const MyShopCartContainer = () => {
 
                   <S.PriceInfo>
                     <S.PriceRow>
-                      상품금액({q}개) <S.PriceValue>{item.price.toLocaleString()}{unit}</S.PriceValue>
+                      상품금액({q}개) <S.PriceValue>{item.productPrice.toLocaleString()}{unit}</S.PriceValue>
                     </S.PriceRow>
                     <S.PriceRow>
                       할인금액 <S.PriceValue>0{unit}</S.PriceValue>
