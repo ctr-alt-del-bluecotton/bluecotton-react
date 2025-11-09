@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import S from '../style';
 
@@ -28,9 +28,11 @@ const feedbackOptions = [
 
 const MySomPartyContainer = () => {
   const navigate = useNavigate();
-  const [activeFilter, setActiveFilter] = useState('completed');
+  const [activeFilter, setActiveFilter] = useState('scheduled');
   const [showPopup, setShowPopup] = useState(false);
   const [selected, setSelected] = useState([]);
+  const [partySoms, setPartySoms] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   // 모달용 팀/소식지명 변수 -> teamLeaderName 으로 변경
   const teamLeaderName = 'zl존준서';
@@ -41,20 +43,109 @@ const MySomPartyContainer = () => {
     // 3개 이상 선택시 무시
   };
 
-  const challenges = [
-    {
-      type: '소셜',
-      title: '전국 플로깅 대회',
-      date: '2025.09.01 ~ 2025.09.07',
-      repeat: '[요일반복] [금]',
-    },
-    {
-      type: '소셜',
-      title: '공원 조깅 모임',
-      date: '2025.09.01 ~ 2025.09.07',
-      repeat: '[요일반복] [금]',
+  // 카테고리 매핑
+  const categoryMap = {
+    study: '학습',
+    health: '건강',
+    social: '소셜',
+    hobby: '취미',
+    'life-style': '생활',
+    life: '생활',
+    rookie: '루키'
+  };
+
+  // 날짜 포맷팅 함수
+  const formatDate = (dateString) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}.${month}.${day}`;
+  };
+
+  // 시간 포맷팅 함수 (시:분)
+  const formatTime = (dateString) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    return `${hours}:${minutes}`;
+  };
+
+  // API에서 데이터 가져오기
+  useEffect(() => {
+    const fetchPartySoms = async () => {
+      try {
+        setLoading(true);
+        const res = await fetch(`${process.env.REACT_APP_BACKEND_URL}/my-page/read-som`, {
+          headers: { "Content-Type": "application/json" },
+          method: "GET",
+          credentials: "include"
+        });
+
+        if (!res.ok) {
+          throw new Error('솜 데이터를 불러오는데 실패했습니다.');
+        }
+
+        const result = await res.json();
+        console.log("서버 응답:", result);
+
+        // somType이 "party"인 데이터만 필터링
+        const partyData = (result.data || []).filter(som => som.somType === 'party');
+        setPartySoms(partyData);
+      } catch (error) {
+        console.error('솜 데이터 로딩 실패:', error);
+        setPartySoms([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPartySoms();
+  }, []);
+
+  // 현재 시간 기준으로 데이터 분류
+  const categorizeSoms = () => {
+    const now = new Date();
+    const scheduled = [];
+    const progress = [];
+    const completed = [];
+
+    partySoms.forEach(som => {
+      const startDate = new Date(som.somStartDate);
+      const endDate = new Date(som.somEndDate);
+
+      if (startDate > now) {
+        // 진행예정: 시작 시간이 현재보다 미래
+        scheduled.push(som);
+      } else if (endDate >= now && startDate <= now) {
+        // 진행중: 현재 시간이 시작과 종료 사이
+        progress.push(som);
+      } else {
+        // 진행완료: 종료 시간이 현재보다 과거
+        completed.push(som);
+      }
+    });
+
+    return { scheduled, progress, completed };
+  };
+
+  const { scheduled, progress, completed } = categorizeSoms();
+
+  // 현재 필터에 맞는 데이터 가져오기
+  const getCurrentData = () => {
+    switch (activeFilter) {
+      case 'scheduled':
+        return scheduled;
+      case 'progress':
+        return progress;
+      case 'completed':
+        return completed;
+      default:
+        return [];
     }
-  ];
+  };
 
   // ✅ 상태에 따라 버튼 라벨과 이동 경로 결정
   const getButtonLabel = () => {
@@ -69,6 +160,12 @@ const MySomPartyContainer = () => {
     return null;
   };
 
+  if (loading) {
+    return <div>로딩 중...</div>;
+  }
+
+  const currentData = getCurrentData();
+
   return (
     <div>
       <S.FilterContainer>
@@ -76,59 +173,69 @@ const MySomPartyContainer = () => {
           active={activeFilter === 'scheduled'}
           onClick={() => setActiveFilter('scheduled')}
         >
-          진행예정 (2개)
+          진행예정 ({scheduled.length}개)
         </S.FilterButton>
         <S.FilterButton
           active={activeFilter === 'progress'}
           onClick={() => setActiveFilter('progress')}
         >
-          진행중 (2개)
+          진행중 ({progress.length}개)
         </S.FilterButton>
         <S.FilterButton
           active={activeFilter === 'completed'}
           onClick={() => setActiveFilter('completed')}
         >
-          진행완료(15개)
+          진행완료 ({completed.length}개)
         </S.FilterButton>
       </S.FilterContainer>
       
       <S.ListContainer>
-        {challenges.map((challenge, index) => (
-          <S.ListItem key={index}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-              <div>
-                <S.ItemType>{challenge.type}</S.ItemType>
-                <S.ItemTitle>{challenge.title}</S.ItemTitle>
-                <S.ItemDetails>
-                  <span>{challenge.date} {challenge.repeat}</span>
-                </S.ItemDetails>
-              </div>
-
-              {/* ✅ 진행예정은 버튼 숨김, 나머지는 상태에 따라 버튼 표시 */}
-              {getButtonLabel() && (
-                <div style={{ display: 'flex', alignItems: 'center' }}>
-                  {activeFilter === 'progress' ? (
-                    <S.ActionButton onClick={()=>navigate('/main/my-page/my-som-check')}>
-                      {getButtonLabel()}
-                    </S.ActionButton>
-                  ) : (
-                    <S.ActionButton onClick={()=>setShowPopup(true)}>
-                      {getButtonLabel()}
-                    </S.ActionButton>
-                  )}
-                  {activeFilter === 'progress' && (
-                    <S.CancelButton onClick={() => {
-                      // 중단하기 로직 구현
-                      console.log('챌린지 중단');
-                    }}>
-                      중단하기
-                    </S.CancelButton>
-                  )}
+        {currentData.length === 0 ? (
+          <div style={{ padding: '40px', textAlign: 'center', color: '#808080' }}>
+            {activeFilter === 'scheduled' && '진행예정인 솜이 없습니다.'}
+            {activeFilter === 'progress' && '진행중인 솜이 없습니다.'}
+            {activeFilter === 'completed' && '진행완료된 솜이 없습니다.'}
+          </div>
+        ) : (
+          currentData.map((som) => (
+            <S.ListItem key={som.id}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                <div>
+                  <S.ItemType>{categoryMap[som.somCategory] || som.somCategory}</S.ItemType>
+                  <S.ItemTitle>{som.somTitle}</S.ItemTitle>
+                  <S.ItemDetails>
+                    <span>
+                      {formatDate(som.somStartDate)} {formatTime(som.somStartDate)} ~ {formatDate(som.somEndDate)} {formatTime(som.somEndDate)}
+                    </span>
+                  </S.ItemDetails>
                 </div>
-              )}
-            </div>
-          </S.ListItem>
-        ))}
+
+                {/* ✅ 진행예정은 버튼 숨김, 나머지는 상태에 따라 버튼 표시 */}
+                {getButtonLabel() && (
+                  <div style={{ display: 'flex', alignItems: 'center' }}>
+                    {activeFilter === 'progress' ? (
+                      <S.ActionButton onClick={()=>navigate('/main/my-page/my-som-check')}>
+                        {getButtonLabel()}
+                      </S.ActionButton>
+                    ) : (
+                      <S.ActionButton onClick={()=>setShowPopup(true)}>
+                        {getButtonLabel()}
+                      </S.ActionButton>
+                    )}
+                    {activeFilter === 'progress' && (
+                      <S.CancelButton onClick={() => {
+                        // 중단하기 로직 구현
+                        console.log('챌린지 중단');
+                      }}>
+                        중단하기
+                      </S.CancelButton>
+                    )}
+                  </div>
+                )}
+              </div>
+            </S.ListItem>
+          ))
+        )}
       </S.ListContainer>
 
       <S.Pagination>
