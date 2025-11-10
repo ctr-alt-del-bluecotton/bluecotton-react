@@ -32,14 +32,18 @@ S.Tab = styled.button`
   cursor: pointer;
   transition: all 0.2s;
   background-color: ${props => props.active ? props.theme.PALLETE.primary.main : props.theme.PALLETE.white};
+  /* background-color: ${({ $active, theme }) => $active ? theme.PALLETE.primary.main : theme.PALLETE.white}; */
   color: ${props => props.active ? props.theme.PALLETE.white : props.theme.PALLETE.basic};
+  /* color: ${({ $active, theme }) => $active ? theme.PALLETE.white : theme.PALLETE.basic}; */
   box-shadow: ${props => props.active ? 'none' : '0 1px 3px rgba(0, 0, 0, 0.1)'};
+  /* box-shadow: ${({ $active }) => $active ? 'none' : '0 1px 3px rgba(0, 0, 0, 0.1)'}; */
   display: flex;
   align-items: center;
   justify-content: center;
   
   &:hover {
     background-color: ${props => props.active ? props.theme.PALLETE.primary.main : props.theme.PALLETE.grey.greyScale0};
+     /* background-color: ${({ $active, theme }) => $active ? theme.PALLETE.primary.main : theme.PALLETE.grey.greyScale0}; */
   }
 `;
 
@@ -53,16 +57,20 @@ S.FilterButton = styled.button`
   padding: 10px 20px;
   border-radius: 8px;
   border: none;
-  ${props => props.active ? C.smallText2Bold : C.smallText2Regular}
+  /* ${props => props.active ? C.smallText2Bold : C.smallText2Regular} */
+  ${({ $active }) => $active ? C.smallText2Bold : C.smallText2Regular}
   font-family: 'Daeojamjil', sans-serif;
   cursor: pointer;
   transition: all 0.2s;
-  background-color: ${props => props.active ? props.theme.PALLETE.primary.main : props.theme.PALLETE.grey.greyScale0};
-  color: ${props => props.active ? props.theme.PALLETE.white : props.theme.PALLETE.basic};
+  /* background-color: ${props => props.active ? props.theme.PALLETE.primary.main : props.theme.PALLETE.grey.greyScale0};
+  color: ${props => props.active ? props.theme.PALLETE.white : props.theme.PALLETE.basic}; */
+  background-color: ${({ $active, theme }) => $active ? theme.PALLETE.primary.main : theme.PALLETE.grey.greyScale0};
+  color: ${({ $active, theme }) => $active ? theme.PALLETE.white : theme.PALLETE.basic};
   font-family: 'Daeojamjil', sans-serif;
   
   &:hover {
-    background-color: ${props => props.active ? props.theme.PALLETE.primary.main : props.theme.PALLETE.grey.greyScale1};
+    /* background-color: ${props => props.active ? props.theme.PALLETE.primary.main : props.theme.PALLETE.grey.greyScale1}; */
+    background-color: ${({ $active, theme }) => $active ? theme.PALLETE.primary.main : theme.PALLETE.grey.greyScale1};
   }
 `;
 
@@ -131,7 +139,8 @@ S.PageButton = styled.button`
   font-family: 'Daeojamjil', sans-serif;
   
   &:hover {
-    color: ${props => props.disabled ? '#BDBDBD' : '${({ theme }) => theme.PALLETE.primary.main}'};
+    /* color: ${props => props.disabled ? '#BDBDBD' : '${({ theme }) => theme.PALLETE.primary.main}'}; */
+    color: ${({ disabled, theme }) => disabled ? '#BDBDBD' : theme.PALLETE.primary.main};
   }
 `;
 
@@ -214,7 +223,7 @@ S.Label = styled.span`
   ${C.smallText1Bold}
   border-radius: 4px;
   margin-right: 4px;
-  background-color: ${props => props.type === 'BEST' ? '#FF6B6B' : '${({ theme }) => theme.PALLETE.primary.main}'};
+  background-color: ${({ type, theme }) => type === 'BEST' ? '#FF6B6B' : theme.PALLETE.primary.main};
   color: white;
 `;
 
@@ -254,15 +263,21 @@ S.ResetButton = styled.button`
   padding: 10px 20px;
   border-radius: 8px;
   border: none;
-  ${props => props.active ? C.smallText2Bold : C.smallText2Regular}
+  /* ${props => props.active ? C.smallText2Bold : C.smallText2Regular} */
+  ${({ $active }) => $active ? C.smallText2Bold : C.smallText2Regular}
   cursor: pointer;
   transition: all 0.2s;
-  background-color: ${props => props.active ? props.theme.PALLETE.primary.main : props.theme.PALLETE.grey.greyScale0};
+  /* background-color: ${props => props.active ? props.theme.PALLETE.primary.main : props.theme.PALLETE.grey.greyScale0};
   color: ${props => props.active ? props.theme.PALLETE.white : props.theme.PALLETE.basic};
+   */
+  background-color: ${({ $active, theme }) => $active ? theme.PALLETE.primary.main : theme.PALLETE.grey.greyScale0};
+  color: ${({ $active, theme }) => $active ? theme.PALLETE.white : theme.PALLETE.basic};
+
   font-family: 'Daeojamjil', sans-serif;
   
   &:hover {
-    background-color: ${props => props.active ? props.theme.PALLETE.primary.main : props.theme.PALLETE.grey.greyScale1};
+    /* background-color: ${props => props.active ? props.theme.PALLETE.primary.main : props.theme.PALLETE.grey.greyScale1}; */
+     background-color: ${({ $active, theme }) => $active ? theme.PALLETE.primary.main : theme.PALLETE.grey.greyScale1};
   }
 `;
 
@@ -404,6 +419,10 @@ S.ActionButton = styled.button`
   border: ${props => props.primary ? 'none' : '1px solid #E0E0E0'};
   background-color: ${props => props.primary ? '#0051FF' : '#fff'};
   color: ${props => props.primary ? '#fff' : '#111111'};
+  
+  /* border: ${({ $primary }) => $primary ? 'none' : '1px solid #E0E0E0'};
+ background-color: ${({ $primary }) => $primary ? '#0051FF' : '#fff'};
+ color: ${({ $primary }) => $primary ? '#fff' : '#111111'}; */
   ${C.smallText2Regular}
   font-family: 'Daeojamjil', sans-serif;
   cursor: pointer;
@@ -412,6 +431,7 @@ S.ActionButton = styled.button`
   
   &:hover {
     background-color: ${props => props.primary ? '#003DB8' : '#F5F5F5'};
+     /* background-color: ${({ $primary }) => $primary ? '#003DB8' : '#F5F5F5'}; */
   }
 `;
 
@@ -495,12 +515,18 @@ S.ReviewButton = styled.button`
   border: 1px solid ${props => props.primary ? '#0051FF' : '#E0E0E0'};
   background-color: ${props => props.primary ? '#0051FF' : '#fff'};
   color: ${props => props.primary ? '#fff' : '#111111'};
+   /* border: 1px solid ${({ $primary }) => $primary ? '#0051FF' : '#E0E0E0'};
+ background-color: ${({ $primary }) => $primary ? '#0051FF' : '#fff'};
+ color: ${({ $primary }) => $primary ? '#fff' : '#111111'}; */
+
   transition: all 0.2s;
   font-family: 'Daeojamjil', sans-serif;
   
   &:hover {
     background-color: ${props => props.primary ? '#003DB8' : '#F5F5F5'};
     border-color: ${props => props.primary ? '#003DB8' : '#E0E0E0'};
+    /* background-color: ${({ $primary }) => $primary ? '#003DB8' : '#F5F5F5'};
+   border-color: ${({ $primary }) => $primary ? '#003DB8' : '#E0E0E0'}; */
   }
 `;
 
