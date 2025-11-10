@@ -46,25 +46,21 @@ const PostCard = ({
     e.stopPropagation();
 
     try {
-      const response = await fetch(
-        `${BASE_URL}/main/post/like/toggle`, // 🔹 백엔드 주소 확인!!
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            postId: id,
-            memberId: memberId,
-          }),
-        }
-      );
+      const response = await fetch(`${BASE_URL}/main/post/like/toggle`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          postId: id,
+          memberId: memberId,
+        }),
+      });
 
       console.log("좋아요 응답 status:", response.status);
 
       if (!response.ok) throw new Error("좋아요 요청 실패");
 
-      // 필요하면 서버 응답 내용도 확인
       const result = await response.json();
       console.log("좋아요 토글 결과:", result);
 
@@ -78,30 +74,32 @@ const PostCard = ({
 
   // ✅ 한영 변환된 카테고리 표시
   const translatedCategory =
-    categoryMap[category?.toUpperCase()] || category || "기타";
+    categoryMap[category?.toLowerCase()] || category || "기타";
 
   return (
     <S.Card onClick={onClick} role="button" tabIndex={0}>
       {/* ✅ 좋아요 버튼 */}
       <S.LikeButton $liked={isLiked} onClick={handleLikeClick} />
 
-      {/* 썸네일 */}
-      <S.ThumbWrap>
-        <img
-          src={
-            imageUrl?.startsWith("http")
-              ? imageUrl
-              : `http://localhost:10000${
-                  imageUrl?.startsWith("/") ? imageUrl : "/" + imageUrl
-                }`
-          }
-          alt="썸네일"
-          onError={(e) => {
-            e.target.src =
-              "http://localhost:10000/upload/default/default_post.jpg";
-          }}
-        />
-      </S.ThumbWrap>
+  {/* ✅ 썸네일 */}
+  <S.ThumbWrap>
+    <img
+      src={
+        imageUrl?.startsWith("http")
+          ? imageUrl
+          : `http://localhost:10000${
+              imageUrl?.startsWith("/") ? imageUrl : "/" + imageUrl
+            }`
+      }
+      alt="썸네일"
+      onError={(e) => {
+        if (!e.target.dataset.fallback) {
+          e.target.dataset.fallback = "true";
+          e.target.src = "/assets/images/postDefault.jpg"; // ✅ public 폴더 fallback
+        }
+      }}
+    />
+  </S.ThumbWrap>
 
       {/* 본문 */}
       <S.Body>
@@ -117,7 +115,7 @@ const PostCard = ({
         {/* 제목 */}
         <S.Title>{title}</S.Title>
 
-        {/* ✅ HTML 태그가 적용된 요약문 */}
+        {/* ✅ HTML 태그 적용된 요약문 */}
         <S.Excerpt
           dangerouslySetInnerHTML={{
             __html:
