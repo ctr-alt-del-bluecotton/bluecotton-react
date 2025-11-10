@@ -99,7 +99,7 @@ const MapContainer = () => {
       map.panTo(moveLatLon); // 부드럽게 이동
     }
   };
-
+ 
   if (!isLoaded || !center) return <div>지도 불러오는 중...</div>;
 
   // 렌더링

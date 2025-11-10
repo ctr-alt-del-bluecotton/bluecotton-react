@@ -2,6 +2,8 @@ import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import S from "./style";
 import { useForm } from "react-hook-form";
+import { useDispatch } from "react-redux";
+import { setUserStatus } from "../../modules/user";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -32,6 +34,7 @@ const Login = () => {
       if (accessToken) {
         localStorage.setItem("accessToken", accessToken);
         navigate("/main/som/all");
+        window.location.reload();
       } else {
         alert("로그인 실패: accessToken이 없습니다");
       }
