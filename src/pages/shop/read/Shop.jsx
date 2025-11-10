@@ -426,6 +426,12 @@ const Shop = () => {
 
   const { avgScore, totalCount: reviewCount } = reviewStats;
 
+  const subImagesOnly = parseSubs(productSubImageUrl);
+
+  const allThumbnails = [
+    headerData.productMainImageUrl, ...subImagesOnly             
+  ].filter(Boolean);
+
   const subImages = parseSubs(productSubImageUrl);
   const isNew = String(productType || "").includes("NEW");
   const isBest = String(productType || "").includes("BEST");
@@ -437,11 +443,12 @@ const Shop = () => {
         <S.Left>
           <S.MainImage>
             <img src={selectedImage} alt="상품 메인 이미지" />
+            
           </S.MainImage>
 
-          {!!subImages.length && (
+          {!!allThumbnails.length && (
             <S.SubImageArea>
-              {subImages.map((src, i) => (
+              {allThumbnails.map((src, i) => (
                 <S.SubImage key={i} onClick={() => setSelectedImage(src)}>
                   <img src={src} alt={`서브 이미지 ${i + 1}`} />
                 </S.SubImage>
