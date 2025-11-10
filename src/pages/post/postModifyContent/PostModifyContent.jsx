@@ -58,7 +58,7 @@ const PostModifyContent = () => {
     }
   }, [id, navigate, openModal]);
 
-  // ✅ placeholder 색상 회색으로 (Toast UI 특성상 직접 조작)
+  // ✅ placeholder 색상 회색으로
   useEffect(() => {
     const editorEl = document.querySelector(".toastui-editor-contents");
     if (!editorEl) return;
@@ -66,7 +66,7 @@ const PostModifyContent = () => {
     const observer = new MutationObserver(() => {
       const placeholder = editorEl.querySelector(".toastui-placeholder");
       if (placeholder) {
-        placeholder.style.color = "#9e9e9e"; // 회색
+        placeholder.style.color = "#9e9e9e";
         placeholder.style.opacity = "1";
       }
     });

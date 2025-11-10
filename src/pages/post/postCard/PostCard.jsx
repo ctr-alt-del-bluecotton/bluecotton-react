@@ -4,6 +4,7 @@ import Report from "../../../components/Report/Report";
 
 const PostCard = ({
   id,
+  somTitle,
   category,
   challengeDay,
   title,
@@ -31,6 +32,8 @@ const PostCard = ({
     }
   };
 
+  
+
   return (
     <S.Card onClick={onClick} role="button" tabIndex={0}>
       {/* ✅ 찜 버튼 */}
@@ -38,23 +41,42 @@ const PostCard = ({
 
       {/* 썸네일 */}
       <S.ThumbWrap>
-        <img src={imageUrl} alt="썸네일" />
+        <img
+          src={
+            imageUrl?.startsWith("http")
+              ? imageUrl
+              : `http://localhost:10000${imageUrl?.startsWith("/") ? imageUrl : "/" + imageUrl}`
+          }
+          alt="썸네일"
+          onError={(e) => {
+            e.target.src = "http://localhost:10000/upload/default/default_post.jpg";
+          }}
+        />
       </S.ThumbWrap>
 
       {/* 본문 */}
       <S.Body>
         {/* 상단 메타 */}
         <S.MetaTop>
-          <span className="category">{category}</span>
+          <span className="category">{somTitle}</span>
           <span className="bar">|</span>
           <span className="challenge">도전 {challengeDay}일</span>
+          <span className="bar">|</span>
+          <span className="category">{category}</span>
         </S.MetaTop>
 
         {/* 제목 */}
         <S.Title>{title}</S.Title>
 
-        {/* 요약문 */}
-        <S.Excerpt>{excerpt}</S.Excerpt>
+        {/* ✅ HTML 태그가 적용된 요약문 */}
+        <S.Excerpt
+          dangerouslySetInnerHTML={{
+            __html:
+              excerpt?.length > 150
+                ? excerpt.substring(0, 150) + "..."
+                : excerpt || "",
+          }}
+        />
 
         {/* 하단 정보 */}
         <S.MetaBottom>
@@ -62,7 +84,7 @@ const PostCard = ({
             <img className="avatar" src={avatar} alt="프로필" />
             <span className="nick">{nickname}</span>
             <span className="bar">|</span>
-            <span className="date">{date}</span>
+            <span className="date">{date?.replace(/-/g, ".")}</span>
           </div>
 
           <div className="right">
@@ -78,6 +100,9 @@ const PostCard = ({
           </div>
         </S.MetaBottom>
       </S.Body>
+
+      {/* 신고 모달 */}
+      {showReportModal && <Report onClose={() => setShowReportModal(false)} />}
     </S.Card>
   );
 };
