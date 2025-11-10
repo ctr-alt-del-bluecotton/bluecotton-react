@@ -62,6 +62,14 @@ S.CommentItem = styled.div`
     gap: 6px;
     flex: 1;
 
+    /* ✅ 닉네임 + 좋아요 한 줄 정렬 */
+    .header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
     .writer {
       font-weight: ${({ theme }) => theme.FONT_WEIGHT["bold"]};
       font-size: ${({ theme }) => theme.FONT_SIZE["smallText3"]};
@@ -122,28 +130,6 @@ S.CommentItem = styled.div`
     position: relative;
     top: 2px;
     align-self: flex-start;
-
-    .like {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 4px;
-      min-width: 52px;
-      height: 28px;
-      border: 1px solid ${({ theme }) => theme.PALLETE.grey.greyScale2};
-      border-radius: 4px;
-      background: white;
-      padding: 3px 8px;
-      cursor: pointer;
-      font-size: ${({ theme }) => theme.FONT_SIZE["smallText3"]};
-      color: ${({ theme }) => theme.PALLETE.grey.greyScale3};
-      transition: 0.15s ease;
-
-      &:hover {
-        color: ${({ theme }) => theme.PALLETE.primary.main};
-        border-color: ${({ theme }) => theme.PALLETE.primary.main};
-      }
-    }
   }
 `;
 

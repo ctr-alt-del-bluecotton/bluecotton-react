@@ -7,43 +7,18 @@ import PostComment from "../commentcomponent/PostComment";
 const PostReadContent = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { openModal } = useModal(); // ✅ 전역 모달 훅 사용
+  const { openModal } = useModal();
 
-  const [showComments, setShowComments] = useState(true);
+  const [post, setPost] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [comments, setComments] = useState([]);
   const [comment, setComment] = useState("");
   const [replyInputs, setReplyInputs] = useState({});
-  const [deleteTarget, setDeleteTarget] = useState(null);
   const [showReplyTarget, setShowReplyTarget] = useState(null);
+  const [deleteTarget, setDeleteTarget] = useState(null);
   const [showReportModal, setShowReportModal] = useState(false);
   const [reportTarget, setReportTarget] = useState(null);
-
-  // ✅ 게시글 좋아요 상태
-  const [postLiked, setPostLiked] = useState(false);
-  const [postLikeCount, setPostLikeCount] = useState(8);
-
-  // ✅ 댓글 데이터
-  const [comments, setComments] = useState([
-    {
-      id: 1,
-      name: "지존준서",
-      date: "2025.10.9 21:31",
-      text: "손흥민짱!!",
-      profile: "/postImages/profile.png",
-      likes: 1,
-      liked: true,
-      replies: [
-        {
-          id: 101,
-          name: "초이준서",
-          date: "2025.10.9 22:00",
-          text: "@지존준서 완전 공감합니다!",
-          profile: "/postImages/profile.png",
-          likes: 0,
-          liked: false,
-        },
-      ],
-    },
-  ]);
+  const [showComments, setShowComments] = useState(true);
 
   const currentId = Number(id);
   const prevId = currentId > 1 ? currentId - 1 : null;
@@ -53,152 +28,165 @@ const PostReadContent = () => {
   const goPrev = () => prevId && navigate(`/main/post/read/${prevId}`);
   const goNext = () => navigate(`/main/post/read/${nextId}`);
 
-  // ✅ 게시글 좋아요 토글
-  const handlePostLike = () => {
-    setPostLiked((prev) => !prev);
-    setPostLikeCount((prev) => (postLiked ? prev - 1 : prev + 1));
-  };
-
-  // ✅ 카카오 공유
+  // ✅ Kakao SDK 초기화
   useEffect(() => {
-    if (window.Kakao && !window.Kakao.isInitialized()) {
-      window.Kakao.init("8205d77659532bf75b85e3424590d6bc");
-      console.log("✅ Kakao SDK Initialized");
+    const initKakao = () => {
+      if (window.Kakao && !window.Kakao.isInitialized()) {
+        window.Kakao.init("8cb2100ec330f00d05688be83f2361af");
+        console.log("✅ Kakao SDK Initialized:", window.Kakao.isInitialized());
+      }
+    };
+    if (window.Kakao) {
+      initKakao();
     } else {
-      console.warn("⚠️ Kakao SDK가 로드되지 않았습니다.");
+      const check = setInterval(() => {
+        if (window.Kakao) {
+          clearInterval(check);
+          initKakao();
+        }
+      }, 300);
+      return () => clearInterval(check);
     }
   }, []);
 
-  const handleShare = () => {
-    const shareUrl = `${window.location.origin}/main/post/read/${id}`;
+  // ✅ 게시글 상세조회 (댓글 + 좋아요 여부 포함)
+  useEffect(() => {
+    const fetchPostDetail = async () => {
+      try {
+        const BASE_URL =
+          process.env.REACT_APP_BACKEND_URL || "http://localhost:10000";
+        const memberId = 1; // 임시 로그인
 
-    window.Kakao.Share.sendDefault({
-      objectType: "feed",
-      content: {
-        title: "10일차 러닝 도전!",
-        description: `지존준서님의 오늘의 솜 기록 🌱`,
-        imageUrl: "https://yourdomain.com/assets/som-share-thumbnail.png",
-        link: {
-          mobileWebUrl: shareUrl,
-          webUrl: shareUrl,
-        },
-      },
-      buttons: [
-        {
-          title: "지금 참여하기",
-          link: {
-            mobileWebUrl: shareUrl,
-            webUrl: shareUrl,
-          },
-        },
-      ],
-    });
+        const response = await fetch(
+          `${BASE_URL}/main/post/read/${id}?memberId=${memberId}`,
+          {
+            method: "GET",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+          }
+        );
+
+        if (!response.ok)
+          throw new Error(`HTTP error! status: ${response.status}`);
+
+        const result = await response.json();
+
+        if (result.data) {
+          // ✅ 댓글 isCommentLiked → liked 변환
+          const mappedComments = (result.data.comments || []).map((c) => ({
+            ...c,
+            liked: c.isCommentLiked === 1,
+            replies: (c.replies || []).map((r) => ({
+              ...r,
+              liked: r.isReplyLiked === 1,
+            })),
+          }));
+
+          setPost(result.data);
+          setComments(mappedComments);
+        } else {
+          throw new Error(
+            result.message || "게시글 데이터를 불러오지 못했습니다."
+          );
+        }
+      } catch (err) {
+        console.error("게시글 상세 불러오기 실패:", err);
+        openModal({
+          title: "오류",
+          message: "게시글을 불러오는 중 문제가 발생했습니다.",
+          confirmText: "확인",
+          onConfirm: () => navigate("/main/post/all"),
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchPostDetail();
+  }, [id, navigate, openModal]);
+
+  // ✅ 댓글/대댓글 좋아요 토글 (서버 반영)
+  const handleLike = async (commentId, isReply = false, parentId = null) => {
+    const BASE_URL =
+      process.env.REACT_APP_BACKEND_URL || "http://localhost:10000";
+    const memberId = 1;
+
+    try {
+      const endpoint = !isReply
+        ? `${BASE_URL}/main/post/comment/like/toggle`
+        : `${BASE_URL}/main/post/reply/like/toggle`;
+
+      const bodyData = !isReply
+        ? { commentId: commentId, memberId: memberId }
+        : { replyId: commentId, memberId: memberId };
+
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(bodyData),
+      });
+
+      if (!response.ok) throw new Error("좋아요 요청 실패");
+
+      const result = await response.json();
+      console.log("좋아요 토글 결과:", result);
+
+      // ✅ UI 즉시 반영
+      setComments((prevComments) =>
+        prevComments.map((c) => {
+          if (!isReply && c.commentId === commentId) {
+            return {
+              ...c,
+              liked: !c.liked,
+              commentLikeCount: c.liked
+                ? c.commentLikeCount - 1
+                : c.commentLikeCount + 1,
+            };
+          }
+
+          if (isReply && c.commentId === parentId) {
+            return {
+              ...c,
+              replies: c.replies.map((r) =>
+                r.replyId === commentId
+                  ? {
+                      ...r,
+                      liked: !r.liked,
+                      replyLikeCount: r.liked
+                        ? r.replyLikeCount - 1
+                        : r.replyLikeCount + 1,
+                    }
+                  : r
+              ),
+            };
+          }
+
+          return c;
+        })
+      );
+    } catch (err) {
+      console.error("좋아요 토글 실패:", err);
+    }
   };
 
-  // 댓글/대댓글 좋아요
-  const handleLike = (cid, isReply = false, parentId = null) => {
-    setComments((prev) =>
-      prev.map((c) => {
-        if (isReply && c.id === parentId) {
-          return {
-            ...c,
-            replies: c.replies.map((r) =>
-              r.id === cid
-                ? {
-                    ...r,
-                    liked: !r.liked,
-                    likes: r.liked ? r.likes - 1 : r.likes + 1,
-                  }
-                : r
-            ),
-          };
-        }
-        if (!isReply && c.id === cid)
-          return {
-            ...c,
-            liked: !c.liked,
-            likes: c.liked ? c.likes - 1 : c.likes + 1,
-          };
-        return c;
-      })
+  const handleReplyClick = (parentId, targetId, nickname) => {
+    setShowReplyTarget((prev) =>
+      prev?.targetId === targetId ? null : { parentId, targetId, nickname }
     );
   };
 
-  // 📝 댓글 등록
   const handleCommentSubmit = () => {
     if (!comment.trim()) return;
-    const newComment = {
-      id: Date.now(),
-      name: "지존준서",
-      date: "2025.10.26 22:00",
-      text: comment,
-      profile: "/postImages/profile.png",
-      likes: 0,
-      liked: false,
-      replies: [],
-    };
-    setComments((prev) => [...prev, newComment]);
+    console.log("댓글 등록:", comment);
     setComment("");
   };
 
-  // 🧩 대댓글 등록
   const handleReplySubmit = (parentId, targetId) => {
     const text = (replyInputs[targetId] || "").trim();
     if (!text) return;
-
-    setComments((prev) =>
-      prev.map((c) => {
-        if (c.id === parentId) {
-          return {
-            ...c,
-            replies: [
-              ...c.replies,
-              {
-                id: Date.now(),
-                name: "지존준서",
-                date: "2025.10.26 22:10",
-                text,
-                profile: "/postImages/profile.png",
-                likes: 0,
-                liked: false,
-              },
-            ],
-          };
-        }
-        return c;
-      })
-    );
-
+    console.log(`답글 등록: parent=${parentId}, target=${targetId}, text=${text}`);
     setReplyInputs((prev) => ({ ...prev, [targetId]: "" }));
-    setShowReplyTarget(null);
   };
 
-  // 답글 버튼 클릭
-  const handleReplyClick = (parentId, targetId, nickname) => {
-    setShowReplyTarget((prev) =>
-      prev && prev.targetId === targetId ? null : { parentId, targetId }
-    );
-
-    setReplyInputs((prev) => ({
-      ...prev,
-      [targetId]: prev[targetId]?.includes(`@${nickname}`)
-        ? prev[targetId]
-        : `@${nickname} `,
-    }));
-  };
-
-  const renderTextWithTags = (text) => {
-    const parts = text.split(/(@\S+)/g);
-    return parts.map((part, i) =>
-      part.startsWith("@") ? (
-        <S.Mention key={i}>{part}</S.Mention>
-      ) : (
-        <React.Fragment key={i}>{part}</React.Fragment>
-      )
-    );
-  };
-
-  // 🗑 게시글 삭제 (완성된 fetch 로직)
   const handleDelete = async () => {
     openModal({
       title: "게시글을 삭제하시겠습니까?",
@@ -207,29 +195,33 @@ const PostReadContent = () => {
       cancelText: "취소",
       onConfirm: async () => {
         try {
-          const BASE_URL = process.env.REACT_APP_BACKEND_URL;
-
+          const BASE_URL =
+            process.env.REACT_APP_BACKEND_URL || "http://localhost:10000";
           const response = await fetch(`${BASE_URL}/main/post/withdraw?id=${id}`, {
             method: "DELETE",
           });
 
-          if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(errorText || "게시글 삭제 실패");
+          let result = {};
+          try {
+            result = await response.json();
+          } catch {
+            result = {};
           }
 
-          const result = await response.json();
+          if (!response.ok)
+            throw new Error(result.message || "게시글 삭제 실패");
+
           openModal({
             title: "삭제 완료",
-            message: result.message || "게시글이 성공적으로 삭제되었습니다.",
+            message: result.message || "게시글이 삭제되었습니다.",
             confirmText: "확인",
             onConfirm: () => navigate("/main/post/all"),
           });
         } catch (error) {
-          console.error("삭제 오류:", error);
+          console.error("게시글 삭제 중 오류:", error);
           openModal({
             title: "삭제 실패",
-            message: "게시글 삭제 중 오류가 발생했습니다.",
+            message: "삭제 중 오류가 발생했습니다.",
             confirmText: "확인",
           });
         }
@@ -237,46 +229,59 @@ const PostReadContent = () => {
     });
   };
 
-  // 댓글/답글 삭제
-  const handleCommentDelete = () => {
-    if (!deleteTarget) return;
+  if (loading) return <S.Container>로딩 중...</S.Container>;
+  if (!post) return <S.Container>게시글을 찾을 수 없습니다.</S.Container>;
 
-    openModal({
-      title: "댓글을 삭제하시겠습니까?",
-      message: "삭제된 댓글은 복구할 수 없습니다.",
-      confirmText: "삭제",
-      cancelText: "취소",
-      onConfirm: () => {
-        setComments((prev) =>
-          prev
-            .map((c) => {
-              if (deleteTarget.type === "comment" && c.id === deleteTarget.id)
-                return null;
-              if (deleteTarget.type === "reply") {
-                return {
-                  ...c,
-                  replies: c.replies.filter((r) => r.id !== deleteTarget.id),
-                };
-              }
-              return c;
-            })
-            .filter(Boolean)
-        );
-        setDeleteTarget(null);
+  const formatDate = (dateString) => {
+    const d = new Date(dateString);
+    if (isNaN(d)) return "";
+    return d
+      .toLocaleDateString("ko-KR", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+      })
+      .replace(/\.\s?/g, ".")
+      .replace(/\.$/, "");
+  };
+
+  const handleShare = () => {
+    if (!window.Kakao || !window.Kakao.Share) {
+      alert("카카오 SDK가 아직 초기화되지 않았습니다.");
+      return;
+    }
+
+    const shareUrl = `${window.location.origin}/main/post/read/${id}`;
+    window.Kakao.Share.sendDefault({
+      objectType: "feed",
+      content: {
+        title: post?.postTitle || "오늘의 솜",
+        description: `${post?.memberNickname || "회원"}님의 도전 🌱`,
+        imageUrl:
+          post?.postImageUrl && !post.postImageUrl.includes("default_post.png")
+            ? post.postImageUrl
+            : "https://yourdomain.com/assets/som-share-thumbnail.png",
+        link: { mobileWebUrl: shareUrl, webUrl: shareUrl },
       },
+      buttons: [
+        {
+          title: "BlueCotton에서 보기",
+          link: { mobileWebUrl: shareUrl, webUrl: shareUrl },
+        },
+      ],
     });
   };
 
   return (
     <S.Container>
-      <S.Title>{id}번 게시글 제목</S.Title>
+      <S.Title>{post.postTitle}</S.Title>
 
       <S.MetaBox>
-        <div className="writer">지존준서</div>
+        <div className="writer">{post.memberNickname}</div>
         <span className="divider">|</span>
-        <div className="date">2025.10.26</div>
+        <div className="date">{formatDate(post.postCreateAt)}</div>
         <span className="divider">|</span>
-        <div className="view">조회수 : 5,905</div>
+        <div className="view">조회수 : {post.postReadCount}</div>
       </S.MetaBox>
 
       <S.Content>
@@ -284,27 +289,47 @@ const PostReadContent = () => {
           <span onClick={() => navigate(`/main/post/modify/${id}`)}>수정</span> |{" "}
           <span onClick={handleDelete}>삭제</span>
         </S.EditBox>
-        <p>{id}번 게시물 내용입니다.</p>
+
+        {post.postImageUrl &&
+          !post.postImageUrl.includes("default_post.jpg") && (
+            <img
+              src={
+                post.postImageUrl.startsWith("/upload/")
+                  ? `http://localhost:10000${post.postImageUrl}`
+                  : post.postImageUrl
+              }
+              alt="게시글 이미지"
+              style={{ width: "100%", marginBottom: "20px" }}
+              onError={(e) => {
+                e.target.src =
+                  "http://localhost:10000/upload/default/default_post.jpg";
+              }}
+            />
+          )}
+
+        <div
+          className="post-content"
+          dangerouslySetInnerHTML={{ __html: post.postContent }}
+        />
       </S.Content>
 
-      {/* 공유 */}
       <S.PostSocialBox>
         <S.ReportButton
           onClick={() => {
-            setReportTarget({ type: "post", id }); // 게시글 신고
+            setReportTarget({ type: "post", id });
             setShowReportModal(true);
           }}
         >
           <img src="/assets/icons/report.svg" alt="신고하기" />
           <span>신고</span>
         </S.ReportButton>
+
         <S.ShareButton onClick={handleShare}>
           <img src="/assets/icons/share_gray.svg" alt="공유하기" />
           <span>공유</span>
         </S.ShareButton>
       </S.PostSocialBox>
 
-      {/* 💬 댓글 컴포넌트 */}
       <PostComment
         showComments={showComments}
         setShowComments={setShowComments}
@@ -318,21 +343,21 @@ const PostReadContent = () => {
         setShowReplyTarget={setShowReplyTarget}
         deleteTarget={deleteTarget}
         setDeleteTarget={setDeleteTarget}
-        handleCommentDelete={handleCommentDelete}
+        handleCommentDelete={() => {}}
         handleReplyClick={handleReplyClick}
         handleReplySubmit={handleReplySubmit}
         handleLike={handleLike}
         handleCommentSubmit={handleCommentSubmit}
-        renderTextWithTags={renderTextWithTags}
+        renderTextWithTags={(text) => text}
         showReportModal={showReportModal}
         setShowReportModal={setShowReportModal}
         reportTarget={reportTarget}
         setReportTarget={setReportTarget}
+        postId={id}
       />
 
-      {/* ✅ 이전/다음 글 */}
       <S.NavList>
-        <S.NavItem onClick={goNext} $disabled={!nextId}>
+        <S.NavItem onClick={goNext}>
           <div className="label">
             <S.NavArrow src="/assets/icons/drop_down.svg" alt="" $up />
             다음 글
@@ -340,7 +365,7 @@ const PostReadContent = () => {
           <div className="title">{`${nextId}번 게시글 입니다.`}</div>
         </S.NavItem>
 
-        <S.NavItem onClick={prevId ? goPrev : undefined} $disabled={!prevId}>
+        <S.NavItem onClick={goPrev} $disabled={!prevId}>
           <div className="label">
             <S.NavArrow src="/assets/icons/drop_down.svg" alt="" />
             이전 글
