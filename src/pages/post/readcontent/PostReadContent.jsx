@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import S from "./style";
 import { useModal } from "../../../components/modal";
 import PostComment from "../commentcomponent/PostComment";
+
 const PostReadContent = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -197,14 +198,42 @@ const PostReadContent = () => {
     );
   };
 
-  // 🗑 게시글 삭제
-  const handleDelete = () => {
+  // 🗑 게시글 삭제 (완성된 fetch 로직)
+  const handleDelete = async () => {
     openModal({
       title: "게시글을 삭제하시겠습니까?",
       message: "삭제된 게시글은 복구할 수 없습니다.",
       confirmText: "삭제",
       cancelText: "취소",
-      onConfirm: () => navigate("/main/post/all"),
+      onConfirm: async () => {
+        try {
+          const BASE_URL = process.env.REACT_APP_BACKEND_URL;
+
+          const response = await fetch(`${BASE_URL}/main/post/withdraw?id=${id}`, {
+            method: "DELETE",
+          });
+
+          if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(errorText || "게시글 삭제 실패");
+          }
+
+          const result = await response.json();
+          openModal({
+            title: "삭제 완료",
+            message: result.message || "게시글이 성공적으로 삭제되었습니다.",
+            confirmText: "확인",
+            onConfirm: () => navigate("/main/post/all"),
+          });
+        } catch (error) {
+          console.error("삭제 오류:", error);
+          openModal({
+            title: "삭제 실패",
+            message: "게시글 삭제 중 오류가 발생했습니다.",
+            confirmText: "확인",
+          });
+        }
+      },
     });
   };
 
@@ -252,8 +281,8 @@ const PostReadContent = () => {
 
       <S.Content>
         <S.EditBox>
-          <span onClick={() => navigate(`/main/post/modify/${id}`)}>수정</span>{" "}
-          | <span onClick={handleDelete}>삭제</span>
+          <span onClick={() => navigate(`/main/post/modify/${id}`)}>수정</span> |{" "}
+          <span onClick={handleDelete}>삭제</span>
         </S.EditBox>
         <p>{id}번 게시물 내용입니다.</p>
       </S.Content>
