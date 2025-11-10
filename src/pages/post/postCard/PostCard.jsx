@@ -107,12 +107,11 @@ const PostCard = ({
       <S.Body>
         {/* 상단 메타 */}
         <S.MetaTop>
-          <span className="category">{somTitle}</span>
+          <span className="category">{translatedCategory}</span>
           <span className="bar">|</span>
           <span className="challenge">도전 {challengeDay}일</span>
           <span className="bar">|</span>
-          {/* ✅ 카테고리 한영 변환 적용 */}
-          <span className="category">{translatedCategory}</span>
+          <span className="somtitle">{somTitle}</span>
         </S.MetaTop>
 
         {/* 제목 */}

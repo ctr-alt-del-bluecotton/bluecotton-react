@@ -46,6 +46,12 @@ S.MetaTop = styled.div`
     font-weight: ${({ theme }) => theme.FONT_WEIGHT["bold"]};
   }
 
+  .somtitle {
+    color: ${({ theme }) => theme.PALLETE.basic};
+    font-size: ${({ theme }) => theme.FONT_SIZE["smallText2"]};
+    font-weight: ${({ theme }) => theme.FONT_WEIGHT["bold"]};
+  }
+
   .bar {
     color: ${({ theme }) => theme.PALLETE.grey.greyScale2};
     font-size: ${({ theme }) => theme.FONT_SIZE["smallText2"]};

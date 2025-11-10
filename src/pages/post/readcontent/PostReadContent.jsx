@@ -11,7 +11,6 @@ const PostReadContent = () => {
 
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(true);
-
   const [comments, setComments] = useState([]);
   const [comment, setComment] = useState("");
   const [replyInputs, setReplyInputs] = useState({});
@@ -37,7 +36,6 @@ const PostReadContent = () => {
         console.log("✅ Kakao SDK Initialized:", window.Kakao.isInitialized());
       }
     };
-
     if (window.Kakao) {
       initKakao();
     } else {
@@ -51,23 +49,41 @@ const PostReadContent = () => {
     }
   }, []);
 
-  // ✅ 게시글 상세조회 (좋아요 여부 포함)
+  // ✅ 게시글 상세조회 (댓글 + 좋아요 여부 포함)
   useEffect(() => {
     const fetchPostDetail = async () => {
       try {
         const BASE_URL =
           process.env.REACT_APP_BACKEND_URL || "http://localhost:10000";
-        const memberId = 1; // ✅ 임시 로그인 (테스트용)
+        const memberId = 1; // 임시 로그인
+
         const response = await fetch(
-          `${BASE_URL}/main/post/read/${id}?memberId=${memberId}`
+          `${BASE_URL}/main/post/read/${id}?memberId=${memberId}`,
+          {
+            method: "GET",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+          }
         );
+
         if (!response.ok)
           throw new Error(`HTTP error! status: ${response.status}`);
 
         const result = await response.json();
+
         if (result.data) {
+          // ✅ 댓글 isCommentLiked → liked 변환
+          const mappedComments = (result.data.comments || []).map((c) => ({
+            ...c,
+            liked: c.isCommentLiked === 1,
+            replies: (c.replies || []).map((r) => ({
+              ...r,
+              liked: r.isReplyLiked === 1,
+            })),
+          }));
+
           setPost(result.data);
-          setComments(result.data.comments || []);
+          setComments(mappedComments);
         } else {
           throw new Error(
             result.message || "게시글 데이터를 불러오지 못했습니다."
@@ -88,40 +104,68 @@ const PostReadContent = () => {
     fetchPostDetail();
   }, [id, navigate, openModal]);
 
-  // ✅ 좋아요 토글
-  const handleLike = (commentId, isReply = false, parentId = null) => {
-    setComments((prevComments) =>
-      prevComments.map((c) => {
-        if (!isReply && c.commentId === commentId) {
-          return {
-            ...c,
-            liked: !c.liked,
-            commentLikeCount: c.liked
-              ? c.commentLikeCount - 1
-              : c.commentLikeCount + 1,
-          };
-        }
+  // ✅ 댓글/대댓글 좋아요 토글 (서버 반영)
+  const handleLike = async (commentId, isReply = false, parentId = null) => {
+    const BASE_URL =
+      process.env.REACT_APP_BACKEND_URL || "http://localhost:10000";
+    const memberId = 1;
 
-        if (isReply && c.commentId === parentId) {
-          return {
-            ...c,
-            replies: c.replies.map((r) =>
-              r.replyId === commentId
-                ? {
-                    ...r,
-                    liked: !r.liked,
-                    replyLikeCount: r.liked
-                      ? r.replyLikeCount - 1
-                      : r.replyLikeCount + 1,
-                  }
-                : r
-            ),
-          };
-        }
+    try {
+      const endpoint = !isReply
+        ? `${BASE_URL}/main/post/comment/like/toggle`
+        : `${BASE_URL}/main/post/reply/like/toggle`;
 
-        return c;
-      })
-    );
+      const bodyData = !isReply
+        ? { commentId: commentId, memberId: memberId }
+        : { replyId: commentId, memberId: memberId };
+
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(bodyData),
+      });
+
+      if (!response.ok) throw new Error("좋아요 요청 실패");
+
+      const result = await response.json();
+      console.log("좋아요 토글 결과:", result);
+
+      // ✅ UI 즉시 반영
+      setComments((prevComments) =>
+        prevComments.map((c) => {
+          if (!isReply && c.commentId === commentId) {
+            return {
+              ...c,
+              liked: !c.liked,
+              commentLikeCount: c.liked
+                ? c.commentLikeCount - 1
+                : c.commentLikeCount + 1,
+            };
+          }
+
+          if (isReply && c.commentId === parentId) {
+            return {
+              ...c,
+              replies: c.replies.map((r) =>
+                r.replyId === commentId
+                  ? {
+                      ...r,
+                      liked: !r.liked,
+                      replyLikeCount: r.liked
+                        ? r.replyLikeCount - 1
+                        : r.replyLikeCount + 1,
+                    }
+                  : r
+              ),
+            };
+          }
+
+          return c;
+        })
+      );
+    } catch (err) {
+      console.error("좋아요 토글 실패:", err);
+    }
   };
 
   const handleReplyClick = (parentId, targetId, nickname) => {
