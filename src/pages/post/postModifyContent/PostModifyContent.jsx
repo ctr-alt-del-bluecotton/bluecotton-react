@@ -36,7 +36,7 @@ const PostModifyContent = () => {
     const fetchPostData = async () => {
       try {
         const BASE_URL =
-          process.env.REACT_APP_BACKEND_URL || "http://localhost:10000";
+          process.env.REACT_APP_BACKEND_URL;
         const res = await fetch(`${BASE_URL}/main/post/modify/${id}`);
 
         if (!res.ok) throw new Error(`HTTP Error: ${res.status}`);
@@ -85,13 +85,13 @@ const PostModifyContent = () => {
     const fetchCategories = async () => {
       try {
         const BASE_URL =
-          process.env.REACT_APP_BACKEND_URL || "http://localhost:10000";
+          process.env.REACT_APP_BACKEND_URL;
         const res = await fetch(`${BASE_URL}/main/post/categories/${memberId}`);
         if (!res.ok) throw new Error("카테고리 불러오기 실패");
 
         const result = await res.json();
         console.log("참여 중인 카테고리:", result);
-        setJoinedCategories(result); // [{ somCategory: "STUDY", somTitle: "스터디 챌린지" }]
+        setJoinedCategories(result); // [{ somCategory: "stydy", somTitle: "스터디 챌린지" }]
       } catch (err) {
         console.error("카테고리 목록 불러오기 실패:", err);
       }

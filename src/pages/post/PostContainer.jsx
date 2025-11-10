@@ -33,8 +33,8 @@ const PostContainer = () => {
     study: "학습",
     health: "건강",
     social: "소셜",
-    hobby: "취미",
     life: "생활",
+    hobby: "취미",
     rookie: "루키",
   };
 
@@ -60,7 +60,7 @@ const PostContainer = () => {
 
     const fetchPosts = async () => {
       try {
-        const baseUrl = process.env.REACT_APP_BACKEND_URL;
+        const baseUrl = process.env.REACT_APP_BACKEND_URL
 
         const params = new URLSearchParams();
         params.set("page", String(pageNumber - 1)); // 프론트 1-based → 서버 0-based

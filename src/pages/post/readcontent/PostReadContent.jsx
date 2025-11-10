@@ -28,7 +28,7 @@ const PostReadContent = () => {
   const goPrev = () => prevId && navigate(`/main/post/read/${prevId}`);
   const goNext = () => navigate(`/main/post/read/${nextId}`);
 
-  // ✅ Kakao SDK 초기화
+  // Kakao SDK 초기화
   useEffect(() => {
     const initKakao = () => {
       if (window.Kakao && !window.Kakao.isInitialized()) {
@@ -49,12 +49,12 @@ const PostReadContent = () => {
     }
   }, []);
 
-  // ✅ 게시글 상세조회 (댓글 + 좋아요 여부 포함)
+  // 게시글 상세조회 (댓글 + 좋아요 여부 포함)
   useEffect(() => {
     const fetchPostDetail = async () => {
       try {
         const BASE_URL =
-          process.env.REACT_APP_BACKEND_URL || "http://localhost:10000";
+          process.env.REACT_APP_BACKEND_URL;
         const memberId = 1; // 임시 로그인
 
         const response = await fetch(
@@ -104,10 +104,10 @@ const PostReadContent = () => {
     fetchPostDetail();
   }, [id, navigate, openModal]);
 
-  // ✅ 댓글/대댓글 좋아요 토글 (서버 반영)
+  // 댓글/대댓글 좋아요 토글 (서버 반영)
   const handleLike = async (commentId, isReply = false, parentId = null) => {
     const BASE_URL =
-      process.env.REACT_APP_BACKEND_URL || "http://localhost:10000";
+      process.env.REACT_APP_BACKEND_URL;
     const memberId = 1;
 
     try {
