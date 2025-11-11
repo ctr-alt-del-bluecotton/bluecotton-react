@@ -12,7 +12,6 @@ const MapContainer = () => {
 
   const mapRef = useRef(null);
 
-  // ✅ 내 위치 가져오기
   const fetchMyLocation = () => {
     if (!navigator.geolocation) {
       alert("현재 브라우저에서는 위치 정보를 사용할 수 없습니다.");
@@ -31,7 +30,6 @@ const MapContainer = () => {
     );
   };
 
-  // ✅ 솜 리스트 가져오기
   const fetchSomList = async () => {
     try {
       const res = await fetch(`${process.env.REACT_APP_BACKEND_URL}/som/all`);
@@ -48,7 +46,6 @@ const MapContainer = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  // ✅ 주소 → 좌표 변환
   useEffect(() => {
     if (somList.length === 0) return;
     const geocoder = new window.kakao.maps.services.Geocoder();
@@ -84,7 +81,6 @@ const MapContainer = () => {
     });
   }, [somList]);
 
-  // ✅ 지도 이동
   const moveToLocation = (lat, lng) => {
     const map = mapRef.current;
     if (map) {
@@ -93,9 +89,9 @@ const MapContainer = () => {
     }
   };
 
-  // ✅ 마커 클릭 시 토글
-  const handleMarkerClick = (id) => {
+  const handleMarkerClick = (id, lat, lng) => {
     setSelectedMarkerId((prev) => (prev === id ? null : id));
+    moveToLocation(lat, lng);
   };
 
   if (!isLoaded || !center) return <div>지도 불러오는 중...</div>;
@@ -106,11 +102,9 @@ const MapContainer = () => {
         <S.Title>솜이 진행 중인 장소 / 솜 찾기</S.Title>
         <S.MapAndListWrapper>
 
-          {/* 지도 */}
           <S.MapBox>
             <S.Map center={center} level={5} ref={mapRef}>
 
-              {/* 내 위치 */}
               {myLocation && (
                 <MapMarker
                   position={myLocation}
@@ -121,7 +115,6 @@ const MapContainer = () => {
                 />
               )}
 
-              {/* 솜 마커 */}
               {markers.map((marker) => (
                 <React.Fragment key={marker.id}>
                   <MapMarker
@@ -130,8 +123,9 @@ const MapContainer = () => {
                       src: process.env.PUBLIC_URL + "/assets/icons/mapSomMarker.png",
                       size: { width: 60, height: 100 },
                     }}
-                    onClick={() => handleMarkerClick(marker.id)}
+                    onClick={() => handleMarkerClick(marker.id, marker.latitude, marker.longitude)}
                   />
+
 
                   {selectedMarkerId === marker.id && (
                     <CustomOverlayMap
@@ -164,7 +158,6 @@ const MapContainer = () => {
             />
           </S.MapBox>
 
-          {/* 리스트 */}
           <S.ListBox>
             {somList.map((som) => (
               <S.SomItem
@@ -172,6 +165,7 @@ const MapContainer = () => {
                 onClick={() => {
                   const m = markers.find((m) => m.id === som.id);
                   if (m) moveToLocation(m.latitude, m.longitude);
+                  setSelectedMarkerId(m.id);
                 }}
               >
                 <S.SomTitle>{som.somTitle}</S.SomTitle>
