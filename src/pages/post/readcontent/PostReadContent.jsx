@@ -32,6 +32,7 @@ const PostReadContent = () => {
   const goPrev = () => prevId && navigate(`/main/post/read/${prevId}`);
   const goNext = () => navigate(`/main/post/read/${nextId}`);
 
+
   // ✅ Kakao SDK 초기화
   useEffect(() => {
     const initKakao = () => {
@@ -58,27 +59,35 @@ const PostReadContent = () => {
     const fetchPostDetail = async () => {
       try {
         const BASE_URL = process.env.REACT_APP_BACKEND_URL;
-        const memberId = isLogin && currentUser?.id ? currentUser.id : null;
-
+        const token = localStorage.getItem("accessToken");
+        const memberId = currentUser.id;
+        console.log(token)
+        // ✅ 로그인 여부에 따라 endpoint 결정
         const endpoint = memberId
-          ? `${BASE_URL}/private/post/read/${id}?memberId=${memberId}`
-          : `${BASE_URL}/private/post/read/${id}`;
+          ? `${BASE_URL}/main/post/read/${id}?memberId=${memberId}`
+          : `${BASE_URL}/main/post/read/${id}`;
 
+        console.log(`${BASE_URL}/main/post/read/${id}?memberId=${memberId}`)
+        // ✅ 헤더 설정 (로그인 시에만 Authorization 포함)
+        const headers = {
+          "Content-Type": "application/json",
+          ...(token && { Authorization: `Bearer ${token}` }),
+        };
+        console.log("✅ 요청 URL:", endpoint);
         const response = await fetch(endpoint, {
           method: "GET",
-          headers: { "Content-Type": "application/json" ,
-            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-          },
+          headers,
           credentials: "include",
         });
 
-        console.log("테스트")
-        console.log(response)
+
         if (!response.ok) throw new Error(`HTTP error ${response.status}`);
 
         const result = await response.json();
-
+        console.log("테스트")
+        console.log(response)
         if (result.data) {
+          // ✅ 댓글·대댓글 좋아요 여부 매핑
           const mappedComments = (result.data.comments || []).map((c) => ({
             ...c,
             liked: c.isCommentLiked === 1,
@@ -105,6 +114,7 @@ const PostReadContent = () => {
         setLoading(false);
       }
     };
+
     fetchPostDetail();
   }, [id, isLogin, currentUser, navigate, openModal]);
 

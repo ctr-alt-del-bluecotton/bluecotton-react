@@ -372,7 +372,10 @@ const PostComment = ({
                       </div>
 
                       <div className="meta-row">
-                        <span>{formatDate(c.commentCreateAt)}</span> |{" "}
+                        <span>{formatDate(c.commentCreateAt)}</span>
+
+                        {/* 신고 버튼 */}
+                        <span> | </span>
                         <span
                           className="report"
                           onClick={() => {
@@ -384,28 +387,31 @@ const PostComment = ({
                               });
                               return;
                             }
-                            setReportTarget({
-                              type: "comment",
-                              id: c.commentId,
-                            });
+                            setReportTarget({ type: "comment", id: c.commentId });
                             setShowReportModal(true);
                           }}
                         >
                           신고
-                        </span>{" "}
-                        |{" "}
-                        <span
-                          className="delete"
-                          onClick={() => {
-                            setDeleteTarget({
-                              type: "comment",
-                              id: c.commentId,
-                            });
-                            handleCommentDelete();
-                          }}
-                        >
-                          삭제
                         </span>
+
+                        {/* 삭제 버튼 (자기 댓글에만 표시) */}
+                        {isLogin && currentUser?.id === c.memberId && (
+                          <>
+                            <span> | </span>
+                            <span
+                              className="delete"
+                              onClick={() => {
+                                setDeleteTarget({
+                                  type: "comment",
+                                  id: c.commentId,
+                                });
+                                handleCommentDelete();
+                              }}
+                            >
+                              삭제
+                            </span>
+                          </>
+                        )}
                       </div>
 
                       <div className="reply-row">
@@ -515,15 +521,17 @@ const PostComment = ({
                           </div>
 
                           <div className="meta-row">
-                            <span>{formatDate(r.replyCreateAt)}</span> |{" "}
+                            <span>{formatDate(r.replyCreateAt)}</span>
+
+                            {/* 신고 버튼 */}
+                            <span> | </span>
                             <span
                               className="report"
                               onClick={() => {
                                 if (!isLogin || !currentUser?.id) {
                                   openModal({
                                     title: "로그인이 필요합니다",
-                                    message:
-                                      "신고 기능은 로그인 후 이용 가능합니다.",
+                                    message: "신고 기능은 로그인 후 이용 가능합니다.",
                                     confirmText: "확인",
                                   });
                                   return;
@@ -536,21 +544,28 @@ const PostComment = ({
                               }}
                             >
                               신고
-                            </span>{" "}
-                            |{" "}
-                            <span
-                              className="delete"
-                              onClick={() => {
-                                setDeleteTarget({
-                                  type: "reply",
-                                  id: r.replyId,
-                                });
-                                handleCommentDelete();
-                              }}
-                            >
-                              삭제
                             </span>
+
+                            {/* ✅ 자기 대댓글일 때만 삭제 버튼 표시 */}
+                            {isLogin && currentUser?.id === r.memberId && (
+                              <>
+                                <span> | </span>
+                                <span
+                                  className="delete"
+                                  onClick={() => {
+                                    setDeleteTarget({
+                                      type: "reply",
+                                      id: r.replyId,
+                                    });
+                                    handleCommentDelete();
+                                  }}
+                                >
+                                  삭제
+                                </span>
+                              </>
+                            )}
                           </div>
+
 
                           <div className="reply-row">
                             <button
