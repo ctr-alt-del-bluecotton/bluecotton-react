@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import S from "./style.js";
 import { useParams } from "react-router-dom";
+import { resolveUrl } from "../../../../utils/url.js";
+
 
 const ShopInfo = () => {
   const [open, setOpen] = useState(true);
@@ -69,14 +71,14 @@ const ShopInfo = () => {
       </S.InfoTextWrap>
 
       <S.InfoImage>          
-        <img src={infoMainImage} alt="상품 상세 메인 이미지" />
+        <img src={resolveUrl(infoMainImage)} alt="상품 상세 메인 이미지" />
       </S.InfoImage>
 
       {open && (
         <>
         {infoSubImages.map((src, i) => (
           <S.InfoImage key={i}>
-            <img src={src} alt={`상품 서브 이미지 ${i + 1}`}/>
+            <img src={resolveUrl(src)} alt={`상품 서브 이미지 ${i + 1}`}/>
           </S.InfoImage>
         ))}
 

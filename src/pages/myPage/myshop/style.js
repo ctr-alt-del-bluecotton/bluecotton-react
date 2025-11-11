@@ -593,7 +593,6 @@ S.BestTag = styled.span`
 
 S.PriceText = styled.p`
   ${C.smallText1Bold}
-  color: ${({ theme }) => theme.PALLETE.primary.main};
   margin: 6px 0 8px;
 `;
 

@@ -31,17 +31,22 @@ S.Right = styled.div`
   height: fit-content;
 `;
 
-/* 메인 / 서브 이미지 */
+/* 메인 이미지 */
 S.MainImage = styled.div`
   width: 680px;
   height: 680px;
   overflow: hidden;
   background: #f6f6f6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
   img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: cover;    
+    object-position: center; 
+    display: block;
   }
 `;
 

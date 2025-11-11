@@ -1,12 +1,17 @@
 import React from 'react';
 import S from '../style';
 import ReviewModal from '../review/ReviewModal';
+import { useSelector } from 'react-redux';
 
 
 const formatDotDate = (str) => str.split('T')[0].replace(/-/g, '.');
 
 // 구매내역
 const MyShopOrderContainer = () => {
+
+   const { currentUser, isLogin } = useSelector((state) => state.user);
+   const memberId = currentUser.id;
+
   const orders = [
     { id: 1, name: '솜이 인형', date: '2025-09-11' },
     { id: 2, name: '솜이 인형', date: '2025-09-11' },

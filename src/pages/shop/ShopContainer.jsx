@@ -2,8 +2,12 @@ import React, { useState, useMemo, useEffect } from "react";
 import S from "./style";
 import ShopList from "./ShopList";
 import ShopNumberSelect from "./shopNumberSelect/ShopNumberSelect";
+import { useSelector } from "react-redux";
 
 const ShopContainer = () => {
+
+    const { currentUser, isLogin } = useSelector((state) => state.user);
+      const memberId = currentUser.id;
 
     const [categories, setCategories] = useState({
         clothing: false,
@@ -60,8 +64,7 @@ const ShopContainer = () => {
             });
 
             filterParams.order = selected;
-
-            filterParams.memberId = 1;
+            filterParams.memberId = memberId;
 
             console.log("필터링한 데이터 :", filterParams);
 
@@ -92,7 +95,7 @@ const ShopContainer = () => {
 
         fetchFilterProduct(); 
 
-    }, [categories, productTypes, purchaseTypes, selected]); 
+    }, [categories, productTypes, purchaseTypes, selected, memberId, isLogin]); 
 
     
 
@@ -102,7 +105,7 @@ const ShopContainer = () => {
             id: p.id,
             name: p.productName,
             imageUrl: p.productImageUrl,
-            priceText: Number(p.productPrice).toLocaleString() + "원",
+            priceText: `${Number(p.productPrice).toLocaleString()}${p.productPurchaseType === "CANDY" ? "캔디" : "원"}`,
             score: (p.productAvgRating ?? 0).toFixed(1),
             reviewCount: p.productReviewCount ?? 0,
             likeCount: p.productLikeCount ?? 0,

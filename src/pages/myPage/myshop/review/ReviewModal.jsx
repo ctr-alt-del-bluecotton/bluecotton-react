@@ -51,6 +51,7 @@ const ReviewModal = ({
 
   const handleSubmit = () => {
     onSubmit?.({ rating, content, files });
+    console.log(files, content)
     onClose?.();
   };
 

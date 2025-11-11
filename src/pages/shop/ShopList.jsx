@@ -2,11 +2,15 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import S from "./style";
 import { resolveUrl } from "../../utils/url";
+import { useSelector } from "react-redux";
 
 const ShopList = ({ items }) => {
 
+ const { currentUser, isLogin } = useSelector((state) => state.user);
 
  const [liked, setLiked] = useState(new Set());
+
+  const memberId = currentUser?.id ?? null;    
 
   useEffect(() => {
     const next = new Set();
@@ -20,16 +24,11 @@ const ShopList = ({ items }) => {
   
   const toggleLike = async (productId) => {
 
-    const memberId = 1; 
-
 
     const isCurrentlyLiked = liked.has(productId);
 
     // 백엔드 API로 보낼 데이터 (JSON)
-    const likeData = {
-      memberId: memberId,
-      productId: productId,
-    };
+    const likeData = { memberId, productId }; 
     
     // 백엔드 컨트롤러(ShopApi)에 만든 주소
     const url = `${process.env.REACT_APP_BACKEND_URL}/shop/like/toggle`;
@@ -67,7 +66,6 @@ const ShopList = ({ items }) => {
   };
 
 
-
   const data = items;
 
   return (
@@ -77,6 +75,30 @@ const ShopList = ({ items }) => {
         const id = item.id ?? i + 1; 
         const isActive = liked.has(id);
         
+
+        const img = resolveUrl(item.productImageUrl); 
+
+        const purchaseType = item.productPurchaseType || item.purchaseType || "CASH"; 
+        const rawPrice = item.productPrice ?? 0; 
+        const priceNumber = Number(rawPrice) || 0; 
+        const priceText =
+          `${priceNumber.toLocaleString()}${purchaseType === "CANDY" ? "캔디" : "원"}`; 
+
+        const typeStr = String(item.productType ?? ""); 
+        const isNew = typeStr.includes("NEW"); 
+        const isBest = typeStr.includes("BEST"); 
+
+
+        const name = item.productName; 
+
+        // 평점/리뷰/좋아요 
+        // 없으면 0
+        const score = Number(item.productAvgRating ?? 0).toFixed(1); 
+        const reviewCount = Number(item.productReviewCount ?? 0); 
+        const likeCount = Number(item.productLikeCount ?? 0);
+
+
+
         return (
           <S.Card key={id}>
             <S.LikeButton
