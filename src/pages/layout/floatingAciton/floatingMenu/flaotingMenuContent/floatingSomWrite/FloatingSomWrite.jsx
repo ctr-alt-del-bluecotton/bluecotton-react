@@ -2,24 +2,37 @@ import React from 'react';
 import S from './style';
 import FloatingSomWritePages from './floatingSomWriteCotent/FloatingSomWriteCotent';
 import { useFloatingAction } from '../../../../../../context/FloatingActionContext';
+import { fetchData, options } from '../../../../../../context/FetchContext';
+import { MainProvider } from '../../../../../../context/MainContext';
 
-const FloatingSomWrite = () => {
-  const { somMenuPage, setSomMenuPage, handleSubmit, getValues } = useFloatingAction();
+const FloatingSomWriteComponent = ({setInsertSom}) => {
+  const { somMenuPage, setSomMenuPage, handleSubmit, getValues, setIsAllError,
+    uploadImageTempIds, setUploadImageTempIds, reset
+   } = useFloatingAction();
+  const contents = Object.keys(getValues()).filter((content) => content !== "somContent");
 
-  const contents = Object.keys(getValues).filter((content) => content !== "somContent");
+  // const isContent = (contentName) => {
+  //   if (getValues() == {}) {
+  //       return false;
+  //   } else {
+  //       if(getValues()[contentName] === null) {
+  //           return false;
+  //       }
+  //   }
+  //   return true;
+
+  // }
 
   const pageNext = (e) => {
-    const values = getValues();
-
+    setIsAllError(true)
     for(const content of contents){
-      if(!values[content] || values[content].trim() === ""){
-        console.log(`${content}, ${values[content]}`)
+      if(!getValues()[content] || getValues()[content].trim() === ""){
+        
         return;
       }
     }
     setSomMenuPage((prev) => ++prev)
   }
-
 
   function onSubmit(data) {
     console.log(data)
@@ -44,9 +57,32 @@ const FloatingSomWrite = () => {
       setSomMenuPage(targetPage);
       return;
     }
+    data.memberId = 1;
+
+    const trimData = Object.fromEntries(
+      Object.entries(data).map(([key, value]) => [
+        key,
+        typeof value === "string" ? value.trim() : value,
+      ])
+    );
 
     // ✅ 백엔드로 전송
     console.log("전송 데이터:", data);
+    fetchData('som/register', options.postOption(trimData))
+    .then(async (somRes) => {
+      const somData = await somRes.json()
+      console.log(somData)
+      console.log(options.putOption({ somId: somData.data.id, somImageIds: uploadImageTempIds }))
+      fetchData('som-image/update', options.putOption({ 
+        somId : somData.data.id,
+        somImageIds : uploadImageTempIds
+      }))
+      reset();                    // form 값 초기화
+      setUploadImageTempIds([]);  // 업로드한 이미지 리스트 초기화
+      setSomMenuPage(1);          // 페이지 1로 이동
+      window.scrollTo(0, 0);   
+      setInsertSom((prev) => !prev)
+      })
   };
   
   const beforeButton = <S.floatingMenuButton onClick={() => setSomMenuPage((prev) => --prev)}>이전</S.floatingMenuButton>;
@@ -80,7 +116,14 @@ const FloatingSomWrite = () => {
       </S.floatingFormWrap>
     </S.floatingMenuWrap>
 
-  );
+  );  
 };
 
+const FloatingSomWrite = () => {
+  return (
+    <MainProvider>
+      <FloatingSomWriteComponent />
+    </MainProvider>
+  );
+};
 export default FloatingSomWrite;

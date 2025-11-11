@@ -5,16 +5,16 @@ import { useMain } from "../../../context/MainContext";
 
 const SomContent = ({ content, somisLike }) => {
   const nav = useNavigate();
-  const { somisLikeList, setSomisLikeList } = useMain();
+  const { somisLikeList, setSomisLikeList, formatDate } = useMain();
   const {
     id,
     somTitle,
-    somImagePath,
+    somImageList,
     somAddress,
     somStartDate,
     somEndDate,
     somCount,
-    somLikeCount,
+    somLike,
     memberName,
     meberProfilePath
   } = content;
@@ -36,13 +36,13 @@ const SomContent = ({ content, somisLike }) => {
   <S.LikeButton onClick={isLikeButtonOnclick} $isLike={true}>
     <S.somLikeIcon src="../../assets/icons/som_read_like_active.png" alt="좋아요 아이콘"/> {/* 여기 하트 아이콘 들어갈 자리 ♥ */}
     <span>
-      {somLikeCount}
+      {somLike}
     </span>
   </S.LikeButton> :
   <S.LikeButton onClick={isLikeButtonOnclick} $isLike={false}>
     <S.somLikeIcon src="../../assets/icons/som_list_like_inactive.png" alt="좋아요 아이콘"/> {/* 여기 하트 아이콘 들어갈 자리 ♡ */}
     <span>
-      {somLikeCount}
+      {somLike}
     </span>
   </S.LikeButton> ;
 
@@ -53,7 +53,7 @@ const SomContent = ({ content, somisLike }) => {
 
   return (
     <S.Card>
-      <S.SomImage onClick={somOnClick} bgsrc={somImagePath} alt={somTitle} />
+      <S.SomImage onClick={somOnClick} bgsrc={somImageList[0]?.somImagePath} alt={somImageList[0]?.somImageName} />
       <S.SomInfo>
         <S.SomTitleArea onClick={somOnClick}>
           <img src={meberProfilePath} alt={memberName} />
@@ -65,14 +65,14 @@ const SomContent = ({ content, somisLike }) => {
               <S.SomLocationIcon src="../../assets/icons/som_list_location_icon.png" alt="위치 아이콘"/>
               {somAddress}
             </S.SomExplanationInfo>
-              {somStartDate}
+              {formatDate(somStartDate).split(' ')[0]}
           </S.SomExplantionArea>
           <S.SomExplantionArea>
             <S.SomExplanationInfo>
               <S.SomDateIcon src="../../assets/icons/som_list_date_icon.png" alt="날짜 아이콘"/>
               솜 마감일
             </S.SomExplanationInfo>
-              {somEndDate}
+              {formatDate(somEndDate).split(' ')[0]}
           </S.SomExplantionArea>
         </S.SomExplanation>
       </S.SomInfo>
