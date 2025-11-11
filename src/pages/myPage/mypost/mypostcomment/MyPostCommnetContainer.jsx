@@ -1,101 +1,193 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import S from '../style';
 import { useModal } from '../../../../components/modal';
+
+const categoryMap = {
+  life: '생활',
+  health: '건강',
+  study: '학습',
+  social: '소셜',
+  hobby: '취미',
+  rookie: '루키',
+};
 
 const MyPostCommnetContainer = () => {
   const navigate = useNavigate();
   const { openModal } = useModal();
-  const [posts, setPosts] = useState([
-    {
-      id: 1,
-      type: '건강',
-      title: '2km 런닝 뛰기 챌린지',
-      date: '2025.08.30',
-    },
-    {
-      id: 2,
-      type: '소셜',
-      title: '전국 플로깅 대회',
-      date: '2025.09.05',
-    },
-    {
-      id: 3,
-      type: '건강',
-      title: '매일 스쿼트 50개 도전',
-      date: '2025.09.10',
-    },
-    {
-      id: 4,
-      type: '학습',
-      title: '공부 시간 기록 챌린지',
-      date: '2025.09.15',
-    }
-  ]);
+  const [searchParams] = useSearchParams();
+  const { currentUser } = useSelector((state) => state.user);
+  // URL 파라미터에서 id를 가져오거나, 없으면 Redux의 현재 사용자 ID 사용
+  const id = searchParams.get('id') || (currentUser?.id ? String(currentUser.id) : null);
+  const [comments, setComments] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const handleDelete = async (postId) => {
+  useEffect(() => {
+    const formatDate = (dateString) => {
+      if (!dateString) return '';
+      const date = new Date(dateString);
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}.${month}.${day}`;
+    };
+
+    const fetchComments = async () => {
+      try {
+        setLoading(true);
+        // id가 없으면 API 호출하지 않음 (서버에서 id가 필수 파라미터일 수 있음)
+        if (!id) {
+          setComments([]);
+          setLoading(false);
+          return;
+        }
+        
+        const url = `${process.env.REACT_APP_BACKEND_URL}/my-page/read-post-comment?id=${id}`;
+        
+        const response = await fetch(url, {
+          headers: { "Content-Type": "application/json" },
+          method: "GET",
+          credentials: "include"
+        });
+        
+        if (!response.ok) {
+          throw new Error('댓글 조회 실패');
+        }
+        
+        const result = await response.json();
+        console.log('댓글 응답:', result);
+        
+        if (result.data && Array.isArray(result.data)) {
+          const formattedComments = result.data.map((item) => ({
+            commentId: item.commentId,
+            replyId: item.replyId,
+            postId: item.postId,
+            type: categoryMap[item.somCategory] || item.somCategory || '기타',
+            title: item.postTitle || '',
+            // 댓글인지 대댓글인지에 따라 날짜 선택
+            date: formatDate(item.replyId ? item.postReplyCreateAt : item.postCommentCreateAt),
+            isReply: item.replyId !== null, // 대댓글 여부
+          }));
+          setComments(formattedComments);
+        } else {
+          setComments([]);
+        }
+      } catch (error) {
+        console.error('댓글 조회 오류:', error);
+        setComments([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchComments();
+  }, [id, currentUser]);
+
+  const handleDelete = async (commentId, replyId, isReply) => {
     try {
-      const response = await fetch(`http://localhost:10000/my-page/delete-post-comment?id=${postId}`, {
+      let url;
+      let deleteId;
+      
+      // 대댓글인 경우와 댓글인 경우 다른 엔드포인트 사용
+      if (isReply && replyId) {
+        // 대댓글 삭제
+        url = `${process.env.REACT_APP_BACKEND_URL}/my-page/delete-post-reply?id=${replyId}`;
+        deleteId = replyId;
+      } else {
+        // 댓글 삭제
+        url = `${process.env.REACT_APP_BACKEND_URL}/my-page/delete-post-comment?id=${commentId}`;
+        deleteId = commentId;
+      }
+
+      const response = await fetch(url, {
         method: 'DELETE',
+        headers: { "Content-Type": "application/json" },
+        credentials: "include"
       });
 
       if (!response.ok) {
-        throw new Error('댓글 단 글 삭제 실패');
+        throw new Error(isReply ? '대댓글 삭제 실패' : '댓글 삭제 실패');
       }
 
-      // 성공적으로 삭제되면 목록에서 해당 게시글 제거
-      setPosts(prevPosts => prevPosts.filter(post => post.id !== postId));
+      // 성공적으로 삭제되면 목록에서 해당 댓글/대댓글 제거
+      setComments(prevComments => 
+        prevComments.filter(comment => {
+          if (isReply) {
+            return comment.replyId !== deleteId;
+          } else {
+            return comment.commentId !== deleteId;
+          }
+        })
+      );
     } catch (error) {
-      console.error('댓글 단 글 삭제 오류:', error);
+      console.error('삭제 오류:', error);
       openModal({
         title: "삭제 실패",
-        message: "댓글 단 글 삭제에 실패했습니다.",
+        message: `${isReply ? '대댓글' : '댓글'} 삭제에 실패했습니다.`,
         confirmText: "확인",
       });
     }
   };
 
+  if (loading) {
+    return (
+      <div>
+        <S.ListHeader>댓글 단 글(0개)</S.ListHeader>
+        <div>로딩 중...</div>
+      </div>
+    );
+  }
+
   return (
     <div>
-      <S.ListHeader>댓글 단 글(4개)</S.ListHeader>
+      <S.ListHeader>댓글 단 글({comments.length}개)</S.ListHeader>
       
-      <S.ListContainer>
-        {posts.map((post, index) => (
-          <S.ListItem 
-            key={index}
-            onClick={() => navigate(`/main/post/read/${post.id}`)}
-            style={{ cursor: 'pointer' }}
-          >
-            <div style={{ flex: 1 }}>
-              <S.ItemType>{post.type}</S.ItemType>
-              <S.ItemTitle>{post.title}</S.ItemTitle>
-              <S.ItemDetails>
-                <span>{post.date}</span>
-              </S.ItemDetails>
-            </div>
-            <S.DeleteButton 
-              onClick={(e) => {
-                e.stopPropagation();
-                openModal({
-                  title: "댓글 삭제",
-                  message: "정말 이 댓글을 삭제하시겠습니까?",
-                  confirmText: "삭제",
-                  cancelText: "취소",
-                  onConfirm: () => handleDelete(post.id),
-                });
-              }}
-            >
-              삭제
-            </S.DeleteButton>
-          </S.ListItem>
-        ))}
-      </S.ListContainer>
+      {comments.length === 0 ? (
+        <div>댓글 단 글이 없습니다.</div>
+      ) : (
+        <>
+          <S.ListContainer>
+            {comments.map((comment, index) => (
+              <S.ListItem 
+                key={`${comment.commentId}-${comment.replyId || 'comment'}-${index}`}
+                onClick={() => navigate(`/main/post/read/${comment.postId}`)}
+                style={{ cursor: 'pointer' }}
+              >
+                <div style={{ flex: 1 }}>
+                  <S.ItemType>{comment.type}</S.ItemType>
+                  <S.ItemTitle>
+                    {comment.isReply ? '↳ ' : ''}{comment.title}
+                  </S.ItemTitle>
+                  <S.ItemDetails>
+                    <span>{comment.isReply ? '대댓글' : '댓글'} · {comment.date}</span>
+                  </S.ItemDetails>
+                </div>
+                <S.DeleteButton 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    openModal({
+                      title: "댓글 삭제",
+                      message: `정말 이 ${comment.isReply ? '대댓글' : '댓글'}을 삭제하시겠습니까?`,
+                      confirmText: "삭제",
+                      cancelText: "취소",
+                      onConfirm: () => handleDelete(comment.commentId, comment.replyId, comment.isReply),
+                    });
+                  }}
+                >
+                  삭제
+                </S.DeleteButton>
+              </S.ListItem>
+            ))}
+          </S.ListContainer>
 
-      <S.Pagination>
-        <S.PageButton disabled>&lt; 이전</S.PageButton>
-        <S.PageNumber>1</S.PageNumber>
-        <S.PageButton disabled={false}>다음 &gt;</S.PageButton>
-      </S.Pagination>
+          <S.Pagination>
+            <S.PageButton disabled>&lt; 이전</S.PageButton>
+            <S.PageNumber>1</S.PageNumber>
+            <S.PageButton disabled={false}>다음 &gt;</S.PageButton>
+          </S.Pagination>
+        </>
+      )}
     </div>
   );
 };

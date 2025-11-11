@@ -10,8 +10,9 @@ const FloatingSomWritePage1 = () => {
     setFormData,
     register,
     setValue,
+    isAllError,
     watch,
-    formState: { errors, touchedFields },
+    formState: { touchedFields },
     somType, setSomType
   } = useFloatingAction();
 
@@ -70,7 +71,6 @@ const FloatingSomWritePage1 = () => {
     setValue("somCategory", value);
     setOpen(false);
   };
-
   return (
     <S.floatingFormWrap>
       <S.floatingInputWrap>
@@ -80,7 +80,8 @@ const FloatingSomWritePage1 = () => {
             required: true
           })}
           $isEmpty={!valueWatch.somTitle?.trim()}
-          $isError={errors.somTitle?.type === "required"}
+          $isError={valueWatch.somTitle?.trim() === '' || valueWatch.somTitle === null || valueWatch.somTitle === undefined}
+          $isAllError={isAllError}
           $isTouched={touchedFields.somTitle}
         />
       </S.floatingInputWrap>
@@ -88,8 +89,12 @@ const FloatingSomWritePage1 = () => {
         <S.floatingInputTitles>카테고리</S.floatingInputTitles>
         <input type="hidden" {...register("somCategory", { required: true })} />
         <S.floatingSomCategoryInputWrap>
-          <S.floatingSomCategoryInputValue $isError={errors.somCategory?.type === "required"}
-            $isTouched={touchedFields.somCategory} $hasValue={!!selected} open={open} onClick={() => setOpen(!open)}>
+          <S.floatingSomCategoryInputValue 
+            $isTouched={touchedFields.somCategory} 
+            $isEmpty={!valueWatch.somCategory?.trim()}
+            $isError={valueWatch.somCategory?.trim() === '' || valueWatch.somCategory === null || valueWatch.somCategory === undefined}
+            $isAllError={isAllError}
+            $hasValue={!!selected} open={open} onClick={() => setOpen(!open)}>
             {selected || "카테고리를 선택하세요"} 
             <S.floatingSomCategoryInputArrow open={open} />
           </S.floatingSomCategoryInputValue>
@@ -114,7 +119,9 @@ const FloatingSomWritePage1 = () => {
             {...register("somAddress",{
               required: true
             })}
-            $isError={errors.somAddress?.type === "required"}
+            $isEmpty={!valueWatch.somAddress?.trim()}
+            $isError={valueWatch.somAddress?.trim() === '' || valueWatch.somAddress === null || valueWatch.somAddress === undefined}
+            $isAllError={isAllError}
             $isTouched={touchedFields.somAddress}
           />
           <S.floatingSomAddressButton onClick={openPostcode}>주소 검색</S.floatingSomAddressButton>
@@ -127,14 +134,18 @@ const FloatingSomWritePage1 = () => {
             {...register("somStartDate",{
               required: true
             })}
-            $isError={errors.somStartDate?.type === "required"}
+            $isEmpty={!valueWatch.somStartDate?.trim()}
+            $isError={valueWatch.somStartDate?.trim() === '' || valueWatch.somStartDate === null || valueWatch.somStartDate === undefined}
+            $isAllError={isAllError}
             $isTouched={touchedFields.somStartDate}
           />
           <S.floatingDateInputs type='datetime-local' placeholder='종료 날짜를 입력하세요'
             {...register("somEndDate",{
               required: true
             })}
-            $isError={errors.somEndDate?.type === "required"}
+            $isEmpty={!valueWatch.somEndDate?.trim()}
+            $isError={valueWatch.somEndDate?.trim() === '' || valueWatch.somEndDate === null || valueWatch.somEndDate === undefined}
+            $isAllError={isAllError}
             $isTouched={touchedFields.somEndDate}
           />
         </S.floatingSomDateSelectWrap>
