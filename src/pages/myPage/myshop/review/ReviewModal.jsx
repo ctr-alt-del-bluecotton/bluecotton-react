@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import S from "./style";
+import { useSelector } from "react-redux";
 
 const ReviewModal = ({
   open,
@@ -9,6 +10,14 @@ const ReviewModal = ({
   initial = null,
   onSubmit,
 }) => {
+
+
+  const [imagePath, setImagePath] = useState("");
+  const [imageName, setImageName] = useState("");
+
+  const { currentUser, isLogin } = useSelector((state) => state.user);
+  const memberId = currentUser.id;
+
   const [rating, setRating] = useState(5);
   const [content, setContent] = useState("");
   const [files, setFiles] = useState([]);
@@ -37,10 +46,40 @@ const ReviewModal = ({
 
   if (!open) return null;
 
+  const uploadImageToServer = async (file, folder = 'shop') => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, "0");
+    const day = String(now.getDate()).padStart(2, "0");
+    
+    // ✅ 폴더 구조: som/2025/11/10
+    const formData = new FormData();
+    const folderPath = `${folder}/${year}/${month}/${day}`;
+    formData.append('file', file);
+    formData.append('folder', folderPath); 
+    
+    const res = await fetch(`${process.env.REACT_APP_BACKEND_URL}/file/upload-image`, {
+        method: 'POST',
+        body: formData,
+  });
+  
+  if (!res.ok) throw new Error('이미지 업로드 실패');
+  
+  return await res.json();
+  }
+
   const openFilePicker = () => fileInputRef.current?.click();
-  const onChangeFiles = (e) => {
+  const onChangeFiles = async (e) => {
     const picked = Array.from(e.target.files || []);
     const next = [...files, ...picked].slice(0, 5);
+    console.log(e.target.files[0])
+    const result = await uploadImageToServer(e.target.files[0] ,"shop_review");
+    console.log("[DEBUG] Image uploaded:", result);
+
+     const data = result?.data ?? result;       
+    setImagePath(data.imagePath || data.path); 
+    setImageName(data.imageName || data.name); 
+
     setFiles(next);
     e.target.value = "";
   };
@@ -50,10 +89,30 @@ const ReviewModal = ({
   const titleText = mode === "edit" ? "리뷰 수정" : "리뷰 작성";
 
   const handleSubmit = () => {
-    onSubmit?.({ rating, content, files });
-    console.log(files, content)
+    onSubmit?.({ productId: product.id, rating, content, files });
     onClose?.();
+
+
+     const payload = {
+        memberId,                 // ★ Redux에서
+        productId: product.id,    // ★ 모달 prop의 product.id 사용
+        rating,
+        content,
+        imagePath,                // ★ 업로드 결과
+        imageName,
+      };
+
+        const res = fetch(`${process.env.REACT_APP_BACKEND_URL}/mypage/myshop/review`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+
+
   };
+
+
 
   return (
     <S.Overlay onClick={onClose}>

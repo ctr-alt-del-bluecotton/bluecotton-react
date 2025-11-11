@@ -421,6 +421,7 @@ S.OrderItemImage = styled.div`
   background-color: #E0E0E0;
   border-radius: 8px;
   margin-right: 16px;
+  object-fit: cover;
 `;
 
 S.ItemContent = styled.div`
