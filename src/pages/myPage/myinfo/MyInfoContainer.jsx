@@ -158,9 +158,9 @@ const MyInfoContainer = () => {
             const genderUpper = String(memberGender).toUpperCase();
             const genderLower = String(memberGender).toLowerCase();
             
-            if (genderUpper === 'M' || genderLower === '남       ' || genderUpper === 'MALE') {
+            if (genderUpper === 'M' || genderLower === '남' || genderUpper === 'MALE') {
               gender = 'male';
-            } else if (genderUpper === 'F' || genderLower === '여       ' || genderUpper === 'FEMALE') {
+            } else if (genderUpper === 'F' || genderLower === '여' || genderUpper === 'FEMALE') {
               gender = 'female';
             }
           }
