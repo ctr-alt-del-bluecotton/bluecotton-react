@@ -5,12 +5,13 @@ import { useMain } from "../../../context/MainContext";
 
 const SomContentList = () => {
   const { somList, pageNumber, somisLikeList } = useMain();
+  console.log(somList)
   const startIndex = (pageNumber - 1) * 9;
-  const currentList = somList.slice(startIndex, startIndex + 9);
+  const currentList = somList?.slice(startIndex, startIndex + 9) ;
 
   return (
     <Grid>
-      {currentList.map((content) => (
+      {currentList?.map((content) => (
         <SomContent 
           key={content.id} 
           content={content} 

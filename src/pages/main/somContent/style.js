@@ -10,12 +10,15 @@ S.Card = styled.div`
   flex-direction: column;
 `;
 
-S.SomImage = styled.div`
+S.SomImage = styled.div.withConfig({
+  shouldForwardProp: (prop) => prop !== "bgsrc"
+})`
   width: 100%;
   height: 230px;
-  background-image: url(${({ bgsrc }) => bgsrc});
+  background-image: ${({ bgsrc }) => `url("${bgsrc}")`};
   background-position: center;
   border-radius: 8px;
+  background-size: cover;
   object-fit: cover;
   cursor: pointer;
 `;
