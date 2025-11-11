@@ -20,10 +20,8 @@ const LoginLayOut = () => {
     }
   }, [isLogin]);
 
-  // 로그인 안 되어 있으면 페이지 렌더 막기
   if (!isLogin) return null;
 
-  // 로그인 되어 있으면 하위 라우트 렌더링
   return <Outlet />;
 };
 

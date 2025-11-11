@@ -168,7 +168,7 @@ const SignUp = () => {
           <S.DateInputBox>
             <S.DateInput
               type="date"
-              {...register("memberBirth", { required: true })} // ✅ 올바른 name
+              {...register("memberBirth", { required: true })}
             />
             <S.SmallButton type="button">확인</S.SmallButton>
           </S.DateInputBox>

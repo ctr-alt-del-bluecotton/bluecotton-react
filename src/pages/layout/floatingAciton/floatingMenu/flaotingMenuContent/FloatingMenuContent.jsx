@@ -2,6 +2,7 @@ import React from 'react';
 import FloatingSomWrite from './floatingSomWrite/FloatingSomWrite';
 import S from './style';
 import { useFloatingAction } from '../../../../../context/FloatingActionContext';
+import FloatingChatBot from './floatingChatBot/FloatingChatBot';
 
 const FloatingMenuContent = () => {
   const { somMenuContent } = useFloatingAction();
@@ -9,7 +10,7 @@ const FloatingMenuContent = () => {
   const contents = [
     {
       label: "chatBot",
-      output: <div>챗봇 자리</div>
+      output: <FloatingChatBot />
     },
     {
       label: "chatting",
