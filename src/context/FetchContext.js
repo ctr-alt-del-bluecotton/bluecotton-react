@@ -1,27 +1,24 @@
+import { createContext, useContext } from "react";
+
 const FetchContext = createContext();
 
 export const useFetchAction = () => useContext(FetchContext);
 
-export const fetchDataPost = async ( url, options = {}) => {
-  const response = await fetch(url, {
+export const fetchData = async ( url, options = {}) => {
+  const openUrl = `${process.env.REACT_APP_BACKEND_URL}/${url}`
+  const response = await fetch(openUrl, {
     method: options.method,
     headers: {
-      "Content-Type" : "application/json"
+      "Content-Type": "application/json"
     },
     body: options.body ? JSON.stringify(options.body) : undefined
   })
-  
-  response.then(res => res.json())
-  .then(({message, data}) => {
-    let accessToken = data.accessToken;
-    localStorage.setItem("accessToken", accessToken)
-    alert(message)
-  })
+  return response
 }
 
-export const option = {}
+export const options = {}
 
-option.postOption = (data) => {
+options.postOption = (data) => {
   const option = {
     method: "POST",
     body: data
@@ -30,7 +27,7 @@ option.postOption = (data) => {
   return option
 }
 
-option.getOption = (data) => {
+options.getOption = (data) => {
   const option = {
     method: "GET",
     body: data ? data : undefined
@@ -39,7 +36,7 @@ option.getOption = (data) => {
   return option
 }
 
-option.putOption = (data) => {
+options.putOption = (data) => {
   const option = {
     method: "PUT",
     body: data ? data : undefined
@@ -48,7 +45,7 @@ option.putOption = (data) => {
   return option
 }
 
-option.deleteOption = (data) => {
+options.deleteOption = (data) => {
   const option = {
     method: "PUT",
     body: data ? data : undefined

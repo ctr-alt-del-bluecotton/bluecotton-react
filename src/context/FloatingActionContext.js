@@ -1,5 +1,6 @@
-import React, { createContext, useState, useContext } from 'react';
+import React, { createContext, useState, useContext, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
+import { fetchData, options } from './FetchContext';
 
 const FloatingActionContext = createContext();
 
@@ -18,7 +19,13 @@ export const FloatingActionProvider = ({ children }) => {
         solo : true,
         party: false
     });
+    const [uploadImageTempIds, setUploadImageTempIds] = useState([]);
     const formMethods = useForm({ mode: "onChange" });
+    const [isAllError, setIsAllError] = useState(false);
+    
+    useEffect(() => {
+        console.log(uploadImageTempIds)
+    }, [uploadImageTempIds])
 
     const somMenuSelect = (contentName) => {
         if (isDisplayFloatingMenu === false) {
@@ -34,6 +41,46 @@ export const FloatingActionProvider = ({ children }) => {
             }
         }
     };
+
+    const uploadImageToServer = async (file, folder = 'som') => {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, "0");
+        const day = String(now.getDate()).padStart(2, "0");
+        
+        // ✅ 폴더 구조: som/2025/11/10
+        const formData = new FormData();
+        const folderPath = `${folder}/${year}/${month}/${day}`;
+        formData.append('file', file);
+        formData.append('folder', folderPath); // Blob 제거
+        
+        const res = await fetch(`${process.env.REACT_APP_BACKEND_URL}/file/upload-image`, {
+            method: 'POST',
+            body: formData,
+        });
+        
+        if (!res.ok) throw new Error('이미지 업로드 실패');
+        
+        return await res.json();
+    }
+
+    const insertImageData = async (url = '') => {
+        const imageData = {
+            somImagePath: url,
+            somImageName: url.split("/").reverse()[0]
+        }
+        const res = await fetchData(`som-image/insert`,
+            options.postOption(imageData)
+        )
+
+        const resJson = await res.json();
+
+        console.log(resJson);
+
+        setUploadImageTempIds((prev) => [...prev, resJson.data.id])
+
+        return resJson;
+    }
 
     const value = {
         isFloatingSelect,
@@ -51,10 +98,14 @@ export const FloatingActionProvider = ({ children }) => {
         selected,
         setSelected,
         formData,
+        insertImageData,
         setFormData,
         ...formMethods,
         somMenuSelect,
-        somType, setSomType
+        somType, setSomType,
+        isAllError, setIsAllError,
+        uploadImageToServer,
+        uploadImageTempIds, setUploadImageTempIds
     };
 
     return (
