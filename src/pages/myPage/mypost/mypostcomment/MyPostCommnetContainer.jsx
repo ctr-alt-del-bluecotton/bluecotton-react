@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import S from '../style';
 import { useModal } from '../../../../components/modal';
 
@@ -16,7 +17,9 @@ const MyPostCommnetContainer = () => {
   const navigate = useNavigate();
   const { openModal } = useModal();
   const [searchParams] = useSearchParams();
-  const id = searchParams.get('id');
+  const { currentUser } = useSelector((state) => state.user);
+  // URL 파라미터에서 id를 가져오거나, 없으면 Redux의 현재 사용자 ID 사용
+  const id = searchParams.get('id') || (currentUser?.id ? String(currentUser.id) : null);
   const [comments, setComments] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -33,13 +36,19 @@ const MyPostCommnetContainer = () => {
     const fetchComments = async () => {
       try {
         setLoading(true);
-        const url = id 
-          ? `${process.env.REACT_APP_BACKEND_URL}/my-page/read-post-comment?id=${id}`
-          : `${process.env.REACT_APP_BACKEND_URL}/my-page/read-post-comment`;
+        // id가 없으면 API 호출하지 않음 (서버에서 id가 필수 파라미터일 수 있음)
+        if (!id) {
+          setComments([]);
+          setLoading(false);
+          return;
+        }
+        
+        const url = `${process.env.REACT_APP_BACKEND_URL}/my-page/read-post-comment?id=${id}`;
         
         const response = await fetch(url, {
           headers: { "Content-Type": "application/json" },
-          method: "GET"
+          method: "GET",
+          credentials: "include"
         });
         
         if (!response.ok) {
@@ -73,7 +82,7 @@ const MyPostCommnetContainer = () => {
     };
 
     fetchComments();
-  }, [id]);
+  }, [id, currentUser]);
 
   const handleDelete = async (commentId, replyId, isReply) => {
     try {
@@ -94,6 +103,7 @@ const MyPostCommnetContainer = () => {
       const response = await fetch(url, {
         method: 'DELETE',
         headers: { "Content-Type": "application/json" },
+        credentials: "include"
       });
 
       if (!response.ok) {
