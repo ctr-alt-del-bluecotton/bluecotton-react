@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import S from '../style';
 import { useModal } from '../../../../components/modal';
 
@@ -16,7 +17,9 @@ const MyPostLikeContainer = () => {
   const navigate = useNavigate();
   const { openModal } = useModal();
   const [searchParams] = useSearchParams();
-  const id = searchParams.get('id');
+  const { currentUser } = useSelector((state) => state.user);
+  // URL 파라미터에서 id를 가져오거나, 없으면 Redux의 현재 사용자 ID 사용
+  const id = searchParams.get('id') || (currentUser?.id ? String(currentUser.id) : null);
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -33,11 +36,21 @@ const MyPostLikeContainer = () => {
     const fetchPosts = async () => {
       try {
         setLoading(true);
-        const url = id 
-          ? `http://localhost:10000/my-page/read-post-like?id=${id}`
-          : 'http://localhost:10000/my-page/read-post-like';
+        // id가 없으면 API 호출하지 않음 (서버에서 id가 필수 파라미터일 수 있음)
+        if (!id) {
+          setPosts([]);
+          setLoading(false);
+          return;
+        }
         
-        const response = await fetch(url);
+        const url = `${process.env.REACT_APP_BACKEND_URL}/my-page/read-post-like?id=${id}`;
+        
+        const response = await fetch(url, {
+          headers: { "Content-Type": "application/json" },
+          method: "GET",
+          credentials: "include"
+        });
+        
         if (!response.ok) {
           throw new Error('좋아요 게시글 조회 실패');
         }
@@ -51,21 +64,26 @@ const MyPostLikeContainer = () => {
             date: formatDate(post.postCreateAt),
           }));
           setPosts(formattedPosts);
+        } else {
+          setPosts([]);
         }
       } catch (error) {
         console.error('좋아요 게시글 조회 오류:', error);
+        setPosts([]);
       } finally {
         setLoading(false);
       }
     };
 
     fetchPosts();
-  }, [id]);
+  }, [id, currentUser]);
 
   const handleDelete = async (postId) => {
     try {
-      const response = await fetch(`http://localhost:10000/my-page/delete-post-like?id=${postId}`, {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/my-page/delete-post-like?id=${postId}`, {
         method: 'DELETE',
+        headers: { "Content-Type": "application/json" },
+        credentials: "include"
       });
 
       if (!response.ok) {

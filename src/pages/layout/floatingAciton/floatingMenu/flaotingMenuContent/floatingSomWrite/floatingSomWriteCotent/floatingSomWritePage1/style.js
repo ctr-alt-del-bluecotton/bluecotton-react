@@ -23,7 +23,7 @@ S.floatingInputTitles = styled.div`
 `
 
 S.floatingInputs = styled.input.withConfig({
-  shouldForwardProp: (prop) => !["$isError", "$isTouched"].includes(prop)
+  shouldForwardProp: (prop) => !["$isError", "$isTouched", "$isAllError"].includes(prop)
 })`
   ${basic}
   ${smallText3Regular}
@@ -33,8 +33,8 @@ S.floatingInputs = styled.input.withConfig({
   border-radius: 4px;
   box-sizing: border-box;
   border: 1px solid;
-  border-color: ${({ $isError, $isTouched, theme }) => 
-    $isError && $isTouched
+  border-color: ${({ $isError, $isAllError, $isTouched, theme }) => 
+    $isError && ($isTouched || $isAllError)
       ? theme.PALLETE.warning
       : theme.PALLETE.grey.greyScale1};
   outline: 0;
@@ -55,8 +55,8 @@ S.floatingCategoryInput = styled.select`
   border-radius: 4px;
   box-sizing: border-box;
   border: 1px solid;
-  border-color: ${({ $isError, $isTouched, theme }) => 
-    $isError && $isTouched
+  border-color: ${({ $isError, $isAllError, $isTouched, theme }) => 
+    $isError && ($isTouched || $isAllError)
       ? theme.PALLETE.warning
       : theme.PALLETE.grey.greyScale1};
   outline: 0;
@@ -122,6 +122,10 @@ S.floatingSomAddressInputWrap = styled.div`
   gap: 20px;
 `
 S.floatingSomAddressInput = styled.input`
+  border-color: ${({ $isError, $isAllError, $isTouched, theme }) => 
+    $isError && ($isTouched || $isAllError)
+      ? theme.PALLETE.warning
+      : theme.PALLETE.grey.greyScale1};
 
 `
 S.floatingSomAddressButton = styled.div`
@@ -159,7 +163,7 @@ S.floatingSomDateSelectWrap = styled.div`
 `
 
 S.floatingDateInputs = styled.input.withConfig({
-  shouldForwardProp: (prop) => !["$isError", "$isTouched"].includes(prop)
+  shouldForwardProp: (prop) => !["$isError", "$isAllError", "$isTouched"].includes(prop)
 })`
   ${basic}
   ${smallText3Regular}
@@ -171,8 +175,8 @@ S.floatingDateInputs = styled.input.withConfig({
   border-radius: 4px;
   box-sizing: border-box;
   border: 1px solid;
-  border-color: ${({ $isError, $isTouched, theme }) => 
-    $isError && $isTouched
+  border-color: ${({ $isError, $isAllError, $isTouched, theme }) => 
+    ($isError || $isAllError) && ($isTouched || $isAllError)
       ? theme.PALLETE.warning
       : theme.PALLETE.grey.greyScale1};
   outline: 0;
@@ -216,11 +220,12 @@ S.floatingSomCategoryInputValue = styled.div.withConfig({
   justify-content: space-between;
   align-items: center;
   transition: all 0.2s ease;
-  border-color: ${({ $isError, $isTouched, theme }) => 
-    $isError && $isTouched
+  border-color: ${({ open, $isError, $isAllError, $isTouched, theme }) => 
+      $isError && ($isTouched || $isAllError)
       ? theme.PALLETE.warning
-      : theme.PALLETE.grey.greyScale1};
+      : open ? theme.PALLETE.primary.main : theme.PALLETE.grey.greyScale1};
 `;
+
 
 S.testButton = styled.input`
   
@@ -265,14 +270,14 @@ S.floatingSomCategoryOption = styled.li.withConfig({
 })`
   padding: 10px 14px;
   cursor: pointer;
-  background-color: ${({ selected }) =>
-    selected ? "#007aff" : "white"};
+  background-color: ${({ selected, theme }) =>
+    selected ? theme.PALLETE.primary.main : "white"};
   color: ${({ selected }) => (selected ? "white" : "#000")};
   transition: background-color 0.2s ease;
 
   &:hover {
-    background-color: ${({ selected }) =>
-      selected ? "#007aff" : "#f0f0f0"};
+    background-color: ${({ selected, theme }) =>
+      selected ? theme.PALLETE.primary.main : theme.PALLETE.grey.greyScale1};
   }
 `;
 
@@ -295,7 +300,7 @@ S.floatingSomTypeLabel = styled.label`
 `
 
 S.floatingSomTypeRadio = styled.input.attrs({ type: "radio" })`
-  appearance: none; /* 브라우저 기본 동그라미 제거 */
+  appearance: none;
   width: 20px;
   height: 20px;
   border: 2px solid ${({ theme }) => theme.PALLETE.grey.greyScale2};
@@ -306,7 +311,19 @@ S.floatingSomTypeRadio = styled.input.attrs({ type: "radio" })`
 
   &:checked {
     border-color: ${({ theme }) => theme.PALLETE.primary.main};
+  }
+
+  /* ✅ 안쪽 파란 원 (선택 시 생기는 내부 원) */
+  &:checked::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
     background-color: ${({ theme }) => theme.PALLETE.primary.main};
+    transform: translate(-50%, -50%);
   }
 
   &:hover {
