@@ -1,14 +1,19 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import S from './style';
+import { useSelector } from 'react-redux';
 import { useModal } from '../../../components/modal';
 import { openPostcode } from '../../../commons/address';
 import { useForm } from 'react-hook-form';
+import S from './style';
 
 const MyInfoContainer = () => {
   const { openModal } = useModal();
   const fileInputRef = useRef(null);
   const [searchParams] = useSearchParams();
+  
+  // Redux에서 현재 로그인한 사용자 정보 가져오기
+  const { currentUser, isLogin } = useSelector((state) => state.user);
+  console.log('Redux currentUser:', currentUser);
 
   // URL 쿼리 파라미터에서 id 가져오기, 없으면 기본값 1
   const memberId = searchParams.get('id') || '1';
@@ -45,95 +50,156 @@ const MyInfoContainer = () => {
   });
 
   useEffect(() => {
-    const fetchMemberInfo = async () => {
-      try {
-        const res = await fetch(`${process.env.REACT_APP_BACKEND_URL}/my-page/read-member?id=${memberId}`, {
-          headers: { "Content-Type": "application/json" },
-          method: "GET"
-        });
-  
-        if (!res.ok) {
-          throw new Error('회원 정보를 불러오는데 실패했습니다.');
-        }
-  
-        const result = await res.json();
-        console.log("서버 응답:", result);
-  
-        const memberVO = result.data; // ✅ data 안의 실제 회원 정보 꺼내기
-  
-        if (!memberVO) {
-          console.warn("회원 정보가 존재하지 않습니다.");
-          return;
-        }
-  
-        // ✅ 생년월일 변환
-        let birthYear = '';
-        let birthMonth = '';
-        let birthDay = '';
-  
-        if (memberVO.memberBirth) {
-          const birthDate = new Date(memberVO.memberBirth);
-          if (!isNaN(birthDate.getTime())) {
-            birthYear = birthDate.getFullYear().toString();
-            birthMonth = (birthDate.getMonth() + 1).toString().padStart(2, '0');
-            birthDay = birthDate.getDate().toString().padStart(2, '0');
-          }
-        }
-  
-        // ✅ 성별 변환
-        let gender = '';
-        const memberGender = memberVO.memberGender;
-        console.log('받아온 성별 값:', memberGender);
-        
-        if (memberGender) {
-          const genderUpper = String(memberGender).toUpperCase();
-          const genderLower = String(memberGender).toLowerCase();
-          
-          if (genderUpper === 'M' || genderLower === '남' || genderUpper === 'MALE') {
-            gender = 'male';
-          } else if (genderUpper === 'F' || genderLower === '여' || genderUpper === 'FEMALE') {
-            gender = 'female';
-          }
-        }
-        
-        console.log('변환된 성별 값:', gender);
+    // Redux에 로그인한 사용자 정보가 있으면 사용
+    if (isLogin && currentUser) {
+      console.log('Redux에서 사용자 정보 로드:', currentUser);
 
-        // ✅ formData에 서버 데이터 세팅
-        setFormData({
-          email: memberVO.memberEmail || '',
-          nickname: memberVO.memberNickName || memberVO.memberNickname || '',
-          phone: memberVO.memberPhone || '',
-          birthYear,
-          birthMonth,
-          birthDay,
-          gender,
-          postcode: memberVO.memberPostcode || '',
-          address1: memberVO.memberAddress || '',
-          address2: memberVO.memberAddressDetail || '',
-          picturePath: memberVO.memberPicturePath || '',
-          pictureName: memberVO.memberPictureName || ''
-        });
-        
-        console.log('설정된 formData.gender:', gender);
+      // ✅ 생년월일 변환
+      let birthYear = '';
+      let birthMonth = '';
+      let birthDay = '';
 
-        // 서버에서 받아온 프로필 이미지가 있으면 미리보기 설정
-        if (memberVO.memberPicturePath && memberVO.memberPictureName) {
-          const imageUrl = `${process.env.REACT_APP_BACKEND_URL}${memberVO.memberPicturePath}${memberVO.memberPictureName}`;
-          setPreviewImage(imageUrl);
+      if (currentUser.memberBirth) {
+        const birthDate = new Date(currentUser.memberBirth);
+        if (!isNaN(birthDate.getTime())) {
+          birthYear = birthDate.getFullYear().toString();
+          birthMonth = (birthDate.getMonth() + 1).toString().padStart(2, '0');
+          birthDay = birthDate.getDate().toString().padStart(2, '0');
         }
-  
-      } catch (error) {
-        console.error('회원 정보 조회 오류:', error);
-        openModal({
-          title: "오류",
-          message: "회원 정보를 불러오는데 실패했습니다.",
-          confirmText: "확인"
-        });
       }
-    };
-  
-    fetchMemberInfo();
-  }, [openModal, memberId]);
+
+      // ✅ 성별 변환
+      let gender = '';
+      const memberGender = currentUser.memberGender;
+      console.log('받아온 성별 값:', memberGender);
+      
+      if (memberGender) {
+        const genderUpper = String(memberGender).toUpperCase();
+        const genderLower = String(memberGender).toLowerCase();
+        
+        if (genderUpper === 'M' || genderLower === '남' || genderUpper === 'MALE') {
+          gender = 'male';
+        } else if (genderUpper === 'F' || genderLower === '여' || genderUpper === 'FEMALE') {
+          gender = 'female';
+        }
+      }
+      
+      console.log('변환된 성별 값:', gender);
+
+      // ✅ formData에 Redux 데이터 세팅
+      setFormData({
+        email: currentUser.memberEmail || '',
+        nickname: currentUser.memberNickname || '',
+        phone: currentUser.memberPhone || currentUser.memberPhonse || '', // memberPhonse는 오타지만 호환성 유지
+        birthYear,
+        birthMonth,
+        birthDay,
+        gender,
+        postcode: currentUser.memberPostcode || '',
+        address1: currentUser.memberAddress || '',
+        address2: currentUser.memberAddressDetail || '',
+        picturePath: currentUser.memberPicturePath || '',
+        pictureName: currentUser.memberPictureName || ''
+      });
+      
+      console.log('설정된 formData:', {
+        email: currentUser.memberEmail || '',
+        nickname: currentUser.memberNickname || '',
+        gender
+      });
+
+      // Redux에서 받아온 프로필 이미지가 있으면 미리보기 설정
+      if (currentUser.memberPicturePath && currentUser.memberPictureName) {
+        const imageUrl = `${process.env.REACT_APP_BACKEND_URL}${currentUser.memberPicturePath}${currentUser.memberPictureName}`;
+        setPreviewImage(imageUrl);
+      }
+    } else {
+      // Redux에 정보가 없으면 서버에서 가져오기 (기존 로직 유지)
+      const fetchMemberInfo = async () => {
+        try {
+          const res = await fetch(`${process.env.REACT_APP_BACKEND_URL}/my-page/read-member?id=${memberId}`, {
+            headers: { "Content-Type": "application/json" },
+            method: "GET"
+          });
+    
+          if (!res.ok) {
+            throw new Error('회원 정보를 불러오는데 실패했습니다.');
+          }
+    
+          const result = await res.json();
+          console.log("서버 응답:", result);
+    
+          const memberVO = result.data;
+    
+          if (!memberVO) {
+            console.warn("회원 정보가 존재하지 않습니다.");
+            return;
+          }
+    
+          // ✅ 생년월일 변환
+          let birthYear = '';
+          let birthMonth = '';
+          let birthDay = '';
+    
+          if (memberVO.memberBirth) {
+            const birthDate = new Date(memberVO.memberBirth);
+            if (!isNaN(birthDate.getTime())) {
+              birthYear = birthDate.getFullYear().toString();
+              birthMonth = (birthDate.getMonth() + 1).toString().padStart(2, '0');
+              birthDay = birthDate.getDate().toString().padStart(2, '0');
+            }
+          }
+    
+          // ✅ 성별 변환
+          let gender = '';
+          const memberGender = memberVO.memberGender;
+          
+          if (memberGender) {
+            const genderUpper = String(memberGender).toUpperCase();
+            const genderLower = String(memberGender).toLowerCase();
+            
+            if (genderUpper === 'M' || genderLower === '남       ' || genderUpper === 'MALE') {
+              gender = 'male';
+            } else if (genderUpper === 'F' || genderLower === '여       ' || genderUpper === 'FEMALE') {
+              gender = 'female';
+            }
+          }
+
+          // ✅ formData에 서버 데이터 세팅
+          setFormData({
+            email: memberVO.memberEmail || '',
+            nickname: memberVO.memberNickName || memberVO.memberNickname || '',
+            phone: memberVO.memberPhone || '',
+            birthYear,
+            birthMonth,
+            birthDay,
+            gender,
+            postcode: memberVO.memberPostcode || '',
+            address1: memberVO.memberAddress || '',
+            address2: memberVO.memberAddressDetail || '',
+            picturePath: memberVO.memberPicturePath || '',
+            pictureName: memberVO.memberPictureName || ''
+          });
+
+          // 서버에서 받아온 프로필 이미지가 있으면 미리보기 설정
+          if (memberVO.memberPicturePath && memberVO.memberPictureName) {
+            const imageUrl = `${process.env.REACT_APP_BACKEND_URL}${memberVO.memberPicturePath}${memberVO.memberPictureName}`;
+            setPreviewImage(imageUrl);
+          }
+    
+        } catch (error) {
+          console.error('회원 정보 조회 오류:', error);
+          openModal({
+            title: "오류",
+            message: "회원 정보를 불러오는데 실패했습니다.",
+            confirmText: "확인"
+          });
+        }
+      };
+    
+      fetchMemberInfo();
+    }
+  }, [openModal, memberId, isLogin, currentUser]);
 
   // 우편번호 찾기 버튼 클릭 핸들러
   const handleOpenPostcode = () => {
