@@ -22,7 +22,6 @@ const MapContainer = () => {
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const { latitude, longitude } = position.coords;
-        console.log("📍 내 위치 위도:", latitude, "경도:", longitude);
 
         const current = { lat: latitude, lng: longitude };
         setMyLocation(current);
@@ -40,7 +39,6 @@ const MapContainer = () => {
     try {
       const res = await fetch(`${process.env.REACT_APP_BACKEND_URL}/som/all`);
       const result = await res.json();
-      console.log("🌐 솜 전체 데이터:", result);
       setSomList(result.data);
     } catch (error) {
       console.error("솜 데이터를 불러오는 데 실패했습니다:", error);
@@ -96,7 +94,7 @@ const MapContainer = () => {
     const map = mapRef.current;
     if (map) {
       const moveLatLon = new window.kakao.maps.LatLng(lat, lng);
-      map.panTo(moveLatLon); // 부드럽게 이동
+      map.panTo(moveLatLon);
     }
   };
  
@@ -109,7 +107,7 @@ const MapContainer = () => {
         <S.Title>솜이 진행 중인 장소 / 솜 찾기</S.Title>
         <S.MapAndListWrapper>
 
-          {/* 🗺 왼쪽 지도 */}
+          {/* 왼쪽 지도 */}
           <S.MapBox>
             <S.Map
               center={center}
