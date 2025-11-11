@@ -62,13 +62,19 @@ const MyShopLikeContainer = () => {
 
     setItems((currentItems) => currentItems.filter((it) => it.id !== productId));
 
-    const memberId = 1;
-    const url = `${process.env.REACT_APP_BACKEND_URL}/mypage/myshop/like/${productId}`
+    const memberId = 1; // 임의 ID
+
+    const likeData = {
+        memberId: memberId,
+        productId: productId
+    };
+
+    const url = `${process.env.REACT_APP_BACKEND_URL}/shop/like/toggle`
 
     const res = await fetch(url, {
-      method: "DELETE",
+      method: "POST",
       headers: {"Content-Type": "application/json" },
-
+      body: JSON.stringify(likeData)
     })
 
     const json = await res.json();

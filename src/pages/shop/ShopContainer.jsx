@@ -61,6 +61,8 @@ const ShopContainer = () => {
 
             filterParams.order = selected;
 
+            filterParams.memberId = 1;
+
             console.log("필터링한 데이터 :", filterParams);
 
 
@@ -95,6 +97,7 @@ const ShopContainer = () => {
     
 
     const displayItems = useMemo(() => {
+
         return products.map((p) => ({
             id: p.id,
             name: p.productName,
@@ -105,6 +108,7 @@ const ShopContainer = () => {
             likeCount: p.productLikeCount ?? 0,
             isNew: String(p.productType).includes("NEW"),
             isBest: String(p.productType).includes("BEST"),
+            isLiked: p.isLiked
         }));
     }, [products]);
 
