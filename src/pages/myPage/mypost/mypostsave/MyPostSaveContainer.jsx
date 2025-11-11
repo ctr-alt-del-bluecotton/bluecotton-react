@@ -1,38 +1,84 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import S from '../style';
-import { useNavigate } from 'react-router-dom';
 import { useModal } from '../../../../components/modal';
 
-
+const categoryMap = {
+  life: '생활',
+  health: '건강',
+  study: '학습',
+  social: '소셜',
+  hobby: '취미',
+  rookie: '루키',
+};
 
 const MyPostSaveContainer = () => {
   const { openModal } = useModal();
   const navigate = useNavigate();
-  const [posts, setPosts] = useState([
-    {
-      id: 1,
-      type: '취미',
-      title: '초록색 패션 코디 챌린지',
-      date: '2025.09.15',
-    },
-    {
-      id: 2,
-      type: '소셜',
-      title: '친구들과 함께하는 산책',
-      date: '2025.09.10',
-    },
-    {
-      id: 3,
-      type: '건강',
-      title: '다이어트 습관 만들기',
-      date: '2025.09.05',
-    }
-  ]);
+  const [searchParams] = useSearchParams();
+  const { currentUser } = useSelector((state) => state.user);
+  // URL 파라미터에서 id를 가져오거나, 없으면 Redux의 현재 사용자 ID 사용
+  const id = searchParams.get('id') || (currentUser?.id ? String(currentUser.id) : null);
+  const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const formatDate = (dateString) => {
+      if (!dateString) return '';
+      const date = new Date(dateString);
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}.${month}.${day}`;
+    };
+
+    const fetchPosts = async () => {
+      try {
+        setLoading(true);
+        const url = id 
+          ? `${process.env.REACT_APP_BACKEND_URL}/my-page/read-post-save?id=${id}`
+          : `${process.env.REACT_APP_BACKEND_URL}/my-page/read-post-save`;
+        
+        const response = await fetch(url, {
+          headers: { "Content-Type": "application/json" },
+          method: "GET"
+        });
+        
+        if (!response.ok) {
+          throw new Error('저장된 게시글 조회 실패');
+        }
+        
+        const result = await response.json();
+        console.log('저장된 게시글 응답:', result);
+        
+        if (result.data && Array.isArray(result.data)) {
+          const formattedPosts = result.data.map((post) => ({
+            id: post.id,
+            type: categoryMap[post.somCategory] || post.somCategory || '기타',
+            title: post.postTitle || post.title || '',
+            date: formatDate(post.postCreateAt || post.createAt || post.date),
+          }));
+          setPosts(formattedPosts);
+        } else {
+          setPosts([]);
+        }
+      } catch (error) {
+        console.error('저장된 게시글 조회 오류:', error);
+        setPosts([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPosts();
+  }, [id, currentUser]);
 
   const handleDelete = async (postId) => {
     try {
-      const response = await fetch(`http://localhost:10000/my-page/delete-post-save?id=${postId}`, {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/my-page/delete-post-save?id=${postId}`, {
         method: 'DELETE',
+        headers: { "Content-Type": "application/json" },
       });
 
       if (!response.ok) {
@@ -51,45 +97,60 @@ const MyPostSaveContainer = () => {
     }
   };
 
+  if (loading) {
+    return (
+      <div>
+        <S.ListHeader>임시저장한 글(0개)</S.ListHeader>
+        <div>로딩 중...</div>
+      </div>
+    );
+  }
+
   return (
     <div>
-      <S.ListHeader>임시저장한 글(3개)</S.ListHeader>
+      <S.ListHeader>임시저장한 글({posts.length}개)</S.ListHeader>
       
-      <S.ListContainer>
-        {posts.map((post, index) => (
-          <S.ListItem 
-            key={index}
-            onClick={() => navigate(`/main/post/write?draftId=${post.id}`)}
-            style={{ cursor: 'pointer' }}
-          >
-            <div style={{ flex: 1 }}>
-              <S.ItemType>{post.type}</S.ItemType>
-              <S.ItemTitle>{post.title}</S.ItemTitle>
-              <S.ItemDetails>
-                <span>저장일: {post.date}</span>
-              </S.ItemDetails>
-            </div>
-            <S.DeleteButton onClick={(e) => {
-              e.stopPropagation();
-              openModal({
-                title: "임시저장한 게시글이 사라집니다.",
-                message: "정말 게시글을 삭제제하시겠습니까?",
-                confirmText: "삭제",
-                cancelText: "취소",
-                onConfirm: () => handleDelete(post.id),
-              });
-            }}>
-              삭제
-            </S.DeleteButton>
-          </S.ListItem>
-        ))}
-      </S.ListContainer>
+      {posts.length === 0 ? (
+        <div>임시저장한 글이 없습니다.</div>
+      ) : (
+        <>
+          <S.ListContainer>
+            {posts.map((post, index) => (
+              <S.ListItem 
+                key={post.id || index}
+                onClick={() => navigate(`/main/post/write?draftId=${post.id}`)}
+                style={{ cursor: 'pointer' }}
+              >
+                <div style={{ flex: 1 }}>
+                  <S.ItemType>{post.type}</S.ItemType>
+                  <S.ItemTitle>{post.title}</S.ItemTitle>
+                  <S.ItemDetails>
+                    <span>저장일: {post.date}</span>
+                  </S.ItemDetails>
+                </div>
+                <S.DeleteButton onClick={(e) => {
+                  e.stopPropagation();
+                  openModal({
+                    title: "임시저장한 게시글이 사라집니다.",
+                    message: "정말 게시글을 삭제하시겠습니까?",
+                    confirmText: "삭제",
+                    cancelText: "취소",
+                    onConfirm: () => handleDelete(post.id),
+                  });
+                }}>
+                  삭제
+                </S.DeleteButton>
+              </S.ListItem>
+            ))}
+          </S.ListContainer>
 
-      <S.Pagination>
-        <S.PageButton disabled>&lt; 이전</S.PageButton>
-        <S.PageNumber>1</S.PageNumber>
-        <S.PageButton disabled={false}>다음 &gt;</S.PageButton>
-      </S.Pagination>
+          <S.Pagination>
+            <S.PageButton disabled>&lt; 이전</S.PageButton>
+            <S.PageNumber>1</S.PageNumber>
+            <S.PageButton disabled={false}>다음 &gt;</S.PageButton>
+          </S.Pagination>
+        </>
+      )}
     </div>
   );
 };
