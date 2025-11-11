@@ -7,6 +7,7 @@ const MainContext = createContext();
 
 export const useMain = () => useContext(MainContext);
 
+
 const categoryMap = {
     all: "전체",
     study: "학습",
@@ -23,7 +24,8 @@ export const MainProvider = ({ children }) => {
     const [somList, setSomList] = useState([]);
     const [somisLikeList, setSomisLikeList] = useState([]);
     const [pageNumber, setPageNumber] = useState(1);
-
+    const [ insertSom, setInsertSom ] = useState(false);
+    
     useEffect(() => {
         setPageNumber(1);
     }, [category]);
@@ -38,7 +40,7 @@ export const MainProvider = ({ children }) => {
                     const jsonData = await data.json();
                     setSomList(jsonData.data);
                 } else {
-                    const data = await fetchData(`som/category/${category}` ,options.getOption())
+                    const data = await fetchData(`som/category?somCategory=${category}` ,options.getOption())
                     const jsonData = await data.json();
                     setSomList(jsonData.data);
                 }
@@ -48,7 +50,7 @@ export const MainProvider = ({ children }) => {
             }
         };
         loadSomList();
-    }, [category, sortBy, pageNumber]);
+    }, [category, sortBy, pageNumber, insertSom]);
 
     useEffect(() => {
         // 초기 좋아요 목록 설정
@@ -71,6 +73,7 @@ export const MainProvider = ({ children }) => {
         setSortBy,
         somList,
         somisLikeList,
+        setInsertSom,
         setSomisLikeList,
         pageNumber,
         setPageNumber,

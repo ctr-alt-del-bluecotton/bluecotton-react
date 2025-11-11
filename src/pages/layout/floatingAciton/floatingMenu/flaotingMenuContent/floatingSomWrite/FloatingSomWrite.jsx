@@ -3,10 +3,12 @@ import S from './style';
 import FloatingSomWritePages from './floatingSomWriteCotent/FloatingSomWriteCotent';
 import { useFloatingAction } from '../../../../../../context/FloatingActionContext';
 import { fetchData, options } from '../../../../../../context/FetchContext';
+import { MainProvider } from '../../../../../../context/MainContext';
 
-const FloatingSomWrite = () => {
-  const { somMenuPage, setSomMenuPage, handleSubmit, getValues, setIsAllError  } = useFloatingAction();
-
+const FloatingSomWriteComponent = ({setInsertSom}) => {
+  const { somMenuPage, setSomMenuPage, handleSubmit, getValues, setIsAllError,
+    uploadImageTempIds, setUploadImageTempIds, reset
+   } = useFloatingAction();
   const contents = Object.keys(getValues()).filter((content) => content !== "somContent");
 
   // const isContent = (contentName) => {
@@ -31,9 +33,6 @@ const FloatingSomWrite = () => {
     }
     setSomMenuPage((prev) => ++prev)
   }
-
-  
-
 
   function onSubmit(data) {
     console.log(data)
@@ -70,6 +69,20 @@ const FloatingSomWrite = () => {
     // ✅ 백엔드로 전송
     console.log("전송 데이터:", data);
     fetchData('som/register', options.postOption(trimData))
+    .then(async (somRes) => {
+      const somData = await somRes.json()
+      console.log(somData)
+      console.log(options.putOption({ somId: somData.data.id, somImageIds: uploadImageTempIds }))
+      fetchData('som-image/update', options.putOption({ 
+        somId : somData.data.id,
+        somImageIds : uploadImageTempIds
+      }))
+      reset();                    // form 값 초기화
+      setUploadImageTempIds([]);  // 업로드한 이미지 리스트 초기화
+      setSomMenuPage(1);          // 페이지 1로 이동
+      window.scrollTo(0, 0);   
+      setInsertSom((prev) => !prev)
+      })
   };
   
   const beforeButton = <S.floatingMenuButton onClick={() => setSomMenuPage((prev) => --prev)}>이전</S.floatingMenuButton>;
@@ -103,7 +116,14 @@ const FloatingSomWrite = () => {
       </S.floatingFormWrap>
     </S.floatingMenuWrap>
 
-  );
+  );  
 };
 
+const FloatingSomWrite = () => {
+  return (
+    <MainProvider>
+      <FloatingSomWriteComponent />
+    </MainProvider>
+  );
+};
 export default FloatingSomWrite;

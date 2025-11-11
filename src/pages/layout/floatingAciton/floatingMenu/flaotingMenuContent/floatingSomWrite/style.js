@@ -22,7 +22,7 @@ S.floatingMenuWrap = styled.div`
 S.floatingFormWrap = styled.form`
   display:flex;
   width: 100%;
-  height: 850px;
+  height: calc(100% - 130px);
   flex-direction: column;
   justify-content: space-between; /* ✅ 위, 아래 고정 */
   align-items: center;

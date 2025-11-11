@@ -3,6 +3,7 @@ import S from './style';
 import SomMemberList from './somMemberList/SomMemberList'
 import SomLeaderInfo from './somLeader/SomLeaderInfo';
 import { useRead } from '../../../../../context/ReadContext';
+import { Viewer } from '@toast-ui/react-editor';
 
 const SomInfoContent = () => {
   const { infoMenuSelect, somInfo } = useRead();
@@ -10,7 +11,8 @@ const SomInfoContent = () => {
 
   if(infoMenuSelect === "info"){
     content = ( 
-    <S.somContent dangerouslySetInnerHTML={{ __html: somInfo.somContent }}>
+    <S.somContent>
+      <Viewer initialValue={somInfo.somContent || ""} />
     </S.somContent> 
     );
   } else if (infoMenuSelect === "memberList") {
