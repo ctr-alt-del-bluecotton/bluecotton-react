@@ -4,7 +4,6 @@ import { useSelector } from "react-redux";
 import S from "./style";
 import { useModal } from "../../../components/modal";
 import PostComment from "../commentcomponent/PostComment";
-import { circInOut } from "framer-motion";
 
 const PostReadContent = () => {
   const { id } = useParams();
@@ -31,7 +30,6 @@ const PostReadContent = () => {
   const goList = () => navigate("/main/post/all");
   const goPrev = () => prevId && navigate(`/main/post/read/${prevId}`);
   const goNext = () => navigate(`/main/post/read/${nextId}`);
-
 
   // ✅ Kakao SDK 초기화
   useEffect(() => {
@@ -60,32 +58,21 @@ const PostReadContent = () => {
       try {
         const BASE_URL = process.env.REACT_APP_BACKEND_URL;
         const token = localStorage.getItem("accessToken");
-        const memberId = currentUser.id;
-        console.log(token)
-        // ✅ 로그인 여부에 따라 endpoint 결정
-        const endpoint = memberId
-          ? `${BASE_URL}/main/post/read/${id}?memberId=${memberId}`
-          : `${BASE_URL}/main/post/read/${id}`;
 
-        console.log(`${BASE_URL}/main/post/read/${id}?memberId=${memberId}`)
-        // ✅ 헤더 설정 (로그인 시에만 Authorization 포함)
         const headers = {
           "Content-Type": "application/json",
           ...(token && { Authorization: `Bearer ${token}` }),
         };
-        console.log("✅ 요청 URL:", endpoint);
-        const response = await fetch(endpoint, {
+
+        const response = await fetch(`${BASE_URL}/main/post/read/${id}`, {
           method: "GET",
           headers,
           credentials: "include",
         });
 
-
         if (!response.ok) throw new Error(`HTTP error ${response.status}`);
 
         const result = await response.json();
-        console.log("테스트")
-        console.log(response)
         if (result.data) {
           // ✅ 댓글·대댓글 좋아요 여부 매핑
           const mappedComments = (result.data.comments || []).map((c) => ({
@@ -117,6 +104,45 @@ const PostReadContent = () => {
 
     fetchPostDetail();
   }, [id, isLogin, currentUser, navigate, openModal]);
+
+  // ✅ 상세조회 완료 후 → 최근 본 글 등록 (순차 실행 보장)
+  useEffect(() => {
+    const registerRecentPost = async () => {
+      const BASE_URL = process.env.REACT_APP_BACKEND_URL;
+      const token = localStorage.getItem("accessToken");
+
+      // ✅ 로그인 상태 & 게시글 데이터 있을 때만 실행
+      if (!isLogin || !token || !id || !post) {
+        console.warn("🚫 최근 본 글 등록 스킵 (조건 불충족)", { id, token, post });
+        return;
+      }
+
+      try {
+        console.log("📩 최근 본 글 등록 요청:", `${BASE_URL}/private/post/recent/${id}`);
+
+        const response = await fetch(`${BASE_URL}/private/post/recent/${id}`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (!response.ok) {
+          console.warn(`⚠️ 최근 본 글 등록 실패: ${response.status}`);
+          return;
+        }
+
+        const result = await response.json();
+        console.log("✅ 최근 본 글 등록 완료:", result.message);
+      } catch (err) {
+        console.error("❌ 최근 본 글 등록 중 오류:", err);
+      }
+    };
+
+    // 📌 post가 완전히 로드된 뒤에만 실행
+    if (post) registerRecentPost();
+  }, [post, id, isLogin]);
 
   // ✅ 댓글/대댓글 좋아요 토글
   const handleLike = async (commentId, isReply = false, parentId = null) => {
@@ -211,16 +237,26 @@ const PostReadContent = () => {
       onConfirm: async () => {
         try {
           const BASE_URL = process.env.REACT_APP_BACKEND_URL;
+          const token = localStorage.getItem("accessToken");
+
+          if (!token) {
+            throw new Error("토큰 없음 또는 인증 실패");
+          }
+
           const response = await fetch(
             `${BASE_URL}/private/post/withdraw?id=${id}`,
             {
               method: "DELETE",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+              },
               credentials: "include",
             }
           );
 
           const result = await response.json();
-          if (!response.ok) throw new Error(result.message);
+          if (!response.ok) throw new Error(result.message || "삭제 실패");
 
           openModal({
             title: "삭제 완료",
@@ -232,7 +268,7 @@ const PostReadContent = () => {
           console.error("삭제 실패:", error);
           openModal({
             title: "삭제 실패",
-            message: "삭제 중 오류가 발생했습니다.",
+            message: error.message || "삭제 중 오류가 발생했습니다.",
             confirmText: "확인",
           });
         }
@@ -331,7 +367,6 @@ const PostReadContent = () => {
           dangerouslySetInnerHTML={{ __html: post.postContent }}
         />
       </S.Content>
-
 
       <S.PostSocialBox>
         <S.ReportButton

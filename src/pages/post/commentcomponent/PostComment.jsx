@@ -24,19 +24,13 @@ const PostComment = ({
   setReportTarget,
   postId,
 }) => {
-  const BASE_URL =
-    process.env.REACT_APP_BACKEND_URL || "http://localhost:10000";
+  const BASE_URL = process.env.REACT_APP_BACKEND_URL;
   const { openModal } = useModal();
 
-  // ✅ Redux 로그인 정보
   const { currentUser, isLogin } = useSelector((state) => state.user);
 
   /* ✅ 좋아요 토글 */
-  const handleLike = async (
-    targetId,
-    isReply = false,
-    parentCommentId = null
-  ) => {
+  const handleLike = async (targetId, isReply = false, parentCommentId = null) => {
     if (!isLogin || !currentUser?.id) {
       openModal({
         title: "로그인이 필요합니다",
@@ -53,8 +47,9 @@ const PostComment = ({
     try {
       const res = await fetch(endpoint, {
         method: "POST",
-        headers: { "Content-Type": "application/json", 
-        Authorization: `Bearer ${localStorage.getItem("accessToken")}`
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
         },
         body: JSON.stringify({
           memberId: currentUser.id,
@@ -66,21 +61,21 @@ const PostComment = ({
 
       setComments((prev) =>
         prev.map((c) => {
-          if (!isReply && c.commentId === targetId) {
+          if (!isReply && c.id === targetId) {
             const liked = !c.liked;
             return {
               ...c,
               liked,
-              commentLikeCount: c.commentLikeCount + (liked ? 1 : -1),
+              postCommentLikeCount: c.postCommentLikeCount + (liked ? 1 : -1),
             };
           }
           if (isReply && c.replies) {
             const updatedReplies = c.replies.map((r) =>
-              r.replyId === targetId
+              r.id === targetId
                 ? {
                     ...r,
                     liked: !r.liked,
-                    replyLikeCount: r.replyLikeCount + (!r.liked ? 1 : -1),
+                    postReplyLikeCount: r.postReplyLikeCount + (!r.liked ? 1 : -1),
                   }
                 : r
             );
@@ -118,8 +113,9 @@ const PostComment = ({
     try {
       const res = await fetch(`${BASE_URL}/private/post/comment`, {
         method: "POST",
-        headers: { "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("accessToken")}`
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
         },
         body: JSON.stringify({
           postCommentContent: comment,
@@ -134,13 +130,13 @@ const PostComment = ({
       setComments((prev) => [
         ...prev,
         {
-          commentId: result.data?.commentId || Date.now(),
-          commentContent: comment,
-          commentCreateAt: new Date().toISOString(),
+          id: result.data?.commentId || Date.now(),
+          postCommentContent: comment,
+          postCommentCreateAt: new Date().toISOString(),
           memberNickname: currentUser.memberNickname || "익명",
           memberProfileUrl:
             currentUser.profilePath || "/images/default_profile.png",
-          commentLikeCount: 0,
+          postCommentLikeCount: 0,
           liked: false,
           replies: [],
         },
@@ -173,8 +169,9 @@ const PostComment = ({
     try {
       const res = await fetch(`${BASE_URL}/private/post/reply`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" ,
-        Authorization: `Bearer ${localStorage.getItem("accessToken")}`
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
         },
         body: JSON.stringify({
           postReplyContent: text,
@@ -188,19 +185,19 @@ const PostComment = ({
 
       setComments((prev) =>
         prev.map((c) =>
-          c.commentId === parentId
+          c.id === parentId
             ? {
                 ...c,
                 replies: [
                   ...(c.replies || []),
                   {
-                    replyId: result.data?.replyId || Date.now(),
-                    replyContent: text,
-                    replyCreateAt: new Date().toISOString(),
+                    id: result.data?.replyId || Date.now(),
+                    postReplyContent: text,
+                    postReplyCreateAt: new Date().toISOString(),
                     memberNickname: currentUser.memberNickname || "익명",
                     memberProfileUrl:
                       currentUser.profilePath || "/images/default_profile.png",
-                    replyLikeCount: 0,
+                    postReplyLikeCount: 0,
                     liked: false,
                   },
                 ],
@@ -221,7 +218,7 @@ const PostComment = ({
     }
   };
 
-  /* ✅ 답글 클릭 */
+  /* ✅ 답글 클릭  */
   const handleReplyClick = (parentId, targetId, nickname, type) => {
     setShowReplyTarget((prev) => {
       if (
@@ -276,12 +273,12 @@ const PostComment = ({
           if (!res.ok) throw new Error(`${type} 삭제 실패`);
 
           if (type === "comment") {
-            setComments((prev) => prev.filter((c) => c.commentId !== id));
+            setComments((prev) => prev.filter((c) => c.id !== id));
           } else {
             setComments((prev) =>
               prev.map((c) => ({
                 ...c,
-                replies: c.replies.filter((r) => r.replyId !== id),
+                replies: c.replies.filter((r) => r.id !== id),
               }))
             );
           }
@@ -331,7 +328,7 @@ const PostComment = ({
         <>
           <S.CommentList>
             {comments.map((c) => (
-              <React.Fragment key={c.commentId}>
+              <React.Fragment key={c.id}>
                 {/* ✅ 댓글 */}
                 <S.CommentItem>
                   <div className="left">
@@ -353,7 +350,7 @@ const PostComment = ({
                         </div>
                         <S.LikeButton
                           $liked={c.liked}
-                          onClick={() => handleLike(c.commentId, false)}
+                          onClick={() => handleLike(c.id, false)}
                         >
                           <img
                             src={
@@ -363,48 +360,47 @@ const PostComment = ({
                             }
                             alt="좋아요"
                           />
-                          {c.commentLikeCount}
+                          {c.postCommentLikeCount}
                         </S.LikeButton>
                       </div>
 
                       <div className="content">
-                        {renderTextWithTags(c.commentContent)}
+                        {renderTextWithTags(c.postCommentContent)}
                       </div>
 
                       <div className="meta-row">
-                        <span>{formatDate(c.commentCreateAt)}</span>
+                        <span>{formatDate(c.postCommentCreateAt)}</span>
 
-                        {/* 신고 버튼 */}
-                        <span> | </span>
-                        <span
-                          className="report"
-                          onClick={() => {
-                            if (!isLogin || !currentUser?.id) {
-                              openModal({
-                                title: "로그인이 필요합니다",
-                                message: "신고 기능은 로그인 후 이용 가능합니다.",
-                                confirmText: "확인",
-                              });
-                              return;
-                            }
-                            setReportTarget({ type: "comment", id: c.commentId });
-                            setShowReportModal(true);
-                          }}
-                        >
-                          신고
-                        </span>
+                        {(!isLogin || currentUser?.id !== c.memberId) && (
+                          <>
+                            <span> | </span>
+                            <span
+                              className="report"
+                              onClick={() => {
+                                if (!isLogin || !currentUser?.id) {
+                                  openModal({
+                                    title: "로그인이 필요합니다",
+                                    message: "신고 기능은 로그인 후 이용 가능합니다.",
+                                    confirmText: "확인",
+                                  });
+                                  return;
+                                }
+                                setReportTarget({ type: "comment", id: c.id });
+                                setShowReportModal(true);
+                              }}
+                            >
+                              신고
+                            </span>
+                          </>
+                        )}
 
-                        {/* 삭제 버튼 (자기 댓글에만 표시) */}
                         {isLogin && currentUser?.id === c.memberId && (
                           <>
                             <span> | </span>
                             <span
                               className="delete"
                               onClick={() => {
-                                setDeleteTarget({
-                                  type: "comment",
-                                  id: c.commentId,
-                                });
+                                setDeleteTarget({ type: "comment", id: c.id });
                                 handleCommentDelete();
                               }}
                             >
@@ -419,8 +415,8 @@ const PostComment = ({
                           className="reply"
                           onClick={() =>
                             handleReplyClick(
-                              c.commentId,
-                              c.commentId,
+                              c.id,
+                              c.id,
                               c.memberNickname,
                               "comment"
                             )
@@ -435,8 +431,8 @@ const PostComment = ({
 
                 {/* ✅ 댓글의 답글 입력창 */}
                 {showReplyTarget?.type === "comment" &&
-                  showReplyTarget?.targetId === c.commentId &&
-                  showReplyTarget?.parentId === c.commentId && (
+                  showReplyTarget?.targetId === c.id &&
+                  showReplyTarget?.parentId === c.id && (
                     <S.CommentForm $indent>
                       <div className="avatar">
                         <img
@@ -454,23 +450,21 @@ const PostComment = ({
                         <textarea
                           placeholder="답글을 입력하세요"
                           maxLength={300}
-                          value={replyInputs[c.commentId] || ""}
+                          value={replyInputs[c.id] || ""}
                           onChange={(e) =>
                             setReplyInputs((prev) => ({
                               ...prev,
-                              [c.commentId]: e.target.value,
+                              [c.id]: e.target.value,
                             }))
                           }
                         />
                         <span className="count">
-                          {(replyInputs[c.commentId]?.length || 0)}/300
+                          {(replyInputs[c.id]?.length || 0)}/300
                         </span>
                       </div>
                       <button
                         className="submit-btn"
-                        onClick={() =>
-                          handleReplySubmit(c.commentId, c.commentId)
-                        }
+                        onClick={() => handleReplySubmit(c.id, c.id)}
                       >
                         등록
                       </button>
@@ -479,7 +473,7 @@ const PostComment = ({
 
                 {/* ✅ 대댓글 */}
                 {c.replies?.map((r) => (
-                  <React.Fragment key={r.replyId}>
+                  <React.Fragment key={r.id}>
                     <S.CommentItem indent>
                       <div className="left">
                         <img
@@ -500,9 +494,7 @@ const PostComment = ({
                             </div>
                             <S.LikeButton
                               $liked={r.liked}
-                              onClick={() =>
-                                handleLike(r.replyId, true, c.commentId)
-                              }
+                              onClick={() => handleLike(r.id, true, c.id)}
                             >
                               <img
                                 src={
@@ -512,51 +504,49 @@ const PostComment = ({
                                 }
                                 alt="좋아요"
                               />
-                              {r.replyLikeCount}
+                              {r.postReplyLikeCount}
                             </S.LikeButton>
                           </div>
 
                           <div className="content">
-                            {renderTextWithTags(r.replyContent)}
+                            {renderTextWithTags(r.postReplyContent)}
                           </div>
 
                           <div className="meta-row">
-                            <span>{formatDate(r.replyCreateAt)}</span>
+                            <span>{formatDate(r.postReplyCreateAt)}</span>
 
-                            {/* 신고 버튼 */}
-                            <span> | </span>
-                            <span
-                              className="report"
-                              onClick={() => {
-                                if (!isLogin || !currentUser?.id) {
-                                  openModal({
-                                    title: "로그인이 필요합니다",
-                                    message: "신고 기능은 로그인 후 이용 가능합니다.",
-                                    confirmText: "확인",
-                                  });
-                                  return;
-                                }
-                                setReportTarget({
-                                  type: "reply",
-                                  id: r.replyId,
-                                });
-                                setShowReportModal(true);
-                              }}
-                            >
-                              신고
-                            </span>
+                            {/* ✅ 신고 버튼: 본인 댓글이 아닐 때만 표시 */}
+                            {(!isLogin || currentUser?.id !== r.memberId) && (
+                              <>
+                                <span> | </span>
+                                <span
+                                  className="report"
+                                  onClick={() => {
+                                    if (!isLogin || !currentUser?.id) {
+                                      openModal({
+                                        title: "로그인이 필요합니다",
+                                        message: "신고 기능은 로그인 후 이용 가능합니다.",
+                                        confirmText: "확인",
+                                      });
+                                      return;
+                                    }
+                                    setReportTarget({ type: "reply", id: r.id });
+                                    setShowReportModal(true);
+                                  }}
+                                >
+                                  신고
+                                </span>
+                              </>
+                            )}
 
-                            {/* ✅ 자기 대댓글일 때만 삭제 버튼 표시 */}
+                            {/* ✅ 삭제 버튼: 본인 댓글일 때만 표시 */}
                             {isLogin && currentUser?.id === r.memberId && (
                               <>
                                 <span> | </span>
                                 <span
                                   className="delete"
                                   onClick={() => {
-                                    setDeleteTarget({
-                                      type: "reply",
-                                      id: r.replyId,
-                                    });
+                                    setDeleteTarget({ type: "reply", id: r.id });
                                     handleCommentDelete();
                                   }}
                                 >
@@ -566,14 +556,13 @@ const PostComment = ({
                             )}
                           </div>
 
-
                           <div className="reply-row">
                             <button
                               className="reply"
                               onClick={() =>
                                 handleReplyClick(
-                                  c.commentId,
-                                  r.replyId,
+                                  c.id,
+                                  r.id,
                                   r.memberNickname,
                                   "reply"
                                 )
@@ -588,8 +577,8 @@ const PostComment = ({
 
                     {/* ✅ 대댓글의 답글 입력창 */}
                     {showReplyTarget?.type === "reply" &&
-                      showReplyTarget?.targetId === r.replyId &&
-                      showReplyTarget?.parentId === c.commentId && (
+                      showReplyTarget?.targetId === r.id &&
+                      showReplyTarget?.parentId === c.id && (
                         <S.CommentForm $nested>
                           <div className="avatar">
                             <img
@@ -607,22 +596,22 @@ const PostComment = ({
                             <textarea
                               placeholder="답글을 입력하세요"
                               maxLength={300}
-                              value={replyInputs[r.replyId] || ""}
+                              value={replyInputs[r.id] || ""}
                               onChange={(e) =>
                                 setReplyInputs((prev) => ({
                                   ...prev,
-                                  [r.replyId]: e.target.value,
+                                  [r.id]: e.target.value,
                                 }))
                               }
                             />
                             <span className="count">
-                              {(replyInputs[r.replyId]?.length || 0)}/300
+                              {(replyInputs[r.id]?.length || 0)}/300
                             </span>
                           </div>
                           <button
                             className="submit-btn"
                             onClick={() =>
-                              handleReplySubmit(c.commentId, r.replyId)
+                              handleReplySubmit(c.id, r.id)
                             }
                           >
                             등록
@@ -661,7 +650,6 @@ const PostComment = ({
           </S.CommentForm>
         </>
       )}
-
       {showReportModal && (
         <Report
           target={reportTarget}
@@ -675,5 +663,7 @@ const PostComment = ({
     </S.CommentSection>
   );
 };
+
+
 
 export default PostComment;

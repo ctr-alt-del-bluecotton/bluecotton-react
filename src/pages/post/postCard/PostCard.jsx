@@ -39,7 +39,7 @@ const PostCard = ({
   const { currentUser, isLogin } = useSelector((state) => state.user);
   const { openModal } = useModal();
 
-  const BASE_URL = process.env.REACT_APP_BACKEND_URL || "http://localhost:10000";
+  const BASE_URL = process.env.REACT_APP_BACKEND_URL;
 
   // ✅ 좋아요 토글 핸들러 (쿠키 기반 인증)
   const handleLikeClick = async (e) => {

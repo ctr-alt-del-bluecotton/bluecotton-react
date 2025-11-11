@@ -176,8 +176,8 @@ const PostContainer = () => {
         ) : (
           currentPosts.map((post) => (
             <PostCard
-              key={post.postId}
-              id={post.postId}
+              key={post.id}
+              id={post.id}
               somTitle={post.somTitle}
               category={post.somCategory}
               challengeDay={post.postSomDay}
@@ -192,7 +192,7 @@ const PostContainer = () => {
               views={post.postReadCount}
               imageUrl={post.postImageUrl}
               onLike={handleLike}
-              onClick={() => navigate(`/main/post/read/${post.postId}`)}
+              onClick={() => navigate(`/main/post/read/${post.id}`)}
             />
           ))
         )}

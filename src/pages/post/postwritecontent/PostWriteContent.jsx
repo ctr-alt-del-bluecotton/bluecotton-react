@@ -304,7 +304,7 @@ const PostWriteContent = () => {
           <select value={category} onChange={(e) => setCategory(e.target.value)}>
             <option value="">참여 중인 솜을 선택해주세요</option>
             {categories.map((cat) => (
-              <option key={cat.somId} value={cat.somId}>
+              <option key={cat.id} value={cat.id}>
                 {categoryMap[cat.somCategory] || cat.somCategory}
               </option>
             ))}

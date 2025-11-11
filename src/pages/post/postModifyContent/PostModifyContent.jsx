@@ -101,14 +101,18 @@ const PostModifyContent = () => {
         if (!isLogin || !currentUser?.id) return;
 
         const BASE_URL = process.env.REACT_APP_BACKEND_URL;
-        const res = await fetch(
-          `${BASE_URL}/main/post/categories/${currentUser.id}`
-        );
+        const res = await fetch(`${BASE_URL}/private/post/categories`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          },
+        });
 
         if (!res.ok) throw new Error("카테고리 불러오기 실패");
         const result = await res.json();
 
-        setJoinedCategories(result);
+        // ✅ result.data 형태 확인 후 세팅
+        const categories = result.data || result;
+        setJoinedCategories(categories);
       } catch (err) {
         console.error("카테고리 목록 불러오기 실패:", err);
       }
@@ -172,7 +176,9 @@ const PostModifyContent = () => {
       // ✅ 수정 요청 API — 실제 백엔드 매핑에 맞게
       const res = await fetch(`${BASE_URL}/private/post/modify/${id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json" ,
+           Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
         body: JSON.stringify({
           postTitle: title,
           somCategory: category,
@@ -236,7 +242,7 @@ const PostModifyContent = () => {
           >
             <option value="">카테고리를 선택해주세요</option>
             {joinedCategories.map((cat) => (
-              <option key={cat.somId} value={cat.somCategory}>
+              <option key={cat.id} value={cat.somCategory}>
                 {categoryMap[cat.somCategory?.toUpperCase()] ||
                   cat.somTitle ||
                   cat.somCategory}
