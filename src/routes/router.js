@@ -36,6 +36,7 @@ import PostWriteContent from "../pages/post/postwritecontent/PostWriteContent";
 import PostModifyContent from "../pages/post/postModifyContent/PostModifyContent";
 import MySomCheck from "../pages/myPage/mysom/mysomcheck/MySomCheck";
 import SocialRedirect from "../pages/login/success/SocialRedirect";
+import LoginLayOut from "../pages/layout/LoginLayout";
 
 const router = createBrowserRouter([
   {
@@ -59,94 +60,48 @@ const router = createBrowserRouter([
         element: <MapContainer />
       },
       {
-        path: "my-page",
-        element: <MyPageContainer />,
+        element: <LoginLayOut />, // 여기에 감싸면 로그인 필요한 모든 하위 경로가 보호됨
         children: [
           {
-            path: "my-som",
-            element: <MySomContainer />,
+            path: "my-page",
+            element: <MyPageContainer />,
             children: [
               {
-                path: "auth",
-                element: <MySomAuthContainer />
+                path: "my-som",
+                element: <MySomContainer />,
+                children: [
+                  { path: "auth", element: <MySomAuthContainer /> },
+                  { path: "solo", element: <MySomSoloContainer /> },
+                  { path: "party", element: <MySomPartyContainer /> },
+                  { path: "candy", element: <MySomCandyContainer /> },
+                  { path: "rank", element: <MySomRankContainer /> },
+                ],
+              },
+              { path: "my-som-check", element: <MySomCheck /> },
+              {
+                path: "my-shop",
+                element: <MyShopContainer />,
+                children: [
+                  { path: "like", element: <MyShopLikeContainer /> },
+                  { path: "cart", element: <MyShopCartContainer /> },
+                  { path: "review", element: <MyShopReviewContainer /> },
+                  { path: "delivery", element: <MyShopDeliveryContainer /> },
+                  { path: "order", element: <MyShopOrderContainer /> },
+                ],
               },
               {
-                path: "solo",
-                element: <MySomSoloContainer />
+                path: "my-post",
+                element: <MyPostContainer />,
+                children: [
+                  { path: "like", element: <MyPostLikeContainer /> },
+                  { path: "write", element: <MyPostWriteContainer /> },
+                  { path: "comment", element: <MyPostCommnetContainer /> },
+                  { path: "save", element: <MyPostSaveContainer /> },
+                  { path: "recent", element: <MyPostRecentContainer /> },
+                ],
               },
-              {
-                path: "party",
-                element: <MySomPartyContainer />
-              },
-              {
-                path: "candy",
-                element: <MySomCandyContainer />
-              },
-              {
-                path: "rank",
-                element: <MySomRankContainer />
-              },
-            ]
-          },
-          {
-            path: "my-som-check",
-            element: <MySomCheck />
-          },
-          {
-            path: "my-shop",
-            element: <MyShopContainer />,
-            children: [
-              {
-                path: "like",
-                element: <MyShopLikeContainer />
-              },
-              {
-                path: "cart",
-                element: <MyShopCartContainer />
-              },
-              {
-                path: "review",
-                element: <MyShopReviewContainer />
-              },
-              {
-                path: "delivery",
-                element: <MyShopDeliveryContainer />
-              },
-              {
-                path: "order",
-                element: <MyShopOrderContainer />
-              },
-            ]
-          },
-          {
-            path: "my-post",
-            element: <MyPostContainer />,
-            children: [
-              {
-                path: "like",
-                element: <MyPostLikeContainer />
-              },
-              {
-                path: "write",
-                element: <MyPostWriteContainer />
-              },
-              {
-                path: "comment",
-                element: <MyPostCommnetContainer />
-              },
-              {
-                path: "save",
-                element: <MyPostSaveContainer />
-              },
-              {
-                path: "recent",
-                element: <MyPostRecentContainer />
-              },
-            ]
-          },
-          {
-            path: "my-info",
-            element: <MyInfoContainer />,
+              { path: "my-info", element: <MyInfoContainer /> },
+            ],
           },
         ]
       },
