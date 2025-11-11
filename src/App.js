@@ -6,64 +6,57 @@ import router from "./routes/router";
 import { ModalProvider } from "./components/modal/useModal";
 import ConfirmModal from "./components/modal/ConfirmModal";
 import { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { setUser, setUserStatus } from "./modules/user";
-import { set } from "react-hook-form";
 
 function App() {
- 
-  const [accessToken, setAccessToken] = useState(localStorage.getItem("accessToken") || null)
-  const user = useSelector((state) => state.user);
-  const dispatch = useDispatch()
-  console.log(user)
-  //  최초 한 번
-  useEffect(() => {
+  const [accessToken, setAccessToken] = useState(localStorage.getItem("accessToken") || null);
+  const [init, setInit] = useState(false);
+  const dispatch = useDispatch();
 
-    if(accessToken){
-      const getUser = async () => {
-        const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/private/members/me`, {
-          method: "GET",
-          headers: {
-            "Authorization" : `Bearer ${accessToken}`
+  useEffect(() => {
+    const initAuth = async () => {
+      if (accessToken) {
+        try {
+          const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/private/members/me`, {
+            method: "GET",
+            headers: { Authorization: `Bearer ${accessToken}` },
+          });
+
+          if (!response.ok) throw new Error("토큰 만료");
+
+          const data = await response.json();
+          dispatch(setUser(data.data));
+          dispatch(setUserStatus(true));
+        } catch (error) {
+
+          const refreshResponse = await fetch(`${process.env.REACT_APP_BACKEND_URL}/auth/refresh`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+            body: JSON.stringify({ accessToken }),
+          });
+
+          if (!refreshResponse.ok) {
+            localStorage.removeItem("accessToken");
+            setAccessToken(null);
+            return;
           }
-        })
-        if(!response.ok){
-          throw new Error("토큰 만료")
+
+          const newResponseData = await refreshResponse.json();
+          const newAccessToken = newResponseData.data.accessToken;
+          localStorage.setItem("accessToken", newAccessToken);
+          setAccessToken(newAccessToken);
         }
-        const data = await response.json()
-        return data
       }
 
-      getUser()
-      .then((res) => {
-        console.log("실행")
-        console.log(res.data)
-        dispatch(setUser(res.data))
-        dispatch(setUserStatus(true ))
-      })
-      .catch(async(error) => {
-        const resfreshResponse = await fetch(`${process.env.REACT_APP_BACKEND_URL}/auth/refresh`, {
-            method: "POST",
-            headers:  {
-              "Content-Type" : "application/json"
-            },
-            credentials: 'include',
-            body: JSON.stringify({
-              accessToken: accessToken
-            })
-          })
+      setInit(true);
+    };
 
-          if(!resfreshResponse.ok){
-            return alert("토큰 발급 실패")
-          }
+    initAuth();
+  }, [accessToken, dispatch]);
 
-          const newResponseData = await resfreshResponse.json()
-          let newAccessToken =  newResponseData.data.accessToken
-          localStorage.setItem("accessToken", newAccessToken)
-          setAccessToken(newAccessToken)
-      })
-    }
-  }, [accessToken])
+  if (!init) return <div style={{ textAlign: "center", marginTop: "100px" }}>로딩 중...</div>;
 
   return (
     <ThemeProvider theme={theme}>

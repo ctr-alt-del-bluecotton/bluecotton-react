@@ -17,12 +17,12 @@ const ChatBotSimple = () => {
 
   return (
     <S.Container>
-      {/* ✅ 헤더 (X와 같은 높이, 타이틀 중앙정렬) */}
+      {/* 헤더 (X와 같은 높이, 타이틀 중앙정렬) */}
       <S.Header>
         <S.Title>챗봇 솜이</S.Title>
       </S.Header>
 
-      {/* ✅ 대화 영역 */}
+      {/* 대화 영역 */}
       <S.ChatBody>
         {messages.map((msg, i) => (
           <S.Bubble key={i} isUser={msg.sender === "user"}>
@@ -31,7 +31,7 @@ const ChatBotSimple = () => {
         ))}
       </S.ChatBody>
 
-      {/* ✅ 입력 영역 */}
+      {/* 입력 영역 */}
       <S.InputArea>
         <S.Input
           placeholder="궁금한 사항을 입력해주세요"
@@ -39,7 +39,7 @@ const ChatBotSimple = () => {
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && handleSend()}
         />
-        <S.SendBtn onClick={handleSend}>📩</S.SendBtn>
+        <S.SendBtn onClick={handleSend}>전송</S.SendBtn>
       </S.InputArea>
     </S.Container>
   );

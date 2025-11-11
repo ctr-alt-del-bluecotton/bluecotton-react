@@ -1,49 +1,33 @@
 import styled from "styled-components";
+import { title } from "../../../../../../styles/common";
 
 const S = {};
 
-/* 전체 레이아웃 */
 S.Container = styled.div`
   display: flex;
   flex-direction: column;
   width: 100%;
   height: 100%;
-  background-color: #fff;
+  background-color: ${({theme}) => theme.PALLETE.white}
 `;
 
-/* ✅ 헤더 */
 S.Header = styled.div`
   position: relative;
   display: flex;
-  justify-content: center; /* 중앙 정렬 */
+  justify-content: center;
   align-items: center;
   padding: 18px 20px;
-  border-bottom: 1.5px solid #eef1f8;
-  background-color: #fff;
+  margin-top: 40px;
 `;
 
+
 S.Title = styled.h3`
-  font-size: 17px;
-  font-weight: 700;
-  color: ${({ theme }) => theme.PALLETE.black || "#111"};
+  ${title}
+  color: ${({ theme }) => theme.PALLETE.primary.main};
   text-align: center;
   margin: 0;
 `;
 
-S.CloseBtn = styled.button`
-  position: absolute;
-  right: 20px; /* 타이틀 오른쪽 끝에 고정 */
-  font-size: 22px;
-  background: none;
-  border: none;
-  color: #888;
-  cursor: pointer;
-  &:hover {
-    color: #333;
-  }
-`;
-
-/* ✅ 대화 영역 */
 S.ChatBody = styled.div`
   flex: 1;
   padding: 20px;
@@ -67,12 +51,10 @@ S.Bubble = styled.div`
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
 `;
 
-/* ✅ 입력 영역 */
 S.InputArea = styled.div`
   display: flex;
   align-items: center;
   padding: 14px 16px;
-  border-top: 1.5px solid #eef1f8;
   background-color: #fff;
 `;
 
