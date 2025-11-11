@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import S from '../style';
 import { useNavigate } from 'react-router-dom';
 import { useModal } from '../../../../components/modal';
@@ -8,7 +8,7 @@ import { useModal } from '../../../../components/modal';
 const MyPostSaveContainer = () => {
   const { openModal } = useModal();
   const navigate = useNavigate();
-  const posts = [
+  const [posts, setPosts] = useState([
     {
       id: 1,
       type: '취미',
@@ -27,11 +27,28 @@ const MyPostSaveContainer = () => {
       title: '다이어트 습관 만들기',
       date: '2025.09.05',
     }
-  ];
+  ]);
 
-  const handleDelete = (id) => {
-    console.log('삭제:', id);
-    // 삭제 로직 구현
+  const handleDelete = async (postId) => {
+    try {
+      const response = await fetch(`http://localhost:10000/my-page/delete-post-save?id=${postId}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        throw new Error('임시저장 게시글 삭제 실패');
+      }
+
+      // 성공적으로 삭제되면 목록에서 해당 게시글 제거
+      setPosts(prevPosts => prevPosts.filter(post => post.id !== postId));
+    } catch (error) {
+      console.error('임시저장 게시글 삭제 오류:', error);
+      openModal({
+        title: "삭제 실패",
+        message: "임시저장 게시글 삭제에 실패했습니다.",
+        confirmText: "확인",
+      });
+    }
   };
 
   return (
@@ -40,7 +57,11 @@ const MyPostSaveContainer = () => {
       
       <S.ListContainer>
         {posts.map((post, index) => (
-          <S.ListItem key={index}>
+          <S.ListItem 
+            key={index}
+            onClick={() => navigate(`/main/post/write?draftId=${post.id}`)}
+            style={{ cursor: 'pointer' }}
+          >
             <div style={{ flex: 1 }}>
               <S.ItemType>{post.type}</S.ItemType>
               <S.ItemTitle>{post.title}</S.ItemTitle>
@@ -55,8 +76,7 @@ const MyPostSaveContainer = () => {
                 message: "정말 게시글을 삭제제하시겠습니까?",
                 confirmText: "삭제",
                 cancelText: "취소",
-                // onConfirm: () => handleDelete(post.id), 
-                // 삭제 눌렀을때 TBL_POST_DRAFT 테이블에서 삭제되게 구현
+                onConfirm: () => handleDelete(post.id),
               });
             }}>
               삭제

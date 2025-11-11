@@ -1,10 +1,12 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import S from '../style';
 import { useModal } from '../../../../components/modal';
 
 const MyPostRecentContainer = () => {
+  const navigate = useNavigate();
   const { openModal } = useModal();
-  const posts = [
+  const [posts, setPosts] = useState([
     {
       id: 1,
       type: '건강',
@@ -41,11 +43,28 @@ const MyPostRecentContainer = () => {
       title: '공원 조깅 모임',
       date: '2025.09.18',
     }
-  ];
+  ]);
 
-  const handleDelete = (id) => {
-    console.log('기록 삭제:', id);
-    // 기록 삭제 로직 구현
+  const handleDelete = async (postId) => {
+    try {
+      const response = await fetch(`http://localhost:10000/my-page/delete-post-recent?id=${postId}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        throw new Error('최근 본 게시글 삭제 실패');
+      }
+
+      // 성공적으로 삭제되면 목록에서 해당 게시글 제거
+      setPosts(prevPosts => prevPosts.filter(post => post.id !== postId));
+    } catch (error) {
+      console.error('최근 본 게시글 삭제 오류:', error);
+      openModal({
+        title: "삭제 실패",
+        message: "최근 본 게시글 삭제에 실패했습니다.",
+        confirmText: "확인",
+      });
+    }
   };
 
   return (
@@ -54,7 +73,11 @@ const MyPostRecentContainer = () => {
       
       <S.ListContainer>
         {posts.map((post, index) => (
-          <S.ListItem key={index}>
+          <S.ListItem 
+            key={index}
+            onClick={() => navigate(`/main/post/read/${post.id}`)}
+            style={{ cursor: 'pointer' }}
+          >
             <div style={{ flex: 1 }}>
               <S.ItemType>{post.type}</S.ItemType>
               <S.ItemTitle>{post.title}</S.ItemTitle>
