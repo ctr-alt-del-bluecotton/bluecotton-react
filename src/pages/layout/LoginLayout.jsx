@@ -1,43 +1,30 @@
+// src/routes/ProtectedRoute.jsx
 import React, { useEffect } from "react";
 import { useSelector } from "react-redux";
 import { Outlet, useNavigate } from "react-router-dom";
-import Header from "./header/Header";
-import HeaderCategory from "./header/mainCategory/HeaderCategory";
-import Footer from "./footer/Footer";
-import FloatingAction from "./floatingAciton/FloatingAction";
-import ScrollToTop from "../../components/scrollTop/ScorllTop";
-import { useModal } from "../../components/modal/useModal";
+import { useModal } from "../../components/modal";
 
-const LoginLayout = () => {
+const LoginLayOut = () => {
   const { isLogin } = useSelector((state) => state.user);
-  const navigate = useNavigate();
   const { openModal } = useModal();
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!isLogin) {
       openModal({
-        title: "로그인이 필요한 서비스입니다.",
-        content: "해당 페이지를 이용하려면 로그인 후 이용해주세요.",
-        confirmText: "로그인하기",
+        title: "로그인이 필요합니다",
+        message: "로그인 후 이용해주세요.",
+        confirmText: "확인",
         onConfirm: () => navigate("/login"),
       });
     }
-  }, [isLogin, navigate, openModal]);
+  }, [isLogin]);
 
-  return (
-    <div>
-      <header>
-        <Header />
-        <HeaderCategory />
-      </header>
-      <main>
-        <ScrollToTop />
-        <Outlet />
-      </main>
-      <Footer />
-      <FloatingAction />
-    </div>
-  );
+  // 로그인 안 되어 있으면 페이지 렌더 막기
+  if (!isLogin) return null;
+
+  // 로그인 되어 있으면 하위 라우트 렌더링
+  return <Outlet />;
 };
 
-export default LoginLayout;
+export default LoginLayOut;
