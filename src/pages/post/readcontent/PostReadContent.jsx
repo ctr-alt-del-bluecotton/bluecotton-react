@@ -1,14 +1,18 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 import S from "./style";
 import { useModal } from "../../../components/modal";
 import PostComment from "../commentcomponent/PostComment";
+import { circInOut } from "framer-motion";
 
 const PostReadContent = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { openModal } = useModal();
 
+  // ✅ Redux 로그인 유저 정보
+  const { currentUser, isLogin } = useSelector((state) => state.user);
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(true);
   const [comments, setComments] = useState([]);
@@ -28,7 +32,7 @@ const PostReadContent = () => {
   const goPrev = () => prevId && navigate(`/main/post/read/${prevId}`);
   const goNext = () => navigate(`/main/post/read/${nextId}`);
 
-  // Kakao SDK 초기화
+  // ✅ Kakao SDK 초기화
   useEffect(() => {
     const initKakao = () => {
       if (window.Kakao && !window.Kakao.isInitialized()) {
@@ -49,30 +53,32 @@ const PostReadContent = () => {
     }
   }, []);
 
-  // 게시글 상세조회 (댓글 + 좋아요 여부 포함)
+  // ✅ 게시글 상세조회 (댓글 + 좋아요 여부 포함)
   useEffect(() => {
     const fetchPostDetail = async () => {
       try {
-        const BASE_URL =
-          process.env.REACT_APP_BACKEND_URL;
-        const memberId = 1; // 임시 로그인
+        const BASE_URL = process.env.REACT_APP_BACKEND_URL;
+        const memberId = isLogin && currentUser?.id ? currentUser.id : null;
 
-        const response = await fetch(
-          `${BASE_URL}/main/post/read/${id}?memberId=${memberId}`,
-          {
-            method: "GET",
-            headers: { "Content-Type": "application/json" },
-            credentials: "include",
-          }
-        );
+        const endpoint = memberId
+          ? `${BASE_URL}/private/post/read/${id}?memberId=${memberId}`
+          : `${BASE_URL}/private/post/read/${id}`;
 
-        if (!response.ok)
-          throw new Error(`HTTP error! status: ${response.status}`);
+        const response = await fetch(endpoint, {
+          method: "GET",
+          headers: { "Content-Type": "application/json" ,
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          },
+          credentials: "include",
+        });
+
+        console.log("테스트")
+        console.log(response)
+        if (!response.ok) throw new Error(`HTTP error ${response.status}`);
 
         const result = await response.json();
 
         if (result.data) {
-          // ✅ 댓글 isCommentLiked → liked 변환
           const mappedComments = (result.data.comments || []).map((c) => ({
             ...c,
             liked: c.isCommentLiked === 1,
@@ -85,9 +91,7 @@ const PostReadContent = () => {
           setPost(result.data);
           setComments(mappedComments);
         } else {
-          throw new Error(
-            result.message || "게시글 데이터를 불러오지 못했습니다."
-          );
+          throw new Error("게시글 데이터를 불러오지 못했습니다.");
         }
       } catch (err) {
         console.error("게시글 상세 불러오기 실패:", err);
@@ -102,37 +106,42 @@ const PostReadContent = () => {
       }
     };
     fetchPostDetail();
-  }, [id, navigate, openModal]);
+  }, [id, isLogin, currentUser, navigate, openModal]);
 
-  // 댓글/대댓글 좋아요 토글 (서버 반영)
+  // ✅ 댓글/대댓글 좋아요 토글
   const handleLike = async (commentId, isReply = false, parentId = null) => {
-    const BASE_URL =
-      process.env.REACT_APP_BACKEND_URL;
-    const memberId = 1;
+    const BASE_URL = process.env.REACT_APP_BACKEND_URL;
+    if (!isLogin || !currentUser?.id) {
+      openModal({
+        title: "로그인이 필요합니다",
+        message: "좋아요를 누르려면 로그인이 필요합니다.",
+        confirmText: "로그인하러 가기",
+        cancelText: "취소",
+        onConfirm: () => navigate("/login"),
+      });
+      return;
+    }
 
     try {
       const endpoint = !isReply
-        ? `${BASE_URL}/main/post/comment/like/toggle`
-        : `${BASE_URL}/main/post/reply/like/toggle`;
+        ? `${BASE_URL}/private/post/comment/like/toggle`
+        : `${BASE_URL}/private/post/reply/like/toggle`;
 
       const bodyData = !isReply
-        ? { commentId: commentId, memberId: memberId }
-        : { replyId: commentId, memberId: memberId };
+        ? { commentId, memberId: currentUser.id }
+        : { replyId: commentId, memberId: currentUser.id };
 
       const response = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify(bodyData),
       });
 
       if (!response.ok) throw new Error("좋아요 요청 실패");
 
-      const result = await response.json();
-      console.log("좋아요 토글 결과:", result);
-
-      // ✅ UI 즉시 반영
-      setComments((prevComments) =>
-        prevComments.map((c) => {
+      setComments((prev) =>
+        prev.map((c) => {
           if (!isReply && c.commentId === commentId) {
             return {
               ...c,
@@ -142,7 +151,6 @@ const PostReadContent = () => {
                 : c.commentLikeCount + 1,
             };
           }
-
           if (isReply && c.commentId === parentId) {
             return {
               ...c,
@@ -159,35 +167,32 @@ const PostReadContent = () => {
               ),
             };
           }
-
           return c;
         })
       );
     } catch (err) {
       console.error("좋아요 토글 실패:", err);
+      openModal({
+        title: "오류",
+        message: "좋아요 처리 중 문제가 발생했습니다.",
+        confirmText: "확인",
+      });
     }
   };
 
-  const handleReplyClick = (parentId, targetId, nickname) => {
-    setShowReplyTarget((prev) =>
-      prev?.targetId === targetId ? null : { parentId, targetId, nickname }
-    );
-  };
-
-  const handleCommentSubmit = () => {
-    if (!comment.trim()) return;
-    console.log("댓글 등록:", comment);
-    setComment("");
-  };
-
-  const handleReplySubmit = (parentId, targetId) => {
-    const text = (replyInputs[targetId] || "").trim();
-    if (!text) return;
-    console.log(`답글 등록: parent=${parentId}, target=${targetId}, text=${text}`);
-    setReplyInputs((prev) => ({ ...prev, [targetId]: "" }));
-  };
-
+  // ✅ 게시글 삭제
   const handleDelete = async () => {
+    if (!isLogin || !currentUser?.id) {
+      openModal({
+        title: "로그인이 필요합니다",
+        message: "게시글을 삭제하려면 로그인이 필요합니다.",
+        confirmText: "로그인하러 가기",
+        cancelText: "취소",
+        onConfirm: () => navigate("/login"),
+      });
+      return;
+    }
+
     openModal({
       title: "게시글을 삭제하시겠습니까?",
       message: "삭제된 게시글은 복구할 수 없습니다.",
@@ -195,21 +200,17 @@ const PostReadContent = () => {
       cancelText: "취소",
       onConfirm: async () => {
         try {
-          const BASE_URL =
-            process.env.REACT_APP_BACKEND_URL || "http://localhost:10000";
-          const response = await fetch(`${BASE_URL}/main/post/withdraw?id=${id}`, {
-            method: "DELETE",
-          });
+          const BASE_URL = process.env.REACT_APP_BACKEND_URL;
+          const response = await fetch(
+            `${BASE_URL}/private/post/withdraw?id=${id}`,
+            {
+              method: "DELETE",
+              credentials: "include",
+            }
+          );
 
-          let result = {};
-          try {
-            result = await response.json();
-          } catch {
-            result = {};
-          }
-
-          if (!response.ok)
-            throw new Error(result.message || "게시글 삭제 실패");
+          const result = await response.json();
+          if (!response.ok) throw new Error(result.message);
 
           openModal({
             title: "삭제 완료",
@@ -218,7 +219,7 @@ const PostReadContent = () => {
             onConfirm: () => navigate("/main/post/all"),
           });
         } catch (error) {
-          console.error("게시글 삭제 중 오류:", error);
+          console.error("삭제 실패:", error);
           openModal({
             title: "삭제 실패",
             message: "삭제 중 오류가 발생했습니다.",
@@ -228,9 +229,6 @@ const PostReadContent = () => {
       },
     });
   };
-
-  if (loading) return <S.Container>로딩 중...</S.Container>;
-  if (!post) return <S.Container>게시글을 찾을 수 없습니다.</S.Container>;
 
   const formatDate = (dateString) => {
     const d = new Date(dateString);
@@ -245,9 +243,14 @@ const PostReadContent = () => {
       .replace(/\.$/, "");
   };
 
+  // ✅ 카카오 공유
   const handleShare = () => {
     if (!window.Kakao || !window.Kakao.Share) {
-      alert("카카오 SDK가 아직 초기화되지 않았습니다.");
+      openModal({
+        title: "공유 불가",
+        message: "카카오 SDK가 아직 초기화되지 않았습니다.",
+        confirmText: "확인",
+      });
       return;
     }
 
@@ -272,6 +275,10 @@ const PostReadContent = () => {
     });
   };
 
+  if (loading) return <S.Container>로딩 중...</S.Container>;
+  if (!post)
+    return <S.Container>게시글을 찾을 수 없습니다.</S.Container>;
+
   return (
     <S.Container>
       <S.Title>{post.postTitle}</S.Title>
@@ -285,10 +292,12 @@ const PostReadContent = () => {
       </S.MetaBox>
 
       <S.Content>
-        <S.EditBox>
-          <span onClick={() => navigate(`/main/post/modify/${id}`)}>수정</span> |{" "}
-          <span onClick={handleDelete}>삭제</span>
-        </S.EditBox>
+        {isLogin && currentUser?.id === post.memberId && (
+          <S.EditBox>
+            <span onClick={() => navigate(`/main/post/modify/${id}`)}>수정</span>{" "}
+            | <span onClick={handleDelete}>삭제</span>
+          </S.EditBox>
+        )}
 
         {post.postImageUrl &&
           !post.postImageUrl.includes("default_post.jpg") && (
@@ -313,9 +322,21 @@ const PostReadContent = () => {
         />
       </S.Content>
 
+
       <S.PostSocialBox>
         <S.ReportButton
           onClick={() => {
+            if (!isLogin || !currentUser?.id) {
+              openModal({
+                title: "로그인이 필요합니다",
+                message: "게시글을 신고하려면 로그인이 필요합니다.",
+                confirmText: "로그인하러 가기",
+                cancelText: "취소",
+                onConfirm: () => navigate("/login"),
+              });
+              return;
+            }
+
             setReportTarget({ type: "post", id });
             setShowReportModal(true);
           }}
@@ -344,16 +365,12 @@ const PostReadContent = () => {
         deleteTarget={deleteTarget}
         setDeleteTarget={setDeleteTarget}
         handleCommentDelete={() => {}}
-        handleReplyClick={handleReplyClick}
-        handleReplySubmit={handleReplySubmit}
         handleLike={handleLike}
-        handleCommentSubmit={handleCommentSubmit}
-        renderTextWithTags={(text) => text}
+        postId={id}
         showReportModal={showReportModal}
         setShowReportModal={setShowReportModal}
         reportTarget={reportTarget}
         setReportTarget={setReportTarget}
-        postId={id}
       />
 
       <S.NavList>

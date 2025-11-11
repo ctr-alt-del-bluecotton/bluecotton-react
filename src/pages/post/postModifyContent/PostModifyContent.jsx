@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 import S from "./style";
 import { useModal } from "../../../components/modal";
 import { Editor } from "@toast-ui/react-editor";
@@ -9,12 +10,12 @@ const MAX_LENGTH = 1000;
 
 // ✅ 영어 → 한글 매핑 테이블
 const categoryMap = {
-  study: "학습",
-  health: "건강",
-  social: "소셜",
-  hobby: "취미",
-  life: "생활",
-  rookie: "루키",
+  STUDY: "학습",
+  HEALTH: "건강",
+  SOCIAL: "소셜",
+  HOBBY: "취미",
+  LIFE: "생활",
+  ROOKIE: "루키",
 };
 
 const PostModifyContent = () => {
@@ -23,27 +24,40 @@ const PostModifyContent = () => {
   const { openModal } = useModal();
   const editorRef = useRef();
 
+  // ✅ Redux 로그인 정보
+  const { currentUser, isLogin } = useSelector((state) => state.user);
+
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState("");
-  const [joinedCategories, setJoinedCategories] = useState([]); // ✅ 참여 중인 솜 카테고리 목록
+  const [joinedCategories, setJoinedCategories] = useState([]);
   const [charCount, setCharCount] = useState(0);
   const [loading, setLoading] = useState(true);
 
-  const memberId = 1; // ✅ 로그인 전 임시값
+  // ✅ 비로그인 접근 방지
+  useEffect(() => {
+    if (!isLogin || !currentUser?.id) {
+      openModal({
+        title: "로그인이 필요한 기능입니다",
+        message: "게시글 수정은 로그인 후 이용 가능합니다.",
+        confirmText: "확인",
+        onConfirm: () => navigate("/main/post/all"),
+      });
+    }
+  }, [isLogin, currentUser, navigate, openModal]);
 
-  // ✅ 기존 게시글 데이터 불러오기
+  // ✅ 기존 게시글 불러오기 (read API 사용)
   useEffect(() => {
     const fetchPostData = async () => {
       try {
-        const BASE_URL =
-          process.env.REACT_APP_BACKEND_URL;
-        const res = await fetch(`${BASE_URL}/main/post/modify/${id}`);
+        const BASE_URL = process.env.REACT_APP_BACKEND_URL;
+        const res = await fetch(`${BASE_URL}/main/post/read/${id}`, {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+        });
 
         if (!res.ok) throw new Error(`HTTP Error: ${res.status}`);
-
         const result = await res.json();
         const post = result.data;
-        console.log("불러온 데이터:", post);
 
         if (!post) {
           openModal({
@@ -54,21 +68,22 @@ const PostModifyContent = () => {
           return;
         }
 
-        setTitle(post.postTitle);
+        setTitle(post.postTitle || "");
         setCategory(post.somCategory || post.postCategory || "");
 
-        // ✅ 에디터 내용 설정
+        // ✅ 에디터 내용 세팅
         setTimeout(() => {
           if (editorRef.current) {
             const editorInstance = editorRef.current.getInstance();
             editorInstance.setHTML(post.postContent || "");
             setCharCount(editorInstance.getMarkdown().trim().length);
           }
-        }, 100);
+        }, 150);
       } catch (err) {
         console.error("게시글 불러오기 실패:", err);
         openModal({
-          title: "게시글을 불러오는 중 오류가 발생했습니다.",
+          title: "게시글 불러오기 실패",
+          message: "게시글을 불러오는 중 문제가 발생했습니다.",
           confirmText: "확인",
           onConfirm: () => navigate("/main/post/all"),
         });
@@ -76,31 +91,33 @@ const PostModifyContent = () => {
         setLoading(false);
       }
     };
-
     fetchPostData();
   }, [id, navigate, openModal]);
 
-  // ✅ 회원이 참여 중인 솜 카테고리 목록 불러오기
+  // ✅ 참여 중 솜 카테고리 목록 불러오기
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const BASE_URL =
-          process.env.REACT_APP_BACKEND_URL;
-        const res = await fetch(`${BASE_URL}/main/post/categories/${memberId}`);
-        if (!res.ok) throw new Error("카테고리 불러오기 실패");
+        if (!isLogin || !currentUser?.id) return;
 
+        const BASE_URL = process.env.REACT_APP_BACKEND_URL;
+        const res = await fetch(
+          `${BASE_URL}/main/post/categories/${currentUser.id}`
+        );
+
+        if (!res.ok) throw new Error("카테고리 불러오기 실패");
         const result = await res.json();
-        console.log("참여 중인 카테고리:", result);
-        setJoinedCategories(result); // [{ somCategory: "stydy", somTitle: "스터디 챌린지" }]
+
+        setJoinedCategories(result);
       } catch (err) {
         console.error("카테고리 목록 불러오기 실패:", err);
       }
     };
 
     fetchCategories();
-  }, [memberId]);
+  }, [isLogin, currentUser]);
 
-  // ✅ 글자수 카운트 + 제한
+  // ✅ 글자수 카운트
   useEffect(() => {
     const editorInstance = editorRef.current?.getInstance();
     if (!editorInstance) return;
@@ -120,9 +137,20 @@ const PostModifyContent = () => {
     return () => editorInstance.off("change", handleChange);
   }, []);
 
-  // ✅ 수정 완료
+  // ✅ 게시글 수정 요청
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!isLogin || !currentUser?.id) {
+      openModal({
+        title: "로그인이 필요한 기능입니다",
+        message: "게시글 수정은 로그인 후 이용 가능합니다.",
+        confirmText: "확인",
+        onConfirm: () => navigate("/main/post/all"),
+      });
+      return;
+    }
+
     const content = editorRef.current?.getInstance().getHTML() || "";
 
     if (!title.trim()) {
@@ -139,19 +167,21 @@ const PostModifyContent = () => {
     }
 
     try {
-      const BASE_URL =
-        process.env.REACT_APP_BACKEND_URL || "http://localhost:10000";
-      const res = await fetch(`${BASE_URL}/main/post/modify/${id}`, {
+      const BASE_URL = process.env.REACT_APP_BACKEND_URL;
+
+      // ✅ 수정 요청 API — 실제 백엔드 매핑에 맞게
+      const res = await fetch(`${BASE_URL}/private/post/modify/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           postTitle: title,
-          postCategory: category,
+          somCategory: category,
           postContent: content,
+          memberId: currentUser.id,
         }),
       });
 
-      if (!res.ok) throw new Error("수정 실패");
+      if (!res.ok) throw new Error(`HTTP Error ${res.status}`);
       const result = await res.json();
 
       openModal({
@@ -161,9 +191,10 @@ const PostModifyContent = () => {
         onConfirm: () => navigate(`/main/post/read/${id}`),
       });
     } catch (err) {
+      console.error("게시글 수정 실패:", err);
       openModal({
         title: "수정 실패",
-        message: "게시글 수정 중 오류가 발생했습니다.",
+        message: "게시글 수정 중 문제가 발생했습니다.",
         confirmText: "확인",
       });
     }
@@ -204,10 +235,8 @@ const PostModifyContent = () => {
             onChange={(e) => setCategory(e.target.value)}
           >
             <option value="">카테고리를 선택해주세요</option>
-
-            {/* ✅ 참여 중인 솜 카테고리만 표시 (영→한 변환 적용) */}
             {joinedCategories.map((cat) => (
-              <option key={cat.somCategory} value={cat.somCategory}>
+              <option key={cat.somId} value={cat.somCategory}>
                 {categoryMap[cat.somCategory?.toUpperCase()] ||
                   cat.somTitle ||
                   cat.somCategory}
