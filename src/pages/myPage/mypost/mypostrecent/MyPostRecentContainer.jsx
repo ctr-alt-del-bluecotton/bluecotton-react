@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import S from '../style';
 import { useModal } from '../../../../components/modal';
 
@@ -16,7 +17,9 @@ const MyPostRecentContainer = () => {
   const navigate = useNavigate();
   const { openModal } = useModal();
   const [searchParams] = useSearchParams();
-  const id = searchParams.get('id');
+  const { currentUser } = useSelector((state) => state.user);
+  // URL 파라미터에서 id를 가져오거나, 없으면 Redux의 현재 사용자 ID 사용
+  const id = searchParams.get('id') || (currentUser?.id ? String(currentUser.id) : null);
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -69,7 +72,7 @@ const MyPostRecentContainer = () => {
     };
 
     fetchPosts();
-  }, [id, openModal]);
+  }, [id, currentUser]);
 
   const handleDelete = async (postId) => {
     try {
