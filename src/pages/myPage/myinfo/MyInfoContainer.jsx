@@ -28,6 +28,8 @@ const MyInfoContainer = () => {
 
   const [previewImage, setPreviewImage] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
+  const [uploadedImagePath, setUploadedImagePath] = useState(null);
+  const [uploadedImageName, setUploadedImageName] = useState(null);
 
   // LoginForm을 위한 react-hook-form 설정
   const {
@@ -54,7 +56,10 @@ const MyInfoContainer = () => {
     address1: '',
     address2: '',
     picturePath: '',
-    pictureName: ''
+    pictureName: '',
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: ''
   });
 
   useEffect(() => {
@@ -128,8 +133,13 @@ const MyInfoContainer = () => {
           });
 
           // 서버에서 받아온 프로필 이미지가 있으면 미리보기 설정
+          // memberPicturePath는 이미 전체 URL (https://image-server.ideaflow.co.kr/uploads/mypage_profile/2025/11/12/)
           if (memberVO.memberPicturePath && memberVO.memberPictureName) {
-            const imageUrl = `${process.env.REACT_APP_BACKEND_URL}${memberVO.memberPicturePath}${memberVO.memberPictureName}`;
+            // memberPicturePath가 이미 전체 URL이므로 그대로 사용
+            const imageUrl = memberVO.memberPicturePath.endsWith('/') 
+              ? `${memberVO.memberPicturePath}${memberVO.memberPictureName}`
+              : `${memberVO.memberPicturePath}/${memberVO.memberPictureName}`;
+            console.log("[DEBUG] 서버에서 받아온 이미지 URL:", imageUrl);
             setPreviewImage(imageUrl);
           }
     
@@ -162,39 +172,280 @@ const MyInfoContainer = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  const uploadImageToServer = async (file, folder = 'shop') => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, "0");
+    const day = String(now.getDate()).padStart(2, "0");
+    
+
+    const formData = new FormData();
+    const folderPath = `${folder}/${year}/${month}/${day}`;
+    formData.append('file', file);
+    formData.append('folder', folderPath); 
+    
+    const res = await fetch(`${process.env.REACT_APP_BACKEND_URL}/file/upload-image`, {
+        method: 'POST',
+        body: formData,
+    });
+
+    return await res.json();
+  }
+
   // 이미지 업로드
   const handleImageClick = () => fileInputRef.current?.click();
-  const handleFileChange = (e) => {
+  const handleFileChange = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 50 * 1024 * 1024) {
+    if (file.size > 20 * 1024 * 1024) {
       openModal({
         title: '파일 크기 초과',
-        message: '용량이 50.0M 이하 파일만 업로드 가능합니다.',
+        message: '용량이 20.0M 이하 파일만 업로드 가능합니다.',
         confirmText: '확인'
       });
+
       return;
     }
+    try {
+      const result = await uploadImageToServer(file ,"mypage_profile");
+      console.log("[DEBUG] Image uploaded - 전체 응답:", result);
 
-    setSelectedFile(file);
-    const reader = new FileReader();
-    reader.onloadend = () => setPreviewImage(reader.result);
-    reader.readAsDataURL(file);
+      // 응답 데이터 추출 (다양한 형식 지원)
+      let data = null;
+      if (result?.data) {
+        data = result.data;
+      } else if (result?.url) {
+        data = result.url;
+      } else if (typeof result === 'string') {
+        data = result;
+      } else {
+        data = result;
+      }
+      
+      console.log("[DEBUG] 파싱된 데이터:", data);
+
+      // 이미지 경로와 파일명 추출
+      // memberPicturePath: https://image-server.ideaflow.co.kr/uploads/mypage_profile/2025/11/12/
+      // memberPictureName: 파일명.png
+      let imagePath = '';
+      let imageName = '';
+      let fullImageUrl = '';
+
+      // 1. 객체 형태로 imagePath와 imageName이 분리되어 있는 경우
+      if (data && typeof data === 'object' && data.imagePath) {
+        imagePath = data.imagePath;
+        imageName = data.imageName || '';
+        console.log("[DEBUG] 객체 형태 - imagePath:", imagePath, "imageName:", imageName);
+      } 
+      // 2. 객체 형태로 path와 name이 있는 경우
+      else if (data && typeof data === 'object' && data.path) {
+        imagePath = data.path;
+        imageName = data.name || '';
+        console.log("[DEBUG] 객체 형태 - path:", imagePath, "name:", imageName);
+      }
+      // 3. 객체 형태로 url이 있는 경우
+      else if (data && typeof data === 'object' && data.url) {
+        fullImageUrl = data.url;
+        console.log("[DEBUG] 객체 형태 - url:", fullImageUrl);
+      }
+      // 4. 문자열로 전체 URL이 반환된 경우
+      else if (typeof data === 'string' && data.startsWith('http')) {
+        fullImageUrl = data;
+        console.log("[DEBUG] 문자열 URL:", fullImageUrl);
+      }
+      // 5. 문자열이지만 상대 경로인 경우
+      else if (typeof data === 'string') {
+        // 상대 경로를 전체 URL로 변환
+        if (data.startsWith('/')) {
+          fullImageUrl = `https://image-server.ideaflow.co.kr${data}`;
+        } else {
+          fullImageUrl = `https://image-server.ideaflow.co.kr/uploads/mypage_profile/${data}`;
+        }
+        console.log("[DEBUG] 상대 경로를 전체 URL로 변환:", fullImageUrl);
+      }
+
+      // fullImageUrl이 있으면 파싱해서 경로와 파일명 분리
+      if (fullImageUrl) {
+        const urlParts = fullImageUrl.split('/');
+        imageName = urlParts[urlParts.length - 1];
+        urlParts.pop();
+        // 경로만 추출 (끝에 / 포함)
+        imagePath = urlParts.join('/') + '/';
+        console.log("[DEBUG] URL 파싱 결과 - imagePath:", imagePath, "imageName:", imageName);
+      }
+
+      // 최종 경로와 파일명이 있는 경우에만 저장
+      if (imagePath && imageName) {
+        console.log("[DEBUG] 최종 저장 - imagePath:", imagePath, "imageName:", imageName);
+        setUploadedImagePath(imagePath);
+        setUploadedImageName(imageName);
+        // formData에도 즉시 반영
+        setFormData((prev) => ({
+          ...prev,
+          picturePath: imagePath,
+          pictureName: imageName
+        }));
+      } else {
+        console.warn("[DEBUG] 경로 또는 파일명이 없습니다. imagePath:", imagePath, "imageName:", imageName);
+      }
+
+      setSelectedFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => setPreviewImage(reader.result);
+      reader.readAsDataURL(file);
+    } catch (error) {
+      console.error('이미지 업로드 실패:', error);
+      openModal({
+        title: '업로드 실패',
+        message: '이미지 업로드에 실패했습니다.',
+        confirmText: '확인'
+      });
+    }
   };
 
   // 제출
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    openModal({
-      title: '회원 정보 수정',
-      message: '회원정보가 수정되었습니다.',
-      confirmText: '확인',
-      onConfirm: () => {
-        console.log('Form submitted:', formData);
-        // TODO: PUT/PATCH로 formData 전송 로직
+
+    try {
+      // 생년월일을 하나의 날짜로 합치기
+      let memberBirth = null;
+      if (formData.birthYear && formData.birthMonth && formData.birthDay) {
+        memberBirth = `${formData.birthYear}-${formData.birthMonth}-${formData.birthDay}`;
       }
-    });
+
+      // 성별 변환 (male -> 남, female -> 여)
+      let memberGender = '';
+      if (formData.gender === 'male') {
+        memberGender = '남';
+      } else if (formData.gender === 'female') {
+        memberGender = '여';
+      }
+
+      // 이미지 경로 설정 (새로 업로드한 이미지가 있으면 사용, 없으면 기존 값 사용)
+      const finalPicturePath = uploadedImagePath || formData.picturePath || '';
+      const finalPictureName = uploadedImageName || formData.pictureName || '';
+      
+      console.log("[DEBUG] 제출 시 이미지 경로 - finalPicturePath:", finalPicturePath, "finalPictureName:", finalPictureName);
+      console.log("[DEBUG] uploadedImagePath:", uploadedImagePath, "uploadedImageName:", uploadedImageName);
+      console.log("[DEBUG] formData.picturePath:", formData.picturePath, "formData.pictureName:", formData.pictureName);
+
+      // 비밀번호 유효성 검사
+      if (formData.newPassword || formData.confirmPassword || formData.currentPassword) {
+        if (!formData.currentPassword) {
+          openModal({
+            title: '입력 오류',
+            message: '현재 비밀번호를 입력해주세요.',
+            confirmText: '확인'
+          });
+          return;
+        }
+        if (!formData.newPassword) {
+          openModal({
+            title: '입력 오류',
+            message: '새 비밀번호를 입력해주세요.',
+            confirmText: '확인'
+          });
+          return;
+        }
+        if (formData.newPassword !== formData.confirmPassword) {
+          openModal({
+            title: '입력 오류',
+            message: '새 비밀번호가 일치하지 않습니다.',
+            confirmText: '확인'
+          });
+          return;
+        }
+        if (!passwordRegex.test(formData.newPassword)) {
+          openModal({
+            title: '입력 오류',
+            message: '비밀번호는 8자 이상, 영문/숫자/특수문자(!@#)를 포함해야 합니다.',
+            confirmText: '확인'
+          });
+          return;
+        }
+      }
+
+      // API 요청 데이터 구성
+      const updateData = {
+        id: parseInt(memberId),
+        memberEmail: formData.email,
+        memberNickname: formData.nickname,
+        memberPhone: formData.phone,
+        memberAddress: formData.address1,
+        memberAddressDetail: formData.address2,
+        memberPostcode: formData.postcode,
+        memberGender: memberGender,
+        memberBirth: memberBirth,
+      };
+
+      // 이미지 경로가 있는 경우에만 포함
+      if (finalPicturePath && finalPictureName) {
+        updateData.memberPicturePath = finalPicturePath;
+        updateData.memberPictureName = finalPictureName;
+        console.log('[DEBUG] 이미지 경로 포함 - memberPicturePath:', finalPicturePath, 'memberPictureName:', finalPictureName);
+      } else if (finalPicturePath) {
+        // 경로만 있는 경우
+        updateData.memberPicturePath = finalPicturePath;
+        console.log('[DEBUG] 이미지 경로만 포함 - memberPicturePath:', finalPicturePath);
+      } else {
+        console.log('[DEBUG] 이미지 경로 없음 - 업로드되지 않았거나 기존 값 없음');
+      }
+
+      // 비밀번호 변경이 있는 경우에만 포함
+      if (formData.newPassword && formData.currentPassword) {
+        updateData.memberPassword = formData.newPassword;
+        // 현재 비밀번호 확인을 위한 필드 (API 스펙에 따라 조정 필요)
+        updateData.currentPassword = formData.currentPassword;
+      }
+
+      console.log('[DEBUG] 최종 업데이트 데이터:', JSON.stringify(updateData, null, 2));
+
+      const accessToken = localStorage.getItem("accessToken");
+      if (!accessToken) {
+        openModal({
+          title: '오류',
+          message: '로그인이 필요합니다.',
+          confirmText: '확인'
+        });
+        return;
+      }
+
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/my-page/update-member`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`
+        },
+        body: JSON.stringify(updateData)
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || '회원 정보 수정에 실패했습니다.');
+      }
+
+      const result = await response.json();
+      console.log('업데이트 성공:', result);
+
+      openModal({
+        title: '회원 정보 수정',
+        message: '회원정보가 수정되었습니다.',
+        confirmText: '확인',
+        onConfirm: () => {
+          // 페이지 새로고침 또는 데이터 다시 불러오기
+          window.location.reload();
+        }
+      });
+    } catch (error) {
+      console.error('회원 정보 수정 오류:', error);
+      openModal({
+        title: '오류',
+        message: error.message || '회원 정보 수정에 실패했습니다.',
+        confirmText: '확인'
+      });
+    }
   };
 
   const handleDeleteAccount = () => {
@@ -218,14 +469,40 @@ const MyInfoContainer = () => {
 
       <form onSubmit={handleSubmit}>
         <S.FormSection>
-          <S.Label>ID (이메일)</S.Label>
+          <S.Label>비밀번호 변경</S.Label>
           <S.Input
-            type="email"  
-            name="email"
-            value={formData.email}
+            type="password"
+            name="currentPassword"
+            value={formData.currentPassword}
             onChange={handleChange}
-            readOnly
+            placeholder="현재 비밀번호"
+            style={{ marginBottom: '12px' }}
           />
+          <S.Input
+            type="password"
+            name="newPassword"
+            value={formData.newPassword}
+            onChange={handleChange}
+            placeholder="새 비밀번호 (8자 이상, 영문/숫자/특수문자 포함)"
+            style={{ marginBottom: '12px' }}
+          />
+          <S.Input
+            type="password"
+            name="confirmPassword"
+            value={formData.confirmPassword}
+            onChange={handleChange}
+            placeholder="새 비밀번호 확인"
+          />
+          {formData.newPassword && formData.confirmPassword && formData.newPassword !== formData.confirmPassword && (
+            <S.FileInfo style={{ color: '#F44336', marginTop: '8px' }}>
+              비밀번호가 일치하지 않습니다.
+            </S.FileInfo>
+          )}
+          {formData.newPassword && !passwordRegex.test(formData.newPassword) && (
+            <S.FileInfo style={{ color: '#F44336', marginTop: '8px' }}>
+              비밀번호는 8자 이상, 영문/숫자/특수문자(!@#)를 포함해야 합니다.
+            </S.FileInfo>
+          )}
         </S.FormSection>
 
         <S.FormSection>
