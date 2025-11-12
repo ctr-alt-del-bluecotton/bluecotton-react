@@ -2,6 +2,7 @@ import React, { createContext, useState, useContext, useEffect } from 'react';
 import { useParams } from "react-router-dom";
 import somIsLikeListDummy from "../pages/main/dummyData/somIsLikeDummy.json";
 import { fetchData, options } from './FetchContext';
+import { useSelector } from 'react-redux';
 
 const MainContext = createContext();
 
@@ -20,11 +21,13 @@ const categoryMap = {
 
 export const MainProvider = ({ children }) => {
     const { category } = useParams();
-    const [sortBy, setSortBy] = useState("최신순");
-    const [somList, setSomList] = useState([]);
-    const [somisLikeList, setSomisLikeList] = useState([]);
-    const [pageNumber, setPageNumber] = useState(1);
+    const [ sortBy, setSortBy ] = useState("all");
+    const [ somList, setSomList ] = useState([]);
+    const [ somisLikeList, setSomisLikeList ] = useState([]);
+    const [ maxPage, setMaxPage ] = useState(1);
+    const [ pageNumber, setPageNumber ] = useState(1);
     const [ insertSom, setInsertSom ] = useState(false);
+    const { currentUser, isLogin } = useSelector((state) => state.user);
     
     useEffect(() => {
         setPageNumber(1);
@@ -34,16 +37,13 @@ export const MainProvider = ({ children }) => {
         const loadSomList = async () => {
             try {
                 console.log(category)
-                // category가 없을 경우 'all'을 기본값으로 사용
-                if (category === "all") {
-                    const data = await fetchData('som/all' ,options.getOption())
-                    const jsonData = await data.json();
-                    setSomList(jsonData.data);
-                } else {
-                    const data = await fetchData(`som/category?somCategory=${category}` ,options.getOption())
-                    const jsonData = await data.json();
-                    setSomList(jsonData.data);
-                }
+                const data = await fetchData(`som/category?somCategory=${category}&somType=${sortBy}&page=${pageNumber}` ,options.getOption())
+                const jsonData = await data.json();
+                const somListData = jsonData.data.somList;
+                const somMaxPage = jsonData.data.maxPage;
+                setSomList(somListData);
+                setMaxPage(somMaxPage);
+                console.log(maxPage)
             } catch (error) {
                 console.error("솜 리스트를 가져오는데 실패했습니다:", error);
                 // TODO: 사용자에게 에러를 알리는 UI 처리
@@ -73,12 +73,15 @@ export const MainProvider = ({ children }) => {
         setSortBy,
         somList,
         somisLikeList,
+        currentUser,
+        isLogin,
         setInsertSom,
         setSomisLikeList,
         pageNumber,
         setPageNumber,
         categoryMap,
-        formatDate
+        formatDate,
+        maxPage, setMaxPage
     };
 
     return (
