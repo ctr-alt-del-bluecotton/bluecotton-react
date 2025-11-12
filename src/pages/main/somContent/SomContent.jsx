@@ -53,7 +53,7 @@ const SomContent = ({ content, somisLike }) => {
 
   return (
     <S.Card>
-      <S.SomImage onClick={somOnClick} bgsrc={somImageList[0]?.somImagePath} alt={somImageList[0]?.somImageName} />
+      <S.SomImage onClick={somOnClick} bgsrc={somImageList[0].somImagePath} alt={somImageList[0]?.somImageName} />
       <S.SomInfo>
         <S.SomTitleArea onClick={somOnClick}>
           <img src={meberProfilePath} alt={memberName} />
