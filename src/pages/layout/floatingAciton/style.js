@@ -34,6 +34,7 @@ S.floatingActionMenuWrap = styled.div.withConfig({
       visibility 0.25s ease;
     pointer-events: ${({ isDisplayFloatingMenu }) =>
     isDisplayFloatingMenu ? "auto" : "none"};
+    border-radius: 20px;
 `
 
 
