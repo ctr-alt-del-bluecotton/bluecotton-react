@@ -38,6 +38,10 @@ import MySomCheck from "../pages/myPage/mysom/mysomcheck/MySomCheck";
 import SocialRedirect from "../pages/login/success/SocialRedirect";
 import LoginLayOut from "../pages/layout/LoginLayout";
 import ManagerContainer from "../pages/manager/ManagerContainer";
+import UserManagementContainer from "../pages/manager/UserManagementContainer";
+import SomManagementContainer from "../pages/manager/SomManagementContainer";
+import PostManagementContainer from "../pages/manager/PostManagementContainer";
+import OrderManagementContainer from "../pages/manager/OrderManagementContainer";
 
 const router = createBrowserRouter([
   {
@@ -149,8 +153,24 @@ const router = createBrowserRouter([
     element : <SignUp></SignUp>
   },
   {
-    path : "/manager",
+    path : "/main/manager",
     element: <ManagerContainer />
+  },
+  {
+    path : "/main/manager/users",
+    element: <UserManagementContainer />
+  },
+  {
+    path : "/main/manager/soms",
+    element: <SomManagementContainer />
+  },
+  {
+    path : "/main/manager/posts",
+    element: <PostManagementContainer />
+  },
+  {
+    path : "/main/manager/orders",
+    element: <OrderManagementContainer />
   },
   {
     path : "*",
