@@ -419,8 +419,11 @@ S.OrderItemImage = styled.div`
   width: 80px;
   height: 80px;
   background-color: #E0E0E0;
-  border-radius: 8px;
+  border-radius: 4px;
   margin-right: 16px;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
 `;
 
 S.ItemContent = styled.div`
@@ -593,7 +596,6 @@ S.BestTag = styled.span`
 
 S.PriceText = styled.p`
   ${C.smallText1Bold}
-  color: ${({ theme }) => theme.PALLETE.primary.main};
   margin: 6px 0 8px;
 `;
 
