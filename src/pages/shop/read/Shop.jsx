@@ -5,6 +5,8 @@ import ShopReview from "./review/ShopReview";
 import ShopRelated from "./ShopRelated";
 import { useNavigate, useParams } from "react-router-dom";
 import { useModal } from "../../../components/modal/useModal";
+import { resolveUrl } from "../../../utils/url";
+
 
 const formatPrice = (type, value) => {
   const n = Number(value) || 0;
@@ -13,6 +15,8 @@ const formatPrice = (type, value) => {
 
 const parseSubs = (s) =>
   typeof s === "string" ? s.split(",").map((v) => v.trim()).filter(Boolean) : [];
+
+
 
 const Shop = () => {
   const { id } = useParams();
@@ -76,9 +80,11 @@ const Shop = () => {
 
         setLikeCount(Number(headerJson.data.productLikeCount) || 0);
         const subs = parseSubs(headerJson.data.productSubImageUrl);
+
+        //  메인이미지/서브이미지에 resolveUrl 적용
         setSelectedImage(
-          headerJson.data.productMainImageUrl ||
-            subs[0] ||
+          resolveUrl(headerJson.data.productMainImageUrl) ||
+            resolveUrl(subs[0]) ||
             "/assets/images/fallback.png"
         );
       } catch (err) {
@@ -107,7 +113,7 @@ const Shop = () => {
 
   const handleAddToCart = async () => {
     const itemData = {
-      memberId: 11, // ✅ 실제 로그인 유저 ID로 교체 예정
+      memberId: 1, 
       productId: id,
       quantity: count,
     };
@@ -158,6 +164,14 @@ const Shop = () => {
 
   const { avgScore, totalCount: reviewCount } = reviewStats;
 
+  const subImagesOnly = parseSubs(productSubImageUrl);
+
+  //  절대주소로 변환
+  const allThumbnails = [
+    resolveUrl(headerData.productMainImageUrl),
+    ...subImagesOnly.map(resolveUrl),
+  ].filter(Boolean);
+
   const subImages = parseSubs(productSubImageUrl);
   const isNew = String(productType || "").includes("NEW");
   const isBest = String(productType || "").includes("BEST");
@@ -168,12 +182,13 @@ const Shop = () => {
         {/* 왼쪽: 이미지 */}
         <S.Left>
           <S.MainImage>
-            <img src={selectedImage} alt="상품 메인 이미지" />
+
+            <img src={resolveUrl(selectedImage)} alt="상품 메인 이미지" />
           </S.MainImage>
 
-          {!!subImages.length && (
+          {!!allThumbnails.length && (
             <S.SubImageArea>
-              {subImages.map((src, i) => (
+              {allThumbnails.map((src, i) => (
                 <S.SubImage key={i} onClick={() => setSelectedImage(src)}>
                   <img src={src} alt={`서브 이미지 ${i + 1}`} />
                 </S.SubImage>

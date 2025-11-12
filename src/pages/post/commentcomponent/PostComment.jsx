@@ -3,6 +3,7 @@ import React from "react";
 import S from "./style";
 import Report from "../../../components/Report/Report";
 import { useModal } from "../../../components/modal";
+import { useSelector } from "react-redux";
 
 const PostComment = ({
   showComments,
@@ -21,66 +22,74 @@ const PostComment = ({
   setShowReportModal,
   reportTarget,
   setReportTarget,
-  postId, // ✅ 게시글 ID
+  postId,
 }) => {
-  const BASE_URL =
-    process.env.REACT_APP_BACKEND_URL || "http://localhost:10000";
-
+  const BASE_URL = process.env.REACT_APP_BACKEND_URL;
   const { openModal } = useModal();
 
-  /* ✅ 댓글/답글 좋아요 토글 */
- const handleLike = async (targetId, isReply = false, parentCommentId = null) => {
-  const endpoint = isReply
-    ? `${BASE_URL}/main/post/reply/like/toggle`
-    : `${BASE_URL}/main/post/comment/like/toggle`;
+  const { currentUser, isLogin } = useSelector((state) => state.user);
 
-  try {
-    const res = await fetch(endpoint, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        memberId: 1, // 로그인 가정
-        ...(isReply ? { replyId: targetId } : { commentId: targetId }),
-      }),
-    });
+  /* ✅ 좋아요 토글 */
+  const handleLike = async (targetId, isReply = false, parentCommentId = null) => {
+    if (!isLogin || !currentUser?.id) {
+      openModal({
+        title: "로그인이 필요합니다",
+        message: "좋아요를 누르려면 로그인이 필요합니다.",
+        confirmText: "확인",
+      });
+      return;
+    }
 
-    if (!res.ok) throw new Error("좋아요 요청 실패");
+    const endpoint = isReply
+      ? `${BASE_URL}/private/post/reply/like/toggle`
+      : `${BASE_URL}/private/post/comment/like/toggle`;
 
-    setComments((prev) =>
-      prev.map((c) => {
-        // 댓글
-        if (!isReply && c.commentId === targetId) {
-          const liked = !c.liked;
-          return {
-            ...c,
-            liked,
-            commentLikeCount: c.commentLikeCount + (liked ? 1 : -1),
-          };
-        }
+    try {
+      const res = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+        body: JSON.stringify({
+          memberId: currentUser.id,
+          ...(isReply ? { replyId: targetId } : { commentId: targetId }),
+        }),
+      });
 
-        // 대댓글
-        if (isReply && c.replies) {
-          const updatedReplies = c.replies.map((r) =>
-            r.replyId === targetId
-              ? {
-                  ...r,
-                  liked: !r.liked,
-                  replyLikeCount: r.replyLikeCount + (!r.liked ? 1 : -1),
-                }
-              : r
-          );
-          return { ...c, replies: updatedReplies };
-        }
-        return c;
-      })
-    );
-  } catch (err) {
-    console.error("좋아요 토글 실패:", err);
-  }
-};
+      if (!res.ok) throw new Error("좋아요 요청 실패");
 
+      setComments((prev) =>
+        prev.map((c) => {
+          if (!isReply && c.id === targetId) {
+            const liked = !c.liked;
+            return {
+              ...c,
+              liked,
+              postCommentLikeCount: c.postCommentLikeCount + (liked ? 1 : -1),
+            };
+          }
+          if (isReply && c.replies) {
+            const updatedReplies = c.replies.map((r) =>
+              r.id === targetId
+                ? {
+                    ...r,
+                    liked: !r.liked,
+                    postReplyLikeCount: r.postReplyLikeCount + (!r.liked ? 1 : -1),
+                  }
+                : r
+            );
+            return { ...c, replies: updatedReplies };
+          }
+          return c;
+        })
+      );
+    } catch (err) {
+      console.error("좋아요 토글 실패:", err);
+    }
+  };
 
-  /* ✅ 멘션 강조 렌더링 */
+  /* ✅ 멘션 강조 */
   const renderTextWithTags = (text = "") => {
     const parts = text.split(/(@\S+)/g);
     return parts.map((part, i) =>
@@ -90,16 +99,28 @@ const PostComment = ({
 
   /* ✅ 댓글 등록 */
   const handleCommentSubmit = async () => {
+    if (!isLogin || !currentUser?.id) {
+      openModal({
+        title: "로그인이 필요합니다",
+        message: "댓글을 작성하려면 로그인이 필요합니다.",
+        confirmText: "확인",
+      });
+      return;
+    }
+
     if (!comment.trim()) return;
 
     try {
-      const res = await fetch(`${BASE_URL}/main/post/comment`, {
+      const res = await fetch(`${BASE_URL}/private/post/comment`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
         body: JSON.stringify({
           postCommentContent: comment,
           postId: postId,
-          memberId: 1, // ✅ 임시
+          memberId: currentUser.id,
         }),
       });
 
@@ -109,12 +130,13 @@ const PostComment = ({
       setComments((prev) => [
         ...prev,
         {
-          commentId: result.data?.commentId || Date.now(),
-          commentContent: comment,
-          commentCreateAt: new Date().toISOString(),
-          memberNickname: "지존준서",
-          memberProfileUrl: "/images/default_profile.png",
-          commentLikeCount: 0,
+          id: result.data?.commentId || Date.now(),
+          postCommentContent: comment,
+          postCommentCreateAt: new Date().toISOString(),
+          memberNickname: currentUser.memberNickname || "익명",
+          memberProfileUrl:
+            currentUser.profilePath || "/images/default_profile.png",
+          postCommentLikeCount: 0,
           liked: false,
           replies: [],
         },
@@ -135,14 +157,26 @@ const PostComment = ({
     const text = (replyInputs[targetId] || "").trim();
     if (!text) return;
 
+    if (!isLogin || !currentUser?.id) {
+      openModal({
+        title: "로그인이 필요합니다",
+        message: "답글을 작성하려면 로그인이 필요합니다.",
+        confirmText: "확인",
+      });
+      return;
+    }
+
     try {
-      const res = await fetch(`${BASE_URL}/main/post/reply`, {
+      const res = await fetch(`${BASE_URL}/private/post/reply`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
         body: JSON.stringify({
           postReplyContent: text,
           postCommentId: parentId,
-          memberId: 1,
+          memberId: currentUser.id,
         }),
       });
 
@@ -151,18 +185,19 @@ const PostComment = ({
 
       setComments((prev) =>
         prev.map((c) =>
-          c.commentId === parentId
+          c.id === parentId
             ? {
                 ...c,
                 replies: [
                   ...(c.replies || []),
                   {
-                    replyId: result.data?.replyId || Date.now(),
-                    replyContent: text,
-                    replyCreateAt: new Date().toISOString(),
-                    memberNickname: "지존준서",
-                    memberProfileUrl: "/images/default_profile.png",
-                    replyLikeCount: 0,
+                    id: result.data?.replyId || Date.now(),
+                    postReplyContent: text,
+                    postReplyCreateAt: new Date().toISOString(),
+                    memberNickname: currentUser.memberNickname || "익명",
+                    memberProfileUrl:
+                      currentUser.profilePath || "/images/default_profile.png",
+                    postReplyLikeCount: 0,
                     liked: false,
                   },
                 ],
@@ -172,6 +207,7 @@ const PostComment = ({
       );
 
       setReplyInputs((prev) => ({ ...prev, [targetId]: "" }));
+      setShowReplyTarget(null);
     } catch (error) {
       console.error(error);
       openModal({
@@ -182,11 +218,19 @@ const PostComment = ({
     }
   };
 
-  /* ✅ 답글 클릭 → 멘션 자동입력 */
-  const handleReplyClick = (parentId, targetId, nickname) => {
-    setShowReplyTarget((prev) =>
-      prev?.targetId === targetId ? null : { parentId, targetId, nickname }
-    );
+  /* ✅ 답글 클릭  */
+  const handleReplyClick = (parentId, targetId, nickname, type) => {
+    setShowReplyTarget((prev) => {
+      if (
+        prev &&
+        prev.parentId === parentId &&
+        prev.targetId === targetId &&
+        prev.type === type
+      ) {
+        return null;
+      }
+      return { parentId, targetId, nickname, type };
+    });
 
     setReplyInputs((prev) => ({
       ...prev,
@@ -194,10 +238,19 @@ const PostComment = ({
     }));
   };
 
-  /* ✅ 삭제 모달 */
+  /* ✅ 삭제 */
   const handleCommentDelete = async () => {
     if (!deleteTarget) return;
     const { type, id } = deleteTarget;
+
+    if (!isLogin || !currentUser?.id) {
+      openModal({
+        title: "로그인이 필요합니다",
+        message: "삭제 기능은 로그인 후 이용 가능합니다.",
+        confirmText: "확인",
+      });
+      return;
+    }
 
     openModal({
       title: type === "comment" ? "댓글 삭제" : "답글 삭제",
@@ -208,18 +261,24 @@ const PostComment = ({
         try {
           const endpoint =
             type === "comment"
-              ? `${BASE_URL}/main/post/comment/${id}`
-              : `${BASE_URL}/main/post/reply/${id}`;
-          const res = await fetch(endpoint, { method: "DELETE" });
+              ? `${BASE_URL}/private/post/comment/${id}`
+              : `${BASE_URL}/private/post/reply/${id}`;
+          const res = await fetch(endpoint, {
+            method: "DELETE",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+            },
+          });
           if (!res.ok) throw new Error(`${type} 삭제 실패`);
 
           if (type === "comment") {
-            setComments((prev) => prev.filter((c) => c.commentId !== id));
+            setComments((prev) => prev.filter((c) => c.id !== id));
           } else {
             setComments((prev) =>
               prev.map((c) => ({
                 ...c,
-                replies: c.replies.filter((r) => r.replyId !== id),
+                replies: c.replies.filter((r) => r.id !== id),
               }))
             );
           }
@@ -269,7 +328,8 @@ const PostComment = ({
         <>
           <S.CommentList>
             {comments.map((c) => (
-              <React.Fragment key={c.commentId}>
+              <React.Fragment key={c.id}>
+                {/* ✅ 댓글 */}
                 <S.CommentItem>
                   <div className="left">
                     <img
@@ -283,17 +343,14 @@ const PostComment = ({
                       alt="프로필"
                       className="profile"
                     />
-
                     <div className="text-box">
                       <div className="header-row">
                         <div className="writer">
                           {c.memberNickname || "익명"}
                         </div>
-
-                        {/* ✅ 댓글 좋아요 */}
                         <S.LikeButton
                           $liked={c.liked}
-                          onClick={() => handleLike(c.commentId, false)}
+                          onClick={() => handleLike(c.id, false)}
                         >
                           <img
                             src={
@@ -303,41 +360,54 @@ const PostComment = ({
                             }
                             alt="좋아요"
                           />
-                          {c.commentLikeCount}
+                          {c.postCommentLikeCount}
                         </S.LikeButton>
                       </div>
 
                       <div className="content">
-                        {renderTextWithTags(c.commentContent)}
+                        {renderTextWithTags(c.postCommentContent)}
                       </div>
 
                       <div className="meta-row">
-                        <span>{formatDate(c.commentCreateAt)}</span> |{" "}
-                        <span
-                          className="report"
-                          onClick={() => {
-                            setReportTarget({
-                              type: "comment",
-                              id: c.commentId,
-                            });
-                            setShowReportModal(true);
-                          }}
-                        >
-                          신고
-                        </span>{" "}
-                        |{" "}
-                        <span
-                          className="delete"
-                          onClick={() => {
-                            setDeleteTarget({
-                              type: "comment",
-                              id: c.commentId,
-                            });
-                            handleCommentDelete();
-                          }}
-                        >
-                          삭제
-                        </span>
+                        <span>{formatDate(c.postCommentCreateAt)}</span>
+
+                        {(!isLogin || currentUser?.id !== c.memberId) && (
+                          <>
+                            <span> | </span>
+                            <span
+                              className="report"
+                              onClick={() => {
+                                if (!isLogin || !currentUser?.id) {
+                                  openModal({
+                                    title: "로그인이 필요합니다",
+                                    message: "신고 기능은 로그인 후 이용 가능합니다.",
+                                    confirmText: "확인",
+                                  });
+                                  return;
+                                }
+                                setReportTarget({ type: "comment", id: c.id });
+                                setShowReportModal(true);
+                              }}
+                            >
+                              신고
+                            </span>
+                          </>
+                        )}
+
+                        {isLogin && currentUser?.id === c.memberId && (
+                          <>
+                            <span> | </span>
+                            <span
+                              className="delete"
+                              onClick={() => {
+                                setDeleteTarget({ type: "comment", id: c.id });
+                                handleCommentDelete();
+                              }}
+                            >
+                              삭제
+                            </span>
+                          </>
+                        )}
                       </div>
 
                       <div className="reply-row">
@@ -345,9 +415,10 @@ const PostComment = ({
                           className="reply"
                           onClick={() =>
                             handleReplyClick(
-                              c.commentId,
-                              c.commentId,
-                              c.memberNickname
+                              c.id,
+                              c.id,
+                              c.memberNickname,
+                              "comment"
                             )
                           }
                         >
@@ -358,115 +429,196 @@ const PostComment = ({
                   </div>
                 </S.CommentItem>
 
-                {/* ✅ 답글 입력창 */}
-                {showReplyTarget?.targetId === c.commentId && (
-                  <S.CommentForm $indent>
-                    <div className="avatar">
-                      <img src="/postImages/profile.png" alt="내 프로필" />
-                      <span className="nickname">지존준서</span>
-                    </div>
-                    <div className="input-wrap">
-                      <textarea
-                        placeholder="답글을 입력하세요"
-                        maxLength={300}
-                        value={replyInputs[c.commentId] || ""}
-                        onChange={(e) =>
-                          setReplyInputs((prev) => ({
-                            ...prev,
-                            [c.commentId]: e.target.value,
-                          }))
-                        }
-                      />
-                      <span className="count">
-                        {(replyInputs[c.commentId]?.length || 0)}/300
-                      </span>
-                    </div>
-                    <button
-                      className="submit-btn"
-                      onClick={() =>
-                        handleReplySubmit(c.commentId, c.commentId)
-                      }
-                    >
-                      등록
-                    </button>
-                  </S.CommentForm>
-                )}
+                {/* ✅ 댓글의 답글 입력창 */}
+                {showReplyTarget?.type === "comment" &&
+                  showReplyTarget?.targetId === c.id &&
+                  showReplyTarget?.parentId === c.id && (
+                    <S.CommentForm $indent>
+                      <div className="avatar">
+                        <img
+                          src={
+                            currentUser?.profilePath ||
+                            "/postImages/profile.png"
+                          }
+                          alt="내 프로필"
+                        />
+                        <span className="nickname">
+                          {currentUser?.memberNickname || "익명"}
+                        </span>
+                      </div>
+                      <div className="input-wrap">
+                        <textarea
+                          placeholder="답글을 입력하세요"
+                          maxLength={300}
+                          value={replyInputs[c.id] || ""}
+                          onChange={(e) =>
+                            setReplyInputs((prev) => ({
+                              ...prev,
+                              [c.id]: e.target.value,
+                            }))
+                          }
+                        />
+                        <span className="count">
+                          {(replyInputs[c.id]?.length || 0)}/300
+                        </span>
+                      </div>
+                      <button
+                        className="submit-btn"
+                        onClick={() => handleReplySubmit(c.id, c.id)}
+                      >
+                        등록
+                      </button>
+                    </S.CommentForm>
+                  )}
 
                 {/* ✅ 대댓글 */}
                 {c.replies?.map((r) => (
-                  <S.CommentItem key={r.replyId} indent>
-                    <div className="left">
-                      <img
-                        src={
-                          r.memberProfileUrl
-                            ? r.memberProfileUrl.startsWith("/upload/")
-                              ? `http://localhost:10000${r.memberProfileUrl}`
-                              : r.memberProfileUrl
-                            : "/images/default_profile.png"
-                        }
-                        alt="프로필"
-                        className="profile"
-                      />
-                      <div className="text-box">
-                        <div className="header-row">
-                          <div className="writer">
-                            {r.memberNickname || "익명"}
+                  <React.Fragment key={r.id}>
+                    <S.CommentItem indent>
+                      <div className="left">
+                        <img
+                          src={
+                            r.memberProfileUrl
+                              ? r.memberProfileUrl.startsWith("/upload/")
+                                ? `http://localhost:10000${r.memberProfileUrl}`
+                                : r.memberProfileUrl
+                              : "/images/default_profile.png"
+                          }
+                          alt="프로필"
+                          className="profile"
+                        />
+                        <div className="text-box">
+                          <div className="header-row">
+                            <div className="writer">
+                              {r.memberNickname || "익명"}
+                            </div>
+                            <S.LikeButton
+                              $liked={r.liked}
+                              onClick={() => handleLike(r.id, true, c.id)}
+                            >
+                              <img
+                                src={
+                                  r.liked
+                                    ? "/assets/icons/favorite_acv.svg"
+                                    : "/assets/icons/favorite_gray.svg"
+                                }
+                                alt="좋아요"
+                              />
+                              {r.postReplyLikeCount}
+                            </S.LikeButton>
                           </div>
 
-                          {/* ✅ 대댓글 좋아요 */}
-                          <S.LikeButton
-                            $liked={r.liked}
-                            onClick={() =>
-                              handleLike(r.replyId, true, c.commentId)
-                            }
-                          >
-                            <img
-                              src={
-                                r.liked
-                                  ? "/assets/icons/favorite_acv.svg"
-                                  : "/assets/icons/favorite_gray.svg"
+                          <div className="content">
+                            {renderTextWithTags(r.postReplyContent)}
+                          </div>
+
+                          <div className="meta-row">
+                            <span>{formatDate(r.postReplyCreateAt)}</span>
+
+                            {/* ✅ 신고 버튼: 본인 댓글이 아닐 때만 표시 */}
+                            {(!isLogin || currentUser?.id !== r.memberId) && (
+                              <>
+                                <span> | </span>
+                                <span
+                                  className="report"
+                                  onClick={() => {
+                                    if (!isLogin || !currentUser?.id) {
+                                      openModal({
+                                        title: "로그인이 필요합니다",
+                                        message: "신고 기능은 로그인 후 이용 가능합니다.",
+                                        confirmText: "확인",
+                                      });
+                                      return;
+                                    }
+                                    setReportTarget({ type: "reply", id: r.id });
+                                    setShowReportModal(true);
+                                  }}
+                                >
+                                  신고
+                                </span>
+                              </>
+                            )}
+
+                            {/* ✅ 삭제 버튼: 본인 댓글일 때만 표시 */}
+                            {isLogin && currentUser?.id === r.memberId && (
+                              <>
+                                <span> | </span>
+                                <span
+                                  className="delete"
+                                  onClick={() => {
+                                    setDeleteTarget({ type: "reply", id: r.id });
+                                    handleCommentDelete();
+                                  }}
+                                >
+                                  삭제
+                                </span>
+                              </>
+                            )}
+                          </div>
+
+                          <div className="reply-row">
+                            <button
+                              className="reply"
+                              onClick={() =>
+                                handleReplyClick(
+                                  c.id,
+                                  r.id,
+                                  r.memberNickname,
+                                  "reply"
+                                )
                               }
-                              alt="좋아요"
-                            />
-                            {r.replyLikeCount}
-                          </S.LikeButton>
-                        </div>
-
-                        <div className="content">
-                          {renderTextWithTags(r.replyContent)}
-                        </div>
-
-                        <div className="meta-row">
-                          <span>{formatDate(r.replyCreateAt)}</span> |{" "}
-                          <span
-                            className="report"
-                            onClick={() => {
-                              setReportTarget({
-                                type: "reply",
-                                id: r.replyId,
-                              });
-                              setShowReportModal(true);
-                            }}
-                          >
-                            신고
-                          </span>{" "}
-                          |{" "}
-                          <span
-                            className="delete"
-                            onClick={() => {
-                              setDeleteTarget({
-                                type: "reply",
-                                id: r.replyId,
-                              });
-                              handleCommentDelete();
-                            }}
-                          >
-                            삭제
-                          </span>
+                            >
+                              답글
+                            </button>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </S.CommentItem>
+                    </S.CommentItem>
+
+                    {/* ✅ 대댓글의 답글 입력창 */}
+                    {showReplyTarget?.type === "reply" &&
+                      showReplyTarget?.targetId === r.id &&
+                      showReplyTarget?.parentId === c.id && (
+                        <S.CommentForm $nested>
+                          <div className="avatar">
+                            <img
+                              src={
+                                currentUser?.profilePath ||
+                                "/postImages/profile.png"
+                              }
+                              alt="내 프로필"
+                            />
+                            <span className="nickname">
+                              {currentUser?.memberNickname || "익명"}
+                            </span>
+                          </div>
+                          <div className="input-wrap">
+                            <textarea
+                              placeholder="답글을 입력하세요"
+                              maxLength={300}
+                              value={replyInputs[r.id] || ""}
+                              onChange={(e) =>
+                                setReplyInputs((prev) => ({
+                                  ...prev,
+                                  [r.id]: e.target.value,
+                                }))
+                              }
+                            />
+                            <span className="count">
+                              {(replyInputs[r.id]?.length || 0)}/300
+                            </span>
+                          </div>
+                          <button
+                            className="submit-btn"
+                            onClick={() =>
+                              handleReplySubmit(c.id, r.id)
+                            }
+                          >
+                            등록
+                          </button>
+                        </S.CommentForm>
+                      )}
+                  </React.Fragment>
                 ))}
               </React.Fragment>
             ))}
@@ -475,8 +627,13 @@ const PostComment = ({
           {/* ✅ 일반 댓글 입력 */}
           <S.CommentForm>
             <div className="avatar">
-              <img src="/postImages/profile.png" alt="내 프로필" />
-              <span className="nickname">지존준서</span>
+              <img
+                src={currentUser?.profilePath || "/postImages/profile.png"}
+                alt="내 프로필"
+              />
+              <span className="nickname">
+                {currentUser?.memberNickname || "익명"}
+              </span>
             </div>
             <div className="input-wrap">
               <textarea
@@ -493,18 +650,12 @@ const PostComment = ({
           </S.CommentForm>
         </>
       )}
-
-      {/* ✅ 신고 모달 */}
       {showReportModal && (
         <Report
           target={reportTarget}
           onClose={() => setShowReportModal(false)}
           onSubmit={(reason) => {
-            console.log("신고 완료:", {
-              target: reportTarget?.type,
-              id: reportTarget?.id,
-              reason,
-            });
+            console.log("신고 완료:", reason);
             setShowReportModal(false);
           }}
         />
@@ -512,5 +663,7 @@ const PostComment = ({
     </S.CommentSection>
   );
 };
+
+
 
 export default PostComment;

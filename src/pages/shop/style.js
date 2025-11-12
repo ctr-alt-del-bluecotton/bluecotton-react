@@ -296,9 +296,13 @@ S.ProductImageBox = styled.div`
   width: 218px;
   height: 290px;
   position: relative;
-background-image: url(${props => props.$bg});
+  background-image: url(${props => props.$bg});
   border: 1px solid ${({ theme }) => theme.PALLETE.grey.greyScale1};
   overflow: hidden;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat
+  
 `;
 
 /* 찜 하기 버튼 */
