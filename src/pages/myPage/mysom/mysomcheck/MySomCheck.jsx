@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 
 const Container = styled.div`
@@ -296,10 +297,83 @@ const SubmitButton = styled.button`
 `;
 
   const MySomCheck = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
   const [fileCount, setFileCount] = useState(0);
   const [textLength, setTextLength] = useState(0);
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [previewUrl, setPreviewUrl] = useState(null);
+  const [somData, setSomData] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  // 카테고리 매핑
+  const categoryMap = {
+    study: '학습',
+    health: '건강',
+    social: '소셜',
+    hobby: '취미',
+    'life-style': '생활',
+    life: '생활',
+    rookie: '루키'
+  };
+
+  // 날짜 포맷팅 함수
+  const formatDate = (dateString) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}.${month}.${day}`;
+  };
+
+  // 시간 포맷팅 함수 (시:분)
+  const formatTime = (dateString) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    const hours = String(date.getHours()).padStart(2, '0');
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    return `${hours}:${minutes}`;
+  };
+
+  // 챌린지 정보 가져오기
+  useEffect(() => {
+    const loadSomData = async () => {
+      try {
+        setLoading(true);
+        
+        // location state에서 챌린지 데이터 가져오기
+        const stateData = location.state?.somData;
+        
+        if (stateData) {
+          setSomData(stateData);
+        } else {
+          // state가 없으면 URL 파라미터나 쿼리에서 ID를 가져와서 API 호출
+          const searchParams = new URLSearchParams(location.search);
+          const somId = searchParams.get('id');
+          
+          if (somId) {
+            const res = await fetch(`${process.env.REACT_APP_BACKEND_URL}/my-page/read-som?id=${somId}`, {
+              headers: { "Content-Type": "application/json" },
+              method: "GET",
+              credentials: "include"
+            });
+
+            if (res.ok) {
+              const result = await res.json();
+              setSomData(result.data);
+            }
+          }
+        }
+      } catch (error) {
+        console.error('챌린지 정보 로딩 실패:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadSomData();
+  }, [location]);
 
   const handleFileChange = (e) => {
     const files = Array.from(e.target.files);
@@ -338,17 +412,41 @@ const SubmitButton = styled.button`
     console.log('인증 등록');
   };
 
+  if (loading) {
+    return (
+      <Container>
+        <div>로딩 중...</div>
+      </Container>
+    );
+  }
+
+  if (!somData) {
+    return (
+      <Container>
+        <Title>오늘의 인증을 남겨보세요!</Title>
+        <Subtitle>챌린지 정보를 불러올 수 없습니다.</Subtitle>
+      </Container>
+    );
+  }
+
+  const somType = somData.somType === 'solo' ? '솔로' : somData.somType === 'party' ? '파티' : '기타';
+  const challengeTitle = somData.somTitle || '제목 없음';
+  const startDate = formatDate(somData.somStartDate);
+  const endDate = formatDate(somData.somEndDate);
+  const startTime = formatTime(somData.somStartDate);
+  const endTime = formatTime(somData.somEndDate);
+
   return (
     <Container>
       <Title>오늘의 인증을 남겨보세요!</Title>
-      <Subtitle>나의 솔로솜 여정을 기록해보세요</Subtitle>
+      <Subtitle>나의 {somType}솜 여정을 기록해보세요</Subtitle>
 
       <ChallengeInfoBox>
-        <ChallengeType>솔로</ChallengeType>
-        <ChallengeTitle>2km 런닝 뛰기 챌린지!!</ChallengeTitle>
+        <ChallengeType>{categoryMap[somData.somCategory] || somData.somCategory || '기타'}</ChallengeType>
+        <ChallengeTitle>{challengeTitle}</ChallengeTitle>
         <ChallengeDetails>
-          <div>2025.09.01 ~ 2025.09.07</div>
-          <div>[요일반복] [금] 7회/7회</div>
+          <div>{startDate} {startTime} ~ {endDate} {endTime}</div>
+          {somData.somRepeat && <div>{somData.somRepeat}</div>}
         </ChallengeDetails>
       </ChallengeInfoBox>
 
@@ -386,7 +484,7 @@ const SubmitButton = styled.button`
       </UploadSection>
 
       <ContentSection>
-        <ContentTitle>인증 내용 2km 런닝 뛰기 챌린지!!</ContentTitle>
+        <ContentTitle>인증 내용 {challengeTitle}</ContentTitle>
         <Toolbar>
           <ToolbarButton title="H1">H1</ToolbarButton>
           <ToolbarButton title="H2">H2</ToolbarButton>
