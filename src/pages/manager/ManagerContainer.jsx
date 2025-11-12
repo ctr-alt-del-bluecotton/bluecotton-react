@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import S from './style';
 
 // 매니저 페이지 주소
 export const MANAGER_PAGE_PATH = '/main/manager';
 
 const ManagerContainer = () => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('overview');
 
   // 더미 데이터
@@ -43,6 +45,33 @@ const ManagerContainer = () => {
           <S.Title>관리자 페이지</S.Title>
           <S.Subtitle>시스템 관리 및 모니터링</S.Subtitle>
         </S.Header>
+
+        {/* 빠른 작업 섹션 */}
+        <S.QuickActionSection>
+          <S.QuickActionTitle>빠른 작업</S.QuickActionTitle>
+          <S.QuickActionGrid>
+            <S.QuickActionCard onClick={() => navigate('/main/manager/users')}>
+              <S.QuickActionIcon>👥</S.QuickActionIcon>
+              <S.QuickActionLabel>사용자 관리</S.QuickActionLabel>
+              <S.QuickActionDesc>전체 사용자 조회 및 관리</S.QuickActionDesc>
+            </S.QuickActionCard>
+            <S.QuickActionCard onClick={() => navigate('/main/manager/soms')}>
+              <S.QuickActionIcon>🎯</S.QuickActionIcon>
+              <S.QuickActionLabel>솜 관리</S.QuickActionLabel>
+              <S.QuickActionDesc>솜 목록 및 상태 관리</S.QuickActionDesc>
+            </S.QuickActionCard>
+            <S.QuickActionCard onClick={() => navigate('/main/manager/posts')}>
+              <S.QuickActionIcon>📝</S.QuickActionIcon>
+              <S.QuickActionLabel>게시글 관리</S.QuickActionLabel>
+              <S.QuickActionDesc>게시글 조회 및 삭제</S.QuickActionDesc>
+            </S.QuickActionCard>
+            <S.QuickActionCard onClick={() => navigate('/main/manager/orders')}>
+              <S.QuickActionIcon>🛒</S.QuickActionIcon>
+              <S.QuickActionLabel>주문 관리</S.QuickActionLabel>
+              <S.QuickActionDesc>주문 및 상품 관리</S.QuickActionDesc>
+            </S.QuickActionCard>
+          </S.QuickActionGrid>
+        </S.QuickActionSection>
 
         {/* 통계 섹션 */}
         <S.ContentSection>
@@ -91,90 +120,8 @@ const ManagerContainer = () => {
           </S.Table>
         </S.ContentSection>
 
-        {/* 신고내용 관리 섹션 */}
-        <S.ContentSection>
-          <S.SectionTitle>신고내용 관리</S.SectionTitle>
-          <S.Table>
-            <S.TableHeader>
-              <S.TableRow>
-                <S.TableHeaderCell>유형</S.TableHeaderCell>
-                <S.TableHeaderCell>신고 사유</S.TableHeaderCell>
-                <S.TableHeaderCell>신고자</S.TableHeaderCell>
-                <S.TableHeaderCell>피신고자</S.TableHeaderCell>
-                <S.TableHeaderCell>신고 시간</S.TableHeaderCell>
-                <S.TableHeaderCell>처리 상태</S.TableHeaderCell>
-                <S.TableHeaderCell>작업</S.TableHeaderCell>
-              </S.TableRow>
-            </S.TableHeader>
-            <tbody>
-              {reports.map((report) => (
-                <S.TableRow key={report.id}>
-                  <S.TableCell>{report.type}</S.TableCell>
-                  <S.TableCell>{report.reason}</S.TableCell>
-                  <S.TableCell>{report.reporter}</S.TableCell>
-                  <S.TableCell>{report.reported}</S.TableCell>
-                  <S.TableCell>{report.time}</S.TableCell>
-                  <S.TableCell>
-                    <S.StatusBadge $status={report.status}>
-                      {report.status === 'pending' ? '대기중' : '처리완료'}
-                    </S.StatusBadge>
-                  </S.TableCell>
-                  <S.TableCell>
-                    <S.Button style={{ padding: '6px 12px', fontSize: '12px' }}>처리</S.Button>
-                  </S.TableCell>
-                </S.TableRow>
-              ))}
-            </tbody>
-          </S.Table>
-        </S.ContentSection>
+              
 
-        {/* 인증내역 관리 섹션 */}
-        <S.ContentSection>
-          <S.SectionTitle>인증내역 관리</S.SectionTitle>
-          <S.Table>
-            <S.TableHeader>
-              <S.TableRow>
-                <S.TableHeaderCell>사용자</S.TableHeaderCell>
-                <S.TableHeaderCell>솜 제목</S.TableHeaderCell>
-                <S.TableHeaderCell>인증 유형</S.TableHeaderCell>
-                <S.TableHeaderCell>인증 시간</S.TableHeaderCell>
-                <S.TableHeaderCell>상태</S.TableHeaderCell>
-                <S.TableHeaderCell>작업</S.TableHeaderCell>
-              </S.TableRow>
-            </S.TableHeader>
-            <tbody>
-              {certifications.map((cert) => (
-                <S.TableRow key={cert.id}>
-                  <S.TableCell>{cert.user}</S.TableCell>
-                  <S.TableCell>{cert.somTitle}</S.TableCell>
-                  <S.TableCell>{cert.type}</S.TableCell>
-                  <S.TableCell>{cert.time}</S.TableCell>
-                  <S.TableCell>
-                    <S.StatusBadge $status={cert.status}>
-                      {cert.status === 'pending' ? '검토중' : '승인됨'}
-                    </S.StatusBadge>
-                  </S.TableCell>
-                  <S.TableCell>
-                    <S.Button style={{ padding: '6px 12px', fontSize: '12px', marginRight: '8px' }}>승인</S.Button>
-                    <S.SecondaryButton style={{ padding: '6px 12px', fontSize: '12px' }}>거부</S.SecondaryButton>
-                  </S.TableCell>
-                </S.TableRow>
-              ))}
-            </tbody>
-          </S.Table>
-        </S.ContentSection>
-
-        {/* 액션 버튼 섹션 */}
-        <S.ContentSection>
-          <S.SectionTitle>빠른 작업</S.SectionTitle>
-          <S.ButtonGroup>
-            <S.Button>사용자 관리</S.Button>
-            <S.Button>솜 관리</S.Button>
-            <S.Button>상품 등록</S.Button>
-            <S.SecondaryButton>게시글 관리</S.SecondaryButton>
-            <S.SecondaryButton>주문 관리</S.SecondaryButton>
-          </S.ButtonGroup>
-        </S.ContentSection>
       </S.ManagerContainer>
     </S.ManagerWrapper>
   );
