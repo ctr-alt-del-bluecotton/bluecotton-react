@@ -116,7 +116,7 @@ const Shop = () => {
 
   const handleAddToCart = async () => {
     const itemData = {
-      memberId: 1, 
+      memberId: currentUser.id, 
       productId: id,
       quantity: count,
     };
