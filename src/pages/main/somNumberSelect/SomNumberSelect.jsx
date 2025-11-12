@@ -3,8 +3,8 @@ import S from "./style";
 import { useMain } from "../../../context/MainContext";
 
 const SomNumberSelect = () => {
-  const { somList, pageNumber, setPageNumber } = useMain();
-  const totalPages = Math.ceil(somList?.length / 9); 
+  const { pageNumber, setPageNumber, maxPage } = useMain();
+  const totalPages = maxPage; 
   const groupSize = 10;
 
   // 현재 페이지 그룹의 시작 번호 계산

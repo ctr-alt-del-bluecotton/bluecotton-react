@@ -8,6 +8,7 @@ S.floatingContentContainer = styled.div`
   position: relative;
   width: 100%;
   height: 850px;
+  border-radius: 20px;
 `
 
 export default S;
