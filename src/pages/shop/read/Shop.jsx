@@ -6,6 +6,7 @@ import ShopRelated from "./ShopRelated";
 import { useNavigate, useParams } from "react-router-dom";
 import { useModal } from "../../../components/modal/useModal";
 import { resolveUrl } from "../../../utils/url";
+import { useSelector } from "react-redux";
 
 
 const formatPrice = (type, value) => {
@@ -22,6 +23,8 @@ const Shop = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { openModal } = useModal();
+  const { currentUser, isLogin } = useSelector((state) => state.user);
+
 
   const [headerData, setHeaderData] = useState(null); // 상품 상단 헤더
   const [reviewStats, setReviewStats] = useState(null); // "리뷰 평점"
@@ -99,7 +102,21 @@ const Shop = () => {
     }
   }, [id]);
 
+
   const toggleLike = () => {
+    // ✅ 비로그인: 공용 모달 안내
+    if (!isLogin || !currentUser?.id) {
+      openModal({
+        title: "로그인이 필요합니다",
+        message: "찜하기는 로그인 후 이용할 수 있어요.",
+        confirmText: "로그인하러 가기",
+        cancelText: "취소",
+        onConfirm: () => navigate("/login"),
+      });
+      return;
+    }
+
+    // ✅ 로그인 상태: 기존 로컬 토글 유지
     setIsLiked((prev) => {
       setLikeCount((v) => (prev ? v - 1 : v + 1));
       return !prev;
