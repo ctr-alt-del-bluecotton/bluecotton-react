@@ -300,7 +300,7 @@ const PostWriteContent = () => {
         </S.FormRow>
 
         <S.FormRow>
-          <label>카테고리</label>
+         <label>카테고리</label>
           <select value={category} onChange={(e) => setCategory(e.target.value)}>
             <option value="">참여 중인 솜을 선택해주세요</option>
             {categories.map((cat) => (

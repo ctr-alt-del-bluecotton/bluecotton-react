@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { useSelector } from 'react-redux';
 import S from '../style';
 import { useModal } from '../../../../components/modal';
+import { getUserId } from '../../utils/getUserId';
 
 const categoryMap = {
   life: '생활',
@@ -17,11 +17,23 @@ const MyPostLikeContainer = () => {
   const navigate = useNavigate();
   const { openModal } = useModal();
   const [searchParams] = useSearchParams();
-  const { currentUser } = useSelector((state) => state.user);
-  // URL 파라미터에서 id를 가져오거나, 없으면 Redux의 현재 사용자 ID 사용
-  const id = searchParams.get('id') || (currentUser?.id ? String(currentUser.id) : null);
+  const [userId, setUserId] = useState(null);
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
+  
+  // 사용자 ID 가져오기
+  useEffect(() => {
+    const fetchUserId = async () => {
+      const urlId = searchParams.get('id');
+      if (urlId) {
+        setUserId(urlId);
+      } else {
+        const id = await getUserId();
+        setUserId(id);
+      }
+    };
+    fetchUserId();
+  }, [searchParams]);
 
   useEffect(() => {
     const formatDate = (dateString) => {
@@ -36,14 +48,14 @@ const MyPostLikeContainer = () => {
     const fetchPosts = async () => {
       try {
         setLoading(true);
-        // id가 없으면 API 호출하지 않음 (서버에서 id가 필수 파라미터일 수 있음)
-        if (!id) {
+        // userId가 없으면 API 호출하지 않음 (서버에서 id가 필수 파라미터일 수 있음)
+        if (!userId) {
           setPosts([]);
           setLoading(false);
           return;
         }
         
-        const url = `${process.env.REACT_APP_BACKEND_URL}/my-page/read-post-like?id=${id}`;
+        const url = `${process.env.REACT_APP_BACKEND_URL}/my-page/read-post-like?id=${userId}`;
         
         const response = await fetch(url, {
           headers: { "Content-Type": "application/json" },
@@ -76,7 +88,7 @@ const MyPostLikeContainer = () => {
     };
 
     fetchPosts();
-  }, [id, currentUser]);
+  }, [userId]);
 
   const handleDelete = async (postId) => {
     try {

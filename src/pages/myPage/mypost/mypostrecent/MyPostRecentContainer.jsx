@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { useSelector } from 'react-redux';
 import S from '../style';
 import { useModal } from '../../../../components/modal';
+import { getUserId } from '../../utils/getUserId';
 
 const categoryMap = {
   life: '생활',
@@ -17,11 +17,23 @@ const MyPostRecentContainer = () => {
   const navigate = useNavigate();
   const { openModal } = useModal();
   const [searchParams] = useSearchParams();
-  const { currentUser } = useSelector((state) => state.user);
-  // URL 파라미터에서 id를 가져오거나, 없으면 Redux의 현재 사용자 ID 사용
-  const id = searchParams.get('id') || (currentUser?.id ? String(currentUser.id) : null);
+  const [userId, setUserId] = useState(null);
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
+  
+  // 사용자 ID 가져오기
+  useEffect(() => {
+    const fetchUserId = async () => {
+      const urlId = searchParams.get('id');
+      if (urlId) {
+        setUserId(urlId);
+      } else {
+        const id = await getUserId();
+        setUserId(id);
+      }
+    };
+    fetchUserId();
+  }, [searchParams]);
 
   useEffect(() => {
     const formatDate = (dateString) => {
@@ -36,9 +48,14 @@ const MyPostRecentContainer = () => {
     const fetchPosts = async () => {
       try {
         setLoading(true);
-        const url = id 
-          ? `${process.env.REACT_APP_BACKEND_URL}/my-page/read-post-recent?id=${id}`
-          : `${process.env.REACT_APP_BACKEND_URL}/my-page/read-post-recent`;
+        // userId가 없으면 API 호출하지 않음
+        if (!userId) {
+          setPosts([]);
+          setLoading(false);
+          return;
+        }
+        
+        const url = `${process.env.REACT_APP_BACKEND_URL}/my-page/read-post-recent?id=${userId}`;
         
         const response = await fetch(url, {
           headers: { "Content-Type": "application/json" },
@@ -53,12 +70,15 @@ const MyPostRecentContainer = () => {
         console.log('최근 본 게시글 응답:', result);
         
         if (result.data && Array.isArray(result.data)) {
-          const formattedPosts = result.data.map((post) => ({
-            id: post.id,
-            type: categoryMap[post.somCategory] || post.somCategory || '기타',
-            title: post.postTitle || post.title || '',
-            date: formatDate(post.postCreateAt || post.createAt || post.date),
-          }));
+          const formattedPosts = result.data.map((post) => {
+            const formattedDate = formatDate(post.postRecentCreateAt || post.postCreateAt || post.createAt || post.date);
+            return {
+              id: post.id,
+              type: categoryMap[post.somCategory] || post.somCategory || '기타',
+              title: post.postTitle || post.title || '제목 없음',
+              date: formattedDate || '조회일자 없음',
+            };
+          });
           setPosts(formattedPosts);
         } else {
           setPosts([]);
@@ -72,7 +92,7 @@ const MyPostRecentContainer = () => {
     };
 
     fetchPosts();
-  }, [id, currentUser]);
+  }, [userId]);
 
   const handleDelete = async (postId) => {
     try {
@@ -122,10 +142,10 @@ const MyPostRecentContainer = () => {
                 style={{ cursor: 'pointer' }}
               >
                 <div style={{ flex: 1 }}>
-                  <S.ItemType>{post.type}</S.ItemType>
-                  <S.ItemTitle>{post.title}</S.ItemTitle>
+                  <S.ItemType>{post.type || '기타'}</S.ItemType>
+                  <S.ItemTitle>{post.title || '제목 없음'}</S.ItemTitle>
                   <S.ItemDetails>
-                    <span>{post.date}</span>
+                    <span>조회일: {post.date || '조회일자 없음'}</span>
                   </S.ItemDetails>
                 </div>
                 <S.DeleteButton 

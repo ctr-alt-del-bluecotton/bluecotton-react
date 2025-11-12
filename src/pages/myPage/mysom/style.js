@@ -53,15 +53,15 @@ S.FilterButton = styled.button`
   padding: 10px 20px;
   border-radius: 8px;
   border: none;
-  ${props => props.active ? C.smallText2Bold : C.smallText2Regular}
+  ${props => props.$active ? C.smallText2Bold : C.smallText2Regular}
   font-family: 'Daeojamjil', sans-serif;
   cursor: pointer;
   transition: all 0.2s;
-  background-color: ${props => props.active ? props.theme.PALLETE.primary.main : props.theme.PALLETE.grey.greyScale0};
-  color: ${props => props.active ? props.theme.PALLETE.white : props.theme.PALLETE.basic};
+  background-color: ${props => props.$active ? props.theme.PALLETE.primary.main : props.theme.PALLETE.grey.greyScale0};
+  color: ${props => props.$active ? props.theme.PALLETE.white : props.theme.PALLETE.basic};
   
   &:hover {
-    background-color: ${props => props.active ? props.theme.PALLETE.primary.main : props.theme.PALLETE.grey.greyScale1};
+    background-color: ${props => props.$active ? props.theme.PALLETE.primary.main : props.theme.PALLETE.grey.greyScale1};
   }
 `;
 
