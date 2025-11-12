@@ -236,6 +236,8 @@ S.Label = styled.label`
   cursor: pointer;
   ${C.smallText2Regular}
   ${C.basic}
+  color: ${({ $active, theme }) => ($active ? theme.PALLETE.primary.main : "inherit")};
+  font-weight: ${({ $active }) => ($active ? 600 : 400)};
 `;
 
 S.Checkbox = styled.input.attrs({ type: "checkbox" })`
@@ -405,6 +407,17 @@ S.Pagination = styled.div`
   display: flex;
   justify-content: center;
   margin: 24px 0 80px;
+`;
+
+S.PageBtn = styled.button`
+  min-width: 36px;
+  height: 36px;
+  margin: 0 4px;
+  border-radius: 8px;
+  border: 1px solid ${({ $active, theme }) => ($active ? theme.PALLETE.primary.main : "#ddd")};
+  background: ${({ $active, theme }) => ($active ? theme.PALLETE.primary.main : "#fff")};
+  color: ${({ $active }) => ($active ? "#fff" : "#333")};
+  cursor: pointer;
 `;
 
 
