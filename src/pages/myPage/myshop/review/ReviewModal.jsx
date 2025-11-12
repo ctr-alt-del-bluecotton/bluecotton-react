@@ -52,7 +52,7 @@ const ReviewModal = ({
     const month = String(now.getMonth() + 1).padStart(2, "0");
     const day = String(now.getDate()).padStart(2, "0");
     
-    // ✅ 폴더 구조: som/2025/11/10
+
     const formData = new FormData();
     const folderPath = `${folder}/${year}/${month}/${day}`;
     formData.append('file', file);
@@ -77,8 +77,27 @@ const ReviewModal = ({
     console.log("[DEBUG] Image uploaded:", result);
 
      const data = result?.data ?? result;       
-    setImagePath(data.imagePath || data.path); 
-    setImageName(data.imageName || data.name); 
+
+
+    let ip = "";
+    let iname = "";
+
+    if (data && data.imagePath) ip = data.imagePath;
+    else if (data && data.path) ip = data.path;
+
+    if (data && data.imageName) iname = data.imageName;
+    else if (data && data.name) iname = data.name;
+
+    if ((!ip || !iname) && data && data.url) {
+      const parts = data.url.split("/");
+      iname = parts[parts.length - 1];     // 파일명
+      parts.pop();
+      ip = parts.join("/") + "/";          // 폴더 경로(끝에 / 붙임)
+    }
+
+
+  setImagePath(ip);
+  setImageName(iname);
 
     setFiles(next);
     e.target.value = "";
@@ -94,11 +113,11 @@ const ReviewModal = ({
 
 
      const payload = {
-        memberId,                 // ★ Redux에서
-        productId: product.id,    // ★ 모달 prop의 product.id 사용
+        memberId,                
+        productId: product.id,    
         rating,
         content,
-        imagePath,                // ★ 업로드 결과
+        imagePath,               
         imageName,
       };
 

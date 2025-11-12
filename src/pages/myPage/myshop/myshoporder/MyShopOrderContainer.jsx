@@ -26,7 +26,7 @@ const MyShopOrderContainer = () => {
       productId:order.productId,
       name: order.productName,
       date: order.orderCreateAt,
-      image: order.productMainImageUrl,
+      image: resolveUrl(order.productMainImageUrl),
     });
     setOpen(true);
   };

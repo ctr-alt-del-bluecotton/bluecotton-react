@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import S from "../style";
 import { useModal } from "../../../../components/modal/useModal";
 import ReviewModal from "../review/ReviewModal";
+import { useSelector } from "react-redux";
+import { resolveUrl } from "../../../../utils/url";
 
 const formatDotDate = (str) => (str.includes(".") ? str : str.replace(/-/g, "."));
 
@@ -26,15 +28,17 @@ const StarRating = ({ rating = 0, size = 19 }) => (
 
 const toClient = (dto) => ({
   id: dto.id,
+  productId: dto.prouductId,
   name: dto.productName || "상품명 없음",
   date: dto.productReviewDate || "",
   rating: dto.productReviewRating || 0,
   text: dto.productReviewContent || "",
-  imageUrl: dto.productImageUrl || "/assets/images/abc.png",
+  imageUrl: resolveUrl(dto.productImageUrl) || "/assets/images/abc.png",
 });
 
 const MyShopReviewContainer = () => {
   const { openModal } = useModal();
+  const { currentUser, isLogin } = useSelector((state) => state.user);
 
   const [reviews, setReviews] = useState([]);
   const [error, setError] = useState(null);
@@ -44,7 +48,7 @@ const MyShopReviewContainer = () => {
     const fetchMyReviews = async () => {
       setError(null);
       try {
-        const memberId = 1; // 로그인을 멤버 ID = 1로 했다고 가정
+        const memberId = currentUser.id;
         const url = `${process.env.REACT_APP_BACKEND_URL}/mypage/myshop/review/${memberId}`;
 
         const res = await fetch(url, {
@@ -62,7 +66,7 @@ const MyShopReviewContainer = () => {
     };
 
     fetchMyReviews();
-  }, []);
+  }, [isLogin, currentUser.id]);
 
   // 리뷰 삭제 - 아직 미구현
   const handleDelete = (id) => {
@@ -71,7 +75,17 @@ const MyShopReviewContainer = () => {
       message: "삭제 후에는 되돌릴 수 없습니다.",
       confirmText: "삭제",
       cancelText: "취소",
-      onConfirm: () => setReviews((prev) => prev.filter((r) => r.id !== id)),
+      onConfirm: async () => {
+
+        const url = `${process.env.REACT_APP_BACKEND_URL}/mypage/myshop/review/${id}}`
+        const res = await fetch(url, {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+        })
+
+        setReviews((prev) => prev.filter((r) => r.id !== id));
+
+      }
     });
   };
 
@@ -86,7 +100,32 @@ const MyShopReviewContainer = () => {
   const closeEdit = () => setEditOpen(false);
 
 
-  const handleEditSubmit = ({ rating, content }) => {
+  const handleEditSubmit = async ({ rating, content }) => {
+
+
+    const reviewUpdateData = {
+      memberId: currentUser.id,
+      rating: rating,
+      content: content,
+    };
+
+    const url = `${process.env.REACT_APP_BACKEND_URL}/mypage/myshop/review/${editing.id}`
+
+    const res = await fetch(url, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(reviewUpdateData),
+    });
+
+    if (!res.ok) { 
+    const errorData = await res.json();
+    throw new Error(errorData.message || "리뷰 수정 실패");
+
+    
+
+}
+
+
     setReviews((prev) =>
       prev.map((r) => (r.id === editing.id ? { ...r, rating, text: content } : r))
     );
@@ -109,12 +148,12 @@ const MyShopReviewContainer = () => {
           <S.ListItem key={review.id}>
             <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
   
-              <S.OrderItemImage style={{ backgroundImage: `url(${review.imageUrl})` }} />
+              <S.OrderItemImage style={{ backgroundImage: `url("${review.imageUrl}")` }} />
 
               <S.ItemContent>
                 <S.ReviewProductInfo>
                   <S.OrderProductName>{review.name}</S.OrderProductName>
-
+ 
                   <StarRating rating={review.rating} />
                   <S.ReviewDate>{formatDotDate(review.date)}</S.ReviewDate>
                   {review.text && <S.ReviewText>{review.text}</S.ReviewText>}
@@ -150,9 +189,9 @@ const MyShopReviewContainer = () => {
         onClose={closeEdit}
         mode="edit"
         product={{
-          id: editing?.id ?? 0,
+          id: editing?.productId ?? 0,
           name: editing?.name ?? "상품명",
-          imageUrl: editing?.imageUrl || "/assets/images/shop_review_som_doll1.png",
+          imageUrl: resolveUrl(editing?.imageUrl) 
         }}
         initial={{
           rating: editing?.rating ?? 0,
