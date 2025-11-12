@@ -86,7 +86,7 @@ const PostWriteContent = () => {
           setCategory(somIdValue);
 
           const matchedCategory = categoryList.find(
-            (cat) => String(cat.somId) === somIdValue
+            (cat) => String(cat.id) === somIdValue
           );
           if (matchedCategory) setCategory(matchedCategory.somId.toString());
 
@@ -300,12 +300,27 @@ const PostWriteContent = () => {
         </S.FormRow>
 
         <S.FormRow>
-         <label>카테고리</label>
-          <select value={category} onChange={(e) => setCategory(e.target.value)}>
+          <label>카테고리</label>
+          <select
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+          >
             <option value="">참여 중인 솜을 선택해주세요</option>
+
             {categories.map((cat) => (
-              <option key={cat.id} value={cat.id}>
+              <option
+                key={cat.id}
+                value={cat.id}
+                disabled={cat.somDayDiff < 1} 도전 전 솜 비활성화
+              >
+                {/* 예: 학습 - 하루 한 문제 풀기 (도전 3일차) */}
                 {categoryMap[cat.somCategory] || cat.somCategory}
+                {" - "}
+                {cat.somTitle}
+                {" "}
+                {cat.somDayDiff < 1
+                  ? "(예정)" 
+                  : `(도전 ${cat.somDayDiff}일차)`} 
               </option>
             ))}
           </select>

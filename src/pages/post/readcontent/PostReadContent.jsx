@@ -31,6 +31,17 @@ const PostReadContent = () => {
   const goPrev = () => prevId && navigate(`/main/post/read/${prevId}`);
   const goNext = () => navigate(`/main/post/read/${nextId}`);
 
+  // ✅ 공통 로그인 필요 모달 함수
+  const requireLoginModal = () => {
+    openModal({
+      title: "로그인이 필요합니다",
+      message: "이 기능은 로그인 후 이용하실 수 있습니다.",
+      confirmText: "로그인하기",
+      cancelText: "취소",
+      onConfirm: () => navigate("/login"),
+    });
+  };
+
   // ✅ Kakao SDK 초기화
   useEffect(() => {
     const initKakao = () => {
@@ -111,15 +122,12 @@ const PostReadContent = () => {
       const BASE_URL = process.env.REACT_APP_BACKEND_URL;
       const token = localStorage.getItem("accessToken");
 
-      // ✅ 로그인 상태 & 게시글 데이터 있을 때만 실행
       if (!isLogin || !token || !id || !post) {
         console.warn("🚫 최근 본 글 등록 스킵 (조건 불충족)", { id, token, post });
         return;
       }
 
       try {
-        console.log("📩 최근 본 글 등록 요청:", `${BASE_URL}/private/post/recent/${id}`);
-
         const response = await fetch(`${BASE_URL}/private/post/recent/${id}`, {
           method: "POST",
           headers: {
@@ -133,14 +141,12 @@ const PostReadContent = () => {
           return;
         }
 
-        const result = await response.json();
-        console.log("✅ 최근 본 글 등록 완료:", result.message);
+        await response.json();
       } catch (err) {
         console.error("❌ 최근 본 글 등록 중 오류:", err);
       }
     };
 
-    // 📌 post가 완전히 로드된 뒤에만 실행
     if (post) registerRecentPost();
   }, [post, id, isLogin]);
 
@@ -148,13 +154,7 @@ const PostReadContent = () => {
   const handleLike = async (commentId, isReply = false, parentId = null) => {
     const BASE_URL = process.env.REACT_APP_BACKEND_URL;
     if (!isLogin || !currentUser?.id) {
-      openModal({
-        title: "로그인이 필요합니다",
-        message: "좋아요를 누르려면 로그인이 필요합니다.",
-        confirmText: "로그인하러 가기",
-        cancelText: "취소",
-        onConfirm: () => navigate("/login"),
-      });
+      requireLoginModal();
       return;
     }
 
@@ -219,13 +219,7 @@ const PostReadContent = () => {
   // ✅ 게시글 삭제
   const handleDelete = async () => {
     if (!isLogin || !currentUser?.id) {
-      openModal({
-        title: "로그인이 필요합니다",
-        message: "게시글을 삭제하려면 로그인이 필요합니다.",
-        confirmText: "로그인하러 가기",
-        cancelText: "취소",
-        onConfirm: () => navigate("/login"),
-      });
+      requireLoginModal();
       return;
     }
 
@@ -239,9 +233,7 @@ const PostReadContent = () => {
           const BASE_URL = process.env.REACT_APP_BACKEND_URL;
           const token = localStorage.getItem("accessToken");
 
-          if (!token) {
-            throw new Error("토큰 없음 또는 인증 실패");
-          }
+          if (!token) throw new Error("토큰 없음 또는 인증 실패");
 
           const response = await fetch(
             `${BASE_URL}/private/post/withdraw?id=${id}`,
@@ -276,14 +268,18 @@ const PostReadContent = () => {
     });
   };
 
+  // ✅ 날짜 포맷 (24시간제)
   const formatDate = (dateString) => {
     const d = new Date(dateString);
     if (isNaN(d)) return "";
     return d
-      .toLocaleDateString("ko-KR", {
+      .toLocaleString("ko-KR", {
         year: "numeric",
         month: "2-digit",
         day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false, // ✅ 24시간제
       })
       .replace(/\.\s?/g, ".")
       .replace(/\.$/, "");
@@ -372,13 +368,7 @@ const PostReadContent = () => {
         <S.ReportButton
           onClick={() => {
             if (!isLogin || !currentUser?.id) {
-              openModal({
-                title: "로그인이 필요합니다",
-                message: "게시글을 신고하려면 로그인이 필요합니다.",
-                confirmText: "로그인하러 가기",
-                cancelText: "취소",
-                onConfirm: () => navigate("/login"),
-              });
+              requireLoginModal();
               return;
             }
 

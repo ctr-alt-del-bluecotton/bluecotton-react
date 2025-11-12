@@ -1,6 +1,7 @@
 // 📄 PostCard.jsx
 import React, { useState } from "react";
 import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import { useModal } from "../../../components/modal";
 import S from "./style";
 import Report from "../../../components/Report/Report";
@@ -38,35 +39,40 @@ const PostCard = ({
 
   const { currentUser, isLogin } = useSelector((state) => state.user);
   const { openModal } = useModal();
+  const navigate = useNavigate();
 
   const BASE_URL = process.env.REACT_APP_BACKEND_URL;
+
+  // ✅ 공통 로그인 필요 모달
+  const requireLoginModal = () => {
+    openModal({
+      title: "로그인이 필요합니다",
+      message: "이 기능은 로그인 후 이용하실 수 있습니다.",
+      confirmText: "로그인하기",
+      cancelText: "취소",
+      onConfirm: () => navigate("/login"),
+    });
+  };
 
   // ✅ 좋아요 토글 핸들러 (쿠키 기반 인증)
   const handleLikeClick = async (e) => {
     e.stopPropagation();
 
     if (!isLogin || !currentUser?.id) {
-      openModal({
-        title: "로그인이 필요합니다",
-        message: "좋아요를 누르려면 로그인이 필요합니다.",
-        confirmText: "확인",
-      });
+      requireLoginModal();
       return;
     }
 
     try {
       const token = localStorage.getItem("accessToken");
-
       const response = await fetch(`${BASE_URL}/private/post/like/toggle`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,  // ✅ 추가!
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ postId: id }),
       });
-
-      console.log("좋아요 요청 상태:", response.status);
 
       if (!response.ok) {
         throw new Error(`좋아요 요청 실패 (status: ${response.status})`);
