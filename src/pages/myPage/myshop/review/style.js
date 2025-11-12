@@ -57,15 +57,16 @@ S.ProductInfoBox = styled.div`
 `;
 
 S.ProductThumb = styled.img`
-  width: 28px;
-  height: 28px;
-  border-radius: 6px;
+  width: 32px;
+  height: 32px;
+  border-radius: 4px;
   object-fit: cover;
 `;
 
 S.ProductName = styled.span`
   ${C.smallText3Light}
   color: ${({ theme }) => theme.PALLETE.basic};
+  margin-left: 4px;
 `;
 
 /*  질문/별점 */

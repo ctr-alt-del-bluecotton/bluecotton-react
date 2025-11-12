@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import S from "../style";
+import { resolveUrl } from "../../../../utils/url";
+import { useSelector } from "react-redux";
 
 const likeProduct = (data) => ({
   id: data.id,
-  name: data.productName || "상품명 없음",
-  imageUrl: data.productImageUrl || "/assets/images/fallback.png",
+  name: data.productName,
+  imageUrl: resolveUrl(data.productImageUrl),
   priceText: `${Number(data.productPrice).toLocaleString()}${
     data.productPurchaseType === "CANDY" ? "캔디" : "원"
   }`,
@@ -21,14 +23,15 @@ const MyShopLikeContainer = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const { currentUser, isLogin } = useSelector((state) => state.user);
+  const memberId = currentUser?.id ?? null;  
+
   // 찜 목록 
   useEffect(() => {
     const fetchMyLikes = async () => {
       setLoading(true);
       setError(null);
       try {
-
-        const memberId = 1;
 
         const url = `${process.env.REACT_APP_BACKEND_URL}/mypage/myshop/like/${memberId}`;
 
@@ -55,20 +58,23 @@ const MyShopLikeContainer = () => {
     };
 
     fetchMyLikes();
-  }, []); 
+  }, [isLogin, memberId]); 
 
 
   const toggleLike = async(productId) => {
 
+    if (!isLogin || !memberId) return;    
+
     setItems((currentItems) => currentItems.filter((it) => it.id !== productId));
 
-    const memberId = 1;
-    const url = `${process.env.REACT_APP_BACKEND_URL}/mypage/myshop/like/${productId}`
+    const likeData = { memberId, productId };
+
+    const url = `${process.env.REACT_APP_BACKEND_URL}/shop/like/toggle`
 
     const res = await fetch(url, {
-      method: "DELETE",
+      method: "POST",
       headers: {"Content-Type": "application/json" },
-
+      body: JSON.stringify(likeData)
     })
 
     const json = await res.json();

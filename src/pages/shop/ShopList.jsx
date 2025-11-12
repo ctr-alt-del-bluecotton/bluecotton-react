@@ -1,23 +1,104 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import S from "./style";
+import { resolveUrl } from "../../utils/url";
+import { useSelector } from "react-redux";
 
 const ShopList = ({ items }) => {
-  const [liked, setLiked] = useState(new Set());
-  const toggleLike = (id) =>
-    setLiked((prev) => {
-      const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
-      return next;
+
+ const { currentUser, isLogin } = useSelector((state) => state.user);
+
+ const [liked, setLiked] = useState(new Set());
+
+  const memberId = currentUser?.id ?? null;    
+
+  useEffect(() => {
+    const next = new Set();
+    (items || []).forEach((item) => {
+ 
+      const likedFlag = item?.isLiked === true || item?.isLiked === 1 || item?.isLiked === "1";
+      if (likedFlag) next.add(item.id);
     });
+    setLiked(next);
+  }, [items]);
+  
+  const toggleLike = async (productId) => {
+
+
+    const isCurrentlyLiked = liked.has(productId);
+
+    // 백엔드 API로 보낼 데이터 (JSON)
+    const likeData = { memberId, productId }; 
+    
+    // 백엔드 컨트롤러(ShopApi)에 만든 주소
+    const url = `${process.env.REACT_APP_BACKEND_URL}/shop/like/toggle`;
+
+    try {
+
+      const res = await fetch(url,{
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(likeData),
+      })
+    
+ 
+      if (!res.ok) {
+        const errorData = await res.json(); 
+        throw new Error(errorData.message || "서버 에러");
+      }
+      
+
+      setLiked((prevLiked) => {
+        const nextLiked = new Set(prevLiked); 
+        
+        if (isCurrentlyLiked) {
+          nextLiked.delete(productId); // 찜 취소
+        } else {
+          nextLiked.add(productId);   // 찜 추가
+        }
+        return nextLiked; // 변경된 Set으로 state 업데이트
+      });
+
+    } catch (error) {
+      console.error("찜하기 처리 중 오류 발생:", error);
+      alert(error.message || "요청을 처리하는 중 오류가 발생했습니다.");
+    }
+  };
+
 
   const data = items;
 
   return (
     <S.CardGrid>
-      {data.map((item, i) => {
-        const id = item.id ?? i + 1;
+
+      {data.map((item, i) => { 
+        const id = item.id ?? i + 1; 
         const isActive = liked.has(id);
+        
+
+        const img = resolveUrl(item.productImageUrl); 
+
+        const purchaseType = item.productPurchaseType || item.purchaseType || "CASH"; 
+        const rawPrice = item.productPrice ?? 0; 
+        const priceNumber = Number(rawPrice) || 0; 
+        const priceText =
+          `${priceNumber.toLocaleString()}${purchaseType === "CANDY" ? "캔디" : "원"}`; 
+
+        const typeStr = String(item.productType ?? ""); 
+        const isNew = typeStr.includes("NEW"); 
+        const isBest = typeStr.includes("BEST"); 
+
+
+        const name = item.productName; 
+
+        // 평점/리뷰/좋아요 
+        // 없으면 0
+        const score = Number(item.productAvgRating ?? 0).toFixed(1); 
+        const reviewCount = Number(item.productReviewCount ?? 0); 
+        const likeCount = Number(item.productLikeCount ?? 0);
+
+
+
         return (
           <S.Card key={id}>
             <S.LikeButton
@@ -28,12 +109,13 @@ const ShopList = ({ items }) => {
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                toggleLike(id);
-              }}/>
+                toggleLike(id); 
+              }}
+            />
 
             <Link to={`/main/shop/read/${id}`} 
             style={{ display: "block", textDecoration: "none", color: "inherit" }}>
-              <S.ProductImageBox $bg={item.imageUrl} />
+              <S.ProductImageBox $bg={resolveUrl(item.imageUrl || "/assets/images/fallback.png")} />
               <S.ProductTitleRow>
                 <S.ProductName>{item.name}</S.ProductName>
                 {item.isNew && <S.NewTag>NEW</S.NewTag>}
