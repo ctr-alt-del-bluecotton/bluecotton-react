@@ -1,13 +1,110 @@
-import React from 'react';
-import { Outlet, useLocation } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import React, { useEffect, useState } from 'react';
+import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import S from './style';
 
 const MyPageContainer = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const [currentUser, setCurrentUser] = useState(null);
+  const [loading, setLoading] = useState(true);
   
-  // Redux에서 현재 로그인한 사용자 정보 가져오기
-  const { currentUser, isLogin } = useSelector((state) => state.user);
+  // 사용자 정보 가져오기
+  useEffect(() => {
+    const fetchUserInfo = async () => {
+      const accessToken = localStorage.getItem("accessToken");
+      
+      // accessToken이 없으면 로그인 페이지로 리다이렉트
+      if (!accessToken) {
+        navigate("/login");
+        return;
+      }
+      
+      try {
+        const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/private/members/me`, {
+          method: "GET",
+          headers: {
+            "Authorization": `Bearer ${accessToken}`
+          }
+        });
+        
+        if (!response.ok) {
+          // 토큰 만료 시 refresh 시도
+          try {
+            const refreshResponse = await fetch(`${process.env.REACT_APP_BACKEND_URL}/auth/refresh`, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json"
+              },
+              credentials: 'include',
+              body: JSON.stringify({
+                accessToken: accessToken
+              })
+            });
+            
+            if (!refreshResponse.ok) {
+              localStorage.removeItem("accessToken");
+              navigate("/login");
+              return;
+            }
+            
+            const refreshData = await refreshResponse.json();
+            const newAccessToken = refreshData.data.accessToken;
+            localStorage.setItem("accessToken", newAccessToken);
+            
+            // 새 토큰으로 다시 사용자 정보 가져오기
+            const retryResponse = await fetch(`${process.env.REACT_APP_BACKEND_URL}/private/members/me`, {
+              method: "GET",
+              headers: {
+                "Authorization": `Bearer ${newAccessToken}`
+              }
+            });
+            
+            if (!retryResponse.ok) {
+              localStorage.removeItem("accessToken");
+              navigate("/login");
+              return;
+            }
+            
+            const retryData = await retryResponse.json();
+            setCurrentUser(retryData.data);
+          } catch (refreshError) {
+            console.error("토큰 갱신 실패:", refreshError);
+            localStorage.removeItem("accessToken");
+            navigate("/login");
+            return;
+          }
+        } else {
+          const data = await response.json();
+          setCurrentUser(data.data);
+        }
+      } catch (error) {
+        console.error("사용자 정보 가져오기 실패:", error);
+        localStorage.removeItem("accessToken");
+        navigate("/login");
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchUserInfo();
+  }, [navigate]);
+  
+  // 로딩 중이면 로딩 표시
+  if (loading) {
+    return (
+      <S.MyPageWrapper>
+        <div style={{ 
+          display: 'flex', 
+          justifyContent: 'center', 
+          alignItems: 'center', 
+          height: '100vh',
+          fontSize: '18px'
+        }}>
+          로딩 중...
+        </div>
+      </S.MyPageWrapper>
+    );
+  }
 
   // 현재 경로에 따라 활성 상태 결정
   const isActive = (path) => {
@@ -19,7 +116,7 @@ const MyPageContainer = () => {
 
   // 프로필 이미지 URL 생성
   const getProfileImageUrl = () => {
-    if (isLogin && currentUser?.memberPicturePath && currentUser?.memberPictureName) {
+    if (currentUser?.memberPicturePath && currentUser?.memberPictureName) {
       return `${process.env.REACT_APP_BACKEND_URL}${currentUser.memberPicturePath}${currentUser.memberPictureName}`;
     }
     return null;
@@ -27,15 +124,24 @@ const MyPageContainer = () => {
 
   // 닉네임 가져오기
   const getNickname = () => {
-    if (isLogin && currentUser?.memberNickname) {
+    if (currentUser?.memberNickname) {
       return currentUser.memberNickname;
     }
     return '게스트';
   };
 
+  // 등급별 색상 설정
+  const rankColorMap = {
+    rookie: '#00C853',
+    silver: '#B0BEC5',
+    gold: '#DAB24C',
+    diamond: '#00E5FF',
+    master: '#FF1744'
+  };
+
   // 등급 가져오기 (대문자로 변환)
   const getGrade = () => {
-    if (isLogin && currentUser?.memberRank) {
+    if (currentUser?.memberRank) {
       const rank = currentUser.memberRank.toUpperCase();
       // 등급 매핑 (필요시 수정)
       const rankMap = {
@@ -44,16 +150,27 @@ const MyPageContainer = () => {
         'SILVER': 'S',
         'GOLD': 'G',
         'PLATINUM': 'P',
-        'DIAMOND': 'D'
+        'DIAMOND': 'D',
+        'MASTER': 'M'
       };
       return rankMap[rank] || rank.charAt(0);
     }
     return 'S'; // 기본 등급
   };
 
+  // 등급 색상 가져오기
+  const getGradeColor = () => {
+    if (currentUser?.memberRank) {
+      const rank = currentUser.memberRank.toLowerCase();
+      return rankColorMap[rank] || rankColorMap.silver;
+    }
+    return rankColorMap.silver; // 기본 색상
+  };
+
   const profileImageUrl = getProfileImageUrl();
   const nickname = getNickname();
   const grade = getGrade();
+  const gradeColor = getGradeColor();
 
   return (
     <S.MyPageWrapper>
@@ -76,7 +193,7 @@ const MyPageContainer = () => {
             )}
           </S.ProfileImageWrapper>
           <S.UserNameContainer>
-            <S.GradeBadge>{grade}</S.GradeBadge>
+            <S.GradeBadge $bgColor={gradeColor}>{grade}</S.GradeBadge>
             <S.UserName>{nickname}</S.UserName>
           </S.UserNameContainer>
         </S.ProfileContainer>
