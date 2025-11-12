@@ -31,7 +31,6 @@ import MyPostCommnetContainer from "../pages/myPage/mypost/mypostcomment/MyPostC
 import MyPostSaveContainer from "../pages/myPage/mypost/mypostsave/MyPostSaveContainer";
 import MyPostRecentContainer from "../pages/myPage/mypost/mypostrecent/MyPostRecentContainer";
 import MyInfoContainer from "../pages/myPage/myinfo/MyInfoContainer";
-import PostContent from "../pages/post/postcontent/PostContent";
 import PostReadContent from "../pages/post/readcontent/PostReadContent";
 import PostWriteContent from "../pages/post/postwritecontent/PostWriteContent";
 import PostModifyContent from "../pages/post/postModifyContent/PostModifyContent";

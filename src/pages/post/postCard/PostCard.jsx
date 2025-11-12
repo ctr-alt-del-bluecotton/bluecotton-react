@@ -1,4 +1,7 @@
+// 📄 PostCard.jsx
 import React, { useState } from "react";
+import { useSelector } from "react-redux";
+import { useModal } from "../../../components/modal";
 import S from "./style";
 import Report from "../../../components/Report/Report";
 
@@ -26,53 +29,67 @@ const PostCard = ({
   nickname,
   avatar,
   imageUrl,
-  liked, // ✅ 서버에서 받은 찜 여부
+  liked,
   onClick,
 }) => {
   const [showReportModal, setShowReportModal] = useState(false);
-
-  // ✅ 좋아요 상태 & 개수 로컬 반영 (undefined 방지)
   const [isLiked, setIsLiked] = useState(!!liked);
   const [likeCount, setLikeCount] = useState(likes ?? 0);
 
-  // ✅ (임시 로그인) 1번 유저로 고정
-  const memberId = 1;
+  const { currentUser, isLogin } = useSelector((state) => state.user);
+  const { openModal } = useModal();
 
-  const BASE_URL =
-    process.env.REACT_APP_BACKEND_URL || "http://localhost:10000";
+  const BASE_URL = process.env.REACT_APP_BACKEND_URL;
 
-  // ✅ 좋아요 토글 핸들러
+  // ✅ 좋아요 토글 핸들러 (쿠키 기반 인증)
   const handleLikeClick = async (e) => {
     e.stopPropagation();
 
+    if (!isLogin || !currentUser?.id) {
+      openModal({
+        title: "로그인이 필요합니다",
+        message: "좋아요를 누르려면 로그인이 필요합니다.",
+        confirmText: "확인",
+      });
+      return;
+    }
+
     try {
-      const response = await fetch(`${BASE_URL}/main/post/like/toggle`, {
+      const token = localStorage.getItem("accessToken");
+
+      const response = await fetch(`${BASE_URL}/private/post/like/toggle`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,  // ✅ 추가!
         },
-        body: JSON.stringify({
-          postId: id,
-          memberId: memberId,
-        }),
+        body: JSON.stringify({ postId: id }),
       });
 
-      console.log("좋아요 응답 status:", response.status);
+      console.log("좋아요 요청 상태:", response.status);
 
-      if (!response.ok) throw new Error("좋아요 요청 실패");
+      if (!response.ok) {
+        throw new Error(`좋아요 요청 실패 (status: ${response.status})`);
+      }
 
       const result = await response.json();
       console.log("좋아요 토글 결과:", result);
 
-      // ✅ 서버 성공 시 즉시 UI 갱신
-      setIsLiked((prev) => !prev);
-      setLikeCount((prev) => (isLiked ? prev - 1 : prev + 1));
+      // ✅ UI 즉시 반영
+      setIsLiked((prev) => {
+        setLikeCount((prevCount) => (prev ? prevCount - 1 : prevCount + 1));
+        return !prev;
+      });
     } catch (err) {
       console.error("좋아요 토글 실패:", err);
+      openModal({
+        title: "오류 발생",
+        message: "좋아요 처리 중 문제가 발생했습니다.",
+        confirmText: "확인",
+      });
     }
   };
 
-  // ✅ 한영 변환된 카테고리 표시
   const translatedCategory =
     categoryMap[category?.toLowerCase()] || category || "기타";
 
@@ -81,29 +98,28 @@ const PostCard = ({
       {/* ✅ 좋아요 버튼 */}
       <S.LikeButton $liked={isLiked} onClick={handleLikeClick} />
 
-  {/* ✅ 썸네일 */}
-  <S.ThumbWrap>
-    <img
-      src={
-        imageUrl?.startsWith("http")
-          ? imageUrl
-          : `http://localhost:10000${
-              imageUrl?.startsWith("/") ? imageUrl : "/" + imageUrl
-            }`
-      }
-      alt="썸네일"
-      onError={(e) => {
-        if (!e.target.dataset.fallback) {
-          e.target.dataset.fallback = "true";
-          e.target.src = "/assets/images/postDefault.jpg"; // ✅ public 폴더 fallback
-        }
-      }}
-    />
-  </S.ThumbWrap>
+      {/* ✅ 썸네일 */}
+      <S.ThumbWrap>
+        <img
+          src={
+            imageUrl?.startsWith("http")
+              ? imageUrl
+              : `http://localhost:10000${
+                  imageUrl?.startsWith("/") ? imageUrl : "/" + imageUrl
+                }`
+          }
+          alt="썸네일"
+          onError={(e) => {
+            if (!e.target.dataset.fallback) {
+              e.target.dataset.fallback = "true";
+              e.target.src = "/assets/images/postDefault.jpg"; // ✅ fallback
+            }
+          }}
+        />
+      </S.ThumbWrap>
 
       {/* 본문 */}
       <S.Body>
-        {/* 상단 메타 */}
         <S.MetaTop>
           <span className="category">{translatedCategory}</span>
           <span className="bar">|</span>
@@ -112,10 +128,8 @@ const PostCard = ({
           <span className="somtitle">{somTitle}</span>
         </S.MetaTop>
 
-        {/* 제목 */}
         <S.Title>{title}</S.Title>
 
-        {/* ✅ HTML 태그 적용된 요약문 */}
         <S.Excerpt
           dangerouslySetInnerHTML={{
             __html:
@@ -125,7 +139,6 @@ const PostCard = ({
           }}
         />
 
-        {/* 하단 정보 */}
         <S.MetaBottom>
           <div className="left">
             <img className="avatar" src={avatar} alt="프로필" />
