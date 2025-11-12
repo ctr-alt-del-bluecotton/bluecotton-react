@@ -85,14 +85,26 @@ const MySomPartyContainer = () => {
         });
 
         if (!res.ok) {
-          throw new Error('솜 데이터를 불러오는데 실패했습니다.');
+          const errorText = await res.text();
+          console.error('API 에러 응답:', errorText);
+          throw new Error(`솜 데이터를 불러오는데 실패했습니다. (${res.status})`);
         }
 
         const result = await res.json();
         console.log("서버 응답:", result);
+        console.log("전체 데이터:", result.data);
+        console.log("데이터 개수:", result.data?.length);
 
-        // somType이 "party"인 데이터만 필터링
-        const partyData = (result.data || []).filter(som => som.somType === 'party');
+        // somType이 "party"인 데이터만 필터링 (대소문자 구분 없이)
+        const allData = result.data || [];
+        console.log("필터링 전 데이터:", allData);
+        const partyData = allData.filter(som => {
+          const somType = som.somType?.toLowerCase();
+          console.log(`som.id: ${som.id}, somType: ${som.somType}, 소문자: ${somType}`);
+          return somType === 'party';
+        });
+        console.log("필터링 후 파티솜 데이터:", partyData);
+        console.log("파티솜 개수:", partyData.length);
         setPartySoms(partyData);
       } catch (error) {
         console.error('솜 데이터 로딩 실패:', error);
@@ -170,19 +182,19 @@ const MySomPartyContainer = () => {
     <div>
       <S.FilterContainer>
         <S.FilterButton
-          active={activeFilter === 'scheduled'}
+          $active={activeFilter === 'scheduled'}
           onClick={() => setActiveFilter('scheduled')}
         >
           진행예정 ({scheduled.length}개)
         </S.FilterButton>
         <S.FilterButton
-          active={activeFilter === 'progress'}
+          $active={activeFilter === 'progress'}
           onClick={() => setActiveFilter('progress')}
         >
           진행중 ({progress.length}개)
         </S.FilterButton>
         <S.FilterButton
-          active={activeFilter === 'completed'}
+          $active={activeFilter === 'completed'}
           onClick={() => setActiveFilter('completed')}
         >
           진행완료 ({completed.length}개)
@@ -198,7 +210,11 @@ const MySomPartyContainer = () => {
           </div>
         ) : (
           currentData.map((som) => (
-            <S.ListItem key={som.id}>
+            <S.ListItem 
+              key={som.id}
+              onClick={() => navigate(`/main/som/read/${som.id}`)}
+              style={{ cursor: 'pointer' }}
+            >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
                 <div>
                   <S.ItemType>{categoryMap[som.somCategory] || som.somCategory}</S.ItemType>
@@ -214,19 +230,32 @@ const MySomPartyContainer = () => {
                 {getButtonLabel() && (
                   <div style={{ display: 'flex', alignItems: 'center' }}>
                     {activeFilter === 'progress' ? (
-                      <S.ActionButton onClick={()=>navigate('/main/my-page/my-som-check')}>
+                      <S.ActionButton 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate('/main/my-page/my-som-check', { state: { somData: som } });
+                        }}
+                      >
                         {getButtonLabel()}
                       </S.ActionButton>
                     ) : (
-                      <S.ActionButton onClick={()=>setShowPopup(true)}>
+                      <S.ActionButton 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setShowPopup(true);
+                        }}
+                      >
                         {getButtonLabel()}
                       </S.ActionButton>
                     )}
                     {activeFilter === 'progress' && (
-                      <S.CancelButton onClick={() => {
-                        // 중단하기 로직 구현
-                        console.log('챌린지 중단');
-                      }}>
+                      <S.CancelButton 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          // 중단하기 로직 구현
+                          console.log('챌린지 중단');
+                        }}
+                      >
                         중단하기
                       </S.CancelButton>
                     )}

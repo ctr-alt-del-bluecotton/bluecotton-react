@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { useSelector } from 'react-redux';
 import S from '../style';
 import { useModal } from '../../../../components/modal';
+import { getUserId } from '../../utils/getUserId';
 
 const categoryMap = {
   life: '생활',
@@ -17,11 +17,23 @@ const MyPostCommnetContainer = () => {
   const navigate = useNavigate();
   const { openModal } = useModal();
   const [searchParams] = useSearchParams();
-  const { currentUser } = useSelector((state) => state.user);
-  // URL 파라미터에서 id를 가져오거나, 없으면 Redux의 현재 사용자 ID 사용
-  const id = searchParams.get('id') || (currentUser?.id ? String(currentUser.id) : null);
+  const [userId, setUserId] = useState(null);
   const [comments, setComments] = useState([]);
   const [loading, setLoading] = useState(true);
+  
+  // 사용자 ID 가져오기
+  useEffect(() => {
+    const fetchUserId = async () => {
+      const urlId = searchParams.get('id');
+      if (urlId) {
+        setUserId(urlId);
+      } else {
+        const id = await getUserId();
+        setUserId(id);
+      }
+    };
+    fetchUserId();
+  }, [searchParams]);
 
   useEffect(() => {
     const formatDate = (dateString) => {
@@ -36,14 +48,14 @@ const MyPostCommnetContainer = () => {
     const fetchComments = async () => {
       try {
         setLoading(true);
-        // id가 없으면 API 호출하지 않음 (서버에서 id가 필수 파라미터일 수 있음)
-        if (!id) {
+        // userId가 없으면 API 호출하지 않음 (서버에서 id가 필수 파라미터일 수 있음)
+        if (!userId) {
           setComments([]);
           setLoading(false);
           return;
         }
         
-        const url = `${process.env.REACT_APP_BACKEND_URL}/my-page/read-post-comment?id=${id}`;
+        const url = `${process.env.REACT_APP_BACKEND_URL}/my-page/read-post-comment?id=${userId}`;
         
         const response = await fetch(url, {
           headers: { "Content-Type": "application/json" },
@@ -82,7 +94,7 @@ const MyPostCommnetContainer = () => {
     };
 
     fetchComments();
-  }, [id, currentUser]);
+  }, [userId]);
 
   const handleDelete = async (commentId, replyId, isReply) => {
     try {
@@ -157,7 +169,7 @@ const MyPostCommnetContainer = () => {
                 <div style={{ flex: 1 }}>
                   <S.ItemType>{comment.type}</S.ItemType>
                   <S.ItemTitle>
-                    {comment.isReply ? '↳ ' : ''}{comment.title}
+                    {comment.isReply ? ' ' : ''}{comment.title}
                   </S.ItemTitle>
                   <S.ItemDetails>
                     <span>{comment.isReply ? '대댓글' : '댓글'} · {comment.date}</span>
