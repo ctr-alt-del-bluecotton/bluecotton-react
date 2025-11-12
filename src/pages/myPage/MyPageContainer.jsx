@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { getUserId } from './utils/getUserId';
 import S from './style';
 
 const MyPageContainer = () => {
@@ -20,9 +21,19 @@ const MyPageContainer = () => {
       }
       
       try {
-        const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/private/members/me`, {
+        // 사용자 ID 가져오기
+        const userId = await getUserId();
+        if (!userId) {
+          localStorage.removeItem("accessToken");
+          navigate("/login");
+          return;
+        }
+        
+        // /my-page/read-member API로 사용자 정보 가져오기
+        const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/my-page/read-member?id=${userId}`, {
           method: "GET",
           headers: {
+            "Content-Type": "application/json",
             "Authorization": `Bearer ${accessToken}`
           }
         });
@@ -52,9 +63,10 @@ const MyPageContainer = () => {
             localStorage.setItem("accessToken", newAccessToken);
             
             // 새 토큰으로 다시 사용자 정보 가져오기
-            const retryResponse = await fetch(`${process.env.REACT_APP_BACKEND_URL}/private/members/me`, {
+            const retryResponse = await fetch(`${process.env.REACT_APP_BACKEND_URL}/my-page/read-member?id=${userId}`, {
               method: "GET",
               headers: {
+                "Content-Type": "application/json",
                 "Authorization": `Bearer ${newAccessToken}`
               }
             });
@@ -66,6 +78,7 @@ const MyPageContainer = () => {
             }
             
             const retryData = await retryResponse.json();
+            console.log("[DEBUG] 사용자 정보 응답:", retryData);
             setCurrentUser(retryData.data);
           } catch (refreshError) {
             console.error("토큰 갱신 실패:", refreshError);
@@ -75,6 +88,9 @@ const MyPageContainer = () => {
           }
         } else {
           const data = await response.json();
+          console.log("[DEBUG] 사용자 정보 응답:", data);
+          console.log("[DEBUG] memberPicturePath:", data.data?.memberPicturePath);
+          console.log("[DEBUG] memberPictureName:", data.data?.memberPictureName);
           setCurrentUser(data.data);
         }
       } catch (error) {
@@ -115,17 +131,30 @@ const MyPageContainer = () => {
   };
 
   // 프로필 이미지 URL 생성
+  // memberPicturePath는 이미 전체 URL (https://image-server.ideaflow.co.kr/uploads/mypage_profile/2025/11/12/)
   const getProfileImageUrl = () => {
     if (currentUser?.memberPicturePath && currentUser?.memberPictureName) {
-      return `${process.env.REACT_APP_BACKEND_URL}${currentUser.memberPicturePath}${currentUser.memberPictureName}`;
+      // memberPicturePath가 이미 전체 URL이므로 그대로 사용
+      const imageUrl = currentUser.memberPicturePath.endsWith('/') 
+        ? `${currentUser.memberPicturePath}${currentUser.memberPictureName}`
+        : `${currentUser.memberPicturePath}/${currentUser.memberPictureName}`;
+      console.log("[DEBUG] 프로필 이미지 URL:", imageUrl);
+      return imageUrl;
     }
+    console.log("[DEBUG] 프로필 이미지 없음 - memberPicturePath:", currentUser?.memberPicturePath, "memberPictureName:", currentUser?.memberPictureName);
     return null;
+  };
+
+  // 첫 글자를 대문자로 변환하는 함수
+  const capitalize = (str) => {
+    if (!str) return str;
+    return str.charAt(0).toUpperCase() + str.slice(1);
   };
 
   // 닉네임 가져오기
   const getNickname = () => {
     if (currentUser?.memberNickname) {
-      return currentUser.memberNickname;
+      return capitalize(currentUser.memberNickname);
     }
     return '게스트';
   };
@@ -185,7 +214,7 @@ const MyPageContainer = () => {
                   width: '100%', 
                   height: '100%', 
                   objectFit: 'cover',
-                  borderRadius: '50%'
+                  borderRadius: '8px'
                 }} 
               />
             ) : (

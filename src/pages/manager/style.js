@@ -84,6 +84,64 @@ S.ButtonGroup = styled.div`
   margin-top: 20px;
 `;
 
+S.QuickActionSection = styled.section`
+  background: linear-gradient(135deg, ${({ theme }) => theme.PALLETE.primary.main} 0%, ${({ theme }) => theme.PALLETE.primary.dark} 100%);
+  border-radius: 16px;
+  padding: 40px 32px;
+  margin-bottom: 32px;
+  box-shadow: 0 8px 24px rgba(0, 81, 255, 0.2);
+`;
+
+S.QuickActionTitle = styled.h2`
+  ${C.heading2}
+  ${C.white}
+  margin-bottom: 32px;
+  text-align: center;
+`;
+
+S.QuickActionGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 20px;
+`;
+
+S.QuickActionCard = styled.div`
+  background-color: ${({ theme }) => theme.PALLETE.white};
+  border-radius: 12px;
+  padding: 32px 24px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+
+  &:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+  }
+`;
+
+S.QuickActionIcon = styled.div`
+  font-size: 48px;
+  margin-bottom: 16px;
+  line-height: 1;
+`;
+
+S.QuickActionLabel = styled.h3`
+  ${C.heading5}
+  ${C.basic}
+  margin-bottom: 8px;
+  font-weight: 700;
+`;
+
+S.QuickActionDesc = styled.p`
+  ${C.smallText2Regular}
+  color: ${({ theme }) => theme.PALLETE.grey.greyScale3};
+  margin: 0;
+`;
+
 S.Button = styled.button`
   ${C.smallText2Regular}
   ${C.white}
@@ -157,6 +215,14 @@ S.StatusBadge = styled.span`
   background-color: ${({ $status, theme }) => 
     $status === 'active' ? theme.PALLETE.primary.main :
     $status === 'pending' ? theme.PALLETE.secondary.main :
+    $status === 'shipped' ? '#2196F3' :
+    $status === 'delivered' ? '#4CAF50' :
+    $status === 'cancelled' ? '#F44336' :
+    $status === 'suspended' ? '#FF9800' :
+    $status === 'inactive' ? theme.PALLETE.grey.greyScale2 :
+    $status === 'reported' ? '#E91E63' :
+    $status === 'resolved' ? '#4CAF50' :
+    $status === 'preparing' ? '#FF9800' :
     theme.PALLETE.grey.greyScale2};
   padding: 4px 12px;
   border-radius: 12px;
@@ -173,6 +239,79 @@ S.EmptyStateText = styled.p`
   ${C.paragraphRegular}
   color: ${({ theme }) => theme.PALLETE.grey.greyScale3};
   margin-top: 16px;
+`;
+
+S.BackButton = styled.button`
+  ${C.smallText2Regular}
+  color: ${({ theme }) => theme.PALLETE.primary.main};
+  background: none;
+  border: none;
+  cursor: pointer;
+  margin-bottom: 16px;
+  padding: 8px 0;
+  transition: opacity 0.2s;
+
+  &:hover {
+    opacity: 0.7;
+  }
+`;
+
+S.FilterBar = styled.div`
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+  align-items: center;
+`;
+
+S.SearchInput = styled.input`
+  flex: 1;
+  padding: 10px 16px;
+  border: 1px solid ${({ theme }) => theme.PALLETE.grey.greyScale1};
+  border-radius: 4px;
+  ${C.smallText2Regular}
+  
+  &:focus {
+    outline: none;
+    border-color: ${({ theme }) => theme.PALLETE.primary.main};
+  }
+`;
+
+S.FilterSelect = styled.select`
+  padding: 10px 16px;
+  border: 1px solid ${({ theme }) => theme.PALLETE.grey.greyScale1};
+  border-radius: 4px;
+  ${C.smallText2Regular}
+  background-color: ${({ theme }) => theme.PALLETE.white};
+  cursor: pointer;
+  
+  &:focus {
+    outline: none;
+    border-color: ${({ theme }) => theme.PALLETE.primary.main};
+  }
+`;
+
+S.TabContainer = styled.div`
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+  border-bottom: 2px solid ${({ theme }) => theme.PALLETE.grey.greyScale1};
+`;
+
+S.TabButton = styled.button`
+  ${C.smallText2Regular}
+  padding: 12px 24px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  border-bottom: 2px solid ${({ $active, theme }) => $active ? theme.PALLETE.primary.main : 'transparent'};
+  color: ${({ $active, theme }) => $active ? theme.PALLETE.primary.main : theme.PALLETE.grey.greyScale3};
+  font-weight: ${({ $active }) => $active ? 'bold' : 'normal'};
+  transition: all 0.2s;
+  margin-bottom: -2px;
+
+  &:hover {
+    color: ${({ theme }) => theme.PALLETE.primary.main};
+  }
 `;
 
 export default S;
