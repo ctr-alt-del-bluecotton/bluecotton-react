@@ -37,7 +37,7 @@ S.ProfileImageWrapper = styled.div`
   position: relative;
   width: 75px;
   height: 75px;
-  border-radius: 50%;
+  border-radius: 8px;
   overflow: hidden;
   margin-bottom: 8px;
 `;
