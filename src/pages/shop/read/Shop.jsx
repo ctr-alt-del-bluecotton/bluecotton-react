@@ -6,6 +6,7 @@ import ShopRelated from "./ShopRelated";
 import { useNavigate, useParams } from "react-router-dom";
 import { useModal } from "../../../components/modal/useModal";
 import { resolveUrl } from "../../../utils/url";
+import { useSelector } from "react-redux";
 
 
 const formatPrice = (type, value) => {
@@ -22,6 +23,8 @@ const Shop = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { openModal } = useModal();
+  const { currentUser, isLogin } = useSelector((s) => s.user);
+
 
   const [headerData, setHeaderData] = useState(null); // 상품 상단 헤더
   const [reviewStats, setReviewStats] = useState(null); // "리뷰 평점"
@@ -176,6 +179,51 @@ const Shop = () => {
   const isNew = String(productType || "").includes("NEW");
   const isBest = String(productType || "").includes("BEST");
 
+  const handlePurchase = async () => {
+    if(!headerData || !id) return;
+
+    const itemData = {
+      memberId: currentUser.id,
+      productId: Number(id),
+      quantity:count,
+      totalPrice: Number(headerData.productPrice) * count,
+    };
+
+    const url = `${process.env.REACT_APP_BACKEND_URL}/order/single`;
+   setError(null);
+
+    try {
+     // 2. 백엔드 주문 생성 API 호출 (POST /order/single)
+      const res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+         body: JSON.stringify(itemData),
+      });
+
+      if (!res.ok) {
+       throw new Error("단일 주문 생성에 실패했습니다.");
+      }
+
+      const result = await res.json();
+      const orderId = result?.data; // Long 타입의 orderId를 백엔드에서 받음
+
+      if (!orderId) {
+        throw new Error("서버에서 유효한 주문 ID를 받지 못했습니다.");
+      }
+
+      // 3. 주문 페이지로 orderId를 쿼리 파라미터로 전달하여 이동
+      navigate(`/main/shop/order?orderId=${orderId}`);
+
+    } catch (error) {
+      openModal({
+        title: "주문 오류",
+        message: error.message || "주문 진행 중 오류가 발생했습니다.",
+        confirmText: "확인",
+      });
+      console.error("단일 구매 중 오류 발생:", error);
+     }
+
+  }
   return (
     <S.Page>
       <S.DetailContainer>
@@ -305,7 +353,7 @@ const Shop = () => {
 
             <S.CartButton onClick={handleAddToCart}>장바구니</S.CartButton>
 
-            <S.PurchaseButton onClick={() => navigate("/main/shop/order")}>
+            <S.PurchaseButton onClick={handlePurchase}>
               구매하기
             </S.PurchaseButton>
           </S.ButtonRow>
