@@ -247,6 +247,25 @@ const PostWriteContent = () => {
         body: JSON.stringify(post),
       });
 
+      // 1일 1회 제한 (409 CONFLICT)
+      if (res.status === 409) {
+        const errData = await res.json();
+        return openModal({
+          title: "작성 제한",
+          message: errData?.message || "이미 오늘 해당 솜에 게시글을 작성했습니다.",
+          confirmText: "확인",
+        });
+      }
+
+      // 서버 내부 오류 (500)
+      if (res.status >= 500) {
+        return openModal({
+          title: "서버 오류",
+          message: "서버에서 오류가 발생했습니다. 잠시 후 다시 시도해주세요.",
+          confirmText: "확인",
+        });
+      }
+
       if (!res.ok) throw new Error("게시글 등록 실패");
 
       const result = await res.json();
