@@ -162,20 +162,46 @@ const MyInfoContainer = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  const uploadImageToServer = async (file, folder = 'shop') => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, "0");
+    const day = String(now.getDate()).padStart(2, "0");
+    
+
+    const formData = new FormData();
+    const folderPath = `${folder}/${year}/${month}/${day}`;
+    formData.append('file', file);
+    formData.append('folder', folderPath); 
+    
+    const res = await fetch(`${process.env.REACT_APP_BACKEND_URL}/file/upload-image`, {
+        method: 'POST',
+        body: formData,
+    });
+
+    return await res.json();
+  }
+
   // 이미지 업로드
   const handleImageClick = () => fileInputRef.current?.click();
-  const handleFileChange = (e) => {
+  const handleFileChange = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 50 * 1024 * 1024) {
+    if (file.size > 20 * 1024 * 1024) {
       openModal({
         title: '파일 크기 초과',
-        message: '용량이 50.0M 이하 파일만 업로드 가능합니다.',
+        message: '용량이 20.0M 이하 파일만 업로드 가능합니다.',
         confirmText: '확인'
       });
+
       return;
     }
+    const result = await uploadImageToServer(file ,"mypage_profile");
+    console.log("[DEBUG] Image uploaded:", result);
+
+    const data = result?.url ?? result;
+    console.log(data)
 
     setSelectedFile(file);
     const reader = new FileReader();

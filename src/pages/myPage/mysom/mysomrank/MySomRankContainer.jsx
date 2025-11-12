@@ -20,11 +20,17 @@ const MySomRankContainer = () => {
     master: { letter: 'M', color: '#FF1744' }
   };
 
+  // 첫 글자를 대문자로 변환하는 함수
+  const capitalize = (str) => {
+    if (!str) return str;
+    return str.charAt(0).toUpperCase() + str.slice(1);
+  };
+
   // 사용자 이름 (닉네임 우선, 없으면 이름)
-  const userName = currentUser?.memberNickname || currentUser?.memberName || '회원';
+  const userName = capitalize(currentUser?.memberNickname || currentUser?.memberName || '회원');
   
   // 등급 정보 (실제 API에서 가져와야 할 정보)
-  const userRank = currentUser?.memberRank || 'Silver';
+  const userRank = capitalize(currentUser?.memberRank || 'Silver');
   const userSom = currentUser?.memberCandy || 0;
 
   // 다음 등급까지 필요한 솜 계산

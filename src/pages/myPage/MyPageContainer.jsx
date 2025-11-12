@@ -122,10 +122,16 @@ const MyPageContainer = () => {
     return null;
   };
 
+  // 첫 글자를 대문자로 변환하는 함수
+  const capitalize = (str) => {
+    if (!str) return str;
+    return str.charAt(0).toUpperCase() + str.slice(1);
+  };
+
   // 닉네임 가져오기
   const getNickname = () => {
     if (currentUser?.memberNickname) {
-      return currentUser.memberNickname;
+      return capitalize(currentUser.memberNickname);
     }
     return '게스트';
   };
