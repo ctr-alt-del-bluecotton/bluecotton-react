@@ -134,7 +134,18 @@ S.InfoTitle = styled.h4`
   font-weight: 600;
   margin-bottom: 4px;
   color: ${({ theme }) => theme.PALLETE.basic};
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;       
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  word-break: break-word;      
+  white-space: normal;         
+  max-height: 3.2em;            
 `;
+
+
 
 S.InfoAddress = styled.span`
   font-size: 12px;
