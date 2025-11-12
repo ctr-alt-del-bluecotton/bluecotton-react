@@ -3,12 +3,22 @@ import S from './style';
 import FloatingSomWritePages from './floatingSomWriteCotent/FloatingSomWriteCotent';
 import { useFloatingAction } from '../../../../../../context/FloatingActionContext';
 import { fetchData, options } from '../../../../../../context/FetchContext';
-import { MainProvider } from '../../../../../../context/MainContext';
+import { MainProvider, useMain } from '../../../../../../context/MainContext';
 
-const FloatingSomWriteComponent = ({setInsertSom}) => {
+const FloatingSomWrite = () => {
+  return (
+    <MainProvider>
+      <FloatingSomWriteInner />
+    </MainProvider>
+  );
+};
+
+const FloatingSomWriteInner = () => {
   const { somMenuPage, setSomMenuPage, handleSubmit, getValues, setIsAllError,
-    uploadImageTempIds, setUploadImageTempIds, reset
+    uploadImageTempIds, setUploadImageTempIds, reset, currentUser, insertSom
    } = useFloatingAction();
+   const { setInsertSom } = useMain();
+   
   const contents = Object.keys(getValues()).filter((content) => content !== "somContent");
 
   // const isContent = (contentName) => {
@@ -57,7 +67,7 @@ const FloatingSomWriteComponent = ({setInsertSom}) => {
       setSomMenuPage(targetPage);
       return;
     }
-    data.memberId = 1;
+    data.memberId = currentUser.id;
 
     const trimData = Object.fromEntries(
       Object.entries(data).map(([key, value]) => [
@@ -81,7 +91,7 @@ const FloatingSomWriteComponent = ({setInsertSom}) => {
       setUploadImageTempIds([]);  // 업로드한 이미지 리스트 초기화
       setSomMenuPage(1);          // 페이지 1로 이동
       window.scrollTo(0, 0);   
-      setInsertSom((prev) => !prev)
+      setInsertSom(!insertSom)
       })
   };
   
@@ -117,13 +127,5 @@ const FloatingSomWriteComponent = ({setInsertSom}) => {
     </S.floatingMenuWrap>
 
   );  
-};
-
-const FloatingSomWrite = () => {
-  return (
-    <MainProvider>
-      <FloatingSomWriteComponent />
-    </MainProvider>
-  );
 };
 export default FloatingSomWrite;

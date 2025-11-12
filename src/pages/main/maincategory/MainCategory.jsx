@@ -8,9 +8,9 @@ const reverseMap = (obj) => Object.fromEntries(
 );
 
 const sortOptions = [
-  { value: "latest", label: "전체" },
-  { value: "popular", label: "솔로솜" },
-  { value: "closing", label: "파티솜" },
+  { value: "all", label: "전체" },
+  { value: "solo", label: "솔로솜" },
+  { value: "party", label: "파티솜" },
 ];
 
 const MainCategory = () => {
