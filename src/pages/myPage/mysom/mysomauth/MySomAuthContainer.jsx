@@ -1,54 +1,120 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import S from '../style';
 
 const MySomAuthContainer = () => {
+  const navigate = useNavigate();
   const [activeFilter, setActiveFilter] = useState('pending');
+  const [authData, setAuthData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  
+  // Redux에서 사용자 id 가져오기
+  const user = useSelector((state) => state.user);
+  const userId = user?.currentUser?.id;
 
-  const challenges = [
-    {
-      type: '건강',
-      title: '2km 런닝 뛰기 챌린지',
-      date: '2025.09.01 ~ 2025.09.07',
-      repeat: '[요일반복] [금]',
-    },
-    {
-      type: '학습',
-      title: '독서 30분 챌린지',
-      date: '2025.09.01 ~ 2025.09.07',
-      repeat: '[요일반복] [금]',
-    }
-  ];
+  // API에서 데이터 가져오기
+  useEffect(() => {
+    const fetchAuthData = async () => {
+      // userId가 없으면 API 호출하지 않음
+      if (!userId) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        const res = await fetch(`${process.env.REACT_APP_BACKEND_URL}/my-page/read-som-check?id=${userId}`, {
+          headers: { "Content-Type": "application/json" },
+          method: "GET",
+          credentials: "include"
+        });
+
+        if (!res.ok) {
+          throw new Error('인증 데이터를 불러오는데 실패했습니다.');
+        }
+
+        const result = await res.json();
+        console.log("서버 응답:", result);
+
+        // data 배열에서 데이터 가져오기
+        const checkData = result.data || [];
+        setAuthData(checkData);
+      } catch (error) {
+        console.error('인증 데이터 로딩 실패:', error);
+        setAuthData([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAuthData();
+  }, [userId]);
+
+  // somCheckIsChecked 값에 따라 데이터 분류
+  const pendingData = authData.filter(item => !item.somCheckIsChecked);
+  const completedData = authData.filter(item => item.somCheckIsChecked);
+
+  // 현재 필터에 맞는 데이터 가져오기
+  const getCurrentData = () => {
+    return activeFilter === 'pending' ? pendingData : completedData;
+  };
+
+  if (loading) {
+    return <div>로딩 중...</div>;
+  }
+
+  const currentData = getCurrentData();
 
   return (
     <div>
       
       <S.FilterContainer>
         <S.FilterButton
-          active={activeFilter === 'pending'}
+          $active={activeFilter === 'pending'}
           onClick={() => setActiveFilter('pending')}
         >
-          인증대기 (2개)
+          인증대기 ({pendingData.length}개)
         </S.FilterButton>
         <S.FilterButton
-          active={activeFilter === 'completed'}
+          $active={activeFilter === 'completed'}
           onClick={() => setActiveFilter('completed')}
         >
-          인증완료 (5개)
+          인증완료 ({completedData.length}개)
         </S.FilterButton>
       </S.FilterContainer>
       
       <S.ListContainer>
-        {challenges.map((challenge, index) => (
-          <S.ListItem key={index}>
-            <div>
-              <S.ItemType>{challenge.type}</S.ItemType>
-              <S.ItemTitle>{challenge.title}</S.ItemTitle>
-              <S.ItemDetails>
-                <span>{challenge.date} {challenge.repeat}</span>
-              </S.ItemDetails>
-            </div>
-          </S.ListItem>
-        ))}
+        {currentData.length === 0 ? (
+          <div style={{ padding: '40px', textAlign: 'center', color: '#808080' }}>
+            {activeFilter === 'pending' && '인증 대기 중인 항목이 없습니다.'}
+            {activeFilter === 'completed' && '인증 완료된 항목이 없습니다.'}
+          </div>
+        ) : (
+          currentData.map((item, index) => (
+            <S.ListItem 
+              key={index}
+              onClick={() => {
+                if (item.somId) {
+                  navigate(`/main/som/read/${item.somId}`);
+                }
+              }}
+              style={{ cursor: item.somId ? 'pointer' : 'default' }}
+            >
+              <div>
+                <S.ItemType>
+                  {item.somCheckIsChecked ? '인증 완료' : '인증 대기'}
+                </S.ItemType>
+                <S.ItemTitle>{item.somCheckContent || '인증 내용 없음'}</S.ItemTitle>
+                <S.ItemDetails>
+                  <span>
+                    {item.somCheckIsChecked ? '✅ 인증이 완료되었습니다.' : '⏳ 인증 대기 중입니다.'}
+                  </span>
+                </S.ItemDetails>
+              </div>
+            </S.ListItem>
+          ))
+        )}
       </S.ListContainer>
 
       <S.Pagination>

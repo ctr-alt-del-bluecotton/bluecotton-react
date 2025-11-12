@@ -1,22 +1,30 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { useSelector } from 'react-redux';
 import { useModal } from '../../../components/modal';
 import { openPostcode } from '../../../commons/address';
 import { useForm } from 'react-hook-form';
+import { getUserId } from '../utils/getUserId';
 import S from './style';
 
 const MyInfoContainer = () => {
   const { openModal } = useModal();
   const fileInputRef = useRef(null);
   const [searchParams] = useSearchParams();
+  const [memberId, setMemberId] = useState(null);
   
-  // Redux에서 현재 로그인한 사용자 정보 가져오기
-  const { currentUser, isLogin } = useSelector((state) => state.user);
-  console.log('Redux currentUser:', currentUser);
-
-  // URL 쿼리 파라미터에서 id 가져오기, 없으면 기본값 1
-  const memberId = searchParams.get('id') || '1';
+  // URL 쿼리 파라미터에서 id 가져오기, 없으면 사용자 ID 가져오기
+  useEffect(() => {
+    const fetchMemberId = async () => {
+      const urlId = searchParams.get('id');
+      if (urlId) {
+        setMemberId(urlId);
+      } else {
+        const id = await getUserId();
+        setMemberId(id || '1');
+      }
+    };
+    fetchMemberId();
+  }, [searchParams]);
 
   const [previewImage, setPreviewImage] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
@@ -50,72 +58,10 @@ const MyInfoContainer = () => {
   });
 
   useEffect(() => {
-    // Redux에 로그인한 사용자 정보가 있으면 사용
-    if (isLogin && currentUser) {
-      console.log('Redux에서 사용자 정보 로드:', currentUser);
-
-      // ✅ 생년월일 변환
-      let birthYear = '';
-      let birthMonth = '';
-      let birthDay = '';
-
-      if (currentUser.memberBirth) {
-        const birthDate = new Date(currentUser.memberBirth);
-        if (!isNaN(birthDate.getTime())) {
-          birthYear = birthDate.getFullYear().toString();
-          birthMonth = (birthDate.getMonth() + 1).toString().padStart(2, '0');
-          birthDay = birthDate.getDate().toString().padStart(2, '0');
-        }
-      }
-
-      // ✅ 성별 변환
-      let gender = '';
-      const memberGender = currentUser.memberGender;
-      console.log('받아온 성별 값:', memberGender);
-      
-      if (memberGender) {
-        const genderUpper = String(memberGender).toUpperCase();
-        const genderLower = String(memberGender).toLowerCase();
-        
-        if (genderUpper === 'M' || genderLower === '남' || genderUpper === 'MALE') {
-          gender = 'male';
-        } else if (genderUpper === 'F' || genderLower === '여' || genderUpper === 'FEMALE') {
-          gender = 'female';
-        }
-      }
-      
-      console.log('변환된 성별 값:', gender);
-
-      // ✅ formData에 Redux 데이터 세팅
-      setFormData({
-        email: currentUser.memberEmail || '',
-        nickname: currentUser.memberNickname || '',
-        phone: currentUser.memberPhone || currentUser.memberPhonse || '', // memberPhonse는 오타지만 호환성 유지
-        birthYear,
-        birthMonth,
-        birthDay,
-        gender,
-        postcode: currentUser.memberPostcode || '',
-        address1: currentUser.memberAddress || '',
-        address2: currentUser.memberAddressDetail || '',
-        picturePath: currentUser.memberPicturePath || '',
-        pictureName: currentUser.memberPictureName || ''
-      });
-      
-      console.log('설정된 formData:', {
-        email: currentUser.memberEmail || '',
-        nickname: currentUser.memberNickname || '',
-        gender
-      });
-
-      // Redux에서 받아온 프로필 이미지가 있으면 미리보기 설정
-      if (currentUser.memberPicturePath && currentUser.memberPictureName) {
-        const imageUrl = `${process.env.REACT_APP_BACKEND_URL}${currentUser.memberPicturePath}${currentUser.memberPictureName}`;
-        setPreviewImage(imageUrl);
-      }
-    } else {
-      // Redux에 정보가 없으면 서버에서 가져오기 (기존 로직 유지)
-      const fetchMemberInfo = async () => {
+    if (!memberId) return;
+    
+    // 서버에서 사용자 정보 가져오기
+    const fetchMemberInfo = async () => {
         try {
           const res = await fetch(`${process.env.REACT_APP_BACKEND_URL}/my-page/read-member?id=${memberId}`, {
             headers: { "Content-Type": "application/json" },
@@ -198,8 +144,7 @@ const MyInfoContainer = () => {
       };
     
       fetchMemberInfo();
-    }
-  }, [openModal, memberId, isLogin, currentUser]);
+  }, [openModal, memberId]);
 
   // 우편번호 찾기 버튼 클릭 핸들러
   const handleOpenPostcode = () => {

@@ -50,14 +50,26 @@ const MySomSoloContainer = () => {
         });
 
         if (!res.ok) {
-          throw new Error('솜 데이터를 불러오는데 실패했습니다.');
+          const errorText = await res.text();
+          console.error('API 에러 응답:', errorText);
+          throw new Error(`솜 데이터를 불러오는데 실패했습니다. (${res.status})`);
         }
 
         const result = await res.json();
         console.log("서버 응답:", result);
+        console.log("전체 데이터:", result.data);
+        console.log("데이터 개수:", result.data?.length);
 
-        // somType이 "solo"인 데이터만 필터링
-        const soloData = (result.data || []).filter(som => som.somType === 'solo');
+        // somType이 "solo"인 데이터만 필터링 (대소문자 구분 없이)
+        const allData = result.data || [];
+        console.log("필터링 전 데이터:", allData);
+        const soloData = allData.filter(som => {
+          const somType = som.somType?.toLowerCase();
+          console.log(`som.id: ${som.id}, somType: ${som.somType}, 소문자: ${somType}`);
+          return somType === 'solo';
+        });
+        console.log("필터링 후 솔로솜 데이터:", soloData);
+        console.log("솔로솜 개수:", soloData.length);
         setSoloSoms(soloData);
       } catch (error) {
         console.error('솜 데이터 로딩 실패:', error);
@@ -135,19 +147,19 @@ const MySomSoloContainer = () => {
     <div>
       <S.FilterContainer>
         <S.FilterButton
-          active={activeFilter === 'scheduled'}
+          $active={activeFilter === 'scheduled'}
           onClick={() => setActiveFilter('scheduled')}
         >
           진행예정 ({scheduled.length}개)
         </S.FilterButton>
         <S.FilterButton
-          active={activeFilter === 'progress'}
+          $active={activeFilter === 'progress'}
           onClick={() => setActiveFilter('progress')}
         >
           진행중 ({progress.length}개)
         </S.FilterButton>
         <S.FilterButton
-          active={activeFilter === 'completed'}
+          $active={activeFilter === 'completed'}
           onClick={() => setActiveFilter('completed')}
         >
           진행완료 ({completed.length}개)
@@ -163,7 +175,11 @@ const MySomSoloContainer = () => {
           </div>
         ) : (
           currentData.map((som) => (
-            <S.ListItem key={som.id}>
+            <S.ListItem 
+              key={som.id}
+              onClick={() => navigate(`/main/som/read/${som.id}`)}
+              style={{ cursor: 'pointer' }}
+            >
               <div style={{
                 display: 'flex',
                 justifyContent: 'space-between',
@@ -183,13 +199,21 @@ const MySomSoloContainer = () => {
                 {/* ✅ 진행예정은 버튼 숨김, 진행중만 표시 */}
                 {getButtonLabel() && (
                   <div style={{ display: 'flex', alignItems: 'center' }}>
-                    <S.ActionButton onClick={() => navigate(getButtonPath())}>
+                    <S.ActionButton 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(getButtonPath(), { state: { somData: som } });
+                      }}
+                    >
                       {getButtonLabel()}
                     </S.ActionButton>
-                    <S.CancelButton onClick={() => {
-                      // 중단하기 로직 구현
-                      console.log('챌린지 중단');
-                    }}>
+                    <S.CancelButton 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        // 중단하기 로직 구현
+                        console.log('챌린지 중단');
+                      }}
+                    >
                       중단하기
                     </S.CancelButton>
                   </div>
