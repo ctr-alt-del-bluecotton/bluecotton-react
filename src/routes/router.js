@@ -37,6 +37,7 @@ import PostModifyContent from "../pages/post/postModifyContent/PostModifyContent
 import MySomCheck from "../pages/myPage/mysom/mysomcheck/MySomCheck";
 import SocialRedirect from "../pages/login/success/SocialRedirect";
 import LoginLayOut from "../pages/layout/LoginLayout";
+import ManagerContainer from "../pages/manager/ManagerContainer";
 
 const router = createBrowserRouter([
   {
@@ -146,6 +147,10 @@ const router = createBrowserRouter([
   {
     path : "/sign-up",
     element : <SignUp></SignUp>
+  },
+  {
+    path : "/manager",
+    element: <ManagerContainer />
   },
   {
     path : "*",
