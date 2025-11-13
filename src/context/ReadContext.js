@@ -70,7 +70,7 @@ export const ReadProvider = ({ children }) => {
     useEffect(() => {
         const loadReadData = async () => {
             setLoading(true);
-            await fetchData(`som/read?somId=${id}}&memberEmail=${currentUser.memberEmail}`, options.getOption())
+            await fetchData(`som/read?somId=${id}&memberEmail=${currentUser.memberEmail}`, options.getOption())
                 .then(async (res) => {
                     const target = await res.json();
                     const readData = target.data;
