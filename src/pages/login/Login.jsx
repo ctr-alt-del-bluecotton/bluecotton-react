@@ -41,7 +41,7 @@ const Login = () => {
     })
     .catch((err) => {
       console.error("로그인 요청 중 에러:", err);
-      alert("서버 연결에 문제가 있습니다");
+      alert("서버 연결에 문제가 있습니다"); 
     });
 });
   //  로그인 유효성검사
