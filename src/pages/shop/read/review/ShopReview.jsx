@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import S from "./style";
 import Report from "../../../../components/Report/Report";
 import { useParams } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 const toClient = (dto) => ({
   id: dto.id,
@@ -18,6 +19,8 @@ const toClient = (dto) => ({
 
 const ShopReview = () => {
   const { id } = useParams();
+  const { currentUser, isLogin } = useSelector((state) => state.user);
+
 
   const [sort, setSort] = useState("latest");
   const [type, setType] = useState("all");
@@ -33,6 +36,8 @@ const ShopReview = () => {
 
   // 에러
   const [error, setError] = useState(null);
+
+  const [writeOpen, setWriteOpen] = useState(false);
 
 
   // 신고 모달창
@@ -51,14 +56,14 @@ const ShopReview = () => {
           headers: { "Content-Type": "application/json" },
         });
 
-        if (!res.ok) throw new Error("평점 로딩 실패");
+        if (!res.ok) throw new Error("데이터 실패");
 
         const json = await res.json();
 
         if (json.data) {
           setStats(json.data);
         } else {
-          throw new Error("통계 데이터가 비어있습니다.");
+          throw new Error("데이터가 없습니다");
         }
       } catch (err) {
         setError(err.message);
