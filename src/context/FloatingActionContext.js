@@ -2,7 +2,6 @@ import React, { createContext, useState, useContext, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { fetchData, options } from './FetchContext';
 import { useSelector } from 'react-redux';
-import { useMain } from './MainContext';
 
 const FloatingActionContext = createContext();
 
@@ -24,6 +23,7 @@ export const FloatingActionProvider = ({ children }) => {
     const [uploadImageTempIds, setUploadImageTempIds] = useState([]);
     const formMethods = useForm({ mode: "onChange" });
     const [isAllError, setIsAllError] = useState(false);
+    const [isReset, setIsReset] = useState(false);
     const { currentUser, isLogin } = useSelector((state) => state.user);
     
     useEffect(() => {
@@ -95,6 +95,7 @@ export const FloatingActionProvider = ({ children }) => {
         somMenuPage,
         setSomMenuPage,
         somMenuContent,
+        isReset, setIsReset,
         currentUser,
         setSomMenuContent,
         open,
