@@ -48,7 +48,7 @@ const MyShopCartContainer = () => {
     .filter((item) => checkedIds.has(item.id))
     .map((item) => ({
       productId: item.productId,
-      quantity: qtyMap[item.id] || 1,
+      orderQuantity: qtyMap[item.id] || 1,
     }));
 
   if (itemsToOrder.length === 0) {
@@ -85,7 +85,7 @@ const MyShopCartContainer = () => {
       const payload = {
         memberId,
         productId: item.productId,
-        quantity: item.quantity,
+        orderQuantity: item.cartQuantity,
       };
 
       const url = `${process.env.REACT_APP_BACKEND_URL}/order/cart`;
