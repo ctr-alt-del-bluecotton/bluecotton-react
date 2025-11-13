@@ -2,6 +2,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import S from "./style";
 import DeliveryAddressModal from "../deliveryAddress/DeliveryAddressModal";
+import { useSelector } from "react-redux";
 
 const DELIVERY_OPTIONS = [
   "문 앞에 놔주세요",
@@ -15,12 +16,14 @@ const OrderUserInfo = () => {
   const [open, setOpen] = useState(false);
   const [select, setSelect] = useState(DELIVERY_OPTIONS[0]);
   const dropdown = useRef(null);
+  const { currentUser, isLogin } = useSelector((s) => s.user);
+
 
   const [addrModalOpen, setAddrModalOpen] = useState(false);
-  const [recipient, setRecipient] = useState("최준서");
-  const [phone, setPhone] = useState("010-1234-5678");
+  const [recipient, setRecipient] = useState(currentUser.memberName);
+  const [phone, setPhone] = useState(currentUser.memberPhone);
   const [zip, setZip] = useState("");
-  const [addr1, setAddr1] = useState("서울 서초구 강남대로 47-6");
+  const [addr1, setAddr1] = useState(currentUser.memberAddress);
   const [addr2, setAddr2] = useState("");
 
   
