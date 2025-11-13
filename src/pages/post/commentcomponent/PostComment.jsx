@@ -1,5 +1,6 @@
 // 📄 PostComment.jsx
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import S from "./style";
 import Report from "../../../components/Report/Report";
 import { useModal } from "../../../components/modal";
@@ -26,17 +27,25 @@ const PostComment = ({
 }) => {
   const BASE_URL = process.env.REACT_APP_BACKEND_URL;
   const { openModal } = useModal();
+  const navigate = useNavigate();
 
   const { currentUser, isLogin } = useSelector((state) => state.user);
+
+  /** ✅ 공통: 로그인 필요 모달 */
+  const requireLoginModal = () => {
+    openModal({
+      title: "로그인이 필요합니다",
+      message: "이 기능은 로그인 후 이용하실 수 있습니다.",
+      confirmText: "로그인하기",
+      cancelText: "취소",
+      onConfirm: () => navigate("/login"),
+    });
+  };
 
   /* ✅ 좋아요 토글 */
   const handleLike = async (targetId, isReply = false, parentCommentId = null) => {
     if (!isLogin || !currentUser?.id) {
-      openModal({
-        title: "로그인이 필요합니다",
-        message: "좋아요를 누르려면 로그인이 필요합니다.",
-        confirmText: "확인",
-      });
+      requireLoginModal();
       return;
     }
 
@@ -100,11 +109,7 @@ const PostComment = ({
   /* ✅ 댓글 등록 */
   const handleCommentSubmit = async () => {
     if (!isLogin || !currentUser?.id) {
-      openModal({
-        title: "로그인이 필요합니다",
-        message: "댓글을 작성하려면 로그인이 필요합니다.",
-        confirmText: "확인",
-      });
+      requireLoginModal();
       return;
     }
 
@@ -158,11 +163,7 @@ const PostComment = ({
     if (!text) return;
 
     if (!isLogin || !currentUser?.id) {
-      openModal({
-        title: "로그인이 필요합니다",
-        message: "답글을 작성하려면 로그인이 필요합니다.",
-        confirmText: "확인",
-      });
+      requireLoginModal();
       return;
     }
 
@@ -218,7 +219,7 @@ const PostComment = ({
     }
   };
 
-  /* ✅ 답글 클릭  */
+  /* ✅ 답글 클릭 */
   const handleReplyClick = (parentId, targetId, nickname, type) => {
     setShowReplyTarget((prev) => {
       if (
@@ -244,11 +245,7 @@ const PostComment = ({
     const { type, id } = deleteTarget;
 
     if (!isLogin || !currentUser?.id) {
-      openModal({
-        title: "로그인이 필요합니다",
-        message: "삭제 기능은 로그인 후 이용 가능합니다.",
-        confirmText: "확인",
-      });
+      requireLoginModal();
       return;
     }
 
@@ -302,6 +299,9 @@ const PostComment = ({
         year: "numeric",
         month: "2-digit",
         day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
       })
       .replace(/\.\s/g, ".")
       .replace(/\.$/, "");
@@ -378,11 +378,7 @@ const PostComment = ({
                               className="report"
                               onClick={() => {
                                 if (!isLogin || !currentUser?.id) {
-                                  openModal({
-                                    title: "로그인이 필요합니다",
-                                    message: "신고 기능은 로그인 후 이용 가능합니다.",
-                                    confirmText: "확인",
-                                  });
+                                  requireLoginModal();
                                   return;
                                 }
                                 setReportTarget({ type: "comment", id: c.id });
@@ -437,8 +433,7 @@ const PostComment = ({
                       <div className="avatar">
                         <img
                           src={
-                            currentUser?.profilePath ||
-                            "/postImages/profile.png"
+                            currentUser?.profilePath || "/postImages/profile.png"
                           }
                           alt="내 프로필"
                         />
@@ -523,11 +518,7 @@ const PostComment = ({
                                   className="report"
                                   onClick={() => {
                                     if (!isLogin || !currentUser?.id) {
-                                      openModal({
-                                        title: "로그인이 필요합니다",
-                                        message: "신고 기능은 로그인 후 이용 가능합니다.",
-                                        confirmText: "확인",
-                                      });
+                                      requireLoginModal();
                                       return;
                                     }
                                     setReportTarget({ type: "reply", id: r.id });
@@ -610,9 +601,7 @@ const PostComment = ({
                           </div>
                           <button
                             className="submit-btn"
-                            onClick={() =>
-                              handleReplySubmit(c.id, r.id)
-                            }
+                            onClick={() => handleReplySubmit(c.id, r.id)}
                           >
                             등록
                           </button>
@@ -663,7 +652,5 @@ const PostComment = ({
     </S.CommentSection>
   );
 };
-
-
 
 export default PostComment;

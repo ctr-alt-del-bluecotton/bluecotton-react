@@ -8,7 +8,7 @@ import {
   matchPath,
 } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { useModal } from "../../components/modal/useModal"
+import { useModal } from "../../components/modal/useModal";
 import S from "./style";
 import PostCategory from "./postcategory/PostCategory";
 import PostCard from "./postCard/PostCard";
@@ -18,7 +18,7 @@ const PostContainer = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
-  const { openModal } = useModal(); // ✅ 모달 훅 사용 선언
+  const { openModal } = useModal();
 
   // ✅ Redux 로그인 유저 정보
   const { currentUser, isLogin } = useSelector((state) => state.user);
@@ -30,6 +30,17 @@ const PostContainer = () => {
   const [posts, setPosts] = useState([]);
   const [orderType, setOrderType] = useState("latest");
   const postsPerPage = 9;
+
+  // ✅ 공통 로그인 필요 모달
+  const requireLoginModal = () => {
+    openModal({
+      title: "로그인이 필요합니다",
+      message: "이 기능은 로그인 후 이용하실 수 있습니다.",
+      confirmText: "로그인하기",
+      cancelText: "취소",
+      onConfirm: () => navigate("/login"),
+    });
+  };
 
   // ✅ 카테고리 추출
   const category = location.pathname.split("/").pop();
@@ -120,6 +131,11 @@ const PostContainer = () => {
 
   // ✅ 좋아요 토글 (UI만 변경)
   const handleLike = (id) => {
+    if (!isLogin || !currentUser?.id) {
+      requireLoginModal();
+      return;
+    }
+
     setPosts((prev) =>
       prev.map((p) =>
         p.postId === id
@@ -145,11 +161,7 @@ const PostContainer = () => {
   // ✅ 글쓰기 버튼 클릭
   const handleWriteClick = () => {
     if (!isLogin || !currentUser?.id) {
-      openModal({
-        title: "로그인이 필요합니다",
-        message: "오늘의 솜을 작성하려면 로그인이 필요합니다.",
-        confirmText: "확인",
-      });
+      requireLoginModal();
       return;
     }
     navigate("/main/post/write");
