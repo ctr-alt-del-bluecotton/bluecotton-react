@@ -5,7 +5,7 @@ import { useSelector } from 'react-redux';
 
 const SomReadInfo = () => {
   const { isLogin } = useSelector((state) => state.user);
-  const { somInfo, somIsLike, setSomIsLike, formatDate, setSoloSomJoinModal, somJoin, somJoinNotLogin } = useRead();
+  const { somInfo, somIsLike, setSomIsLike, formatDate, somJoinSoloSom, somJoin, somJoinNotLogin } = useRead();
   const {
     somTitle,
     somCategory,
@@ -24,7 +24,7 @@ const SomReadInfo = () => {
     setSomIsLike(!somIsLike);
   } 
   const somTypeText = somType === "solo" ? "솔로솜" : "파티솜";
-  const somOnClick = somType !== "solo" ? () => { isLogin ? somJoin() :  somJoinNotLogin() } :  () => { setSoloSomJoinModal(true) };
+  const somOnClick = somType !== "solo" ? () => { isLogin ? somJoin() :  somJoinNotLogin() } :  () => { somJoinSoloSom() };
 
   const somButton = somType !== "solo" ? <S.somButton onClick={somOnClick}>참여 - {somTypeText}({somCount})</S.somButton>
   : <S.fullSomButton onClick={somOnClick}>참여 - {somTypeText}({somCount})</S.fullSomButton> ;
