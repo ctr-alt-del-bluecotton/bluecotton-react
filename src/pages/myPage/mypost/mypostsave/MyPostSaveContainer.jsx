@@ -71,11 +71,11 @@ const MyPostSaveContainer = () => {
         
         if (result.data && Array.isArray(result.data)) {
           const formattedPosts = result.data.map((post) => {
-            const formattedDate = formatDate(post.postCreateAt || post.createAt || post.date);
+            const formattedDate = formatDate(post.postDraftCreateAt || post.postCreateAt || post.createAt || post.date);
             return {
               id: post.id,
               type: categoryMap[post.somCategory] || post.somCategory || '기타',
-              title: post.postTitle || post.title || '제목 없음',
+              title: post.postDraftTitle || post.postTitle || post.title || '제목 없음',
               date: formattedDate || '저장일 없음',
             };
           });
