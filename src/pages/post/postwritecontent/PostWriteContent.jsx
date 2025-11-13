@@ -86,7 +86,7 @@ const PostWriteContent = () => {
           setCategory(somIdValue);
 
           const matchedCategory = categoryList.find(
-            (cat) => String(cat.somId) === somIdValue
+            (cat) => String(cat.id) === somIdValue
           );
           if (matchedCategory) setCategory(matchedCategory.somId.toString());
 
@@ -247,6 +247,25 @@ const PostWriteContent = () => {
         body: JSON.stringify(post),
       });
 
+      // 1일 1회 제한 (409 CONFLICT)
+      if (res.status === 409) {
+        const errData = await res.json();
+        return openModal({
+          title: "작성 제한",
+          message: errData?.message || "이미 오늘 해당 솜에 게시글을 작성했습니다.",
+          confirmText: "확인",
+        });
+      }
+
+      // 서버 내부 오류 (500)
+      if (res.status >= 500) {
+        return openModal({
+          title: "서버 오류",
+          message: "서버에서 오류가 발생했습니다. 잠시 후 다시 시도해주세요.",
+          confirmText: "확인",
+        });
+      }
+
       if (!res.ok) throw new Error("게시글 등록 실패");
 
       const result = await res.json();
@@ -300,12 +319,27 @@ const PostWriteContent = () => {
         </S.FormRow>
 
         <S.FormRow>
-         <label>카테고리</label>
-          <select value={category} onChange={(e) => setCategory(e.target.value)}>
+          <label>카테고리</label>
+          <select
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+          >
             <option value="">참여 중인 솜을 선택해주세요</option>
+
             {categories.map((cat) => (
-              <option key={cat.id} value={cat.id}>
+              <option
+                key={cat.id}
+                value={cat.id}
+                disabled={cat.somDayDiff < 1} 도전 전 솜 비활성화
+              >
+                {/* 예: 학습 - 하루 한 문제 풀기 (도전 3일차) */}
                 {categoryMap[cat.somCategory] || cat.somCategory}
+                {" - "}
+                {cat.somTitle}
+                {" "}
+                {cat.somDayDiff < 1
+                  ? "(예정)" 
+                  : `(도전 ${cat.somDayDiff}일차)`} 
               </option>
             ))}
           </select>
