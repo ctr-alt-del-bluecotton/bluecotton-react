@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { title } from "../../../../../../styles/common";
+import { basic, smallText3Light, smallText3Regular, title } from "../../../../../../styles/common";
 
 const S = {};
 
@@ -17,7 +17,7 @@ S.Header = styled.div`
   justify-content: center;
   align-items: center;
   padding: 18px 20px;
-  margin-top: 40px;
+  margin-top: 50px;
 `;
 
 
@@ -41,12 +41,11 @@ S.ChatBody = styled.div`
 S.Bubble = styled.div`
   max-width: 80%;
   padding: 10px 14px;
-  border-radius: 16px;
+  border-radius: 8px; 
   line-height: 1.4;
-  font-size: 14px;
-  background-color: ${({ isUser, theme }) =>
-    isUser ? theme.PALLETE.primary : "#fff"};
-  color: ${({ isUser }) => (isUser ? "#fff" : "#333")};
+  ${smallText3Regular}
+  background-color: ${({theme}) => theme.PALLETE.white};
+  ${basic};
   align-self: ${({ isUser }) => (isUser ? "flex-end" : "flex-start")};
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
 `;

@@ -84,7 +84,8 @@ const MapContainer = () => {
   const moveToLocation = (lat, lng) => {
     const map = mapRef.current;
     if (map) {
-      const moveLatLon = new window.kakao.maps.LatLng(lat, lng);
+      const offsetY = 0.002;
+      const moveLatLon = new window.kakao.maps.LatLng(lat + offsetY, lng);
       map.panTo(moveLatLon);
     }
   };

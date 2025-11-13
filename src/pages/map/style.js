@@ -36,7 +36,7 @@ S.MapBox = styled.div`
 S.Map = styled(Map)`
   width: 800px;
   height: 600px;
-  border-radius: 20px;
+  border-radius: 8px;
   overflow: hidden;
 `;
 
@@ -59,10 +59,22 @@ S.ListBox = styled.div`
   }
 `;
 
+S.SomTitle = styled.h3`
+  font-size: 18px;
+  font-weight: 600;
+  color: ${({ theme }) => theme.PALLETE.basic};
+  margin-bottom: 8px;
+`;
+
+S.SomAddress = styled.p`
+  font-size: 13px;
+  color: ${({ theme }) => theme.PALLETE.grey.greyScale4};
+`;
+
 S.SomItem = styled.div`
   padding: 16px 20px;
   border-bottom: 1px solid #e0e0e0;
-  border-radius: 10px;
+  border-radius: 8px;
   background-color: ${({ theme }) => theme.PALLETE.grey.greyScale0};
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   margin-bottom: 12px;
@@ -78,18 +90,6 @@ S.SomItem = styled.div`
       color: ${({ theme }) => theme.PALLETE.white};
     }
   }
-`;
-
-S.SomTitle = styled.h3`
-  font-size: 18px;
-  font-weight: 600;
-  color: ${({ theme }) => theme.PALLETE.basic};
-  margin-bottom: 8px;
-`;
-
-S.SomAddress = styled.p`
-  font-size: 13px;
-  color: ${({ theme }) => theme.PALLETE.grey.greyScale4};
 `;
 
 S.MyLocationButton = styled.img`
@@ -115,7 +115,7 @@ S.InfoBox = styled.div`
   width: 200px;
   min-height: 160px;
   background: ${({ theme }) => theme.PALLETE.white};
-  border-radius: 12px;
+  border-radius: 8px;
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
   padding: 10px 12px;
 `;
@@ -144,8 +144,6 @@ S.InfoTitle = styled.h4`
   white-space: normal;         
   max-height: 3.2em;            
 `;
-
-
 
 S.InfoAddress = styled.span`
   font-size: 12px;
