@@ -71,7 +71,7 @@ S.IntroBannerButton = styled.button `
 S.WhatIsSomWrap = styled.div `
     width: 100%;
     box-sizing: border-box;
-    background-color: #E0E0E0; 
+    background-color: #FFACD3; 
     
 `
 S.WhatIsSomContainer = styled.div `

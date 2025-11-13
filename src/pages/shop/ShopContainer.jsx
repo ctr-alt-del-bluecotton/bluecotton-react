@@ -3,11 +3,15 @@ import S from "./style";
 import ShopList from "./ShopList";
 import ShopNumberSelect from "./shopNumberSelect/ShopNumberSelect";
 import { useSelector } from "react-redux";
+import { useSearchParams } from "react-router-dom";
 
 const ShopContainer = () => {
 
     const { currentUser, isLogin } = useSelector((state) => state.user);
       const memberId = currentUser.id;
+    
+    const [searchParams] = useSearchParams();  
+    const keyword = (searchParams.get("q") || "").trim();
 
     const [categories, setCategories] = useState({
         clothing: false,
@@ -66,6 +70,10 @@ const ShopContainer = () => {
             filterParams.order = selected;
             filterParams.memberId = memberId;
 
+            if(keyword) {
+                filterParams.keyword = keyword;
+            }
+
             console.log("필터링한 데이터 :", filterParams);
 
 
@@ -95,7 +103,7 @@ const ShopContainer = () => {
 
         fetchFilterProduct(); 
 
-    }, [categories, productTypes, purchaseTypes, selected, memberId, isLogin]); 
+    }, [categories, productTypes, purchaseTypes, selected, memberId, isLogin, keyword]); 
 
     
 

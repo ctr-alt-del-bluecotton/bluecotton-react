@@ -2,7 +2,6 @@ import React, { useEffect, useMemo, useState } from "react";
 import S from "./style";
 import ShopInfo from "./info/ShopInfo";
 import ShopReview from "./review/ShopReview";
-import ShopRelated from "./ShopRelated";
 import { useNavigate, useParams } from "react-router-dom";
 import { useModal } from "../../../components/modal/useModal";
 import { resolveUrl } from "../../../utils/url";
@@ -132,7 +131,7 @@ const Shop = () => {
     const itemData = {
       memberId: currentUser.id, 
       productId: id,
-      quantity: count,
+      cartQuantity: count,
     };
 
     const url = `${process.env.REACT_APP_BACKEND_URL}/cart/add`;
@@ -199,9 +198,11 @@ const Shop = () => {
     const itemData = {
       memberId: currentUser.id,
       productId: Number(id),
-      quantity:count,
-      totalPrice: Number(headerData.productPrice) * count,
+      orderQuantity:count,
+      orderTotalPrice: Number(headerData.productPrice) * count,
     };
+
+    console.log(itemData);
 
     const url = `${process.env.REACT_APP_BACKEND_URL}/order/single`;
    setError(null);
@@ -221,20 +222,20 @@ const Shop = () => {
       const result = await res.json();
       const orderId = result?.data; // Long 타입의 orderId를 백엔드에서 받음
 
-      if (!orderId) {
-        throw new Error("서버에서 유효한 주문 ID를 받지 못했습니다.");
-      }
+      if (!orderId) {
+        throw new Error("서버에서 유효한 주문 ID를 받지 못했습니다.");
+      }
 
-      // 3. 주문 페이지로 orderId를 쿼리 파라미터로 전달하여 이동
-      navigate(`/main/shop/order?orderId=${orderId}`);
+      // 3. 주문 페이지로 orderId를 쿼리 파라미터로 전달하여 이동
+      navigate(`/main/shop/order?orderId=${orderId}`);
 
-    } catch (error) {
-      openModal({
-        title: "주문 오류",
-        message: error.message || "주문 진행 중 오류가 발생했습니다.",
-        confirmText: "확인",
-      });
-      console.error("단일 구매 중 오류 발생:", error);
+    } catch (error) {
+       openModal({
+          title: "주문 오류",
+          message: error.message || "주문 진행 중 오류가 발생했습니다.",
+          confirmText: "확인",
+        });
+      console.error("단일 구매 중 오류 발생:", error);
      }
 
   }
