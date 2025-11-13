@@ -1,28 +1,33 @@
-import React from 'react';
+
 import S from './style'
 import { useRead } from '../../../../context/ReadContext';
+import { useSelector } from 'react-redux';
 
 const SomReadInfo = () => {
-  const { somInfo, somIsLike, setSomIsLike, formatDate } = useRead();
+  const { isLogin } = useSelector((state) => state.user);
+  const { somInfo, somIsLike, setSomIsLike, formatDate, setSoloSomJoinModal, somJoin, somJoinNotLogin } = useRead();
   const {
     somTitle,
     somCategory,
     somAddress,
     somStartDate,
+    somType,
     somEndDate,
     somCount,
     somLike
   } = somInfo
 
+  
 
   // 증가 쿼리 fetch 예정
   const somLikeButtonOnclick = () => {
     setSomIsLike(!somIsLike);
   } 
+  const somTypeText = somType === "solo" ? "솔로솜" : "파티솜";
+  const somOnClick = somType !== "solo" ? () => { isLogin ? somJoin() :  somJoinNotLogin() } :  () => { setSoloSomJoinModal(true) };
 
-  const somOnClick = () => { alert("참여쿼리 들어갈 곳") };
-
-  const somButton = <S.somButton onClick={somOnClick}>참여 ({somCount}/10)</S.somButton> ;
+  const somButton = somType !== "solo" ? <S.somButton onClick={somOnClick}>참여 - {somTypeText}({somCount})</S.somButton>
+  : <S.fullSomButton onClick={somOnClick}>참여 - {somTypeText}({somCount})</S.fullSomButton> ;
 
   const somLikeButton =
     <S.somLikeButton onClick={somLikeButtonOnclick}>
