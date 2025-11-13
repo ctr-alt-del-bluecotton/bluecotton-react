@@ -69,7 +69,7 @@ const PostWriteContent = () => {
         const res = await fetch(`${BASE_URL}/private/post/draft/${draftId}`, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-          },
+          }
         });
 
         if (!res.ok) throw new Error("임시저장 글 불러오기 실패");

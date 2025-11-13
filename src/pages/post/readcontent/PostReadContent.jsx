@@ -411,15 +411,17 @@ const PostReadContent = () => {
       <S.NavList>
         <S.NavItem onClick={goNext}>
           <div className="label">
-            <S.NavArrow src="/assets/icons/drop_down.svg" alt="" $up />
+            <S.NavArrow src="/assets/icons/drop_down.svg" alt="위화살표" $up />
             다음 글
           </div>
-          <div className="title">{`${nextId}번 게시글 입니다.`}</div>
+          <div className="title">
+            {nextId ? `${nextId}번 게시글 입니다.` : "다음 글이 없습니다."}
+            </div>
         </S.NavItem>
 
         <S.NavItem onClick={goPrev} $disabled={!prevId}>
           <div className="label">
-            <S.NavArrow src="/assets/icons/drop_down.svg" alt="" />
+            <S.NavArrow src="/assets/icons/drop_down.svg" alt="아래화살표" />
             이전 글
           </div>
           <div className="title">

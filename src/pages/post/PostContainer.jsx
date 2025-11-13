@@ -15,6 +15,7 @@ import PostCard from "./postCard/PostCard";
 import PostNumberSelect from "./postNumberSelect/PostNumberSelect";
 
 const PostContainer = () => {
+  
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
