@@ -32,7 +32,7 @@ const ChatBotSimple = () => {
 
       const data = await res.json();
       const botReply =
-        data?.choices?.[0]?.message?.content ||
+        data.choices[0].message.content ||
         "답변을 불러올 수 없습니다. 잠시 후 다시 시도해주세요.";
 
       setMessages((prev) => [...prev, { sender: "bot", text: botReply }]);
