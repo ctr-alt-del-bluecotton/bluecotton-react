@@ -1,15 +1,16 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import S from "./style";
 import OrderUserInfo from "./OrderUserInfo";
 import OrderProduct from "./OrderProduct";
-import PaymentMethod from "./PaymentMathod"; 
+import PaymentMethod from "./PaymentMathod";
 import { useModal } from "../../../components/modal/useModal";
+import { useSelector } from "react-redux";
+import { useLocation, useNavigate } from "react-router-dom";
 
-// ✅ 환경변수
 const PORTONE_IMP_KEY = process.env.REACT_APP_PORTONE_IMP_KEY;
 const API = process.env.REACT_APP_BACKEND_URL;
 
-// ✅ IMP SDK 1회 로드 유틸
+
 const getIMP = (() => {
   let promise;
   return () => {
@@ -21,16 +22,10 @@ const getIMP = (() => {
       script.src = "https://cdn.iamport.kr/v1/iamport.js";
       script.async = true;
       script.onload = () => {
-        if (window.IMP) {
-          if (!PORTONE_IMP_KEY) {
-            reject(new Error("PORTONE 식별키 없음 (REACT_APP_PORTONE_IMP_KEY)"));
-            return;
-          }
-          window.IMP.init(PORTONE_IMP_KEY);
-          resolve(window.IMP);
-        } else {
-          reject(new Error("PortOne SDK 로드 실패"));
-        }
+        if (!window.IMP) return reject(new Error("PortOne SDK 로드 실패"));
+        if (!PORTONE_IMP_KEY) return reject(new Error("PORTONE 식별키 없음 (REACT_APP_PORTONE_IMP_KEY)"));
+        window.IMP.init(PORTONE_IMP_KEY);
+        resolve(window.IMP);
       };
       script.onerror = () => reject(new Error("PortOne 스크립트 로드 실패"));
       document.head.appendChild(script);
@@ -40,7 +35,6 @@ const getIMP = (() => {
   };
 })();
 
-// ✅ 결제 팝업 스타일 강제
 const enforceIframeStyles = () => {
   const popup = document.getElementById("portone-payment-popup");
   if (!popup) return;
@@ -60,163 +54,263 @@ const enforceIframeStyles = () => {
 
 const ShopOrderMenu = () => {
   const { openModal } = useModal();
+  const { currentUser, isLogin } = useSelector((s) => s.user);
+  const navigate = useNavigate();
+  const location = useLocation();
 
-  // ✅ 결제 상태
+  const queryParams = new URLSearchParams(location.search);
+  const orderId = queryParams.get("orderId"); // string | null
+  const snapshot = location.state?.snapshot || null;
+
+  const [orderData, setOrderData] = useState(null);
+  const [isLoadingOrder, setIsLoadingOrder] = useState(true);
+
   const [payType, setPayType] = useState(null); // 'toss' | 'kakao' | 'general' | 'candy'
-  const [generalMethod, setGeneralMethod] = useState("card"); // 'card' | 'vbank' | 'trans' 등
+  const [generalMethod, setGeneralMethod] = useState("card");
   const [payLoading, setPayLoading] = useState(false);
 
-  const isCandy = payType === "candy";
+  const merchantUidRef = useRef(null);
 
-  // ✅ 금액(예시)
-  const productAmount = 1000;
-  const shippingFee = 0;
-  const totalAmount = useMemo(() => productAmount + shippingFee, [productAmount, shippingFee]);
-
-  // ✅ 구매자 정보(예시)
-  const buyer = {
-    email: "user@example.com",
-    name: "최준서",
-    tel: "010-1234-5678",
-    addr: "서울 서초구 강남대로 47-6",
-    postcode: "06234",
-  };
-
-  // ✅ SDK 준비
+  // 스냅샷 우선 반영 (있으면 서버 호출 없이 렌더)
   useEffect(() => {
-    getIMP().catch((e) => {
-      console.error(e);
-      openModal({
-        title: "결제 준비 실패",
-        message: e.message || "PortOne SDK를 불러오지 못했습니다.",
-        confirmText: "확인",
+    if (snapshot?.items?.length) {
+      const items = snapshot.items.map((it) => ({
+        productId: it.productId,
+        name: it.name ?? it.productName ?? "",
+        imageUrl: it.imageUrl ?? it.imgUrl ?? null,
+        unitPrice: Number(it.unitPrice ?? 0),
+        quantity: Number(it.quantity ?? 1),
+        purchaseType: String(it.purchaseType ?? "CASH").toUpperCase(),
+        lineTotal: Number(it.unitPrice ?? 0) * Number(it.quantity ?? 1),
+      }));
+      const totalPrice = Number(snapshot.totalPrice ?? items.reduce((s, v) => s + v.lineTotal, 0));
+      setOrderData({
+        orderId: Number(orderId) || undefined, // 있을 수도/없을 수도
+        items,
+        totalPrice,
+        provisional: true,
       });
-    });
-  }, [openModal]);
+      setIsLoadingOrder(false);
+    }
+  }, [snapshot, orderId]);
 
-  const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
-
-  // ✅ 결제 버튼 핸들러
-  const handlePortOnePay = async () => {
-    if (payLoading) return;
-
-    const amountToPay = Number(totalAmount);
-
-    if (!Number.isFinite(amountToPay) || amountToPay <= 0) {
-    return openModal({ title:"결제 실패", message:"결제 금액이 올바르지 않습니다.", confirmText:"확인" });
-  }
-
-    
-    // 캔디 결제 분기
-    if (payType === "candy") {
+  // 서버에서 주문 상세 조회 (orderId가 있을 때)
+  useEffect(() => {
+    // 스냅샷도 없고 orderId도 없으면 뒤로
+    if (!orderId && !(snapshot?.items?.length)) {
       openModal({
-        title: "캔디 결제 안내",
-        message: "캔디 결제는 별도의 내부 차감 로직으로 처리됩니다.",
+        title: "오류",
+        message: "주문 정보가 유효하지 않습니다.",
         confirmText: "확인",
+        onConfirm: () => navigate("/main/shop/cart"),
       });
       return;
     }
 
-    if (!payType) {
+    const fetchOrderData = async () => {
+      if (!orderId) return; // 스냅샷만 있을 때는 스킵
+      setIsLoadingOrder(true);
+      try {
+        if (!currentUser?.id) return;
+        const res = await fetch(`${API}/order/option?id=${orderId}&memberId=${currentUser.id}`, {
+          headers: { "Content-Type": "application/json" },
+        });
+        if (!res.ok) throw new Error("주문 상세 정보 로드 실패");
+        const result = await res.json();
+
+        const server = result?.data?.value ?? result?.data ?? null;
+        const normalized = server
+          ? {
+              orderId: Number(server.orderId ?? orderId),
+              items: (server.items || []).map((item) => ({
+                productId: item.productId,
+                name: item.name ?? item.productName,
+                imageUrl: item.imageUrl ?? item.imgUrl ?? item.productImageUrl ?? null,
+                unitPrice: Number(item.unitPrice ?? item.price ?? 0),
+                quantity: Number(item.quantity ?? 1),
+                purchaseType: String(item.purchaseType ?? item.productPurchaseType ?? "CASH").toUpperCase(),
+              })),
+              totalPrice: Number(server.totalPrice ?? 0),
+            }
+          : null;
+
+        if (normalized) {
+          normalized.items = normalized.items.map((it) => ({
+            ...it,
+            lineTotal: it.unitPrice * it.quantity,
+          }));
+          setOrderData(normalized);
+        } else {
+          setOrderData(null);
+        }
+      } catch (e) {
+        openModal({ title: "주문 로드 오류", message: e.message || "주문 정보를 불러오지 못했습니다." });
+        setOrderData(null);
+      } finally {
+        setIsLoadingOrder(false);
+      }
+    };
+
+    if (isLogin && currentUser?.id && orderId) fetchOrderData();
+  }, [API, currentUser, isLogin, navigate, openModal, orderId, snapshot]);
+
+  // 금액 계산
+  const itemsSum = (orderData?.items || []).reduce(
+    (s, it) => s + (it.lineTotal || (it.unitPrice || 0) * (it.quantity || 1)),
+    0
+  );
+  const rawTotal = Number.isFinite(orderData?.totalPrice) ? Number(orderData.totalPrice) : itemsSum;
+
+  const FIXED_SHIPPING_FEE = 3000;
+  const shippingFeeDisplay = useMemo(() => (rawTotal >= 30000 ? 0 : FIXED_SHIPPING_FEE), [rawTotal]);
+  const itemPrice = useMemo(() => Math.max(rawTotal - shippingFeeDisplay, 0), [rawTotal, shippingFeeDisplay]);
+  const totalAmount = useMemo(() => rawTotal, [rawTotal]);
+
+  const isCandy = payType === "candy";
+  const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+
+  // IMP 로드
+  useEffect(() => {
+    getIMP().catch((e) =>
       openModal({
-        title: "결제 수단 선택",
-        message: "결제 수단을 선택해 주세요.",
+        title: "결제 준비 실패",
+        message: e.message || "PortOne SDK를 불러오지 못했습니다.",
+        confirmText: "확인",
+      })
+    );
+  }, [openModal]);
+
+  const handlePortOnePay = async () => {
+    if (payLoading || isLoadingOrder || !orderData) {
+      return openModal({ title: "준비 중", message: "주문 정보 로드 대기 중입니다." });
+    }
+    if (!isLogin || !currentUser?.id) {
+      return openModal({
+        title: "로그인이 필요합니다",
+        message: "결제 진행을 위해 로그인해주세요.",
+        confirmText: "로그인",
+        onConfirm: () => navigate("/login"),
+      });
+    }
+    if (!payType) {
+      return openModal({ title: "결제 수단 선택", message: "결제 수단을 선택해주세요." });
+    }
+    if (isCandy) {
+      return openModal({
+        title: "캔디 결제 안내",
+        message: "캔디 결제는 내부 차감 API로 처리됩니다.",
         confirmText: "확인",
       });
-      return;
+    }
+
+    // 주문번호 보장
+    const effectiveOrderId = Number(orderData?.orderId ?? orderId);
+    if (!Number.isFinite(effectiveOrderId) || effectiveOrderId <= 0) {
+      return openModal({
+        title: "주문번호 확인 필요",
+        message: "주문번호가 없어 결제를 시작할 수 없습니다. 장바구니에서 다시 시도해 주세요.",
+        confirmText: "확인",
+      });
+    }
+
+    const amountToPay = Math.round(totalAmount);
+    if (!Number.isFinite(amountToPay) || amountToPay <= 0) {
+      return openModal({ title: "결제 실패", message: "결제 금액이 올바르지 않습니다." });
     }
 
     setPayLoading(true);
     try {
       const IMP = await getIMP();
 
-      // ✅ 가맹점 주문번호
-      const merchant_uid = `BC_${Date.now()}`;
-
-      // ✅ PG/결제수단 매핑
+      // PG/결제수단 매핑
       let pg = "";
       let pay_method = "";
-
       switch (payType) {
         case "toss":
-          // tosspayments 권장
           pg = "uplus.tlgdacomxpay";
           pay_method = "card";
           break;
         case "kakao":
-          pg = "kakaopay.TC0ONETIME"; // kakaopay.TC0ONETIME도 가능하나 간단 표기
+          pg = "kakaopay.TC0ONETIME";
           pay_method = "card";
           break;
         case "general":
           pg = "nice_v2";
-          pay_method = generalMethod; // 'card' | 'vbank' | 'trans' 등
+          pay_method = generalMethod;
           break;
         default:
-          openModal({
-            title: "오류",
-            message: "결제 수단을 확인해 주세요.",
-            confirmText: "확인",
-          });
-          setPayLoading(false);
-          return;
+          throw new Error("결제 수단을 확인해주세요.");
       }
-      if (!API) {
-        console.warn("REACT_APP_BACKEND_URL이 설정되지 않아 사전등록/검증을 생략합니다.");
-      } else {
+
+      let merchantUid = `BC_${effectiveOrderId}_${Date.now()}`;
+
+      // 1) 사전등록
+      if (API) {
+        const paymentType = "CASH";
         const prepRes = await fetch(`${API}/payment/prepare`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ merchantUid: merchant_uid, amount: amountToPay }), 
+          body: JSON.stringify({
+            memberId: currentUser.id,
+            orderId: effectiveOrderId, // ✅ 숫자 보장
+            amount: amountToPay,
+            paymentType,
+            merchantUid,
+          }),
         });
         if (!prepRes.ok) {
-          const message = await prepRes.text();
-          throw new Error(`사전 등록 실패 : ${message || prepRes.status}`);
+          const message = await prepRes.text().catch(() => "");
+          throw new Error(`사전 등록 실패 (${prepRes.status}) ${message}`);
+        }
+        const prepJson = await prepRes.json().catch(() => ({}));
+        if (prepJson?.data?.merchantUid || prepJson?.merchantUid) {
+          merchantUid = prepJson.data?.merchantUid ?? prepJson.merchantUid;
         }
       }
+      merchantUidRef.current = merchantUid;
 
-      // ✅ 결제 요청 (콜백에 async 사용하도록 래핑)
+      // 2) 결제창
       await new Promise((resolve) => {
         IMP.request_pay(
           {
             pg,
             pay_method,
-            merchant_uid,
-            name: "블루코튼 상품 결제",
+            merchant_uid: merchantUidRef.current,
+            name: `블루코튼 상품 결제 (No. ${effectiveOrderId})`,
             amount: amountToPay,
-            buyer_email: buyer.email,
-            buyer_name: buyer.name,
-            buyer_tel: buyer.tel,
-            buyer_addr: buyer.addr,
-            buyer_postcode: buyer.postcode,
+            buyer_email: currentUser?.memberEmail || "",
+            buyer_name: currentUser?.memberName || "",
+            buyer_tel: currentUser?.memberPhone || "",
+            buyer_addr: currentUser?.memberAddress || "",
+            buyer_postcode: currentUser?.memberPostcode || "00000",
             ...(isMobile ? { m_redirect_url: window.location.href } : {}),
           },
           async (rsp) => {
-            // 팝업 열리자마자 스타일 강제 적용
             requestAnimationFrame(enforceIframeStyles);
 
-            if (rsp.success || rsp.imp_uid) {
+            if (rsp?.success || rsp?.imp_uid) {
               try {
-                // ✅ 웹(PC) 환경일 때 서버 검증
+                // 3) 서버 검증
                 if (!isMobile && API) {
                   const vRes = await fetch(`${API}/payment/verify`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
                       impUid: rsp.imp_uid,
+                      merchantUid: merchantUidRef.current,
                     }),
                   });
                   if (!vRes.ok) {
-                    const message = await vRes.text();
+                    const message = await vRes.text().catch(() => "");
                     throw new Error(`검증 실패 : ${message || vRes.status}`);
                   }
                 }
 
-                console.log("결제 성공: ", rsp);
                 openModal({
                   title: "결제 완료",
-                  message: "결제가 완료되었습니다.",
+                  message: "결제가 성공적으로 완료되었습니다. 주문 완료 페이지로 이동합니다.",
                   confirmText: "확인",
-                  // onConfirm: () => navigate('/orders/complete')
+                  onConfirm: () => navigate(`/main/my-page/my-shop/order?memberId=${currentUser.id}`),
                 });
               } catch (err) {
                 console.error(err);
@@ -230,12 +324,12 @@ const ShopOrderMenu = () => {
               console.error("결제 실패: ", rsp);
               openModal({
                 title: "결제 실패",
-                message:  rsp.error_msg || rsp.fail_reason || (rsp.error_code ? `오류코드: ${rsp.error_code}` : "알 수 없는 오류"),
+                message: rsp?.error_msg || rsp?.fail_reason || "알 수 없는 오류",
                 confirmText: "확인",
               });
             }
 
-            resolve(); // Promise 종료
+            resolve();
           }
         );
       });
@@ -243,7 +337,7 @@ const ShopOrderMenu = () => {
       console.error(e);
       openModal({
         title: "결제 오류",
-        message: e.message || "결제 준비 중 오류가 발생했습니다.",
+        message: e.message || "결제 중 오류가 발생했습니다.",
         confirmText: "확인",
       });
     } finally {
@@ -251,14 +345,16 @@ const ShopOrderMenu = () => {
     }
   };
 
+  if (isLoadingOrder || !orderData) {
+    return <S.OrderPageWrap>주문 정보 불러오는 중</S.OrderPageWrap>;
+  }
+
   return (
     <S.OrderPageWrap className={isCandy ? "candy-mode" : ""}>
       <S.OrderMainSection>
         <OrderUserInfo />
-        <OrderProduct />
+        <OrderProduct orderData={orderData} />
         <PaymentMethod value={payType} onChange={setPayType} />
-        {/* 일반결제(method) 세부 옵션 UI가 있다면 아래에 렌더 */}
-        {/* {payType === 'general' && <GeneralMethod value={generalMethod} onChange={setGeneralMethod} />} */}
       </S.OrderMainSection>
 
       <S.OrderSideSection>
@@ -266,17 +362,20 @@ const ShopOrderMenu = () => {
           <S.SideTitle>결제 예정금액</S.SideTitle>
           <S.SideRow>
             <span>상품금액</span>
-            <span>{productAmount.toLocaleString()}원</span>
+            <span>{itemPrice.toLocaleString()}원</span>
           </S.SideRow>
           <S.SideRow>
             <span>배송비</span>
-            <span>{shippingFee.toLocaleString()}원</span>
+            <span>{shippingFeeDisplay.toLocaleString()}원</span>
           </S.SideRow>
           <S.SideTotal>
             <span>합계</span>
             <span className="price">{totalAmount.toLocaleString()}원</span>
           </S.SideTotal>
-          <S.PayButton onClick={handlePortOnePay} disabled={payLoading}>
+          <S.PayButton
+            onClick={handlePortOnePay}
+            disabled={payLoading || !Number.isFinite(Number(orderData?.orderId ?? orderId))}
+          >
             {payLoading ? "결제창 여는 중…" : `${totalAmount.toLocaleString()}원 결제하기`}
           </S.PayButton>
         </S.SideContainer>
