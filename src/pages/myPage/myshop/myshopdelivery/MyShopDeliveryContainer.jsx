@@ -1,47 +1,41 @@
-import React, { useMemo, useState, useEffect } from "react"; // ⬅️ [변경] useEffect 추가
+import React, { useMemo, useState, useEffect } from "react"; 
 import S from "../style";
 import ReviewModal from "../review/ReviewModal";
 import { useSelector } from "react-redux";
-import { resolveUrl } from "../../../../utils/url"; // ⬅️ [추가] 이미지 경로 변환 훅 임포트
+import { resolveUrl } from "../../../../utils/url";
 
-// formatDotDate를 화살표 함수로 변경 (기존 유지)
 const formatDotDate = (str) => {
-  if (!str) return ""; // ⬅️ [수정] 날짜가 null일 경우 방어 로직 추가
+  if (!str) return ""; 
   return str.split("T")[0].replace(/-/g, ".");
 };
 
-// ⬅️ [추가] 백엔드 DTO를 React 컴포넌트가 사용하기 쉬운 형태로 변환하는 함수
 const toClient = (dto) => ({
   id: dto.orderId, // 주문 ID를 리스트의 key로 사용
   deliveryId: dto.deliveryId, // 배송 ID
-  productId: dto.productId, // 상품 ID (리뷰 모달용)
-  name: dto.productName || "상품명 없음", // null 방어
-  date: dto.orderCreatedAt, // YYYY-MM-DD 형식의 문자열
-  status: dto.deliveryStatus.toLowerCase(), // "PAID" -> "paid"
-  imageUrl: resolveUrl(dto.productMainImageUrl) || "/assets/images/abc.png", // 상품 이미지 (resolveUrl 사용)
+  productId: dto.productId, // 상품 ID 
+  name: dto.productName || "상품명 없음", 
+  date: dto.orderCreateAt, // YYYY-MM-DD 형식의 문자열
+  status: dto.deliveryStatus.toLowerCase(), 
+  imageUrl: resolveUrl(dto.productMainImageUrl) || "/assets/images/abc.png", // 상품 이미지 (resolveUrl)
 });
 
 
+
 const MyShopDeliveryContainer = () => {
-  // ⬅️ [변경] activeFilter 초기값을 백엔드 Enum에 맞춰 "paid"로 변경
   const [activeFilter, setActiveFilter] = useState("paid");
 
-  // ⬅️ [변경] Redux useSelector 훅을 사용하여 현재 유저 정보 가져오기 (위치 변경)
   const { currentUser, isLogin } = useSelector((state) => state.user);
 
   const [open, setOpen] = useState(false);
   const [target, setTarget] = useState(null);
 
-  // ⬅️ [추가] API 데이터를 저장할 state
   const [allItems, setAllItems] = useState([]); // 서버에서 받은 원본 데이터
-  const [loading, setLoading] = useState(true); // ⬅️ [추가] 로딩 상태
-  const [error, setError] = useState(null);    // ⬅️ [추가] 에러 상태
+  const [loading, setLoading] = useState(true); // 로딩 
+  const [error, setError] = useState(null);    // 에러 
 
-  // ⬅️ [추가] API 호출 로직 (useEffect 안으로 이동)
   useEffect(() => {
     const fetchDeliveries = async () => {
-      // ⬅️ [추가] 로그인이 안됐거나, memberId가 없으면 요청 중단
-      if (!isLogin || !currentUser?.id) { // currentUser가 null일 경우 방어
+      if (!isLogin || !currentUser?.id) { 
         setAllItems([]);
         setLoading(false);
         return;
@@ -63,7 +57,6 @@ const MyShopDeliveryContainer = () => {
         }
 
         const json = await res.json();
-        
 
         const transformedData = Array.isArray(json.data) ? json.data.map(toClient) : [];
         setAllItems(transformedData);
@@ -77,6 +70,20 @@ const MyShopDeliveryContainer = () => {
 
     fetchDeliveries();
   }, [isLogin, currentUser?.id]); 
+
+
+  const handleCancel = async (orderId) => {
+    const url = `${process.env.REACT_APP_BACKEND_URL}/mypage/myshop/delivery/${orderId}`;
+
+    const res = await fetch(url, {
+      method: "DELETE",
+    });
+    if (!res.ok) throw new Error("구매 취소에 실패했습니다.");
+
+    setAllItems((prev) => prev.filter((it) => it.id !== orderId));
+    alert("구매가 취소되었습니다.")
+
+  }
 
 
   const openReview = (item) => {
@@ -163,7 +170,7 @@ const MyShopDeliveryContainer = () => {
 
               <div>
                 {activeFilter === "paid" && (
-                  <S.ActionButton>구매 취소</S.ActionButton>
+                  <S.ActionButton onClick={() => handleCancel(item.id)}>구매 취소</S.ActionButton>
                 )}
 
                 {activeFilter === "completed" && (
