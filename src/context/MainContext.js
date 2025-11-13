@@ -26,7 +26,6 @@ export const MainProvider = ({ children }) => {
     const [ somisLikeList, setSomisLikeList ] = useState([]);
     const [ maxPage, setMaxPage ] = useState(1);
     const [ pageNumber, setPageNumber ] = useState(1);
-    const [ insertSom, setInsertSom ] = useState(false);
     const { currentUser, isLogin } = useSelector((state) => state.user);
     
     useEffect(() => {
@@ -37,20 +36,28 @@ export const MainProvider = ({ children }) => {
         const loadSomList = async () => {
             try {
                 console.log(category)
-                const data = await fetchData(`som/category?somCategory=${category}&somType=${sortBy}&page=${pageNumber}` ,options.getOption())
-                const jsonData = await data.json();
-                const somListData = jsonData.data.somList;
-                const somMaxPage = jsonData.data.maxPage;
-                setSomList(somListData);
-                setMaxPage(somMaxPage);
-                console.log(maxPage)
+                await fetchData(`som/category?somCategory=${category}&somType=${sortBy}&page=${pageNumber}&memberEmail=${currentUser.memberEmail}` ,options.getOption())
+                .then(async (res) => {
+                    const jsonData = await res.json();
+                    console.log(jsonData)
+                    const somListData = jsonData.data.somList;
+                    const somMaxPage = jsonData.data.maxPage;
+                    setSomList(somListData);
+                    setMaxPage(somMaxPage);
+                })
             } catch (error) {
                 console.error("솜 리스트를 가져오는데 실패했습니다:", error);
-                // TODO: 사용자에게 에러를 알리는 UI 처리
             }
         };
         loadSomList();
-    }, [category, sortBy, pageNumber, insertSom]);
+
+        const handleRefresh = () => {
+            loadSomList(); 
+        };
+
+        window.addEventListener("refreshSomList", handleRefresh);
+        return () => window.removeEventListener("refreshSomList", handleRefresh);
+    }, [category, sortBy, pageNumber]);
 
     useEffect(() => {
         // 초기 좋아요 목록 설정
@@ -75,7 +82,6 @@ export const MainProvider = ({ children }) => {
         somisLikeList,
         currentUser,
         isLogin,
-        setInsertSom,
         setSomisLikeList,
         pageNumber,
         setPageNumber,

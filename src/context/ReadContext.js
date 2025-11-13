@@ -1,16 +1,20 @@
 import { createContext, useState, useContext, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-// import readData from '../pages/main/dummyData/readDummys/readDummy.json';
-import memberData from '../pages/main/dummyData/readDummys/joinMemberDummy.json';
+import { useNavigate, useParams } from 'react-router-dom';
 import leaderData from '../pages/main/dummyData/readDummys/somLeaderDummy.json';
 import reviewData from '../pages/main/dummyData/readDummys/somReviewDummy.json';
 import { fetchData, options } from './FetchContext';
+import { useModal } from './../components/modal';
+import { useSelector } from 'react-redux';
 
 const ReadContext = createContext();
 
 export const useRead = () => useContext(ReadContext);
 
 export const ReadProvider = ({ children }) => {
+    const nav = useNavigate();
+    const { currentUser, isLogin } = useSelector((state) => state.user);
+    const { id } = useParams();
+    const { openModal } = useModal();
     const [somInfo, setSomInfo] = useState({});
     const [somLeader, setSomLeader] = useState({});
     const [somReviews, setSomReviews] = useState([]);
@@ -19,35 +23,86 @@ export const ReadProvider = ({ children }) => {
     const [infoMenuSelect, setInfoMenuSelect] = useState("info");
     const [somMemberList, setSomMemberList] = useState([]);
     const [somIsLike, setSomIsLike] = useState(false);
-    const { id } = useParams();
 
-    useEffect(  () => {
+    const insertFetch = async () => {
+        await fetchData('som/join', options.postOption({
+            somId : id,
+            memberId : currentUser.id
+        }))
+        .then((res) => {
+            console.log(res);
+            window.dispatchEvent(new CustomEvent("refreshSomList"));
+        })
+    }
+
+    const somJoinSoloSom = () => {
+        openModal({
+            title: "솔로 솜에는 참가 할 수 없습니다.",
+            message: "귓솜말로 문의를 해보는건 어떨까요?",
+            cancelText: "더 둘러보기",
+            confirmText: "확인",
+            onConfirm: () => { alert('귓솜말 연결 코드') }
+        });
+    }
+
+    const somJoinNotLogin = () => {
+        if (!isLogin) {
+            openModal({
+                title: "로그인이 필요한 서비스입니다.",
+                message: "로그인을 해주세요.",
+                cancelText: "더 둘러보기",
+                confirmText: "확인", 
+                onConfirm: () => { nav('/login') }
+            });
+        }
+    }
+
+    const somJoin = () => {
+        openModal({
+            title: "해당 솜에 참가합니다.",
+            message: "참가하시겠습니까?",
+            cancelText: "더 둘러보기",
+            confirmText: "참가하기",
+            onConfirm: () => { insertFetch() }
+        });
+    }
+
+    useEffect(() => {
         const loadReadData = async () => {
             setLoading(true);
-            const backReadData = await fetchData(`som/read?somId=${id}`, options.getOption());
-            const target = await backReadData.json();
-            const readData = target.data;
-            console.log(readData)
-
+            await fetchData(`som/read?somId=${id}}&memberEmail=${currentUser.memberEmail}`, options.getOption())
+                .then(async (res) => {
+                    const target = await res.json();
+                    const readData = target.data;
+                    console.log(readData)
+        
+                    // .find((som) => String(som.id) === String(id));
+                    setSomInfo(readData || {});
             
-            // .find((som) => String(som.id) === String(id));
-            setSomInfo(readData || {});
-    
-            const likeInfo = readData.somLike;
-            setSomIsLike(likeInfo ? likeInfo.isLike : false);
-    
-            const leaderInfo = leaderData.find(({ somId }) => String(somId) === String(id));
-            setSomLeader(leaderInfo || {});
-    
-            const contentData = readData.somContent
-            setSomContent(contentData ? contentData.somContent : "");
-    
-            setSomMemberList(memberData.filter(({ somId }) => String(somId) === String(id)));
+                    const likeInfo = readData.somLike;
+                    setSomIsLike(likeInfo ? likeInfo.isLike : false);
             
-            setLoading(false);
+                    const leaderInfo = leaderData.find(({ somId }) => String(somId) === String(id));
+                    setSomLeader(leaderInfo || {});
+            
+                    const contentData = readData.somContent
+                    setSomContent(contentData ? contentData.somContent : "");
+            
+                    console.log("참여 멤버 데이터:", readData.somJoinList);
+                    setSomMemberList(readData.somJoinList || []);
+                    
+                    setLoading(false);
+                })
         }
 
         loadReadData();
+
+        const handleRefresh = () => {
+            loadReadData(); 
+        };
+
+        window.addEventListener("refreshSomList", handleRefresh);
+        return () => window.removeEventListener("refreshSomList", handleRefresh);
     }, [id]);
 
     useEffect(() => {
@@ -73,11 +128,15 @@ export const ReadProvider = ({ children }) => {
         loading,
         somContent,
         infoMenuSelect,
+        insertFetch,
         setInfoMenuSelect,
         somMemberList,
+        somJoinSoloSom,
+        somJoin,
         somIsLike,
         setSomIsLike,
-        formatDate
+        formatDate,
+        somJoinNotLogin
     };
 
     return (

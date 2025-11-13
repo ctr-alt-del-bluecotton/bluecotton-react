@@ -9,6 +9,7 @@ const FloatingButton = () => {
     isHoverButtons,
     setIsHoverButtons,
     somMenuSelect,
+    setIsDisplayFloatingMenu
   } = useFloatingAction();
 
   const buttons = [
@@ -81,7 +82,7 @@ const FloatingButton = () => {
             )
           }
         </S.menuHideButtonWrap>
-        <S.menuButton activeState={isFloatingSelect} onClick={() => {setIsFloatingSelect((select) => !select); console.log(isFloatingSelect)}}>
+        <S.menuButton activeState={isFloatingSelect} onClick={() => {setIsFloatingSelect((select) => !select); setIsDisplayFloatingMenu((prev) => isFloatingSelect === true ? false : prev )}}>
           <S.menuPlusIcon activeState={isFloatingSelect} src={`${process.env.PUBLIC_URL}/assets/icons/plus_icon.svg`} />
         </S.menuButton>
       </S.inner>
