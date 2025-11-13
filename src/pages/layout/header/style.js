@@ -49,7 +49,7 @@ S.CenterGroup = styled.nav`
   transform: translateX(-50%);
   display: flex;
   align-items: center;
-  gap: 110px;
+  gap: 120px;
   justify-self: center;
   white-space: nowrap;
 `;
@@ -59,7 +59,7 @@ S.RightGroup = styled.div`
   align-items: center;
   justify-self: flex-end;
   margin-left: auto;
-  gap: 12px;
+  gap: 10px;
 `;
 
 S.Logo = styled(Link)`
