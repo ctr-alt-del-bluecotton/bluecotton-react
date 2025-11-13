@@ -44,8 +44,10 @@ const MyShopOrderContainer = () => {
         setError(null);
 
         const base = process.env.REACT_APP_BACKEND_URL || "";
-        const res = await fetch(`${base}/mypage/myshop/order?memberId=${memberId}`, {
-          headers: { "Content-Type": "application/json" },
+        const res = await fetch(`${base}/private/mypage/myshop/order?memberId=${memberId}`, {
+          headers: { "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`
+           },
           method: "GET",
         });
 
@@ -109,7 +111,7 @@ const MyShopOrderContainer = () => {
         {orders.length === 0 && <div>구매내역이 없습니다.</div>}
       </S.ListContainer>
 
-      {/* 간단 페이징(추후 서버/클라이언트 페이징 붙일 자리) */}
+
       <S.Pagination>
         <S.PageButton disabled>&lt; 이전</S.PageButton>
         <S.PageNumber>1</S.PageNumber>

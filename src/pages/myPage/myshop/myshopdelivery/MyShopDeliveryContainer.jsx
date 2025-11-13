@@ -47,9 +47,13 @@ const MyShopDeliveryContainer = () => {
       try {
         const memberId = currentUser.id;
 
-        const url = `${process.env.REACT_APP_BACKEND_URL}/mypage/myshop/delivery/${memberId}`;
+        const url = `${process.env.REACT_APP_BACKEND_URL}/private/mypage/myshop/delivery/${memberId}`;
         
-        const res = await fetch(url);
+        const res = await fetch(url,{
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          }
+        });
 
         if (!res.ok) {
           const errorData = await res.json();
@@ -73,10 +77,13 @@ const MyShopDeliveryContainer = () => {
 
 
   const handleCancel = async (orderId) => {
-    const url = `${process.env.REACT_APP_BACKEND_URL}/mypage/myshop/delivery/${orderId}`;
+    const url = `${process.env.REACT_APP_BACKEND_URL}/private/mypage/myshop/delivery/${orderId}`;
 
     const res = await fetch(url, {
       method: "DELETE",
+      headers: {
+         Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+      }
     });
     if (!res.ok) throw new Error("구매 취소에 실패했습니다.");
 
