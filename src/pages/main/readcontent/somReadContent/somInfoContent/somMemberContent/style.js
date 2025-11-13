@@ -12,6 +12,7 @@ S.memberInfoContainer = styled.div`
 S.memberInfoIamge = styled.img`
     width: 60px;
     height: 60px;
+    object-fit: cover;
     border-radius: 100%;
     border: 1px solid ${({ theme }) => theme.PALLETE.grey.greyScale3};
 `
