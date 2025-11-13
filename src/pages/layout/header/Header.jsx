@@ -1,11 +1,48 @@
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import S from "./style.js";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
+import { color } from "framer-motion";
 
 const Header = () => {
   const { pathname } = useLocation();
   const navigate = useNavigate();
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef(null);
+  const [isMyPageHovered, setIsMyPageHovered] = useState(false);
+  const [isLogoutHovered, setIsLogoutHovered] = useState(false);
+
+  const toogleDropdown = () => {
+    setIsOpen((prev) => !prev);
+  };
+
+  const hoverStyle = {
+    borderRadius:"4px",
+    backgroundColor: "#0015FF", 
+    color : "#FFFFFF"
+  };
+
+  const buttonBaseStyle = {
+    width: "100%",
+    padding: "8px 0",
+    textAlign: "center",
+    border: "none",
+    background: "transparent",
+    cursor: "pointer",
+    fontSize: "13px",
+    transition: "background-color 0.1s", 
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if(dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {document.removeEventListener("mousedown", handleClickOutside);};
+  }, []);
 
   //  리덕스에있는 유저 정보 유저 상태
   const { currentUser, isLogin } = useSelector((state) => state.user);
@@ -18,6 +55,11 @@ const Header = () => {
   const handleLogoutClick = () => {
     localStorage.removeItem("accessToken");
     window.location.reload();
+  };
+
+  const handleMyPage = () => {
+    navigate("/main/my-page/my-som");
+    setIsOpen(false);
   };
 
   const isIntroPage = pathname === "/";
@@ -45,6 +87,7 @@ const Header = () => {
       <S.NavLink to="/main/som/all">솜</S.NavLink>
       <S.NavLink to="/main/shop">블루코튼 샵</S.NavLink>
       <S.NavLink to="/main/post/all">오늘의 솜</S.NavLink>
+      <S.NavLink to="/main/map">주변 솜</S.NavLink>
     </>
   );
 
@@ -68,8 +111,12 @@ const Header = () => {
 
           <S.RightGroup>
             {isLogin ? (
-              <>
-                <S.ProfileBox>
+              <div
+                ref={dropdownRef}
+                style={{ position: "relative", display: "inline-block" }}
+              >
+               
+                <S.ProfileBox onClick={toogleDropdown} style={{cursor:"pointer"}}>
                   <img
                     style={{
                       width: "21px",
@@ -79,12 +126,53 @@ const Header = () => {
                     src="/assets/icons/login.svg"
                     alt="프로필아이콘"
                   />
-                  <S.ProfileName>{currentUser.memberNickname || "사용자"}</S.ProfileName>
+                  <S.ProfileName nClick={toogleDropdown} style={{cursor:"pointer"}}>
+                    {currentUser.memberNickname || "사용자"}
+                  </S.ProfileName>
                 </S.ProfileBox>
-                <S.LogoutButton onClick={handleLogoutClick}>
-                  로그아웃
-                </S.LogoutButton>
-              </>
+
+         
+                {isOpen && (
+                  <div
+                    style={{
+                      position: "absolute",
+                      top: "100%",
+                      right: 0,
+                      marginTop: "8px",
+                      backgroundColor: "#FFFFFF",
+                      border:"1px solid #E0E0E0",
+                      boxShadow: "0 3px 4px rgba(0,0,0,0.25)",
+                      borderRadius: "4px",
+                      minWidth: "85px",
+                      // padding: "auto",
+                      zIndex: 300,
+                    }}
+                  >
+                    <button
+                      onClick={handleMyPage}
+                      onMouseEnter={() => setIsMyPageHovered(true)}
+                      onMouseLeave={() => setIsMyPageHovered(false)}
+                      style={{
+                        ...buttonBaseStyle,
+                        ...(isMyPageHovered ? hoverStyle : {}),
+                    }}
+                    >
+                      마이페이지
+                    </button>
+                    <button
+                      onClick={handleLogoutClick}
+                      onMouseEnter={() => setIsLogoutHovered(true)}
+                      onMouseLeave={() => setIsLogoutHovered(false)}
+                      style={{
+                        ...buttonBaseStyle,
+                        ...(isLogoutHovered ? hoverStyle: {}),
+                      }}
+                    >
+                      로그아웃
+                    </button>
+                  </div>
+                )}
+              </div>
             ) : (
               <S.LoginButton onClick={handleLoginClick}>
                 <img

@@ -29,7 +29,7 @@ const IntroMap = () => {
                         viewport={{ once: true }}
                     >
                         <S.IntroPostBord>
-                            <S.IntroMapImg src="/assets/images/intro_map.png" alt="지도 이미지" />
+                            <S.IntroMapImg src="/assets/images/intro_map_real.png" alt="지도 이미지" />
                         </S.IntroPostBord>
                     </motion.div>
                 </S.IntroMapImgAndText>
