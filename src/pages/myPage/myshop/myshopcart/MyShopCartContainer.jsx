@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from "react";
 import S from "../style";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useModal } from "../../../../components/modal/useModal";
+import { useSelector } from "react-redux";
 
 const MyShopCartContainer = () => {
   const { openModal } = useModal();
+  const { currentUser, isLogin } = useSelector((s) => s.user);
+  const navigate = useNavigate();
 
-  /* 탭(일반/캔디) */
   const [tab, setTab] = useState("general");
   const [generalItems, setGeneralItems] = useState([]);
   const [candyItems, setCandyItems] = useState([]);
@@ -16,15 +18,130 @@ const MyShopCartContainer = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  /* 선택/수량 상태 */
   const [checkedIds, setCheckedIds] = useState(new Set());
   const [qtyMap, setQtyMap] = useState({});
-  const memberId = 11;
+  const memberId = currentUser?.id;
 
+  const safeJson = async (res) => {
+    try {
+      return await res.json();
+    } catch {
+      return null;
+    }
+  };
+
+
+  const handleOrder = async () => {
+  
+  if (!isLogin || !memberId) {
+    openModal({
+      title: "로그인이 필요합니다",
+      message: "주문하려면 먼저 로그인해 주세요.",
+      confirmText: "로그인하기",
+      onConfirm: () => navigate("/login"),
+    });
+    return;
+  }
+
+
+  const itemsToOrder = currentItems
+    .filter((item) => checkedIds.has(item.id))
+    .map((item) => ({
+      productId: item.productId,
+      quantity: qtyMap[item.id] || 1,
+    }));
+
+  if (itemsToOrder.length === 0) {
+    openModal({
+      title: "주문할 상품을 선택해 주세요",
+      confirmText: "확인",
+    });
+    return;
+  }
+
+  
+  const snapshotItems = currentItems
+    .filter((item) => checkedIds.has(item.id))
+    .map((item) => {
+      const q = qtyMap[item.id] || 1;
+      const unitPrice = Number(item.productPrice) || 0;
+      return {
+        productId: item.productId,
+        name: item.productName,
+        imageUrl: item.productImageUrl ?? null,
+        unitPrice,
+        quantity: q,
+        purchaseType: String(item.productPurchaseType || "CASH").toUpperCase(),
+        lineTotal: unitPrice * q,
+      };
+    });
+
+  const snapshotTotal = snapshotItems.reduce((s, v) => s + v.lineTotal, 0);
+
+  let lastOrderId = null;
+
+  try {
+    for (const item of itemsToOrder) {
+      const payload = {
+        memberId,
+        productId: item.productId,
+        quantity: item.quantity,
+      };
+
+      const url = `${process.env.REACT_APP_BACKEND_URL}/order/cart`;
+      const response = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const body = await safeJson(response);
+
+      if (!response.ok) {
+        const msg =
+          body?.message ||
+          `주문 실패 (상품 ID: ${item.productId}) - ${response.status}`;
+        throw new Error(msg);
+      }
+
+      if (body?.data) lastOrderId = body.data;
+    }
+
+    const finalOrderId = lastOrderId ?? "";
+
+    openModal({
+      title: "주문 성공",
+      message: `${itemsToOrder.length}개 상품의 주문이 접수되었습니다.`,
+      confirmText: "확인",
+      onConfirm: () => {
+      
+        navigate(`/main/shop/order?orderId=${finalOrderId}`, {
+          state: {
+            snapshot: {
+              items: snapshotItems,      
+              totalPrice: snapshotTotal,
+            },
+          },
+        });
+      },
+    });
+  } catch (err) {
+    console.error("주문 오류:", err);
+    openModal({
+      title: "주문 실패",
+      message: err?.message || "주문이 실패했습니다.",
+      confirmText: "확인",
+    });
+  }
+};
+
+
+ 
   useEffect(() => {
-    // 1. Unmount 후 상태 업데이트 방지 플래그 추가
+    if (!memberId) return; 
+
     let isMounted = true;
-    const url = `${process.env.REACT_APP_BACKEND_URL}/cart/list?memberId=11`;
+    const url = `${process.env.REACT_APP_BACKEND_URL}/cart/list?memberId=${memberId}`;
     setLoading(true);
     setError(null);
 
@@ -32,12 +149,12 @@ const MyShopCartContainer = () => {
       method: "GET",
       headers: { "Content-Type": "application/json" },
     })
-      .then((res) => {
+      .then(async (res) => {
         if (!res.ok) throw new Error(`네트워크 응답 실패: ${res.status}`);
-        return res.json();
+        return safeJson(res);
       })
       .then((data) => {
-        if (!isMounted) return; 
+        if (!isMounted) return;
 
         const items = Array.isArray(data)
           ? data
@@ -46,35 +163,39 @@ const MyShopCartContainer = () => {
           : [];
 
         const normalized = items.map((item) => ({
-          id: item.id, 
+          id: item.id,
           productId: item.productId,
           productName: item.productName,
           productPrice: Number(item.productPrice) || 0,
-          productPurchaseType: String(item.productPurchaseType).toUpperCase(), // CASH | CANDY
+          productPurchaseType: String(item.productPurchaseType || "")
+            .toUpperCase()
+            .trim(), // "CASH" | "CANDY"
           productImageUrl: item.productImageUrl || null,
         }));
 
-        
-        const general = normalized.filter((it) => it.productPurchaseType === "CASH");
-        const candy = normalized.filter((it) => it.productPurchaseType === "CANDY");
+        const general = normalized.filter(
+          (it) => it.productPurchaseType === "CASH"
+        );
+        const candy = normalized.filter(
+          (it) => it.productPurchaseType === "CANDY"
+        );
 
         setGeneralItems(general);
         setCandyItems(candy);
         setLoading(false);
       })
       .catch((err) => {
-        if (!isMounted) return; 
+        if (!isMounted) return;
         setError(err);
         setLoading(false);
       });
-      
-    
+
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [memberId]);
 
-  // 탭/목록 변경 시 수량/선택 초기화
+  // 탭 전환/목록 변경 시 선택/수량 초기화
   useEffect(() => {
     const nextQty = {};
     currentItems.forEach((it) => (nextQty[it.id] = 1));
@@ -82,8 +203,9 @@ const MyShopCartContainer = () => {
     setCheckedIds(new Set());
   }, [tab, currentItems]);
 
-  /* 전체선택/개별선택 */
-  const allChecked = checkedIds.size === currentItems.length && currentItems.length > 0;
+
+  const allChecked =
+    checkedIds.size === currentItems.length && currentItems.length > 0;
 
   const toggleAll = (e) => {
     if (e.target.checked) {
@@ -101,11 +223,11 @@ const MyShopCartContainer = () => {
     });
   };
 
-  /* 수량 변경 */
-  const inc = (id) => setQtyMap((p) => ({ ...p, [id]: (p[id] || 1) + 1 }));
-  const dec = (id) => setQtyMap((p) => ({ ...p, [id]: Math.max(1, (p[id] || 1) - 1) }));
+  const inc = (id) =>
+    setQtyMap((p) => ({ ...p, [id]: (p[id] || 1) + 1 }));
+  const dec = (id) =>
+    setQtyMap((p) => ({ ...p, [id]: Math.max(1, (p[id] || 1) - 1) }));
 
-  /* 합계 */
   const selectedTotal = currentItems
     .filter((it) => checkedIds.has(it.id))
     .reduce((sum, it) => sum + it.productPrice * (qtyMap[it.id] || 1), 0);
@@ -113,7 +235,7 @@ const MyShopCartContainer = () => {
   const unit = tab === "general" ? "원" : "캔디";
   const shippingText = tab === "candy" ? "무료배송" : "3,000원";
 
-  /* 삭제 */
+  
   const handleDelete = (id) => {
     const item = currentItems.find((it) => it.id === id);
     openModal({
@@ -121,35 +243,44 @@ const MyShopCartContainer = () => {
       message: `${item?.productName ?? "선택한 상품"}을(를) 장바구니에서 삭제합니다.`,
       confirmText: "삭제",
       cancelText: "취소",
-      // 실제 백엔드 삭제 로직이 필요하지만, 현재는 프론트엔드 상태만 업데이트
-      // onConfirm: () => setCurrentItems((prev) => prev.filter((it) => it.id !== id)),
       onConfirm: async () => {
         try {
-          const url = `${process.env.REACT_APP_BACKEND_URL}/cart/delete?memberId=11&productId=${item.productId}`
+          const url = `${process.env.REACT_APP_BACKEND_URL}/cart/delete?memberId=${memberId}&productId=${item.productId}`;
           const response = await fetch(url, {
-            method:"DELETE",
-            mode: "cors",
+            method: "DELETE",
             headers: { "Content-Type": "application/json" },
           });
 
-           let payload = null;
-        try {
-          payload = await response.json();
-        } catch (_) { /* ignore non-JSON */ }
+          const payload = await safeJson(response);
 
-        if (!response.ok) {
-          const msg = payload?.message || `삭제 실패: ${response.status}`;
-          throw new Error(msg);
-        }
+          if (!response.ok) {
+            const msg =
+              payload?.message || `삭제 실패: ${response.status}`;
+            throw new Error(msg);
+          }
 
-
-          if(!response.ok) throw new Error(`삭제 실패: ${response.status}`);
+          // 프론트 목록 동기화
           setCurrentItems((prev) => prev.filter((it) => it.id !== id));
-        } catch(error) {
-            console.error(error);
-            alert("삭제 중 오류 발생");
+          // 선택/수량 상태도 정리
+          setCheckedIds((prev) => {
+            const next = new Set(prev);
+            next.delete(id);
+            return next;
+          });
+          setQtyMap((prev) => {
+            const next = { ...prev };
+            delete next[id];
+            return next;
+          });
+        } catch (err) {
+          console.error(err);
+          openModal({
+            title: "삭제 실패",
+            message: err?.message || "삭제 중 오류가 발생했습니다.",
+            confirmText: "확인",
+          });
         }
-      }
+      },
     });
   };
 
@@ -160,7 +291,7 @@ const MyShopCartContainer = () => {
     <div>
       <S.ListHeader>장바구니</S.ListHeader>
 
-      {/* 탭 전환 */}
+      
       <S.FilterContainer>
         <S.FilterButton
           $active={tab === "general"}
@@ -178,26 +309,32 @@ const MyShopCartContainer = () => {
         </S.FilterButton>
       </S.FilterContainer>
 
-      {/* 상단 전체선택/삭제(선택해제) */}
+      
       <S.CartHeader>
         <S.SelectAll>
-          <S.Checkbox checked={allChecked} onChange={toggleAll} aria-label="전체선택" />
+          <S.Checkbox
+            checked={allChecked}
+            onChange={toggleAll}
+            aria-label="전체선택"
+          />
           전체선택
         </S.SelectAll>
 
-        <S.ResetButton $active={checkedIds.size > 0} onClick={() => setCheckedIds(new Set())}>
+        <S.ResetButton
+          $active={checkedIds.size > 0}
+          onClick={() => setCheckedIds(new Set())}
+        >
           선택해제
         </S.ResetButton>
       </S.CartHeader>
 
-      {/* 아이템 리스트 */}
+      
       <S.ListContainer>
         {currentItems.map((item) => {
           const q = qtyMap[item.id] || 1;
           const itemTotal = item.productPrice * q;
 
           return (
-            // key={item.id}는 이제 장바구니 항목 고유 ID를 사용합니다.
             <S.CartItem key={item.id}>
               <S.Checkbox
                 checked={checkedIds.has(item.id)}
@@ -209,16 +346,32 @@ const MyShopCartContainer = () => {
                   <img
                     src={item.productImageUrl}
                     alt={item.productName}
-                    style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: 8 }}
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                      borderRadius: 8,
+                    }}
                   />
                 )}
               </S.ItemImage>
               <S.ItemInfo>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "flex-start",
+                  }}
+                >
                   <div>
                     <S.ItemName>{item.productName}</S.ItemName>
                     <div
-                      style={{ color: "#757575", fontSize: 14, marginBottom: 8, cursor: "pointer" }}
+                      style={{
+                        color: "#757575",
+                        fontSize: 14,
+                        marginBottom: 8,
+                        cursor: "pointer",
+                      }}
                       onClick={() => handleDelete(item.id)}
                     >
                       삭제
@@ -229,7 +382,9 @@ const MyShopCartContainer = () => {
                         -
                       </S.QuantityButton>
                       <S.Quantity>{q}</S.Quantity>
-                      <S.QuantityButton onClick={() => inc(item.id)}>+</S.QuantityButton>
+                      <S.QuantityButton onClick={() => inc(item.id)}>
+                        +
+                      </S.QuantityButton>
                     </S.QuantityControl>
                   </div>
 
@@ -259,6 +414,7 @@ const MyShopCartContainer = () => {
         })}
       </S.ListContainer>
 
+      {/* 요약/주문 */}
       <S.OrderSummary>
         <S.SummaryRow>
           <span>선택 상품 금액</span>
@@ -284,9 +440,7 @@ const MyShopCartContainer = () => {
         </S.SummaryRow>
       </S.OrderSummary>
 
-      <Link to="/main/shop/order" style={{ textDecoration: "none" }}>
-        <S.OrderButton>주문하기</S.OrderButton>
-      </Link>
+      <S.OrderButton onClick={handleOrder}>주문하기</S.OrderButton>
     </div>
   );
 };
