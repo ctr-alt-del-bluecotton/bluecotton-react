@@ -405,10 +405,10 @@ S.OrderButton = styled.button`
   }
 `;
 
-S.DeliveryItemImage = styled.img`
-  width: 60px;
-  height: 60px;
-  border-radius: 8px;
+S.DeliveryItemImage = styled.div`
+width: 80px;
+  height: 80px;
+  border-radius: 4px;
   background-color: #E0E0E0;
   margin-right: 16px;
 `;

@@ -77,7 +77,7 @@ const MyShopReviewContainer = () => {
       cancelText: "취소",
       onConfirm: async () => {
 
-        const url = `${process.env.REACT_APP_BACKEND_URL}/mypage/myshop/review/${id}}`
+        const url = `${process.env.REACT_APP_BACKEND_URL}/mypage/myshop/review/${id}`
         const res = await fetch(url, {
           method: "DELETE",
           headers: { "Content-Type": "application/json" },
