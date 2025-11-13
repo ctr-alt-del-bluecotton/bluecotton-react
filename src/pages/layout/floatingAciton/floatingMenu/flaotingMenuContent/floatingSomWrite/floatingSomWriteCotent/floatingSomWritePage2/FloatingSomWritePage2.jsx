@@ -6,12 +6,16 @@ import S from './style';
 import { useFloatingAction } from '../../../../../../../../context/FloatingActionContext';
 
 const FloatingSomWritePage2 = () => {
-  const { register, setValue, insertImageData, uploadImageToServer } = useFloatingAction();
+  const { register, setValue, insertImageData, uploadImageToServer, isReset } = useFloatingAction();
   const editorRef = useRef();
 
   useEffect(() => {
     register("somContent", { required: true })
   }, [register])
+
+  useEffect(() => {
+    editorRef.current.getInstance().setMarkdown('');
+  }, [isReset])
 
   const handleEditorChange = () => {
     const editorInstance = editorRef.current.getInstance();

@@ -14,9 +14,10 @@ const SomContent = ({ content, somisLike }) => {
     somStartDate,
     somEndDate,
     somCount,
-    somLike,
-    memberName,
-    meberProfilePath
+    somType,
+    memberSomLeader,
+    somJoinList,
+    somLike
   } = content;
 
   // 증가 쿼리 예정
@@ -30,7 +31,7 @@ const SomContent = ({ content, somisLike }) => {
     ));
   }
 
-
+  const somTypeText = somType === "solo" ? "솔로솜" : "파티솜";
   const isLike = somisLike?.isLike ?? false;
   const isLikeButton = isLike ?
   <S.LikeButton onClick={isLikeButtonOnclick} $isLike={true}>
@@ -48,7 +49,7 @@ const SomContent = ({ content, somisLike }) => {
 
   const somOnClick = () => nav(`/main/som/read/${id}`);
 
-  const somButton = <S.SomButton onClick={somOnClick}>참여 ({somCount}/)</S.SomButton> 
+  const somButton = <S.SomButton onClick={somOnClick}>참여 - {somTypeText}({somCount})</S.SomButton> 
   ;
 
   return (
@@ -56,7 +57,7 @@ const SomContent = ({ content, somisLike }) => {
       <S.SomImage onClick={somOnClick} bgsrc={somImageList[0].somImagePath} alt={somImageList[0]?.somImageName} />
       <S.SomInfo>
         <S.SomTitleArea onClick={somOnClick}>
-          <img src={meberProfilePath} alt={memberName} />
+          <img src={somJoinList[0]?.memberProfilePath} alt={somJoinList[0]?.memberProfileName} />
           <S.SomTitle>{somTitle}</S.SomTitle>
         </S.SomTitleArea>
         <S.SomExplanation>
