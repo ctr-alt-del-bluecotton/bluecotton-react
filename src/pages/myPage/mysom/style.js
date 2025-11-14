@@ -134,17 +134,17 @@ S.PageNumber = styled.span`
 
 S.ActionButton = styled.button`
   padding: 8px 16px;
-  background-color: #0051FF;
+  background-color: ${props => props.$disabled ? '#BDBDBD' : '#0051FF'};
   color: white;
   border: none;
   border-radius: 6px;
-  cursor: pointer;
+  cursor: ${props => props.$disabled ? 'not-allowed' : 'pointer'};
   ${C.smallText2Regular}
   font-family: 'Daeojamjil', sans-serif;
   transition: background-color 0.2s;
   
   &:hover {
-    background-color: #003DB8;
+    background-color: ${props => props.$disabled ? '#BDBDBD' : '#003DB8'};
   }
 `;
 
