@@ -47,6 +47,13 @@ S.Content = styled.div`
   line-height: 1.6;
   font-weight: ${({ theme }) => theme.FONT_WEIGHT["regular"]};
   border-bottom: 1px solid ${({ theme }) => theme.PALLETE.grey.greyScale1};
+
+  img {
+    max-width: 100% !important;
+    height: auto !important;
+    display: block;
+    border-radius: 10px;
+  }
 `;
 
 S.EditBox = styled.div`

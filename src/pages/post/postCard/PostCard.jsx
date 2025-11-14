@@ -1,12 +1,11 @@
-// 📄 PostCard.jsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { useModal } from "../../../components/modal";
 import S from "./style";
 import Report from "../../../components/Report/Report";
 
-// ✅ 영어 → 한글 매핑 테이블
+// 영어 → 한글 매핑 테이블
 const categoryMap = {
   study: "학습",
   health: "건강",
@@ -14,6 +13,33 @@ const categoryMap = {
   hobby: "취미",
   life: "생활",
   rookie: "루키",
+};
+
+// 🔥 excerpt에서 텍스트만 추출하는 함수
+const extractTextOnly = (htmlOrMd) => {
+  if (!htmlOrMd) return "";
+
+  let text = htmlOrMd;
+
+  // 1) Markdown 이미지 제거 ![](url)
+  text = text.replace(/!\[.*?\]\(.*?\)/g, "");
+
+  // 2) HTML 이미지 제거
+  text = text.replace(/<img[^>]*>/g, "");
+
+  // 3) Markdown 링크 제거 [text](url)
+  text = text.replace(/\[.*?\]\(.*?\)/g, "");
+
+  // 4) 모든 HTML 태그 제거
+  text = text.replace(/<[^>]+>/g, "");
+
+  // 5) &nbsp; 등 HTML 엔티티 제거
+  text = text.replace(/&[a-z]+;/gi, " ");
+
+  // 6) 연속 공백/줄바꿈 정리
+  text = text.replace(/\s+/g, " ").trim();
+
+  return text;
 };
 
 const PostCard = ({
@@ -43,7 +69,16 @@ const PostCard = ({
 
   const BASE_URL = process.env.REACT_APP_BACKEND_URL;
 
-  // ✅ 공통 로그인 필요 모달
+  // props 변화 시 상태 동기화
+  useEffect(() => {
+    setIsLiked(!!liked);
+  }, [liked]);
+
+  useEffect(() => {
+    setLikeCount(likes ?? 0);
+  }, [likes]);
+
+  // 공통 로그인 필요 모달
   const requireLoginModal = () => {
     openModal({
       title: "로그인이 필요합니다",
@@ -54,7 +89,7 @@ const PostCard = ({
     });
   };
 
-  // ✅ 좋아요 토글 핸들러 (쿠키 기반 인증)
+  // 좋아요 토글 핸들러 (JWT)
   const handleLikeClick = async (e) => {
     e.stopPropagation();
 
@@ -81,7 +116,7 @@ const PostCard = ({
       const result = await response.json();
       console.log("좋아요 토글 결과:", result);
 
-      // ✅ UI 즉시 반영
+      // UI 즉시 반영
       setIsLiked((prev) => {
         setLikeCount((prevCount) => (prev ? prevCount - 1 : prevCount + 1));
         return !prev;
@@ -99,12 +134,19 @@ const PostCard = ({
   const translatedCategory =
     categoryMap[category?.toLowerCase()] || category || "기타";
 
+  // 🔥 excerpt → 텍스트만 남기기
+  const cleanedExcerpt = extractTextOnly(excerpt || "");
+  const finalExcerpt =
+    cleanedExcerpt.length > 150
+      ? cleanedExcerpt.substring(0, 150) + "..."
+      : cleanedExcerpt;
+
   return (
     <S.Card onClick={onClick} role="button" tabIndex={0}>
-      {/* ✅ 좋아요 버튼 */}
+      {/* 좋아요 버튼 */}
       <S.LikeButton $liked={isLiked} onClick={handleLikeClick} />
 
-      {/* ✅ 썸네일 */}
+      {/* 썸네일 */}
       <S.ThumbWrap>
         <img
           src={
@@ -118,7 +160,7 @@ const PostCard = ({
           onError={(e) => {
             if (!e.target.dataset.fallback) {
               e.target.dataset.fallback = "true";
-              e.target.src = "/assets/images/postDefault.jpg"; // ✅ fallback
+              e.target.src = "/assets/images/postDefault.jpg";
             }
           }}
         />
@@ -136,14 +178,8 @@ const PostCard = ({
 
         <S.Title>{title}</S.Title>
 
-        <S.Excerpt
-          dangerouslySetInnerHTML={{
-            __html:
-              excerpt?.length > 150
-                ? excerpt.substring(0, 150) + "..."
-                : excerpt || "",
-          }}
-        />
+        {/* 🔥 텍스트만 보여주는 excerpt */}
+        <S.Excerpt>{finalExcerpt}</S.Excerpt>
 
         <S.MetaBottom>
           <div className="left">
@@ -167,7 +203,6 @@ const PostCard = ({
         </S.MetaBottom>
       </S.Body>
 
-      {/* 신고 모달 */}
       {showReportModal && <Report onClose={() => setShowReportModal(false)} />}
     </S.Card>
   );
