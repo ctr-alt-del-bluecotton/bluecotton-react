@@ -85,9 +85,9 @@ const Header = () => {
   const Categories = (
     <>
       <S.NavLink to="/main/som/all">솜</S.NavLink>
-      <S.NavLink to="/main/shop">블루코튼 샵</S.NavLink>
       <S.NavLink to="/main/post/all">오늘의 솜</S.NavLink>
       <S.NavLink to="/main/map">주변 솜</S.NavLink>
+      <S.NavLink to="/main/shop">블루코튼 샵</S.NavLink>
     </>
   );
 
@@ -140,7 +140,7 @@ const Header = () => {
                       right: 0,
                       marginTop: "8px",
                       backgroundColor: "#FFFFFF",
-                      border:"1px solid #E0E0E0",
+                      // border:"1px solid #E0E0E0",
                       boxShadow: "0 3px 4px rgba(0,0,0,0.25)",
                       borderRadius: "4px",
                       minWidth: "85px",
