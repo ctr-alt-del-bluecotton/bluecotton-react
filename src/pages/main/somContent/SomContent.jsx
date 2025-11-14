@@ -1,49 +1,52 @@
-import React from "react";
+import React, { useState } from "react";
 import S from "./style";
 import { useNavigate } from "react-router-dom";
 import { useMain } from "../../../context/MainContext";
 
-const SomContent = ({ content, somisLike }) => {
+const SomContent = ({ content }) => {
   const nav = useNavigate();
-  const { somisLikeList, setSomisLikeList, formatDate } = useMain();
+  const { formatDate, 
+    somLikeUpdate } = useMain();
   const {
     id,
     somTitle,
-    somImageList,
     somAddress,
     somStartDate,
+    somType,
     somEndDate,
     somCount,
-    somType,
+    isSomLike,
+    somLikeCount,
     memberSomLeader,
-    somJoinList,
-    somLike
+    somTitleImagePath,
+    somTitleImageName
   } = content;
+  const [ isLike, setIsLike ] = useState(isSomLike);
+  const [ likeCount, setLikeCount ] = useState(somLikeCount);
 
-  // 증가 쿼리 예정
-  const isLikeButtonOnclick = (e) => {
-    e.stopPropagation(); // 이벤트 버블링 방지
-    setSomisLikeList(
-      somisLikeList.map((item) =>
-        String(item.somId) === String(id)
-          ? { ...item, isLike: !item?.isLike }
-          : item
-    ));
+  const isLikeButtonOnclick = async (e) => {
+    await somLikeUpdate(id, isLike)
+    .then((res) => res)
+    .then(async (res) => {
+      const resData = await res.json();
+      setIsLike(resData.data.resultLike)
+      setLikeCount(resData.data.likeCount)
+    })
   }
 
-  const somTypeText = somType === "solo" ? "솔로솜" : "파티솜";
-  const isLike = somisLike?.isLike ?? false;
+
+  const somTypeText = somType === "solo" ? "솔로솜" : "파티솜"
   const isLikeButton = isLike ?
   <S.LikeButton onClick={isLikeButtonOnclick} $isLike={true}>
     <S.somLikeIcon src="../../assets/icons/som_read_like_active.png" alt="좋아요 아이콘"/> {/* 여기 하트 아이콘 들어갈 자리 ♥ */}
     <span>
-      {somLike}
+      {likeCount}
     </span>
   </S.LikeButton> :
   <S.LikeButton onClick={isLikeButtonOnclick} $isLike={false}>
     <S.somLikeIcon src="../../assets/icons/som_list_like_inactive.png" alt="좋아요 아이콘"/> {/* 여기 하트 아이콘 들어갈 자리 ♡ */}
     <span>
-      {somLike}
+      {likeCount}
     </span>
   </S.LikeButton> ;
 
@@ -54,10 +57,10 @@ const SomContent = ({ content, somisLike }) => {
 
   return (
     <S.Card>
-      <S.SomImage onClick={somOnClick} bgsrc={somImageList[0].somImagePath} alt={somImageList[0]?.somImageName} />
+      <S.SomImage onClick={somOnClick} bgsrc={somTitleImagePath} alt={somTitleImageName} />
       <S.SomInfo>
         <S.SomTitleArea onClick={somOnClick}>
-          <img src={somJoinList[0]?.memberProfilePath} alt={somJoinList[0]?.memberProfileName} />
+          <img src={memberSomLeader.memberPicturePath} alt={memberSomLeader.memberName} />
           <S.SomTitle>{somTitle}</S.SomTitle>
         </S.SomTitleArea>
         <S.SomExplanation>
