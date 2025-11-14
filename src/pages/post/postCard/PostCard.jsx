@@ -1,12 +1,11 @@
-// 📄 PostCard.jsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { useModal } from "../../../components/modal";
 import S from "./style";
 import Report from "../../../components/Report/Report";
 
-// ✅ 영어 → 한글 매핑 테이블
+// 영어 → 한글 매핑 테이블
 const categoryMap = {
   study: "학습",
   health: "건강",
@@ -43,7 +42,16 @@ const PostCard = ({
 
   const BASE_URL = process.env.REACT_APP_BACKEND_URL;
 
-  // ✅ 공통 로그인 필요 모달
+  // props 변화 시 상태 동기화
+  useEffect(() => {
+    setIsLiked(!!liked);
+  }, [liked]);
+
+  useEffect(() => {
+    setLikeCount(likes ?? 0);
+  }, [likes]);
+
+  // 공통 로그인 필요 모달
   const requireLoginModal = () => {
     openModal({
       title: "로그인이 필요합니다",
@@ -54,7 +62,7 @@ const PostCard = ({
     });
   };
 
-  // ✅ 좋아요 토글 핸들러 (쿠키 기반 인증)
+  // 좋아요 토글 핸들러 (JWT)
   const handleLikeClick = async (e) => {
     e.stopPropagation();
 
@@ -81,7 +89,7 @@ const PostCard = ({
       const result = await response.json();
       console.log("좋아요 토글 결과:", result);
 
-      // ✅ UI 즉시 반영
+      // UI 즉시 반영
       setIsLiked((prev) => {
         setLikeCount((prevCount) => (prev ? prevCount - 1 : prevCount + 1));
         return !prev;

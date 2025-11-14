@@ -1,6 +1,4 @@
-// 📄 PostComment.jsx
 import React from "react";
-import { useNavigate } from "react-router-dom";
 import S from "./style";
 import Report from "../../../components/Report/Report";
 import { useModal } from "../../../components/modal";
@@ -24,29 +22,22 @@ const PostComment = ({
   reportTarget,
   setReportTarget,
   postId,
+  fetchPostDetail,   // ⭐️ 추가됨: 상위(PostReadContent)에서 전달받음
 }) => {
   const BASE_URL = process.env.REACT_APP_BACKEND_URL;
   const { openModal } = useModal();
-  const navigate = useNavigate();
-
   const { currentUser, isLogin } = useSelector((state) => state.user);
 
-  /** ✅ 공통: 로그인 필요 모달 */
-  const requireLoginModal = () => {
-    openModal({
-      title: "로그인이 필요합니다",
-      message: "이 기능은 로그인 후 이용하실 수 있습니다.",
-      confirmText: "로그인하기",
-      cancelText: "취소",
-      onConfirm: () => navigate("/login"),
-    });
-  };
-
-  /* ✅ 좋아요 토글 */
-  const handleLike = async (targetId, isReply = false, parentCommentId = null) => {
-    if (!isLogin || !currentUser?.id) {
-      requireLoginModal();
-      return;
+  /* ===========================================================
+     1) 좋아요 토글 → 서버 → fetchPostDetail() 호출로 최신 상태 반영
+  ============================================================ */
+  const handleLike = async (targetId, isReply = false) => {
+    if (!isLogin) {
+      return openModal({
+        title: "로그인이 필요합니다",
+        message: "좋아요를 누르려면 로그인이 필요합니다.",
+        confirmText: "확인",
+      });
     }
 
     const endpoint = isReply
@@ -68,37 +59,16 @@ const PostComment = ({
 
       if (!res.ok) throw new Error("좋아요 요청 실패");
 
-      setComments((prev) =>
-        prev.map((c) => {
-          if (!isReply && c.id === targetId) {
-            const liked = !c.liked;
-            return {
-              ...c,
-              liked,
-              postCommentLikeCount: c.postCommentLikeCount + (liked ? 1 : -1),
-            };
-          }
-          if (isReply && c.replies) {
-            const updatedReplies = c.replies.map((r) =>
-              r.id === targetId
-                ? {
-                    ...r,
-                    liked: !r.liked,
-                    postReplyLikeCount: r.postReplyLikeCount + (!r.liked ? 1 : -1),
-                  }
-                : r
-            );
-            return { ...c, replies: updatedReplies };
-          }
-          return c;
-        })
-      );
+      // ⭐️ 댓글 상태 새로 불러오기
+      fetchPostDetail();
     } catch (err) {
-      console.error("좋아요 토글 실패:", err);
+      console.error("좋아요 실패:", err);
     }
   };
 
-  /* ✅ 멘션 강조 */
+  /* ===========================================================
+     2) 멘션 강조 처리
+  ============================================================ */
   const renderTextWithTags = (text = "") => {
     const parts = text.split(/(@\S+)/g);
     return parts.map((part, i) =>
@@ -106,11 +76,16 @@ const PostComment = ({
     );
   };
 
-  /* ✅ 댓글 등록 */
+  /* ===========================================================
+     3) 댓글 등록 → 서버 → fetchPostDetail()
+  ============================================================ */
   const handleCommentSubmit = async () => {
-    if (!isLogin || !currentUser?.id) {
-      requireLoginModal();
-      return;
+    if (!isLogin) {
+      return openModal({
+        title: "로그인이 필요합니다",
+        message: "댓글을 작성하려면 로그인이 필요합니다.",
+        confirmText: "확인",
+      });
     }
 
     if (!comment.trim()) return;
@@ -124,47 +99,33 @@ const PostComment = ({
         },
         body: JSON.stringify({
           postCommentContent: comment,
-          postId: postId,
+          postId,
           memberId: currentUser.id,
         }),
       });
 
       if (!res.ok) throw new Error("댓글 등록 실패");
-      const result = await res.json();
 
-      setComments((prev) => [
-        ...prev,
-        {
-          id: result.data?.commentId || Date.now(),
-          postCommentContent: comment,
-          postCommentCreateAt: new Date().toISOString(),
-          memberNickname: currentUser.memberNickname || "익명",
-          memberProfileUrl:
-            currentUser.profilePath || "/images/default_profile.png",
-          postCommentLikeCount: 0,
-          liked: false,
-          replies: [],
-        },
-      ]);
       setComment("");
-    } catch (error) {
-      console.error(error);
-      openModal({
-        title: "오류",
-        message: "댓글 등록 중 문제가 발생했습니다.",
-        confirmText: "확인",
-      });
+      fetchPostDetail(); // ⭐ 새로 불러오기
+    } catch (err) {
+      console.error("댓글 등록 실패:", err);
     }
   };
 
-  /* ✅ 답글 등록 */
+  /* ===========================================================
+     4) 답글 등록 → 서버 → fetchPostDetail()
+  ============================================================ */
   const handleReplySubmit = async (parentId, targetId) => {
     const text = (replyInputs[targetId] || "").trim();
     if (!text) return;
 
-    if (!isLogin || !currentUser?.id) {
-      requireLoginModal();
-      return;
+    if (!isLogin) {
+      return openModal({
+        title: "로그인이 필요합니다",
+        message: "답글을 작성하려면 로그인이 필요합니다.",
+        confirmText: "확인",
+      });
     }
 
     try {
@@ -182,44 +143,19 @@ const PostComment = ({
       });
 
       if (!res.ok) throw new Error("답글 등록 실패");
-      const result = await res.json();
-
-      setComments((prev) =>
-        prev.map((c) =>
-          c.id === parentId
-            ? {
-                ...c,
-                replies: [
-                  ...(c.replies || []),
-                  {
-                    id: result.data?.replyId || Date.now(),
-                    postReplyContent: text,
-                    postReplyCreateAt: new Date().toISOString(),
-                    memberNickname: currentUser.memberNickname || "익명",
-                    memberProfileUrl:
-                      currentUser.profilePath || "/images/default_profile.png",
-                    postReplyLikeCount: 0,
-                    liked: false,
-                  },
-                ],
-              }
-            : c
-        )
-      );
 
       setReplyInputs((prev) => ({ ...prev, [targetId]: "" }));
       setShowReplyTarget(null);
-    } catch (error) {
-      console.error(error);
-      openModal({
-        title: "오류",
-        message: "답글 등록 중 문제가 발생했습니다.",
-        confirmText: "확인",
-      });
+
+      fetchPostDetail(); // ⭐ 최신 상태 반영
+    } catch (err) {
+      console.error("답글 등록 실패:", err);
     }
   };
 
-  /* ✅ 답글 클릭 */
+  /* ===========================================================
+     5) 답글 입력창 토글
+  ============================================================ */
   const handleReplyClick = (parentId, targetId, nickname, type) => {
     setShowReplyTarget((prev) => {
       if (
@@ -239,14 +175,20 @@ const PostComment = ({
     }));
   };
 
-  /* ✅ 삭제 */
+  /* ===========================================================
+     6) 댓글/답글 삭제 → 서버 → fetchPostDetail()
+  ============================================================ */
   const handleCommentDelete = async () => {
     if (!deleteTarget) return;
+
     const { type, id } = deleteTarget;
 
-    if (!isLogin || !currentUser?.id) {
-      requireLoginModal();
-      return;
+    if (!isLogin) {
+      return openModal({
+        title: "로그인이 필요합니다",
+        message: "삭제 기능은 로그인 후 이용 가능합니다.",
+        confirmText: "확인",
+      });
     }
 
     openModal({
@@ -260,6 +202,7 @@ const PostComment = ({
             type === "comment"
               ? `${BASE_URL}/private/post/comment/${id}`
               : `${BASE_URL}/private/post/reply/${id}`;
+
           const res = await fetch(endpoint, {
             method: "DELETE",
             headers: {
@@ -267,27 +210,13 @@ const PostComment = ({
               Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
             },
           });
-          if (!res.ok) throw new Error(`${type} 삭제 실패`);
 
-          if (type === "comment") {
-            setComments((prev) => prev.filter((c) => c.id !== id));
-          } else {
-            setComments((prev) =>
-              prev.map((c) => ({
-                ...c,
-                replies: c.replies.filter((r) => r.id !== id),
-              }))
-            );
-          }
+          if (!res.ok) throw new Error("삭제 실패");
 
           setDeleteTarget(null);
-        } catch (error) {
-          console.error(error);
-          openModal({
-            title: "삭제 실패",
-            message: "삭제 중 오류가 발생했습니다.",
-            confirmText: "확인",
-          });
+          fetchPostDetail(); // ⭐ 삭제 후 최신 데이터 불러오기
+        } catch (err) {
+          console.error("삭제 실패:", err);
         }
       },
     });
@@ -301,7 +230,6 @@ const PostComment = ({
         day: "2-digit",
         hour: "2-digit",
         minute: "2-digit",
-        hour12: false,
       })
       .replace(/\.\s/g, ".")
       .replace(/\.$/, "");
@@ -329,7 +257,7 @@ const PostComment = ({
           <S.CommentList>
             {comments.map((c) => (
               <React.Fragment key={c.id}>
-                {/* ✅ 댓글 */}
+                {/* === 댓글 본문 === */}
                 <S.CommentItem>
                   <div className="left">
                     <img
@@ -343,11 +271,11 @@ const PostComment = ({
                       alt="프로필"
                       className="profile"
                     />
+
                     <div className="text-box">
                       <div className="header-row">
-                        <div className="writer">
-                          {c.memberNickname || "익명"}
-                        </div>
+                        <div className="writer">{c.memberNickname}</div>
+
                         <S.LikeButton
                           $liked={c.liked}
                           onClick={() => handleLike(c.id, false)}
@@ -370,17 +298,19 @@ const PostComment = ({
 
                       <div className="meta-row">
                         <span>{formatDate(c.postCommentCreateAt)}</span>
-
                         {(!isLogin || currentUser?.id !== c.memberId) && (
                           <>
                             <span> | </span>
                             <span
                               className="report"
                               onClick={() => {
-                                if (!isLogin || !currentUser?.id) {
-                                  requireLoginModal();
-                                  return;
-                                }
+                                if (!isLogin)
+                                  return openModal({
+                                    title: "로그인이 필요합니다",
+                                    message: "신고 기능은 로그인 후 이용 가능합니다.",
+                                    confirmText: "확인",
+                                  });
+
                                 setReportTarget({ type: "comment", id: c.id });
                                 setShowReportModal(true);
                               }}
@@ -425,7 +355,7 @@ const PostComment = ({
                   </div>
                 </S.CommentItem>
 
-                {/* ✅ 댓글의 답글 입력창 */}
+                {/* === 댓글의 답글 입력창 === */}
                 {showReplyTarget?.type === "comment" &&
                   showReplyTarget?.targetId === c.id &&
                   showReplyTarget?.parentId === c.id && (
@@ -433,40 +363,41 @@ const PostComment = ({
                       <div className="avatar">
                         <img
                           src={
-                            currentUser?.profilePath || "/postImages/profile.png"
+                            currentUser?.profilePath ||
+                            "/postImages/profile.png"
                           }
                           alt="내 프로필"
                         />
                         <span className="nickname">
-                          {currentUser?.memberNickname || "익명"}
+                          {currentUser?.memberNickname}
                         </span>
                       </div>
-                      <div className="input-wrap">
-                        <textarea
-                          placeholder="답글을 입력하세요"
-                          maxLength={300}
-                          value={replyInputs[c.id] || ""}
-                          onChange={(e) =>
-                            setReplyInputs((prev) => ({
-                              ...prev,
-                              [c.id]: e.target.value,
-                            }))
-                          }
-                        />
-                        <span className="count">
-                          {(replyInputs[c.id]?.length || 0)}/300
-                        </span>
-                      </div>
-                      <button
-                        className="submit-btn"
-                        onClick={() => handleReplySubmit(c.id, c.id)}
-                      >
-                        등록
-                      </button>
-                    </S.CommentForm>
-                  )}
+                    <div className="input-wrap">
+                      <textarea
+                        placeholder="답글을 입력하세요"
+                        maxLength={300}
+                        value={replyInputs[c.id] || ""}
+                        onChange={(e) =>
+                          setReplyInputs((prev) => ({
+                            ...prev,
+                            [c.id]: e.target.value,
+                          }))
+                        }
+                      />
+                      <span className="count">
+                        {(replyInputs[c.id]?.length || 0)}/300
+                      </span>
+                    </div>
+                    <button
+                      className="submit-btn"
+                      onClick={() => handleReplySubmit(c.id, c.id)}
+                    >
+                      등록
+                    </button>
+                  </S.CommentForm>
+                )}
 
-                {/* ✅ 대댓글 */}
+                {/* === 대댓글 목록 === */}
                 {c.replies?.map((r) => (
                   <React.Fragment key={r.id}>
                     <S.CommentItem indent>
@@ -484,12 +415,11 @@ const PostComment = ({
                         />
                         <div className="text-box">
                           <div className="header-row">
-                            <div className="writer">
-                              {r.memberNickname || "익명"}
-                            </div>
+                            <div className="writer">{r.memberNickname}</div>
+
                             <S.LikeButton
                               $liked={r.liked}
-                              onClick={() => handleLike(r.id, true, c.id)}
+                              onClick={() => handleLike(r.id, true)}
                             >
                               <img
                                 src={
@@ -510,17 +440,21 @@ const PostComment = ({
                           <div className="meta-row">
                             <span>{formatDate(r.postReplyCreateAt)}</span>
 
-                            {/* ✅ 신고 버튼: 본인 댓글이 아닐 때만 표시 */}
+                            {/* 신고: 본인 아닐 때 */}
                             {(!isLogin || currentUser?.id !== r.memberId) && (
                               <>
                                 <span> | </span>
                                 <span
                                   className="report"
                                   onClick={() => {
-                                    if (!isLogin || !currentUser?.id) {
-                                      requireLoginModal();
-                                      return;
-                                    }
+                                    if (!isLogin)
+                                      return openModal({
+                                        title: "로그인이 필요합니다",
+                                        message:
+                                          "신고 기능은 로그인 후 이용 가능합니다.",
+                                        confirmText: "확인",
+                                      });
+
                                     setReportTarget({ type: "reply", id: r.id });
                                     setShowReportModal(true);
                                   }}
@@ -530,7 +464,7 @@ const PostComment = ({
                               </>
                             )}
 
-                            {/* ✅ 삭제 버튼: 본인 댓글일 때만 표시 */}
+                            {/* 삭제: 본인일 때만 */}
                             {isLogin && currentUser?.id === r.memberId && (
                               <>
                                 <span> | </span>
@@ -566,7 +500,7 @@ const PostComment = ({
                       </div>
                     </S.CommentItem>
 
-                    {/* ✅ 대댓글의 답글 입력창 */}
+                    {/* === 대댓글의 답글 입력창 === */}
                     {showReplyTarget?.type === "reply" &&
                       showReplyTarget?.targetId === r.id &&
                       showReplyTarget?.parentId === c.id && (
@@ -580,7 +514,7 @@ const PostComment = ({
                               alt="내 프로필"
                             />
                             <span className="nickname">
-                              {currentUser?.memberNickname || "익명"}
+                              {currentUser?.memberNickname}
                             </span>
                           </div>
                           <div className="input-wrap">
@@ -613,7 +547,7 @@ const PostComment = ({
             ))}
           </S.CommentList>
 
-          {/* ✅ 일반 댓글 입력 */}
+          {/* === 일반 댓글 입력창 === */}
           <S.CommentForm>
             <div className="avatar">
               <img
@@ -624,6 +558,7 @@ const PostComment = ({
                 {currentUser?.memberNickname || "익명"}
               </span>
             </div>
+
             <div className="input-wrap">
               <textarea
                 placeholder="마음이 따뜻해지는 착한 댓글만 달아주세요!"
@@ -633,12 +568,15 @@ const PostComment = ({
               />
               <span className="count">{comment.length}/300</span>
             </div>
+
             <button className="submit-btn" onClick={handleCommentSubmit}>
               등록
             </button>
           </S.CommentForm>
         </>
       )}
+
+      {/* === 신고 모달 === */}
       {showReportModal && (
         <Report
           target={reportTarget}

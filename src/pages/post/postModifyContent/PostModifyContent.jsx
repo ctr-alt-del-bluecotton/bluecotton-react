@@ -8,14 +8,14 @@ import "@toast-ui/editor/dist/toastui-editor.css";
 
 const MAX_LENGTH = 1000;
 
-// ✅ 영어 → 한글 매핑 테이블
+// 영어 → 한글 매핑 (write 페이지와 동일)
 const categoryMap = {
-  STUDY: "학습",
-  HEALTH: "건강",
-  SOCIAL: "소셜",
-  HOBBY: "취미",
-  LIFE: "생활",
-  ROOKIE: "루키",
+  study: "학습",
+  health: "건강",
+  social: "소셜",
+  hobby: "취미",
+  life: "생활",
+  rookie: "루키",
 };
 
 const PostModifyContent = () => {
@@ -24,16 +24,16 @@ const PostModifyContent = () => {
   const { openModal } = useModal();
   const editorRef = useRef();
 
-  // ✅ Redux 로그인 정보
+  // 로그인 정보
   const { currentUser, isLogin } = useSelector((state) => state.user);
 
   const [title, setTitle] = useState("");
-  const [category, setCategory] = useState("");
+  const [category, setCategory] = useState(""); // somId
   const [joinedCategories, setJoinedCategories] = useState([]);
   const [charCount, setCharCount] = useState(0);
   const [loading, setLoading] = useState(true);
 
-  // ✅ 비로그인 접근 방지
+  // 비로그인 접근 방지
   useEffect(() => {
     if (!isLogin || !currentUser?.id) {
       openModal({
@@ -45,14 +45,19 @@ const PostModifyContent = () => {
     }
   }, [isLogin, currentUser, navigate, openModal]);
 
-  // ✅ 기존 게시글 불러오기 (read API 사용)
+  // 기존 게시글 불러오기 (🔥 수정용 API로 변경!)
   useEffect(() => {
     const fetchPostData = async () => {
       try {
         const BASE_URL = process.env.REACT_APP_BACKEND_URL;
-        const res = await fetch(`${BASE_URL}/main/post/read/${id}`, {
+
+        // ❗ 기존 read API X → modify 조회 API O
+        const res = await fetch(`${BASE_URL}/private/post/modify/${id}`, {
           method: "GET",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          },
         });
 
         if (!res.ok) throw new Error(`HTTP Error: ${res.status}`);
@@ -68,15 +73,18 @@ const PostModifyContent = () => {
           return;
         }
 
+        // 제목 세팅
         setTitle(post.postTitle || "");
-        setCategory(post.somCategory || post.postCategory || "");
 
-        // ✅ 에디터 내용 세팅
+        // somId 세팅 → select 자동 선택됨
+        setCategory(post.somId?.toString() || "");
+
+        // 에디터 세팅
         setTimeout(() => {
           if (editorRef.current) {
-            const editorInstance = editorRef.current.getInstance();
-            editorInstance.setHTML(post.postContent || "");
-            setCharCount(editorInstance.getMarkdown().trim().length);
+            const ins = editorRef.current.getInstance();
+            ins.setHTML(post.postContent || "");
+            setCharCount(ins.getMarkdown().trim().length);
           }
         }, 150);
       } catch (err) {
@@ -91,16 +99,18 @@ const PostModifyContent = () => {
         setLoading(false);
       }
     };
+
     fetchPostData();
   }, [id, navigate, openModal]);
 
-  // ✅ 참여 중 솜 카테고리 목록 불러오기
+  // 참여 중 솜 목록 불러오기 (write 페이지와 동일)
   useEffect(() => {
     const fetchCategories = async () => {
       try {
         if (!isLogin || !currentUser?.id) return;
 
         const BASE_URL = process.env.REACT_APP_BACKEND_URL;
+
         const res = await fetch(`${BASE_URL}/private/post/categories`, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
@@ -108,11 +118,9 @@ const PostModifyContent = () => {
         });
 
         if (!res.ok) throw new Error("카테고리 불러오기 실패");
-        const result = await res.json();
 
-        // ✅ result.data 형태 확인 후 세팅
-        const categories = result.data || result;
-        setJoinedCategories(categories);
+        const data = await res.json();
+        setJoinedCategories(data); // ← 중요!
       } catch (err) {
         console.error("카테고리 목록 불러오기 실패:", err);
       }
@@ -121,34 +129,34 @@ const PostModifyContent = () => {
     fetchCategories();
   }, [isLogin, currentUser]);
 
-  // ✅ 글자수 카운트
+  // 글자수 카운트
   useEffect(() => {
-    const editorInstance = editorRef.current?.getInstance();
-    if (!editorInstance) return;
+    const ins = editorRef.current?.getInstance();
+    if (!ins) return;
 
     const handleChange = () => {
-      const text = editorInstance.getMarkdown();
+      const text = ins.getMarkdown();
       const len = text.trim().length;
+
       if (len > MAX_LENGTH) {
-        editorInstance.setMarkdown(text.substring(0, MAX_LENGTH));
+        ins.setMarkdown(text.substring(0, MAX_LENGTH));
         setCharCount(MAX_LENGTH);
       } else {
         setCharCount(len);
       }
     };
 
-    editorInstance.on("change", handleChange);
-    return () => editorInstance.off("change", handleChange);
+    ins.on("change", handleChange);
+    return () => ins.off("change", handleChange);
   }, []);
 
-  // ✅ 게시글 수정 요청
+  // 수정 요청
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!isLogin || !currentUser?.id) {
       openModal({
         title: "로그인이 필요한 기능입니다",
-        message: "게시글 수정은 로그인 후 이용 가능합니다.",
         confirmText: "확인",
         onConfirm: () => navigate("/main/post/all"),
       });
@@ -173,21 +181,22 @@ const PostModifyContent = () => {
     try {
       const BASE_URL = process.env.REACT_APP_BACKEND_URL;
 
-      // ✅ 수정 요청 API — 실제 백엔드 매핑에 맞게
       const res = await fetch(`${BASE_URL}/private/post/modify/${id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" ,
-           Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
         },
         body: JSON.stringify({
           postTitle: title,
-          somCategory: category,
+          somId: parseInt(category),
           postContent: content,
           memberId: currentUser.id,
         }),
       });
 
       if (!res.ok) throw new Error(`HTTP Error ${res.status}`);
+
       const result = await res.json();
 
       openModal({
@@ -206,7 +215,7 @@ const PostModifyContent = () => {
     }
   };
 
-  // ✅ 취소
+  // 취소 버튼
   const handleCancel = () => {
     openModal({
       title: "수정 중인 내용이 사라집니다.",
@@ -224,6 +233,7 @@ const PostModifyContent = () => {
       <S.PageTitle>오늘의 솜 수정</S.PageTitle>
 
       <S.Form onSubmit={handleSubmit}>
+        {/* 제목 */}
         <S.FormRow>
           <label>제목</label>
           <input
@@ -234,23 +244,32 @@ const PostModifyContent = () => {
           />
         </S.FormRow>
 
+        {/* 카테고리 (🔥 자동 선택 + 변경 불가) */}
         <S.FormRow>
           <label>카테고리</label>
-          <select
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-          >
-            <option value="">카테고리를 선택해주세요</option>
+
+          <select value={category} disabled>
+            <option value="">참여 중인 솜을 선택해주세요</option>
+
             {joinedCategories.map((cat) => (
-              <option key={cat.id} value={cat.somCategory}>
-                {categoryMap[cat.somCategory?.toUpperCase()] ||
-                  cat.somTitle ||
+              <option
+                key={cat.id}
+                value={cat.id.toString()}
+                disabled={cat.somDayDiff < 1}
+              >
+                {categoryMap[cat.somCategory?.toLowerCase()] ||
                   cat.somCategory}
+                {" - "}
+                {cat.somTitle}{" "}
+                {cat.somDayDiff < 1
+                  ? "(예정)"
+                  : `(도전 ${cat.somDayDiff}일차)`}
               </option>
             ))}
           </select>
         </S.FormRow>
 
+        {/* 내용 */}
         <S.FormGroup>
           <Editor
             ref={editorRef}
@@ -266,6 +285,7 @@ const PostModifyContent = () => {
           </div>
         </S.FormGroup>
 
+        {/* 버튼 */}
         <S.ButtonBox>
           <button type="button" className="cancel" onClick={handleCancel}>
             취소

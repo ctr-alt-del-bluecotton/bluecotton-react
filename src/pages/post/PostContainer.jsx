@@ -1,4 +1,3 @@
-// 📄 PostContainer.jsx
 import React, { useEffect, useState } from "react";
 import {
   Outlet,
@@ -15,16 +14,14 @@ import PostCard from "./postCard/PostCard";
 import PostNumberSelect from "./postNumberSelect/PostNumberSelect";
 
 const PostContainer = () => {
-  
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
   const { openModal } = useModal();
+  const [totalCount, setTotalCount] = useState(0);
 
-  // ✅ Redux 로그인 유저 정보
   const { currentUser, isLogin } = useSelector((state) => state.user);
 
-  // ✅ 작성/읽기 화면에선 목록 API 호출 스킵
   const isWrite = matchPath("/main/post/write", location.pathname);
   const isRead = matchPath("/main/post/read/:id", location.pathname);
 
@@ -32,7 +29,7 @@ const PostContainer = () => {
   const [orderType, setOrderType] = useState("latest");
   const postsPerPage = 9;
 
-  // ✅ 공통 로그인 필요 모달
+  // 로그인 필요 모달
   const requireLoginModal = () => {
     openModal({
       title: "로그인이 필요합니다",
@@ -43,7 +40,7 @@ const PostContainer = () => {
     });
   };
 
-  // ✅ 카테고리 추출
+  // category, keyword, page
   const category = location.pathname.split("/").pop();
   const keyword = (searchParams.get("q") || "").trim();
   const urlPage = parseInt(searchParams.get("page") || "1", 10);
@@ -58,9 +55,10 @@ const PostContainer = () => {
     rookie: "루키",
   };
 
-  // ✅ 검색/정렬/카테고리 변경 시 page=1로 보정
+  // 검색/정렬 변경 시 page=1로 보정
   useEffect(() => {
     if (isWrite || isRead) return;
+
     const next = new URLSearchParams(searchParams);
     let changed = false;
 
@@ -68,11 +66,13 @@ const PostContainer = () => {
       next.set("page", "1");
       changed = true;
     }
+
     if (changed) setSearchParams(next, { replace: true });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
+    // eslint-disable-next-line
   }, [category, orderType, keyword]);
 
-  // ✅ 게시글 목록 fetch
+  // 게시글 목록 fetch
   useEffect(() => {
     if (isWrite || isRead) return;
 
@@ -84,16 +84,18 @@ const PostContainer = () => {
         params.set("page", String(pageNumber - 1));
         params.set("size", String(postsPerPage));
         params.set("orderType", orderType);
+
         if (keyword) params.set("q", keyword);
         if (category !== "all")
           params.set("somCategory", category.toUpperCase());
 
-        // ✅ 로그인 상태면 memberId 전달
+        // 로그인 시 memberId 포함
         if (isLogin && currentUser?.id) {
           params.set("memberId", currentUser.id);
         }
 
         const endpoint = `${baseUrl}/main/post/all?${params.toString()}`;
+
         const response = await fetch(endpoint, {
           method: "GET",
           headers: { "Content-Type": "application/json" },
@@ -103,7 +105,7 @@ const PostContainer = () => {
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         const result = await response.json();
 
-        const mappedPosts = (result.data || []).map((post) => ({
+        const mappedPosts = (result.data.posts || []).map((post) => ({
           ...post,
           somCategory:
             categoryMap[post.somCategory?.trim()] ||
@@ -112,25 +114,24 @@ const PostContainer = () => {
         }));
 
         setPosts(mappedPosts);
+        setTotalCount(result.data.totalCount);
+
       } catch (err) {
         console.error("게시글 목록 조회 실패:", err);
         openModal({
           title: "오류 발생",
-          message: "게시글 목록을 불러오지 못했습니다. 잠시 후 다시 시도해주세요.",
+          message: "게시글 목록을 불러오지 못했습니다.",
           confirmText: "확인",
         });
       }
     };
 
     fetchPosts();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
+    // eslint-disable-next-line
   }, [category, orderType, keyword, pageNumber, isLogin, currentUser]);
 
-  // ✅ 페이지네이션 slice
-  const startIndex = (pageNumber - 1) * postsPerPage;
-  const currentPosts = posts.slice(startIndex, startIndex + postsPerPage);
-
-  // ✅ 좋아요 토글 (UI만 변경)
+  // 좋아요 토글 UI 반영
   const handleLike = (id) => {
     if (!isLogin || !currentUser?.id) {
       requireLoginModal();
@@ -139,7 +140,7 @@ const PostContainer = () => {
 
     setPosts((prev) =>
       prev.map((p) =>
-        p.postId === id
+        p.id === id
           ? {
               ...p,
               postIsLike: p.postIsLike ? 0 : 1,
@@ -152,14 +153,12 @@ const PostContainer = () => {
     );
   };
 
-  // ✅ 페이지 이동
   const handleChangePage = (nextPage) => {
     const next = new URLSearchParams(searchParams);
     next.set("page", String(nextPage));
     setSearchParams(next);
   };
 
-  // ✅ 글쓰기 버튼 클릭
   const handleWriteClick = () => {
     if (!isLogin || !currentUser?.id) {
       requireLoginModal();
@@ -170,24 +169,21 @@ const PostContainer = () => {
 
   return (
     <S.Container>
-      {/* === 배너 === */}
       <S.Banner>
         <div className="banner-inner"></div>
       </S.Banner>
 
-      {/* === 카테고리 + 드롭다운 === */}
       <PostCategory orderType={orderType} setOrderType={setOrderType} />
 
-      {/* === 카드형 게시판 === */}
       <S.Grid>
-        {currentPosts.length === 0 ? (
+        {posts.length === 0 ? (
           <p style={{ textAlign: "center", marginTop: "50px" }}>
             {keyword
               ? `검색 결과가 없습니다: "${keyword}"`
               : "게시글이 없습니다."}
           </p>
         ) : (
-          currentPosts.map((post) => (
+          posts.map((post) => (
             <PostCard
               key={post.id}
               id={post.id}
@@ -211,16 +207,14 @@ const PostContainer = () => {
         )}
       </S.Grid>
 
-      {/* === 글쓰기 버튼 === */}
       <S.WriteButtonWrapper>
         <button className="write-btn" onClick={handleWriteClick}>
           오늘의 솜 작성하기
         </button>
       </S.WriteButtonWrapper>
 
-      {/* === 페이지네이션 === */}
       <PostNumberSelect
-        postList={posts}
+        totalPages={Math.ceil(totalCount / postsPerPage)}
         pageNumber={pageNumber}
         setPageNumber={handleChangePage}
       />
