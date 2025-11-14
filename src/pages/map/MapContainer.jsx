@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Map, MapMarker, CustomOverlayMap } from 'react-kakao-maps-sdk';
 import S from './style';
+import { useSelector } from 'react-redux';
 
 const MapContainer = () => {
   const [somList, setSomList] = useState([]);
@@ -9,6 +10,9 @@ const MapContainer = () => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [myLocation, setMyLocation] = useState(null);
   const [selectedMarkerId, setSelectedMarkerId] = useState(null);
+
+  const {currentUser} = useSelector((state) => state.user)
+  console.log(currentUser)
 
   const mapRef = useRef(null);
 
