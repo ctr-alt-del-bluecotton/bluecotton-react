@@ -1,5 +1,3 @@
-// 📄 PostWriteContent.jsx (최종 완성 — 네 기존 코드 + 팀원 이미지 로직 완전 적용)
-
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
@@ -28,7 +26,7 @@ const PostWriteContent = () => {
   const navigate = useNavigate();
   const editorRef = useRef();
 
-  // ⭐ 줄어든 이유: 이미지 URL 배열 삭제됨 → 이제 임시 이미지 IDs 사용
+  // ⭐ 이미지 URL 배열 제거됨 → PostImageIds로만 처리
   const [postImageIds, setPostImageIds] = useState([]);
 
   const location = useLocation();
@@ -78,12 +76,10 @@ const PostWriteContent = () => {
           setTitle(result.data.postDraftTitle ?? "");
           setCategory(String(result.data.somId ?? ""));
 
-          // 에디터 내용 세팅
           if (editorRef.current) {
             editorRef.current.getInstance().setMarkdown(result.data.postDraftContent ?? "");
           }
 
-          // 🔥 카테고리 매칭 유지
           const matchedCategory = categoryList.find(
             (cat) => String(cat.id ?? cat.somId) === String(result.data.somId)
           );
@@ -124,10 +120,8 @@ const PostWriteContent = () => {
     return () => editor.off("change", handleChange);
   }, []);
 
-  // 🔥 이미지 업로드 — ★ 팀원 구조 그대로 통합
   const handleImageUpload = async (blob, callback) => {
     try {
-      // 날짜 경로 생성
       const now = new Date();
       const y = now.getFullYear();
       const m = String(now.getMonth() + 1).padStart(2, "0");
@@ -135,7 +129,6 @@ const PostWriteContent = () => {
 
       const folderPath = `post/${y}/${m}/${d}`;
 
-      // 1) 이미지 서버 업로드
       const formData = new FormData();
       formData.append("file", blob);
       formData.append("folder", folderPath);
@@ -149,11 +142,10 @@ const PostWriteContent = () => {
 
       const uploadJson = await uploadRes.json();
 
-      const imgUrl = uploadJson.url;      // 예: /upload/post/.../abc.jpg
-      const imgName = uploadJson.imageName;
+      const imgUrl = uploadJson.url;
+      const imgName = imgUrl.substring(imgUrl.lastIndexOf("/") + 1);
       const imgPath = imgUrl.replace(imgName, "");
 
-      // 2) PostImage 임시 저장
       const tempImageData = {
         postImagePath: imgPath,
         postImageName: imgName,
@@ -166,12 +158,9 @@ const PostWriteContent = () => {
       });
 
       const tempJson = await tempRes.json();
-      console.log("🔥 /post-image/insert 응답:", tempJson);
 
-      // ⭐ 필수: 업로드된 imageId 저장
       setPostImageIds((prev) => [...prev, tempJson.data.id]);
 
-      // 3) 에디터에 이미지 삽입
       callback(imgUrl, "image");
     } catch (err) {
       console.error("Toast UI 이미지 업로드 실패:", err);
@@ -188,8 +177,7 @@ const PostWriteContent = () => {
       return;
     }
 
-    const content = editorRef.current?.getInstance().getMarkdown().trim() || "";
-
+    const content = editorRef.current.getInstance().getMarkdown().trim();
     const draft = {
       postDraftTitle: title || null,
       postDraftContent: content || null,
@@ -245,21 +233,40 @@ const PostWriteContent = () => {
       postContent: content,
       memberId: currentUser.id,
       somId: Number(category),
-      postImageIds: postImageIds,   // ⭐ 최종 이미지 매핑용
+      postImageIds: postImageIds,
       draftId: draftId ? Number(draftId) : null,
     };
 
-    const res = await fetch(`${BASE_URL}/private/post/write`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-      },
-      body: JSON.stringify(postData),
-    });
+    let res;
+    try {
+      res = await fetch(`${BASE_URL}/private/post/write`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+        body: JSON.stringify(postData),
+      });
+    } catch (error) {
+      return openModal({
+        title: "네트워크 오류",
+        message: "서버와 통신할 수 없습니다.",
+        confirmText: "확인",
+      });
+    }
 
     const result = await res.json();
 
+    // ⭐⭐⭐ 409 Conflict — 하루 1회 작성 제한
+    if (res.status === 409) {
+      return openModal({
+        title: "작성 불가",
+        message: result?.message || "오늘은 이미 게시글을 작성하셨습니다.",
+        confirmText: "확인",
+      });
+    }
+
+    // ⭐ 일반 실패
     if (!res.ok) {
       return openModal({
         title: "등록 실패",
@@ -268,6 +275,7 @@ const PostWriteContent = () => {
       });
     }
 
+    // ⭐ 성공
     openModal({
       title: "등록 완료",
       message: mode === "draft" ? "임시저장 글이 등록되었습니다." : "게시글이 등록되었습니다.",
@@ -314,7 +322,13 @@ const PostWriteContent = () => {
                 value={cat.id ?? cat.somId}
                 disabled={cat.somDayDiff < 1}
               >
-                {categoryMap[cat.somCategory] || cat.somCategory} - {cat.somTitle}
+                {/* 예: 학습 - 코딩 30일 챌린지 - 도전 4일 */}
+                {categoryMap[cat.somCategory] || cat.somCategory}
+                {" - "}
+                {cat.somTitle}
+                {" - 도전 "}
+                {cat.somDayDiff}
+                {"일"}
               </option>
             ))}
           </select>

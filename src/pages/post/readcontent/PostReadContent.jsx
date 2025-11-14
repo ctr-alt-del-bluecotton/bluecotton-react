@@ -4,6 +4,7 @@ import { useSelector } from "react-redux";
 import S from "./style";
 import { useModal } from "../../../components/modal";
 import PostComment from "../commentcomponent/PostComment";
+import { marked } from "marked"; // ⭐ 마크다운 → HTML 변환기
 
 const PostReadContent = () => {
   const { id } = useParams();
@@ -44,9 +45,8 @@ const PostReadContent = () => {
       }
     };
 
-    if (window.Kakao) {
-      initKakao();
-    } else {
+    if (window.Kakao) initKakao();
+    else {
       const t = setInterval(() => {
         if (window.Kakao) {
           clearInterval(t);
@@ -90,10 +90,10 @@ const PostReadContent = () => {
       /** 🔥 DTO → 프론트 UI 변환 */
       const mappedComments = (fetchedPost.comments || []).map((c) => ({
         ...c,
-        liked: c.isCommentLiked === 1, // ← 프론트 UI용 boolean 필드
+        liked: c.isCommentLiked === 1,
         replies: (c.replies || []).map((r) => ({
           ...r,
-          liked: r.isReplyLiked === 1, // ← 프론트 UI용 boolean 필드
+          liked: r.isReplyLiked === 1,
         })),
       }));
 
@@ -121,7 +121,6 @@ const PostReadContent = () => {
     const register = async () => {
       const BASE_URL = process.env.REACT_APP_BACKEND_URL;
       const token = localStorage.getItem("accessToken");
-
       if (!isLogin || !token || !post) return;
 
       try {
@@ -132,10 +131,9 @@ const PostReadContent = () => {
             Authorization: `Bearer ${token}`,
           },
         });
-      } catch (e) {
-        console.error("최근 본 글 저장 실패");
-      }
+      } catch {}
     };
+
     if (post) register();
   }, [post, id, isLogin]);
 
@@ -182,7 +180,6 @@ const PostReadContent = () => {
     });
   };
 
-  /** 🔥 날짜 포맷 */
   const formatDate = (dateString) => {
     const d = new Date(dateString);
     if (isNaN(d)) return "";
@@ -199,7 +196,6 @@ const PostReadContent = () => {
       .replace(/\.$/, "");
   };
 
-  /** 🔥 prev/next 이동 */
   const goPrev = () => prevPost && navigate(`/main/post/read/${prevPost.id}`);
   const goNext = () => nextPost && navigate(`/main/post/read/${nextPost.id}`);
   const goList = () => navigate("/main/post/all");
@@ -207,12 +203,14 @@ const PostReadContent = () => {
   if (loading) return <S.Container>로딩 중...</S.Container>;
   if (!post) return <S.Container>게시글이 없습니다.</S.Container>;
 
+  /** Markdown → HTML 변환 (이미지 포함해서 전부 렌더링) */
+    // HTML 전체 문자열
+  let htmlContent = marked.parse(post.postContent || "");
+
   return (
     <S.Container>
-      {/* 제목 */}
       <S.Title>{post.postTitle}</S.Title>
 
-      {/* 작성자 / 날짜 / 조회수 */}
       <S.MetaBox>
         <div className="writer">{post.memberNickname}</div>
         <span className="divider">|</span>
@@ -221,8 +219,8 @@ const PostReadContent = () => {
         <div className="view">조회수 : {post.postReadCount}</div>
       </S.MetaBox>
 
-      {/* 본문 */}
       <S.Content>
+        {/* ✨ 본인 글이면 수정/삭제 */}
         {isLogin && currentUser?.id === post.memberId && (
           <S.EditBox>
             <span onClick={() => navigate(`/main/post/modify/${id}`)}>수정</span>{" "}
@@ -230,42 +228,20 @@ const PostReadContent = () => {
           </S.EditBox>
         )}
 
-        {/* 본문 이미지 */}
-        {post.postImageUrl &&
-          !post.postImageUrl.includes("default_post.jpg") && (
-            <img
-              src={
-                post.postImageUrl.startsWith("/upload/")
-                  ? `http://localhost:10000${post.postImageUrl}`
-                  : post.postImageUrl
-              }
-              alt="게시글 이미지"
-              style={{ width: "100%", marginBottom: "20px" }}
-              onError={(e) =>
-                (e.target.src =
-                  "http://localhost:10000/upload/default/default_post.jpg")
-              }
-            />
-          )}
 
-        {/* HTML 본문 */}
+        {/* ⭐ 마크다운 → HTML 렌더링 (이미지 포함) */}
         <div
           className="post-content"
-          dangerouslySetInnerHTML={{ __html: post.postContent }}
+          dangerouslySetInnerHTML={{ __html: htmlContent }}
         />
       </S.Content>
 
       {/* 신고 + 공유 */}
       <S.PostSocialBox>
-        
-        {/* 🔥 (수정됨) 본인 글이면 신고 버튼 숨기기 */}
         {isLogin && currentUser?.id !== post.memberId && (
           <S.ReportButton
             onClick={() => {
-              // 로그인 여부 확인
               if (!isLogin) return requireLoginModal();
-
-              // 신고 대상 설정
               setReportTarget({ type: "post", id });
               setShowReportModal(true);
             }}
@@ -275,7 +251,6 @@ const PostReadContent = () => {
           </S.ReportButton>
         )}
 
-        {/* 카카오 공유 */}
         <S.ShareButton
           onClick={() => {
             if (!window.Kakao) return;
@@ -297,9 +272,7 @@ const PostReadContent = () => {
         </S.ShareButton>
       </S.PostSocialBox>
 
-      {/* ================================
-          댓글 컴포넌트 전체 전달
-      ================================= */}
+      {/* 댓글 */}
       <PostComment
         showComments={showComments}
         setShowComments={setShowComments}
@@ -318,14 +291,11 @@ const PostReadContent = () => {
         setShowReportModal={setShowReportModal}
         reportTarget={reportTarget}
         setReportTarget={setReportTarget}
-        fetchPostDetail={fetchPostDetail}  // ← 핵심!!!
+        fetchPostDetail={fetchPostDetail}
       />
 
-      {/* ================================
-          다음 글 / 이전 글
-      ================================= */}
+      {/* prev/next */}
       <S.NavList>
-        {/* 다음 글 */}
         <S.NavItem onClick={goNext} $disabled={!nextPost}>
           <div className="label">
             <S.NavArrow src="/assets/icons/drop_down.svg" $up />
@@ -336,7 +306,6 @@ const PostReadContent = () => {
           </div>
         </S.NavItem>
 
-        {/* 이전 글 */}
         <S.NavItem onClick={goPrev} $disabled={!prevPost}>
           <div className="label">
             <S.NavArrow src="/assets/icons/drop_down.svg" />
@@ -348,7 +317,6 @@ const PostReadContent = () => {
         </S.NavItem>
       </S.NavList>
 
-      {/* 목록 버튼 */}
       <S.NavSection>
         <S.NavButton onClick={goList}>목록</S.NavButton>
       </S.NavSection>

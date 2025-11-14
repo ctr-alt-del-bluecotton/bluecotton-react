@@ -15,6 +15,33 @@ const categoryMap = {
   rookie: "루키",
 };
 
+// 🔥 excerpt에서 텍스트만 추출하는 함수
+const extractTextOnly = (htmlOrMd) => {
+  if (!htmlOrMd) return "";
+
+  let text = htmlOrMd;
+
+  // 1) Markdown 이미지 제거 ![](url)
+  text = text.replace(/!\[.*?\]\(.*?\)/g, "");
+
+  // 2) HTML 이미지 제거
+  text = text.replace(/<img[^>]*>/g, "");
+
+  // 3) Markdown 링크 제거 [text](url)
+  text = text.replace(/\[.*?\]\(.*?\)/g, "");
+
+  // 4) 모든 HTML 태그 제거
+  text = text.replace(/<[^>]+>/g, "");
+
+  // 5) &nbsp; 등 HTML 엔티티 제거
+  text = text.replace(/&[a-z]+;/gi, " ");
+
+  // 6) 연속 공백/줄바꿈 정리
+  text = text.replace(/\s+/g, " ").trim();
+
+  return text;
+};
+
 const PostCard = ({
   id,
   somTitle,
@@ -107,12 +134,19 @@ const PostCard = ({
   const translatedCategory =
     categoryMap[category?.toLowerCase()] || category || "기타";
 
+  // 🔥 excerpt → 텍스트만 남기기
+  const cleanedExcerpt = extractTextOnly(excerpt || "");
+  const finalExcerpt =
+    cleanedExcerpt.length > 150
+      ? cleanedExcerpt.substring(0, 150) + "..."
+      : cleanedExcerpt;
+
   return (
     <S.Card onClick={onClick} role="button" tabIndex={0}>
-      {/* ✅ 좋아요 버튼 */}
+      {/* 좋아요 버튼 */}
       <S.LikeButton $liked={isLiked} onClick={handleLikeClick} />
 
-      {/* ✅ 썸네일 */}
+      {/* 썸네일 */}
       <S.ThumbWrap>
         <img
           src={
@@ -126,7 +160,7 @@ const PostCard = ({
           onError={(e) => {
             if (!e.target.dataset.fallback) {
               e.target.dataset.fallback = "true";
-              e.target.src = "/assets/images/postDefault.jpg"; // ✅ fallback
+              e.target.src = "/assets/images/postDefault.jpg";
             }
           }}
         />
@@ -144,14 +178,8 @@ const PostCard = ({
 
         <S.Title>{title}</S.Title>
 
-        <S.Excerpt
-          dangerouslySetInnerHTML={{
-            __html:
-              excerpt?.length > 150
-                ? excerpt.substring(0, 150) + "..."
-                : excerpt || "",
-          }}
-        />
+        {/* 🔥 텍스트만 보여주는 excerpt */}
+        <S.Excerpt>{finalExcerpt}</S.Excerpt>
 
         <S.MetaBottom>
           <div className="left">
@@ -175,7 +203,6 @@ const PostCard = ({
         </S.MetaBottom>
       </S.Body>
 
-      {/* 신고 모달 */}
       {showReportModal && <Report onClose={() => setShowReportModal(false)} />}
     </S.Card>
   );
