@@ -6,186 +6,187 @@ import S from "./style";
 import { openPostcode } from "../../commons/address";
 
 const SignUp = () => {
-  const [gender,setGender] = useState("");
+  const [gender, setGender] = useState("");
   const navigate = useNavigate();
-  const {openModal} = useModal();
+  const { openModal } = useModal();
 
   const {
     register,
     handleSubmit,
     getValues,
     setValue,
-    formState: {errors, isSubmitting}
-  } = useForm({mode: "onChange"});
+    formState: { errors, isSubmitting },
+  } = useForm({ mode: "onChange" });
 
   const handleSubmitForm = handleSubmit(async (data) => {
-    const {memberPasswordConfirm, ...member} = data;
+    const { memberPasswordConfirm, ...member } = data;
 
-    const res = await fetch(`${process.env.REACT_APP_BACKEND_URL}/member/register`, {
-      headers: {
-        "Content-Type" : "application/json"
-      },
-      method: "POST",
-      body: JSON.stringify(member)
-    })
+    const res = await fetch(
+      `${process.env.REACT_APP_BACKEND_URL}/member/register`,
+      {
+        headers: { "Content-Type": "application/json" },
+        method: "POST",
+        body: JSON.stringify(member),
+      }
+    );
+
     if (!res.ok) {
-      const errorData = await res.json();
       openModal({
-      title: "이미 존재하는 이메일입니다",
-      confirmText: "확인",
+        title: "이미 존재하는 이메일입니다",
+        confirmText: "확인",
       });
       return;
     }
+
     openModal({
       title: "회원가입이 완료되었습니다.",
       confirmText: "완료",
       onConfirm: () => navigate("/login"),
     });
-  })
+  });
 
-  const handleOpendPostCode = () => {
-    openPostcode(({ address }) => {
-      setValue("memberAddress", address)
-    })
-  }
-  
-  
+  const emailRegex =
+    /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
-  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-  const passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[!@#])[\da-zA-Z!@#]{8,}$/;
+  const passwordRegex =
+    /^(?=.*\d)(?=.*[a-z])(?=.*[!@#])[\da-zA-Z!@#]{8,}$/;
 
   return (
     <S.SignUpContainer>
-      {/* background */}
       <S.BackgroundBox />
 
-      {/* sign-up box */}
       <S.SignUpBox>
         <S.SignUpForm onSubmit={handleSubmitForm}>
-          {/* logo */}
           <S.Logo>blue cotton</S.Logo>
 
-          {/* input */}
-          <S.Input type="text" placeholder="이름을 작성해주세요" name="memberName" 
-            {...register("memberName", {
-              required : true,
-            })}          
+          <S.Input
+            placeholder="이름을 작성해주세요"
+            error={!!errors.memberName}
+            {...register("memberName", { required: true })}
           />
-          {errors.memberName?.type === "required" && (
-            <S.InputErrorMessage>이름을 입력하세요.</S.InputErrorMessage>
-          )}          
-          <S.Input type="text" placeholder="닉네임을 작성해주세요(최대 8 글자)" name="memberNickname" maxLength={8}
-          {...register("memberNickname", {
-            required : true,
-            maxLength: {
-              value: 8,
-            }
-          })}                    
-          />
-          {errors.memberNickName?.type === "required" && (
-            <S.InputErrorMessage>닉네임을 입력하세요.</S.InputErrorMessage>
-          )}                
-          <S.Input type="text" placeholder="이메일을 작성해주세요" name="memberEmail" 
-          {...register("memberEmail", {
-            required : true,
-            pattern : {
-              value : emailRegex
-            }
-          })} 
-          />
-          {errors.memberEmail?.type === "required" && (
-            <S.InputErrorMessage>이메일을 입력하세요.</S.InputErrorMessage>
-          )}
 
-          {errors.memberEmail?.type === "pattern" && (
-            <S.InputErrorMessage>올바른 이메일 형식을 입력해주세요.</S.InputErrorMessage>
-          )}                 
-          <S.Input type="password" placeholder="비밀번호를 작성해주세요" name="memberPassword" 
-          {...register("memberPassword", {
-            required : true,
-            pattern : {
-              value : passwordRegex
-            }
-          })}          
+          <S.Input
+            placeholder="닉네임을 작성해주세요(최대 8 글자)"
+            maxLength={8}
+            error={!!errors.memberNickname}
+            {...register("memberNickname", { required: true })}
           />
-          {errors && errors?.memberPassword?.type === "required" && (
-            <S.InputErrorMessage>비밀번호를 입력하세요.</S.InputErrorMessage>
-          )}
-          {errors && errors?.memberPassword?.type === "pattern" && (
-            <S.InputErrorMessage>소문자, 숫자, 특수문자를 각 하나 포함한 8자리 이상이여야 합니다.</S.InputErrorMessage>
-          )}
-          <S.Input type="password" placeholder="비밀번호 확인" name="memberPasswordCheck" 
-          {...register("memberPasswordConfirm", {
-            required : true,
-            validate : {
-              matchPassword : (memberPasswordConfirm) => {
-                const { memberPassword } = getValues();
-                return memberPassword === memberPasswordConfirm
-              }
-            }
-          })}          
-          />
-          {errors && errors?.memberPasswordConfirm?.type === "matchPassword" && (
-            <S.InputErrorMessage>비밀번호가 일치하지 않습니다.</S.InputErrorMessage>
-          )}
 
-          {/* address */}
-          <S.AddressBox>
-            <S.AddressInput placeholder="주소 검색" readOnly
-            {...register("memberAddress",{
-              required: true
+          <S.Input
+            placeholder="이메일을 작성해주세요"
+            error={!!errors.memberEmail}
+            {...register("memberEmail", {
+              required: true,
+              pattern: emailRegex,
             })}
+          />
+
+          <S.Input
+            placeholder="전화번호 (예: 010-1234-5678)"
+            maxLength={13}
+            error={!!errors.memberPhone}
+            {...register("memberPhone", {
+              required: true,
+              pattern: /^01[0-9]-\d{3,4}-\d{4}$/,
+            })}
+          />
+
+          <S.Input
+            type="password"
+            placeholder="비밀번호를 작성해주세요"
+            error={!!errors.memberPassword}
+            {...register("memberPassword", {
+              required: true,
+              pattern: passwordRegex,
+            })}
+          />
+
+          <S.Input
+            type="password"
+            placeholder="비밀번호 확인"
+            error={!!errors.memberPasswordConfirm}
+            {...register("memberPasswordConfirm", {
+              required: true,
+              validate: (value) =>
+                value === getValues("memberPassword"),
+            })}
+          />
+
+          <S.AddressBox>
+            <S.AddressInput
+              readOnly
+              placeholder="주소 검색"
+              error={!!errors.memberAddress}
+              {...register("memberAddress", { required: true })}
             />
-            <S.SmallButton type="button" onClick={handleOpendPostCode}>검색</S.SmallButton>
+            <S.SmallButton
+              type="button"
+              onClick={() =>
+                openPostcode(({ address, postcode }) => {
+                  setValue("memberAddress", address);
+                  setValue("memberPostcode", postcode);
+                })
+              }
+            >
+              검색
+            </S.SmallButton>
           </S.AddressBox>
-          {errors && errors?.memberAddress?.type === "required" && (
-            <S.InputErrorMessage>주소를 입력해주세요.</S.InputErrorMessage>
-          )}
+
+          <S.Input
+            placeholder="상세주소를 입력해주세요"
+            error={!!errors.memberDetailAddress}
+            {...register("memberDetailAddress", { required: true })}
+          />
+
+          <S.Input
+            readOnly
+            placeholder="우편번호 (자동 입력)"
+            error={!!errors.memberPostcode}
+            {...register("memberPostcode", { required: true })}
+          />
+
           <S.GenderSelectBox>
-            <S.GenderOption selected={gender === "남"}
+            <S.GenderOption
+              selected={gender === "남"}
+              error={!!errors.memberGender}
               onClick={() => {
                 setGender("남");
-                setValue("memberGender", "남", { shouldValidate: true }); 
+                setValue("memberGender", "남", { shouldValidate: true }); // ⭐ 수정
               }}
             >
               남
             </S.GenderOption>
 
-            <S.GenderOption selected={gender === "여"}
+            <S.GenderOption
+              selected={gender === "여"}
+              error={!!errors.memberGender}
               onClick={() => {
                 setGender("여");
-                setValue("memberGender", "여", { shouldValidate: true });
+                setValue("memberGender", "여", { shouldValidate: true }); // ⭐ 수정
               }}
             >
               여
             </S.GenderOption>
           </S.GenderSelectBox>
 
-          <input type="hidden" {...register("memberGender", { required: true })} />
-          {errors.memberGender && <S.InputErrorMessage>성별을 선택해주세요</S.InputErrorMessage>} 
 
-          {/* birth */}
           <S.DateInputBox>
             <S.DateInput
-              type="date"
+              error={!!errors.memberBirth}
               {...register("memberBirth", { required: true })}
             />
             <S.SmallButton type="button">확인</S.SmallButton>
           </S.DateInputBox>
-          {errors.memberBirth && <S.InputErrorMessage>생년월일을 선택해주세요</S.InputErrorMessage>}
 
-          {/* sign-up button */}
-          <S.SignUpButton as="button" type="submit" disabled={isSubmitting}>회원가입 완료</S.SignUpButton>
-
+          <S.SignUpButton as="button" type="submit" disabled={isSubmitting}>
+            회원가입 완료
+          </S.SignUpButton>
         </S.SignUpForm>
 
-        {/* divider */}
         <S.Divider />
 
-        {/* login */}
         <S.LoginText>
-          계정이 있으신가요?{" "}
-          <Link to="/login">로그인하러 가기</Link>
+          계정이 있으신가요? <Link to="/login">로그인하러 가기</Link>
         </S.LoginText>
       </S.SignUpBox>
     </S.SignUpContainer>
