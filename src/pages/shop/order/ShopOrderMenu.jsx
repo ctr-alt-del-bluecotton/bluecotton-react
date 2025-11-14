@@ -37,7 +37,6 @@ const getIMP = (() => {
   };
 })();
 
-
 const enforceIframeStyles = () => {
   const popup = document.getElementById("portone-payment-popup");
   if (!popup) return;
@@ -74,6 +73,7 @@ const ShopOrderMenu = () => {
 
   const merchantUidRef = useRef(null);
 
+  // ✅ 스냅샷(장바구니 → 주문서로 넘어온 경우) 있을 때
   useEffect(() => {
     if (snapshot?.items?.length) {
       const items = snapshot.items.map((it) => {
@@ -102,15 +102,14 @@ const ShopOrderMenu = () => {
         orderId: Number(orderId) || undefined,
         items,
         totalPrice,
-        provisional: true, 
+        provisional: true,
       });
       setIsLoadingOrder(false);
     }
   }, [snapshot, orderId]);
 
-  
+  // ✅ 스냅샷이 없으면 서버에서 주문 상세 조회
   useEffect(() => {
-
     if (snapshot?.items?.length) {
       return;
     }
@@ -260,6 +259,7 @@ const ShopOrderMenu = () => {
     navigator.userAgent
   );
 
+  // PortOne SDK 미리 로딩
   useEffect(() => {
     getIMP().catch((e) =>
       openModal({
@@ -270,13 +270,16 @@ const ShopOrderMenu = () => {
     );
   }, [openModal]);
 
+  // ✅ 결제 버튼 클릭 핸들러
   const handlePortOnePay = async () => {
+    // 공통 체크
     if (payLoading || isLoadingOrder || !orderData) {
       return openModal({
         title: "준비 중",
         message: "주문 정보 로드 대기 중입니다.",
       });
     }
+
     if (!isLogin || !currentUser?.id) {
       return openModal({
         title: "로그인이 필요합니다",
@@ -285,20 +288,72 @@ const ShopOrderMenu = () => {
         onConfirm: () => navigate("/login"),
       });
     }
+
     if (!payType) {
       return openModal({
         title: "결제 수단 선택",
         message: "결제 수단을 선택해주세요.",
       });
     }
+
+    // 1️⃣ 캔디 결제 플로우
     if (isCandy) {
-      return openModal({
-        title: "캔디 결제 안내",
-        message: "캔디 결제는 내부 차감 API로 처리됩니다.",
-        confirmText: "확인",
-      });
+      if (!orderData || !orderData.items?.length) {
+        return openModal({
+          title: "주문 정보 오류",
+          message: "주문 정보가 없습니다. 장바구니에서 다시 시도해주세요.",
+          confirmText: "확인",
+          onConfirm: () => navigate("/main/shop/cart"),
+        });
+      }
+
+      try {
+        setPayLoading(true);
+
+        const res = await fetch(`${API}/payment/candy`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+        });
+
+        if (!res.ok) {
+          const text = await res.text().catch(() => "");
+          throw new Error(text || `캔디 결제 실패 (status: ${res.status})`);
+        }
+
+        const json = await res.json().catch(() => null);
+        const msg =
+          json?.message ||
+          json?.data?.message ||
+          "캔디 결제가 완료되었습니다.";
+
+        openModal({
+          title: "캔디 결제 완료",
+          message: msg,
+          confirmText: "확인",
+          onConfirm: () =>
+            navigate(
+              `/main/my-page/my-shop/order?memberId=${currentUser.id}`
+            ),
+        });
+      } catch (e) {
+        console.error("캔디 결제 오류:", e);
+        openModal({
+          title: "캔디 결제 실패",
+          message:
+            e.message ||
+            "캔디 결제 처리 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.",
+          confirmText: "확인",
+        });
+      } finally {
+        setPayLoading(false);
+      }
+
+      // 캔디 결제는 여기서 끝, 아래 PortOne(카드) 로직 안 탄다
+      return;
     }
 
+    // 2️⃣ 일반 (카드/토스/카카오) PortOne 결제 플로우
     const effectiveOrderId = Number(orderData?.orderId ?? orderId);
     if (!Number.isFinite(effectiveOrderId) || effectiveOrderId <= 0) {
       return openModal({
@@ -341,9 +396,6 @@ const ShopOrderMenu = () => {
           paymentType = generalMethod.toUpperCase();
           pg = "nice_v2";
           pay_method = generalMethod;
-          break;
-        case "candy":
-          paymentType = "CANDY";
           break;
         default:
           throw new Error("결제 수단을 확인해주세요.");
@@ -440,7 +492,6 @@ const ShopOrderMenu = () => {
                 });
               }
             } else {
-              // ❌ 실패/취소 시에는 검증 호출 안 되고, 장바구니도 그대로 유지
               console.error("결제 실패: ", rsp);
               openModal({
                 title: "결제 실패",
@@ -477,10 +528,7 @@ const ShopOrderMenu = () => {
       <S.OrderMainSection>
         <OrderUserInfo />
         <OrderProduct orderData={orderData} />
-        <PaymentMethod
-          value={payType}
-          onChange={setPayType}
-        />
+        <PaymentMethod value={payType} onChange={setPayType} />
       </S.OrderMainSection>
 
       <S.OrderSideSection>
