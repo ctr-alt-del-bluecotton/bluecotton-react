@@ -411,6 +411,9 @@ width: 80px;
   border-radius: 4px;
   background-color: #E0E0E0;
   margin-right: 16px;
+  background-repeat: no-repeat;  
+  background-position: center;   
+  background-size: cover; 
 `;
 
 S.ActionButton = styled.button`
@@ -437,15 +440,18 @@ S.ActionButton = styled.button`
   }
 `;
 
-S.OrderItemImage = styled.div`
+S.OrderItemImage = styled.img`
   width: 80px;
   height: 80px;
-  background-color: #E0E0E0;
   border-radius: 4px;
   margin-right: 16px;
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: cover;
+  background-repeat: no-repeat;   
+  background-position: center;    
+  background-size: cover; 
+
+  object-fit: cover;   
+  object-position: center;
+  display: block;
 `;
 
 S.ItemContent = styled.div`
