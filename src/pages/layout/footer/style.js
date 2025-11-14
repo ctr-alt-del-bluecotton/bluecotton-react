@@ -46,6 +46,8 @@ S.Text2 = styled.div `
     & > p:first-child {
         margin-bottom: 20px;
     }
+
+    gap: 10px;
 `
 
 S.Text3 = styled.div `
@@ -58,6 +60,12 @@ S.BottomContainer = styled.div `
     justify-content: center;
     margin-top: 30px;
     margin-bottom: 50px;
+`
+S.IconContainer = styled.div `
+    display: flex;
+    /* justify-content: center; */
+    align-items: center;
+    
 `
 
 export default S;
