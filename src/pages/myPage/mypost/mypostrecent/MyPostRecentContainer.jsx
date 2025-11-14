@@ -55,10 +55,14 @@ const MyPostRecentContainer = () => {
           return;
         }
         
-        const url = `${process.env.REACT_APP_BACKEND_URL}/my-page/read-post-recent?id=${userId}`;
+        const token = localStorage.getItem("accessToken");
+        const url = `${process.env.REACT_APP_BACKEND_URL}/private/my-page/read-post-recent?id=${userId}`;
         
         const response = await fetch(url, {
-          headers: { "Content-Type": "application/json" },
+          headers: { 
+            "Content-Type": "application/json",
+            ...(token && { "Authorization": `Bearer ${token}` })
+          },
           method: "GET"
         });
         
@@ -96,9 +100,13 @@ const MyPostRecentContainer = () => {
 
   const handleDelete = async (postId) => {
     try {
-      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/my-page/delete-post-recent?id=${postId}`, {
+      const token = localStorage.getItem("accessToken");
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/private/my-page/delete-post-recent?id=${postId}`, {
         method: 'DELETE',
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          ...(token && { "Authorization": `Bearer ${token}` })
+        },
       });
 
       if (!response.ok) {

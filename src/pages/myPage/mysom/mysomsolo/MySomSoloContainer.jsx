@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import S from '../style';
 
 const MySomSoloContainer = () => {
   const navigate = useNavigate();
+  const { currentUser } = useSelector((state) => state.user);
   const [activeFilter, setActiveFilter] = useState('scheduled');
   const [soloSoms, setSoloSoms] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -41,10 +43,20 @@ const MySomSoloContainer = () => {
   // API에서 데이터 가져오기
   useEffect(() => {
     const fetchSoloSoms = async () => {
+      // currentUser가 없으면 API 호출하지 않음
+      if (!currentUser?.id) {
+        setLoading(false);
+        return;
+      }
+
       try {
         setLoading(true);
-        const res = await fetch(`${process.env.REACT_APP_BACKEND_URL}/my-page/read-som`, {
-          headers: { "Content-Type": "application/json" },
+        const token = localStorage.getItem("accessToken");
+        const res = await fetch(`${process.env.REACT_APP_BACKEND_URL}/private/my-page/read-som?id=${currentUser.id}`, {
+          headers: { 
+            "Content-Type": "application/json",
+            ...(token && { "Authorization": `Bearer ${token}` })
+          },
           method: "GET",
           credentials: "include"
         });
@@ -80,7 +92,7 @@ const MySomSoloContainer = () => {
     };
 
     fetchSoloSoms();
-  }, []);
+  }, [currentUser]);
 
   // 현재 시간 기준으로 데이터 분류
   const categorizeSoms = () => {

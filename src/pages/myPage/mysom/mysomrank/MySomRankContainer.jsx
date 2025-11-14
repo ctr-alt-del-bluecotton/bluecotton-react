@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import S from '../style';
 
@@ -6,10 +6,52 @@ const MySomRankContainer = () => {
   // Redux에서 사용자 정보 가져오기
   const user = useSelector((state) => state.user);
   const currentUser = user?.currentUser || {};
+  const [userSom, setUserSom] = useState(0);
+  const [loading, setLoading] = useState(true);
   
   // Redux 정보 콘솔 출력
   console.log('Redux User 정보:', user);
   console.log('Redux CurrentUser 정보:', currentUser);
+
+  // API에서 완료한 솜 수 가져오기
+  useEffect(() => {
+    const fetchRankData = async () => {
+      if (!currentUser?.id) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const token = localStorage.getItem("accessToken");
+        const res = await fetch(`${process.env.REACT_APP_BACKEND_URL}/private/my-page/read-rank?id=${currentUser.id}`, {
+          headers: { 
+            "Content-Type": "application/json",
+            ...(token && { "Authorization": `Bearer ${token}` })
+          },
+          method: "GET",
+          credentials: "include"
+        });
+
+        if (!res.ok) {
+          throw new Error('랭크 데이터를 불러오는데 실패했습니다.');
+        }
+
+        const result = await res.json();
+        console.log("랭크 API 응답:", result);
+        
+        // data는 완료한 솜의 수
+        const completedSom = result.data || 0;
+        setUserSom(completedSom);
+      } catch (error) {
+        console.error('랭크 데이터 로딩 실패:', error);
+        setUserSom(0);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchRankData();
+  }, [currentUser]);
 
   // 등급별 아이콘 설정
   const rankConfig = {
@@ -29,9 +71,17 @@ const MySomRankContainer = () => {
   // 사용자 이름 (닉네임 우선, 없으면 이름)
   const userName = capitalize(currentUser?.memberNickname || currentUser?.memberName || '회원');
   
-  // 등급 정보 (실제 API에서 가져와야 할 정보)
-  const userRank = capitalize(currentUser?.memberRank || 'Silver');
-  const userSom = currentUser?.memberCandy || 0;
+  // 완료한 솜 수에 따라 등급 결정
+  const getRankFromSom = (som) => {
+    if (som >= 200) return 'Master';
+    if (som >= 100) return 'Diamond';
+    if (som >= 50) return 'Gold';
+    if (som >= 10) return 'Silver';
+    return 'Rookie';
+  };
+
+  // 등급 정보 (완료한 솜 수에 따라 결정)
+  const userRank = getRankFromSom(userSom);
 
   // 다음 등급까지 필요한 솜 계산
   const getNextRankRequirement = (currentRank, currentSom) => {
@@ -43,7 +93,7 @@ const MySomRankContainer = () => {
       master: { next: null, required: 0 }
     };
     
-    const requirement = rankRequirements[currentRank.toLowerCase()] || rankRequirements.silver;
+    const requirement = rankRequirements[currentRank.toLowerCase()] || rankRequirements.rookie;
     if (requirement.next) {
       const needed = requirement.required - currentSom;
       return { next: requirement.next, needed: needed > 0 ? needed : 0 };
@@ -52,6 +102,10 @@ const MySomRankContainer = () => {
   };
 
   const nextRankInfo = getNextRankRequirement(userRank, userSom);
+
+  if (loading) {
+    return <div>로딩 중...</div>;
+  }
 
   return (
     <div>

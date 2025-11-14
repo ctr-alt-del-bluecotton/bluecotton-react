@@ -80,10 +80,20 @@ const MySomPartyContainer = () => {
   // API에서 데이터 가져오기
   useEffect(() => {
     const fetchPartySoms = async () => {
+      // currentUser가 없으면 API 호출하지 않음
+      if (!currentUser?.id) {
+        setLoading(false);
+        return;
+      }
+
       try {
         setLoading(true);
-        const res = await fetch(`${process.env.REACT_APP_BACKEND_URL}/my-page/read-som`, {
-          headers: { "Content-Type": "application/json" },
+        const token = localStorage.getItem("accessToken");
+        const res = await fetch(`${process.env.REACT_APP_BACKEND_URL}/private/my-page/read-som?id=${currentUser.id}`, {
+          headers: { 
+            "Content-Type": "application/json",
+            ...(token && { "Authorization": `Bearer ${token}` })
+          },
           method: "GET",
           credentials: "include"
         });
@@ -119,7 +129,7 @@ const MySomPartyContainer = () => {
     };
 
     fetchPartySoms();
-  }, []);
+  }, [currentUser]);
 
   // 현재 시간 기준으로 데이터 분류
   const categorizeSoms = () => {
@@ -331,10 +341,16 @@ const MySomPartyContainer = () => {
                     };
 
                     // API 호출
-                    const response = await fetchData(
-                      'my-page/insert-som-review',
-                      options.postOption(reviewData)
-                    );
+                    const token = localStorage.getItem("accessToken");
+                    const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/private/my-page/insert-som-review`, {
+                      method: "POST",
+                      headers: {
+                        "Content-Type": "application/json",
+                        ...(token && { "Authorization": `Bearer ${token}` })
+                      },
+                      credentials: "include",
+                      body: JSON.stringify(reviewData)
+                    });
 
                     if (!response.ok) {
                       const errorText = await response.text();
@@ -347,8 +363,12 @@ const MySomPartyContainer = () => {
                     console.log('리뷰 등록 성공:', result);
 
                     // 성공 시 데이터 다시 불러오기
-                    const refreshRes = await fetch(`${process.env.REACT_APP_BACKEND_URL}/my-page/read-som`, {
-                      headers: { "Content-Type": "application/json" },
+                    const refreshToken = localStorage.getItem("accessToken");
+                    const refreshRes = await fetch(`${process.env.REACT_APP_BACKEND_URL}/private/my-page/read-som?id=${currentUser.id}`, {
+                      headers: { 
+                        "Content-Type": "application/json",
+                        ...(refreshToken && { "Authorization": `Bearer ${refreshToken}` })
+                      },
                       method: "GET",
                       credentials: "include"
                     });
