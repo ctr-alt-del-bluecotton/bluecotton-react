@@ -1,6 +1,7 @@
 import React from "react";
 import S from "./style";
 import { motion } from "framer-motion";
+import SomMapOnly from "./SomMapOnly";
 
 const IntroMap = () => {
 
@@ -29,7 +30,7 @@ const IntroMap = () => {
                         viewport={{ once: true }}
                     >
                         <S.IntroPostBord>
-                            <S.IntroMapImg src="/assets/images/intro_map_real.png" alt="지도 이미지" />
+                            <SomMapOnly />
                         </S.IntroPostBord>
                     </motion.div>
                 </S.IntroMapImgAndText>
@@ -41,7 +42,7 @@ const IntroMap = () => {
                         viewport={{ once: true }}
                     >
                     <S.IntroPostBord>
-                        <S.IntroMapImg src="/assets/images/intro_map.png" alt="지도 이미지" />
+                        <S.IntroMapImg src="/assets/images/intro_map_real2.png" alt="지도 이미지" />
                     </S.IntroPostBord>
                     </motion.div>
                     <motion.div

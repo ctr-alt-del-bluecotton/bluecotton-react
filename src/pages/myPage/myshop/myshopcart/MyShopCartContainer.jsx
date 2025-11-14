@@ -9,15 +9,18 @@ const MyShopCartContainer = () => {
   const { currentUser, isLogin } = useSelector((s) => s.user);
   const navigate = useNavigate();
 
-  const [tab, setTab] = useState("general");
+ 
+  const [tab, setTab] = useState("general"); // "general" | "candy"
   const [generalItems, setGeneralItems] = useState([]);
   const [candyItems, setCandyItems] = useState([]);
   const currentItems = tab === "general" ? generalItems : candyItems;
   const setCurrentItems = tab === "general" ? setGeneralItems : setCandyItems;
 
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  
   const [checkedIds, setCheckedIds] = useState(new Set());
   const [qtyMap, setQtyMap] = useState({});
   const memberId = currentUser?.id;
@@ -30,64 +33,65 @@ const MyShopCartContainer = () => {
     }
   };
 
-
+ 
   const handleOrder = async () => {
-  
-  if (!isLogin || !memberId) {
-    openModal({
-      title: "로그인이 필요합니다",
-      message: "주문하려면 먼저 로그인해 주세요.",
-      confirmText: "로그인하기",
-      onConfirm: () => navigate("/login"),
-    });
-    return;
-  }
+    if (!isLogin || !memberId) {
+      openModal({
+        title: "로그인이 필요합니다",
+        message: "주문하려면 먼저 로그인해 주세요.",
+        confirmText: "로그인하기",
+        onConfirm: () => navigate("/login"),
+      });
+      return;
+    }
 
-
-  const itemsToOrder = currentItems
-    .filter((item) => checkedIds.has(item.id))
-    .map((item) => ({
-      productId: item.productId,
-      orderQuantity: qtyMap[item.id] || 1,
-    }));
-
-  if (itemsToOrder.length === 0) {
-    openModal({
-      title: "주문할 상품을 선택해 주세요",
-      confirmText: "확인",
-    });
-    return;
-  }
-
-  
-  const snapshotItems = currentItems
-    .filter((item) => checkedIds.has(item.id))
-    .map((item) => {
-      const q = qtyMap[item.id] || 1;
-      const unitPrice = Number(item.productPrice) || 0;
-      return {
+ 
+    const itemsToOrder = currentItems
+      .filter((item) => checkedIds.has(item.id)) 
+      .map((item) => ({
         productId: item.productId,
-        name: item.productName,
-        imageUrl: item.productImageUrl ?? null,
-        unitPrice,
-        quantity: q,
-        purchaseType: String(item.productPurchaseType || "CASH").toUpperCase(),
-        lineTotal: unitPrice * q,
-      };
-    });
+        orderQuantity: qtyMap[item.id] || 1,
+      }));
 
-  const snapshotTotal = snapshotItems.reduce((s, v) => s + v.lineTotal, 0);
+    if (itemsToOrder.length === 0) {
+      openModal({
+        title: "주문할 상품을 선택해 주세요",
+        confirmText: "확인",
+      });
+      return;
+    }
 
-  let lastOrderId = null;
+    
+    const snapshotItems = currentItems
+      .filter((item) => checkedIds.has(item.id))
+      .map((item) => {
+        const q = qtyMap[item.id] || 1;
+        const unitPrice = Number(item.productPrice) || 0;
+        return {
+          productId: item.productId,
+          name: item.productName,
+          imageUrl: item.productImageUrl ?? null,
+          unitPrice,
+          quantity: q,
+          purchaseType: String(item.productPurchaseType || "CASH")
+            .toUpperCase()
+            .trim(),
+          lineTotal: unitPrice * q,
+        };
+      });
 
-  try {
-    for (const item of itemsToOrder) {
-      const payload = {
-        memberId,
-        productId: item.productId,
-        orderQuantity: item.cartQuantity,
-      };
+    const snapshotTotal = snapshotItems.reduce((s, v) => s + v.lineTotal, 0);
 
+
+    const payload = {
+      memberId,
+      id: null,
+      items: itemsToOrder, 
+    };
+
+    console.log("장바구니 확인용 payload:", payload);
+
+    try {
       const url = `${process.env.REACT_APP_BACKEND_URL}/order/cart`;
       const response = await fetch(url, {
         method: "POST",
@@ -98,47 +102,40 @@ const MyShopCartContainer = () => {
       const body = await safeJson(response);
 
       if (!response.ok) {
-        const msg =
-          body?.message ||
-          `주문 실패 (상품 ID: ${item.productId}) - ${response.status}`;
+        const msg = body?.message || `주문 실패 - ${response.status}`;
         throw new Error(msg);
       }
 
-      if (body?.data) lastOrderId = body.data;
-    }
+      const finalOrderId = body?.data ?? "";
 
-    const finalOrderId = lastOrderId ?? "";
-
-    openModal({
-      title: "주문 성공",
-      message: `${itemsToOrder.length}개 상품의 주문이 접수되었습니다.`,
-      confirmText: "확인",
-      onConfirm: () => {
-      
-        navigate(`/main/shop/order?orderId=${finalOrderId}`, {
-          state: {
-            snapshot: {
-              items: snapshotItems,      
-              totalPrice: snapshotTotal,
+      openModal({
+        title: "주문 성공",
+        message: `${itemsToOrder.length}개 상품의 주문이 접수되었습니다.`,
+        confirmText: "확인",
+        onConfirm: () => {
+          navigate(`/main/shop/order?orderId=${finalOrderId}`, {
+            state: {
+              snapshot: {
+                items: snapshotItems,
+                totalPrice: snapshotTotal,
+              },
             },
-          },
-        });
-      },
-    });
-  } catch (err) {
-    console.error("주문 오류:", err);
-    openModal({
-      title: "주문 실패",
-      message: err?.message || "주문이 실패했습니다.",
-      confirmText: "확인",
-    });
-  }
-};
+          });
+        },
+      });
+    } catch (err) {
+      console.error("주문 오류:", err);
+      openModal({
+        title: "주문 실패",
+        message: err?.message || "주문이 실패했습니다.",
+        confirmText: "확인",
+      });
+    }
+  };
 
-
- 
+  // ✅ 장바구니 목록 불러오기
   useEffect(() => {
-    if (!memberId) return; 
+    if (!memberId) return;
 
     let isMounted = true;
     const url = `${process.env.REACT_APP_BACKEND_URL}/cart/list?memberId=${memberId}`;
@@ -163,7 +160,7 @@ const MyShopCartContainer = () => {
           : [];
 
         const normalized = items.map((item) => ({
-          id: item.id,
+          id: item.id, // 장바구니 row ID
           productId: item.productId,
           productName: item.productName,
           productPrice: Number(item.productPrice) || 0,
@@ -195,7 +192,7 @@ const MyShopCartContainer = () => {
     };
   }, [memberId]);
 
-  // 탭 전환/목록 변경 시 선택/수량 초기화
+  // ✅ 탭/목록 변경 시 선택/수량 초기화
   useEffect(() => {
     const nextQty = {};
     currentItems.forEach((it) => (nextQty[it.id] = 1));
@@ -203,7 +200,7 @@ const MyShopCartContainer = () => {
     setCheckedIds(new Set());
   }, [tab, currentItems]);
 
-
+  // ✅ 체크/수량 관련 계산/핸들러
   const allChecked =
     checkedIds.size === currentItems.length && currentItems.length > 0;
 
@@ -224,17 +221,34 @@ const MyShopCartContainer = () => {
   };
 
   const inc = (id) =>
-    setQtyMap((p) => ({ ...p, [id]: (p[id] || 1) + 1 }));
+    setQtyMap((p) => ({
+      ...p,
+      [id]: (p[id] || 1) + 1,
+    }));
+
   const dec = (id) =>
-    setQtyMap((p) => ({ ...p, [id]: Math.max(1, (p[id] || 1) - 1) }));
+    setQtyMap((p) => ({
+      ...p,
+      [id]: Math.max(1, (p[id] || 1) - 1),
+    }));
 
   const selectedTotal = currentItems
     .filter((it) => checkedIds.has(it.id))
     .reduce((sum, it) => sum + it.productPrice * (qtyMap[it.id] || 1), 0);
 
   const unit = tab === "general" ? "원" : "캔디";
-  const shippingText = tab === "candy" ? "무료배송" : "3,000원";
-
+  const hasSelection = selectedTotal > 0;
+  
+  const shippingFee =
+  tab === "candy"
+    ? 0
+    : !hasSelection
+    ? 0
+    : selectedTotal >= 30000
+    ? 0
+    : 3000;
+  const shippingText = shippingFee === 0 ? hasSelection ? "30,000원 이상 무료배송" : "0원" :`${shippingFee.toLocaleString()}원`;
+  const totalOrderAmount = selectedTotal + shippingFee;
   
   const handleDelete = (id) => {
     const item = currentItems.find((it) => it.id === id);
@@ -254,14 +268,13 @@ const MyShopCartContainer = () => {
           const payload = await safeJson(response);
 
           if (!response.ok) {
-            const msg =
-              payload?.message || `삭제 실패: ${response.status}`;
+            const msg = payload?.message || `삭제 실패: ${response.status}`;
             throw new Error(msg);
           }
 
-          // 프론트 목록 동기화
+          
           setCurrentItems((prev) => prev.filter((it) => it.id !== id));
-          // 선택/수량 상태도 정리
+        
           setCheckedIds((prev) => {
             const next = new Set(prev);
             next.delete(id);
@@ -328,7 +341,7 @@ const MyShopCartContainer = () => {
         </S.ResetButton>
       </S.CartHeader>
 
-      
+   
       <S.ListContainer>
         {currentItems.map((item) => {
           const q = qtyMap[item.id] || 1;
@@ -378,7 +391,10 @@ const MyShopCartContainer = () => {
                     </div>
 
                     <S.QuantityControl>
-                      <S.QuantityButton onClick={() => dec(item.id)} disabled={q <= 1}>
+                      <S.QuantityButton
+                        onClick={() => dec(item.id)}
+                        disabled={q <= 1}
+                      >
                         -
                       </S.QuantityButton>
                       <S.Quantity>{q}</S.Quantity>
@@ -414,7 +430,7 @@ const MyShopCartContainer = () => {
         })}
       </S.ListContainer>
 
-      {/* 요약/주문 */}
+   
       <S.OrderSummary>
         <S.SummaryRow>
           <span>선택 상품 금액</span>
@@ -434,7 +450,7 @@ const MyShopCartContainer = () => {
         <S.SummaryRow>
           <span>주문 금액(배송비 별도)</span>
           <span>
-            {selectedTotal.toLocaleString()}
+            {totalOrderAmount.toLocaleString()}
             {unit}
           </span>
         </S.SummaryRow>
