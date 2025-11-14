@@ -3,6 +3,7 @@ import FloatingSomWrite from './floatingSomWrite/FloatingSomWrite';
 import S from './style';
 import { useFloatingAction } from '../../../../../context/FloatingActionContext';
 import FloatingChatBot from './floatingChatBot/FloatingChatBot';
+import FloatingChatting from './floatingChatting/FloatingChatting';
 
 const FloatingMenuContent = () => {
   const { somMenuContent } = useFloatingAction();
@@ -14,7 +15,7 @@ const FloatingMenuContent = () => {
     },
     {
       label: "chatting",
-      output: <div>채팅 자리</div>
+      output: <FloatingChatting />
     },
     {
       label: "somWrite",

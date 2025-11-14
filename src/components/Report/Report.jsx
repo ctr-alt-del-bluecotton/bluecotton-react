@@ -14,36 +14,79 @@ const Report = ({ target, onClose }) => {
   const { openModal } = useModal(); // 전역 확인 모달
 
   // 등록 버튼 눌렀을 때
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
+    const BASE_URL = process.env.REACT_APP_BACKEND_URL;
+    const token = localStorage.getItem("accessToken");
+
     const finalReason =
       selectedReason === "기타" ? customText.trim() : selectedReason;
 
-    // 아무 것도 안 적었을 때
     if (!finalReason) {
-      openModal({
+      return openModal({
         title: "신고 사유를 작성해주세요.",
         confirmText: "확인",
-        onConfirm: () => {},
       });
-      return;
     }
 
-    // 실제 서버 신고 API 자리 (지금은 console.log)
-    console.log("🚨 신고 전송됨", {
-      target,
-      reason: finalReason,
-    });
+    let url = "";
+    let body = {};
 
-    // 신고 완료 안내 모달 (확인 1개짜리)
-    openModal({
-      title: "신고가 접수되었습니다.",
-      message: "관리자가 확인 후 필요한 조치를 취할 예정입니다.",
-      confirmText: "확인",
-      onConfirm: () => {
-        // 확인 누르면 신고 모달 닫힘
-        onClose();
-      },
-    });
+    /** 🔥 신고 타입에 따라 fetch URL, body 자동 변경 */
+    if (target.type === "post") {
+      url = `${BASE_URL}/private/post/report/post`;
+      body = {
+        postReportContent: finalReason,
+        postId: target.id,
+      };
+    } else if (target.type === "comment") {
+      url = `${BASE_URL}/private/post/report/comment`;
+      body = {
+        postCommentReportContent: finalReason,
+        postCommentId: target.id,
+      };
+    } else if (target.type === "reply") {
+      url = `${BASE_URL}/private/post/report/reply`;
+      body = {
+        postReplyReportContent: finalReason,
+        postReplyId: target.id,
+      };
+    }
+
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(body),
+      });
+
+      if (response.status === 409) {
+        const errData = await response.json();
+        return openModal({
+          title: "이미 신고한 항목입니다",
+          message: errData?.message,
+          confirmText: "확인",
+        });
+      }      
+
+      if (!response.ok) throw new Error("신고 실패");
+
+      openModal({
+        title: "신고가 접수되었습니다.",
+        message: "관리자가 확인 후 조치할 예정입니다.",
+        confirmText: "확인",
+        onConfirm: () => onClose(),
+      });
+    } catch (err) {
+      console.error(err);
+      openModal({
+        title: "오류",
+        message: "신고 처리 중 문제가 발생했습니다.",
+        confirmText: "확인",
+      });
+    }
   };
 
   return (
