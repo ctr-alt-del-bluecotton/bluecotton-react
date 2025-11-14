@@ -13,12 +13,10 @@ import {
 
 const S = {};
 
-// 로고
 S.Logo = styled.h1`
   ${headerLogo}
 `;
 
-// 로그인 폼
 S.LoginForm = styled.form`
   display: flex;
   flex-direction: column;
@@ -27,7 +25,6 @@ S.LoginForm = styled.form`
   align-items: center;
 `
 
-// Login Container
 S.LoginContainer = styled.div`
   width: 100%;
   height: 100vh;
@@ -35,7 +32,6 @@ S.LoginContainer = styled.div`
   background-color: ${({ theme }) => theme.PALLETE.white};
 `;
 
-// Background
 S.BackgroundBox = styled.div`
   width: 70%;
   height: 100%;
@@ -44,7 +40,6 @@ S.BackgroundBox = styled.div`
   background-repeat: no-repeat;
 `;
 
-// Login
 S.LoginBox = styled.div`
   width: 30%;
   height: 100%;
@@ -53,17 +48,18 @@ S.LoginBox = styled.div`
   gap: 20px;
 `;
 
-// Input
 S.Input = styled.input`
-  /* 320 - 24 */
   width: 296px;
   height: 55px;
-  border: 1px solid ${({ theme }) => theme.PALLETE.grey.greyScale1};
+  border: 1px solid
+    ${({ theme, $error }) =>
+      $error ? theme.PALLETE.warning : theme.PALLETE.grey.greyScale1};
   border-radius: 4px;
   padding: 0 12px;
   outline: none;
   ${smallText3Light};
-  ${basic}
+  ${basic};
+
   &:focus {
     border-color: ${({ theme }) => theme.PALLETE.primary.main};
   }
@@ -74,7 +70,6 @@ S.InputErrorMessage = styled.p`
   ${smallText1Regular};
 `
 
-// Login Button
 S.LoginButton = styled(Link)`
   width: 320px;
   height: 40px;
@@ -93,7 +88,6 @@ S.LoginButton = styled(Link)`
   }
 `;
 
-// Divider
 S.Divider = styled.div`
   width: 320px;
   height: 1px;
@@ -114,14 +108,12 @@ S.Divider = styled.div`
   }
 `;
 
-// social login box
 S.SocialButtons = styled.div`
   ${flexCenterColumn};
   gap: 15px;
   width: 320px;
 `;
 
-// social login
 S.SocialButton = styled(Link)`
   text-decoration: none;
   cursor: pointer;
@@ -138,7 +130,6 @@ S.SocialButton = styled(Link)`
   }
 `;
 
-//  find id/pwd
 S.FindInfoBox = styled.div`
   display: flex;
   flex-direction: column;
@@ -156,7 +147,6 @@ S.FindInfoBox = styled.div`
   }
 `;
 
-// 회원가입
 S.SignUpText = styled.p`
   color: ${({ theme }) => theme.PALLETE.basic};
   ${smallText3Light};
