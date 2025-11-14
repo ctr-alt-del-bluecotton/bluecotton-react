@@ -59,14 +59,12 @@ const SignUp = () => {
         <S.SignUpForm onSubmit={handleSubmitForm}>
           <S.Logo>blue cotton</S.Logo>
 
-          {/* 이름 */}
           <S.Input
             placeholder="이름을 작성해주세요"
             error={!!errors.memberName}
             {...register("memberName", { required: true })}
           />
 
-          {/* 닉네임 */}
           <S.Input
             placeholder="닉네임을 작성해주세요(최대 8 글자)"
             maxLength={8}
@@ -74,7 +72,6 @@ const SignUp = () => {
             {...register("memberNickname", { required: true })}
           />
 
-          {/* 이메일 */}
           <S.Input
             placeholder="이메일을 작성해주세요"
             error={!!errors.memberEmail}
@@ -84,7 +81,6 @@ const SignUp = () => {
             })}
           />
 
-          {/* 전화번호 */}
           <S.Input
             placeholder="전화번호 (예: 010-1234-5678)"
             maxLength={13}
@@ -95,7 +91,6 @@ const SignUp = () => {
             })}
           />
 
-          {/* 비밀번호 */}
           <S.Input
             type="password"
             placeholder="비밀번호를 작성해주세요"
@@ -106,7 +101,6 @@ const SignUp = () => {
             })}
           />
 
-          {/* 비밀번호 확인 */}
           <S.Input
             type="password"
             placeholder="비밀번호 확인"
@@ -118,7 +112,6 @@ const SignUp = () => {
             })}
           />
 
-          {/* 주소 */}
           <S.AddressBox>
             <S.AddressInput
               readOnly
@@ -139,22 +132,19 @@ const SignUp = () => {
             </S.SmallButton>
           </S.AddressBox>
 
-          {/* 상세주소 */}
           <S.Input
             placeholder="상세주소를 입력해주세요"
-            error={!!errors.memberAddressDetail}
+            error={!!errors.memberDetailAddress}
             {...register("memberDetailAddress", { required: true })}
           />
 
-          {/* 우편번호 */}
           <S.Input
             readOnly
             placeholder="우편번호 (자동 입력)"
-            error={!!errors.memberZipcode}
+            error={!!errors.memberPostcode}
             {...register("memberPostcode", { required: true })}
           />
 
-          {/* ⭐ 성별 */}
           <S.GenderSelectBox>
             <S.GenderOption
               selected={gender === "남"}
@@ -180,7 +170,6 @@ const SignUp = () => {
           </S.GenderSelectBox>
 
 
-          {/* 생년월일 */}
           <S.DateInputBox>
             <S.DateInput
               error={!!errors.memberBirth}
@@ -189,7 +178,6 @@ const SignUp = () => {
             <S.SmallButton type="button">확인</S.SmallButton>
           </S.DateInputBox>
 
-          {/* 회원가입 */}
           <S.SignUpButton as="button" type="submit" disabled={isSubmitting}>
             회원가입 완료
           </S.SignUpButton>
