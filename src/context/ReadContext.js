@@ -34,6 +34,15 @@ export const ReadProvider = ({ children }) => {
             window.dispatchEvent(new CustomEvent("refreshSomList"));
         })
     }
+    
+    const somLikeUpdate = async (somId, isLike) => {
+        const res = await fetchData(`som/like?somId=${somId}&memberEmail=${currentUser.memberEmail}&isLike=${isLike}`,
+            options.putOption()
+        ).then((res) => res)
+        .catch((res) => console.error(res))
+
+        return res;
+    }
 
     const somJoinSoloSom = () => {
         openModal({
@@ -58,13 +67,24 @@ export const ReadProvider = ({ children }) => {
     }
 
     const somJoin = () => {
-        openModal({
-            title: "해당 솜에 참가합니다.",
-            message: "참가하시겠습니까?",
-            cancelText: "더 둘러보기",
-            confirmText: "참가하기",
-            onConfirm: () => { insertFetch() }
-        });
+
+        console.log(somMemberList.forEach((member) => console.log(member.id === currentUser.id)))
+        if(somMemberList.filter((member) => member.id === currentUser.id)){
+            openModal({
+                title: "이미 해당 솜에 참가하고 있습니다.",
+                message: "다른 솜을 둘러보러 가볼까요?",
+                confirmText: "확인"
+            });
+
+        } else {
+            openModal({
+                title: "해당 솜에 참가합니다.",
+                message: "참가하시겠습니까?",
+                cancelText: "더 둘러보기",
+                confirmText: "참가하기",
+                onConfirm: () => { insertFetch() }
+            });
+        }
     }
 
     useEffect(() => {
@@ -125,6 +145,7 @@ export const ReadProvider = ({ children }) => {
         somInfo,
         somLeader,
         somReviews,
+        somLikeUpdate,
         loading,
         somContent,
         infoMenuSelect,

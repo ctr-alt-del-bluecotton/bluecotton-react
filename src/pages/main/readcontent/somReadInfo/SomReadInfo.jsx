@@ -2,37 +2,52 @@
 import S from './style'
 import { useRead } from '../../../../context/ReadContext';
 import { useSelector } from 'react-redux';
+import { useState } from 'react';
 
 const SomReadInfo = () => {
   const { isLogin } = useSelector((state) => state.user);
-  const { somInfo, somIsLike, setSomIsLike, formatDate, somJoinSoloSom, somJoin, somJoinNotLogin } = useRead();
+  const { somInfo, formatDate, somJoinSoloSom, somJoin, somJoinNotLogin, somLikeUpdate } = useRead();
   const {
+    id,
     somTitle,
     somCategory,
     somAddress,
     somStartDate,
     somType,
+    isSomLike,
     somEndDate,
     somCount,
-    somLike
+    somLikeCount
   } = somInfo
 
+  const [ isLike, setIsLike ] = useState(isSomLike);
+  const [ likeCount, setLikeCount ] = useState(somLikeCount); 
   
 
   // 증가 쿼리 fetch 예정
-  const somLikeButtonOnclick = () => {
-    setSomIsLike(!somIsLike);
-  } 
+  const isLikeButtonOnclick = async (e) => {
+    await somLikeUpdate(id, isLike)
+    .then((res) => res)
+    .then(async (res) => {
+      const resData = await res.json();
+      setIsLike(resData.data.resultLike)
+      setLikeCount(resData.data.likeCount)
+    })
+  }
   const somTypeText = somType === "solo" ? "솔로솜" : "파티솜";
   const somOnClick = somType !== "solo" ? () => { isLogin ? somJoin() :  somJoinNotLogin() } :  () => { somJoinSoloSom() };
 
   const somButton = somType !== "solo" ? <S.somButton onClick={somOnClick}>참여 - {somTypeText}({somCount})</S.somButton>
   : <S.fullSomButton onClick={somOnClick}>참여 - {somTypeText}({somCount})</S.fullSomButton> ;
 
-  const somLikeButton =
-    <S.somLikeButton onClick={somLikeButtonOnclick}>
+  const somLikeButton = isLike ?
+    <S.somLikeButton onClick={isLikeButtonOnclick}>
       <S.somLikeIcon src='../../../../assets/icons/som_read_like_active.png' alt='솜 좋아요 true'/>
-      <S.somLikeCount>{somLike}</S.somLikeCount>
+      <S.somLikeCount>{likeCount}</S.somLikeCount>
+    </S.somLikeButton> :
+    <S.somLikeButton onClick={isLikeButtonOnclick}>
+      <S.somLikeIcon src='../../../../assets/icons/som_read_like_inactive.png' alt='솜 좋아요 true'/>
+      <S.somLikeCount>{likeCount}</S.somLikeCount>
     </S.somLikeButton>
 
   return (
