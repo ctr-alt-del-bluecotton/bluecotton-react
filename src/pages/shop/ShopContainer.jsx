@@ -54,8 +54,7 @@ const ShopContainer = () => {
                 }
             });
 
-            // 상품 타입
-            //  XML :  'newType'
+
             if (productTypes.new) filterParams.newType = 'NEW';
             if (productTypes.best) filterParams.best = 'BEST';
 
@@ -71,7 +70,7 @@ const ShopContainer = () => {
             filterParams.memberId = memberId;
 
             if(keyword) {
-                filterParams.keyword = keyword;
+                filterParams.q = keyword;
             }
 
             console.log("필터링한 데이터 :", filterParams);
