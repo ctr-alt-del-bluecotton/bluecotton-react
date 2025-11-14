@@ -82,7 +82,15 @@ const FloatingSomWriteInner = () => {
             somImageIds : uploadImageTempIds
           }))
         }
+
+        const createChatData = {
+          chatTitle: somData.data.somTitle,
+          chatType: somData.data.somType == "solo" ? 'DM' : 'PUBLIC',
+          chatMemberRole: 'OWNER',
+          memberId: currentUser.id,
+        }
         
+        await fetchData('chat/create-rooms', options.postOption(createChatData))
       })
     }
     asyncSubmit(inputData).then(() => {

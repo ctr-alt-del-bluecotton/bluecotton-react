@@ -13,7 +13,6 @@ const SomContentList = () => {
         <SomContent 
           key={content.id} 
           content={content} 
-          somisLike={somisLikeList.find((list) => String(list.somId) === String(content.id))} 
         />
       ))}
     </Grid>
