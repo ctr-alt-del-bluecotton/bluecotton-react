@@ -22,7 +22,6 @@ const HeaderCategory = () => {
                     <S.CategoryLink to="/main/map">주변 솜</S.CategoryLink>
                     <S.CategoryLink to="/main/post/all" className={isPostActive ? "active" :""}>오늘의 솜</S.CategoryLink>
                     <S.CategoryLink to="/main/shop">블루코튼 샵</S.CategoryLink>
-                    <S.CategoryLink to="/main/my-page/my-som/auth" className={isMyPageActive ? "active" : ""}>마이페이지</S.CategoryLink>
                 </S.CategoryBar>
                 {!isHiddenSearchBar && <SearchBar />}
             </S.Container>

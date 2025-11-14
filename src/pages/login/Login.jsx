@@ -128,7 +128,7 @@ const Login = () => {
         {/* find id/psw */}
         <S.FindInfoBox>
           <Link to="/find-password">비밀번호를 잊으셨나요?</Link>
-          <Link to="/find-id">ID를 잊으셨나요?</Link>
+          <Link to="/find-email">ID를 잊으셨나요?</Link>
         </S.FindInfoBox>
 
         {/* sign-up */}

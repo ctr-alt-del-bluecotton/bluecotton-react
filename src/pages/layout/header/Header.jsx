@@ -11,6 +11,7 @@ const Header = () => {
   const dropdownRef = useRef(null);
   const [isMyPageHovered, setIsMyPageHovered] = useState(false);
   const [isLogoutHovered, setIsLogoutHovered] = useState(false);
+  const [profileImage, setProfileImage] = useState(null);
 
   const toogleDropdown = () => {
     setIsOpen((prev) => !prev);
@@ -58,7 +59,7 @@ const Header = () => {
   };
 
   const handleMyPage = () => {
-    navigate("/main/my-page/my-som");
+    navigate("/main/my-page/my-som/auth");
     setIsOpen(false);
   };
 
@@ -91,6 +92,37 @@ const Header = () => {
     </>
   );
 
+  useEffect(() => {
+  const fetchProfile = async () => {
+    if (!isLogin || !currentUser?.id) return;
+
+    try {
+      const res = await fetch(
+        `${process.env.REACT_APP_BACKEND_URL}/member/profile?memberId=${currentUser.id}`,
+        {
+          method: "GET",
+          headers: {
+            "Authorization": `Bearer ${localStorage.getItem("accessToken")}`
+          }
+        }
+      );
+
+      if (!res.ok) throw new Error("프로필 로드 실패");
+
+      const result = await res.json();
+      const data = result.data;
+
+      setProfileImage(data.memberProfilePath + data.memberProfileName);
+    } catch (err) {
+      console.error(err);
+      setProfileImage("/assets/icons/login.svg");
+    }
+  };
+
+  fetchProfile();
+}, [isLogin, currentUser?.id]);
+
+
   return (
     <S.HeaderWrap>
       <S.HeaderContainer>
@@ -119,11 +151,12 @@ const Header = () => {
                 <S.ProfileBox onClick={toogleDropdown} style={{cursor:"pointer"}}>
                   <img
                     style={{
-                      width: "21px",
-                      height: "24px",
-                      marginTop: "2px",
+                      width: "36px",
+                      height: "36px",
+                      borderRadius: "50px",
+                      marginRight: "8px",
                     }}
-                    src="/assets/icons/login.svg"
+                    src={profileImage || "/assets/icons/login.svg"}
                     alt="프로필아이콘"
                   />
                   <S.ProfileName nClick={toogleDropdown} style={{cursor:"pointer"}}>

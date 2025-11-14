@@ -42,6 +42,9 @@ import UserManagementContainer from "../pages/manager/UserManagementContainer";
 import SomManagementContainer from "../pages/manager/SomManagementContainer";
 import PostManagementContainer from "../pages/manager/PostManagementContainer";
 import OrderManagementContainer from "../pages/manager/OrderManagementContainer";
+import FindId from "../pages/findemail/FindEmail";
+import FindEmail from "../pages/findemail/FindEmail";
+import FindPassword from "../pages/findpassword/FindPassword";
 
 const router = createBrowserRouter([
   {
@@ -151,6 +154,14 @@ const router = createBrowserRouter([
   {
     path : "/sign-up",
     element : <SignUp></SignUp>
+  },
+  {
+    path: "/find-email",
+    element: <FindEmail />
+  },
+  {
+    path: "/find-password",
+    element: <FindPassword />
   },
   {
     path : "/main/manager",
