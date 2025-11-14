@@ -140,8 +140,10 @@ S.IntroMapContainer = styled.div `
 `
 
 S.IntroMapImg = styled.img `
-    width: 430px;
-    height: 932px;
+    width: 100%;
+    height: auto;
+    display: block;
+    border-radius: 9%;
 `
 
 S.IntroMapImgAndText = styled.div `
@@ -368,6 +370,7 @@ S.IntroPostBord = styled.div `
     border-radius: 50px;
     background-color: #FFFFFF;
     box-shadow: 0 15px 22px rgba(0, 0, 0, 0.1);
+    overflow: hidden; 
 `
 
 S.IntroPostContainer3 = styled.div `

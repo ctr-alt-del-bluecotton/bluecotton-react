@@ -10,7 +10,6 @@ import { useLocation, useNavigate } from "react-router-dom";
 const PORTONE_IMP_KEY = process.env.REACT_APP_PORTONE_IMP_KEY;
 const API = process.env.REACT_APP_BACKEND_URL;
 
-
 const getIMP = (() => {
   let promise;
   return () => {
@@ -38,6 +37,7 @@ const getIMP = (() => {
   };
 })();
 
+
 const enforceIframeStyles = () => {
   const popup = document.getElementById("portone-payment-popup");
   if (!popup) return;
@@ -62,7 +62,7 @@ const ShopOrderMenu = () => {
   const location = useLocation();
 
   const queryParams = new URLSearchParams(location.search);
-  const orderId = queryParams.get("orderId"); 
+  const orderId = queryParams.get("orderId");
   const snapshot = location.state?.snapshot || null;
 
   const [orderData, setOrderData] = useState(null);
@@ -73,7 +73,6 @@ const ShopOrderMenu = () => {
   const [payLoading, setPayLoading] = useState(false);
 
   const merchantUidRef = useRef(null);
-
 
   useEffect(() => {
     if (snapshot?.items?.length) {
@@ -103,7 +102,7 @@ const ShopOrderMenu = () => {
         orderId: Number(orderId) || undefined,
         items,
         totalPrice,
-        provisional: true,
+        provisional: true, 
       });
       setIsLoadingOrder(false);
     }
@@ -111,7 +110,11 @@ const ShopOrderMenu = () => {
 
   
   useEffect(() => {
-    
+
+    if (snapshot?.items?.length) {
+      return;
+    }
+
     if (!orderId && !(snapshot?.items?.length)) {
       openModal({
         title: "오류",
@@ -123,7 +126,7 @@ const ShopOrderMenu = () => {
     }
 
     const fetchOrderData = async () => {
-      if (!orderId) return; 
+      if (!orderId) return;
       setIsLoadingOrder(true);
       try {
         if (!currentUser?.id) return;
@@ -139,7 +142,6 @@ const ShopOrderMenu = () => {
         const result = await res.json();
         const rawServer = result?.data?.value ?? result?.data ?? null;
 
-   
         let rawItems = [];
         let resolvedOrderId = Number(orderId) || undefined;
         let totalPrice = 0;
@@ -153,9 +155,7 @@ const ShopOrderMenu = () => {
           }
         } else if (rawServer) {
           rawItems = rawServer.items || [];
-          resolvedOrderId = Number(
-            rawServer.orderId ?? resolvedOrderId
-          );
+          resolvedOrderId = Number(rawServer.orderId ?? resolvedOrderId);
           totalPrice = Number(rawServer.totalPrice ?? 0);
         }
 
@@ -219,7 +219,6 @@ const ShopOrderMenu = () => {
     }
   }, [API, currentUser, isLogin, navigate, openModal, orderId, snapshot]);
 
-  /** 3) 금액 계산 */
   const rawTotal = useMemo(() => {
     if (!orderData) return 0;
 
@@ -241,21 +240,25 @@ const ShopOrderMenu = () => {
   }, [orderData]);
 
   const FIXED_SHIPPING_FEE = 3000;
-  const shippingFeeDisplay = useMemo(
+  const shippingFee = useMemo(
     () => (rawTotal >= 30000 ? 0 : FIXED_SHIPPING_FEE),
     [rawTotal]
   );
+  const shippingFeeDisplay =
+    shippingFee === 0
+      ? "30,000원 이상 결제시 배송비 무료"
+      : `${shippingFee.toLocaleString()}원`;
   const itemPrice = useMemo(() => rawTotal, [rawTotal]);
+
   const totalAmount = useMemo(
-    () => rawTotal + shippingFeeDisplay,
-    [rawTotal, shippingFeeDisplay]
+    () => itemPrice + shippingFee,
+    [itemPrice, shippingFee]
   );
 
   const isCandy = payType === "candy";
   const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(
     navigator.userAgent
   );
-
 
   useEffect(() => {
     getIMP().catch((e) =>
@@ -315,23 +318,32 @@ const ShopOrderMenu = () => {
     }
 
     setPayLoading(true);
+
     try {
       const IMP = await getIMP();
 
+      let paymentType = "CASH";
       let pg = "";
       let pay_method = "";
+
       switch (payType) {
         case "toss":
+          paymentType = "TOSS";
           pg = "uplus.tlgdacomxpay";
           pay_method = "card";
           break;
         case "kakao":
+          paymentType = "KAKAO";
           pg = "kakaopay.TC0ONETIME";
           pay_method = "card";
           break;
         case "general":
+          paymentType = generalMethod.toUpperCase();
           pg = "nice_v2";
           pay_method = generalMethod;
+          break;
+        case "candy":
+          paymentType = "CANDY";
           break;
         default:
           throw new Error("결제 수단을 확인해주세요.");
@@ -339,9 +351,7 @@ const ShopOrderMenu = () => {
 
       let merchantUid = `BC_${effectiveOrderId}_${Date.now()}`;
 
-      
       if (API) {
-        const paymentType = "CASH";
         const prepRes = await fetch(`${API}/payment/prepare`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -359,8 +369,7 @@ const ShopOrderMenu = () => {
         }
         const prepJson = await prepRes.json().catch(() => ({}));
         if (prepJson?.data?.merchantUid || prepJson?.merchantUid) {
-          merchantUid =
-            prepJson.data?.merchantUid ?? prepJson.merchantUid;
+          merchantUid = prepJson.data?.merchantUid ?? prepJson.merchantUid;
         }
       }
       merchantUidRef.current = merchantUid;
@@ -371,7 +380,12 @@ const ShopOrderMenu = () => {
             pg,
             pay_method,
             merchant_uid: merchantUidRef.current,
-            name: `블루코튼 상품 결제 (No. ${effectiveOrderId})`,
+            name:
+              orderData.items.length > 1
+                ? `${orderData.items[0].name} 외 ${
+                    orderData.items.length - 1
+                  }건`
+                : `블루코튼 상품 결제 (No. ${effectiveOrderId})`,
             amount: amountToPay,
             buyer_email: currentUser?.memberEmail || "",
             buyer_name: currentUser?.memberName || "",
@@ -383,9 +397,8 @@ const ShopOrderMenu = () => {
           async (rsp) => {
             requestAnimationFrame(enforceIframeStyles);
 
-            if (rsp?.success || rsp?.imp_uid) {
+            if (rsp?.success) {
               try {
-              
                 if (!isMobile && API) {
                   const vRes = await fetch(`${API}/payment/verify`, {
                     method: "POST",
@@ -393,6 +406,10 @@ const ShopOrderMenu = () => {
                     body: JSON.stringify({
                       impUid: rsp.imp_uid,
                       merchantUid: merchantUidRef.current,
+                      memberId: currentUser.id,
+                      paymentType,
+                      pg: rsp.pg,
+                      easyPayProvider: rsp.easy_pay?.provider,
                     }),
                   });
                   if (!vRes.ok) {
@@ -423,6 +440,7 @@ const ShopOrderMenu = () => {
                 });
               }
             } else {
+              // ❌ 실패/취소 시에는 검증 호출 안 되고, 장바구니도 그대로 유지
               console.error("결제 실패: ", rsp);
               openModal({
                 title: "결제 실패",
@@ -462,7 +480,6 @@ const ShopOrderMenu = () => {
         <PaymentMethod
           value={payType}
           onChange={setPayType}
-          // generalMethod / setGeneralMethod 넘겨야 한다면 여기서 props 추가
         />
       </S.OrderMainSection>
 
@@ -475,7 +492,7 @@ const ShopOrderMenu = () => {
           </S.SideRow>
           <S.SideRow>
             <span>배송비</span>
-            <span>{shippingFeeDisplay.toLocaleString()}원</span>
+            <span>{shippingFeeDisplay.toLocaleString()}</span>
           </S.SideRow>
           <S.SideTotal>
             <span>합계</span>
