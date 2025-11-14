@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import { fetchData, options } from '../../../../context/FetchContext';
 import styled from 'styled-components';
 
 const Container = styled.div`
@@ -273,21 +275,21 @@ const CharCount = styled.div`
 const SubmitButton = styled.button`
   width: 100%;
   padding: 16px;
-  background-color: #0051FF;
+  background-color: ${props => props.disabled ? '#BDBDBD' : '#0051FF'};
   color: white;
   border: none;
   border-radius: 6px;
   font-size: 16px;
   font-weight: 600;
-  cursor: pointer;
+  cursor: ${props => props.disabled ? 'not-allowed' : 'pointer'};
   box-sizing: border-box;
   
   &:hover {
-    background-color: #0040D0;
+    background-color: ${props => props.disabled ? '#BDBDBD' : '#0040D0'};
   }
   
   &:active {
-    transform: scale(0.98);
+    transform: ${props => props.disabled ? 'none' : 'scale(0.98)'};
   }
   
   @media (max-width: 480px) {
@@ -299,12 +301,15 @@ const SubmitButton = styled.button`
   const MySomCheck = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { currentUser } = useSelector((state) => state.user);
   const [fileCount, setFileCount] = useState(0);
   const [textLength, setTextLength] = useState(0);
+  const [content, setContent] = useState(''); // 텍스트 내용 저장
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [previewUrl, setPreviewUrl] = useState(null);
   const [somData, setSomData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false); // 제출 중 상태
 
   // 카테고리 매핑
   const categoryMap = {
@@ -404,12 +409,134 @@ const SubmitButton = styled.button`
   };
 
   const handleTextChange = (e) => {
-    setTextLength(e.target.value.length);
+    const value = e.target.value;
+    setContent(value);
+    setTextLength(value.length);
   };
 
-  const handleSubmit = () => {
-    // 인증 등록 로직
-    console.log('인증 등록');
+  // 이미지 업로드 함수
+  const uploadImageToServer = async (file, folder = 'som-check') => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, "0");
+    const day = String(now.getDate()).padStart(2, "0");
+    
+    const formData = new FormData();
+    const folderPath = `${folder}/${year}/${month}/${day}`;
+    formData.append('file', file);
+    formData.append('folder', folderPath);
+    
+    const res = await fetch(`${process.env.REACT_APP_BACKEND_URL}/file/upload-image`, {
+      method: 'POST',
+      body: formData,
+    });
+    
+    if (!res.ok) throw new Error('이미지 업로드 실패');
+    
+    return await res.json();
+  };
+
+  const handleSubmit = async () => {
+    if (!currentUser || !somData) {
+      alert('로그인이 필요하거나 챌린지 정보를 불러올 수 없습니다.');
+      return;
+    }
+
+    if (!content.trim()) {
+      alert('인증 내용을 입력해주세요.');
+      return;
+    }
+
+    if (selectedFiles.length === 0) {
+      alert('인증 사진을 최소 1개 이상 업로드해주세요.');
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+
+      // 이미지 업로드
+      const uploadedImages = [];
+      for (const file of selectedFiles) {
+        try {
+          const uploadResult = await uploadImageToServer(file, 'som-check');
+          
+          // 응답 형식에 따라 경로와 파일명 추출
+          let imagePath = '';
+          let imageName = '';
+          
+          if (uploadResult?.data) {
+            if (typeof uploadResult.data === 'string') {
+              imagePath = uploadResult.data;
+              imageName = uploadResult.data.split("/").reverse()[0];
+            } else if (uploadResult.data.url) {
+              imagePath = uploadResult.data.url;
+              imageName = uploadResult.data.url.split("/").reverse()[0];
+            } else {
+              imagePath = uploadResult.data.imagePath || uploadResult.data.path || '';
+              imageName = uploadResult.data.imageName || uploadResult.data.name || file.name;
+            }
+          } else if (uploadResult?.url) {
+            imagePath = uploadResult.url;
+            imageName = uploadResult.url.split("/").reverse()[0];
+          } else if (typeof uploadResult === 'string') {
+            imagePath = uploadResult;
+            imageName = uploadResult.split("/").reverse()[0];
+          }
+
+          if (imagePath) {
+            uploadedImages.push({
+              somCheckImagePath: imagePath,
+              somCheckImageName: imageName || file.name
+            });
+          }
+        } catch (error) {
+          console.error('이미지 업로드 실패:', error);
+          alert(`이미지 업로드에 실패했습니다: ${file.name}`);
+          setSubmitting(false);
+          return;
+        }
+      }
+
+      // API 요청 데이터 준비
+      const checkData = {
+        somCheckIsChecked: true,
+        somCheckContent: content.trim(),
+        memberId: currentUser.id,
+        somId: somData.id,
+        images: uploadedImages,
+        somCheckIsCheckedYn: 'Y'
+      };
+
+      console.log('전송할 데이터:', checkData);
+
+      // API 호출
+      const response = await fetchData(
+        'my-page/insert-som-check',
+        options.postOption(checkData)
+      );
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('인증 등록 실패:', errorText);
+        alert('인증 등록에 실패했습니다.');
+        setSubmitting(false);
+        return;
+      }
+
+      const result = await response.json();
+      console.log('인증 등록 성공:', result);
+
+      // 성공 시 이전 페이지로 이동 또는 메시지 표시
+      alert('인증이 등록되었습니다.');
+      navigate(-1); // 이전 페이지로 이동
+
+    } catch (error) {
+      console.error('인증 등록 중 오류 발생:', error);
+      alert('인증 등록 중 오류가 발생했습니다.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   if (loading) {
@@ -502,13 +629,14 @@ const SubmitButton = styled.button`
         <TextArea
           placeholder="솜을 하면서 어떤 점을 느끼셨나요? 도전하는 동안 가장 기억에 남는 순간을 적어주세요"
           maxLength={1000}
+          value={content}
           onChange={handleTextChange}
         />
         <CharCount>{textLength}/1000</CharCount>
       </ContentSection>
 
-      <SubmitButton onClick={handleSubmit}>
-        등록
+      <SubmitButton onClick={handleSubmit} disabled={submitting}>
+        {submitting ? '등록 중...' : '등록'}
       </SubmitButton>
     </Container>
   );
