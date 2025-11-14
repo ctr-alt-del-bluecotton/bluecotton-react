@@ -4,6 +4,8 @@ import CandyPayment from "./CandyPayment";
 
 const PaymentMethod = ({ value, onChange }) => {
   const handleChange = (e) => onChange(e.target.value);
+
+  const isCandySelected = value === "candy";
   
   
 
@@ -20,6 +22,7 @@ const PaymentMethod = ({ value, onChange }) => {
               value="toss"
               checked={value === "toss"}
               onChange={handleChange}
+              disabled={isCandySelected && value !== "toss"}
               style={{ width: 18, height: 18}}
             />
             <img
@@ -37,6 +40,7 @@ const PaymentMethod = ({ value, onChange }) => {
               value="kakao"
               checked={value === "kakao"}
               onChange={handleChange}
+              disabled={isCandySelected && value !== "kakao"}
               style={{ width: 18, height: 18}}
             />
             <img
@@ -52,7 +56,7 @@ const PaymentMethod = ({ value, onChange }) => {
               name="payType"
               id="pay-candy"
               value="candy"
-              checked={value === "candy"}
+              checked={isCandySelected}
               onChange={handleChange}
               style={{ width: 18, height: 18, marginRight: 8 }}
             />
@@ -69,6 +73,7 @@ const PaymentMethod = ({ value, onChange }) => {
               value="general"
               checked={value === "general"}
               onChange={handleChange}
+              disabled={isCandySelected && value !== "general"}
               style={{ width: 18, height: 18, marginRight: 8 }}
             />
             <S.PaymentText2>일반 결제</S.PaymentText2>

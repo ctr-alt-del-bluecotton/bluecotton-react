@@ -516,5 +516,18 @@ S.CandyValue = styled.span`
   font-weight: 600;
 `;
 
+S.EmptyText = styled.p`
+  margin-top: 12px;
+  font-size: 14px;
+  color: #999;
+`;
+
+S.OrderProductTotal = styled.p`
+  margin-top: 16px;
+  font-weight: 600;
+  text-align: right;
+`;
+
+
 
 export default S;
