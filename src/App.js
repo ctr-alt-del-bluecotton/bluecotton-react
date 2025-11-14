@@ -10,44 +10,69 @@ import { useDispatch } from "react-redux";
 import { setUser, setUserStatus } from "./modules/user";
 
 function App() {
-  const [accessToken, setAccessToken] = useState(localStorage.getItem("accessToken") || null);
+  const [accessToken, setAccessToken] = useState(localStorage.getItem("accessToken"));
   const [init, setInit] = useState(false);
   const dispatch = useDispatch();
 
   useEffect(() => {
+    const updateToken = () => {
+      const token = localStorage.getItem("accessToken");
+      setAccessToken(token);
+    };
+
+    window.addEventListener("accessTokenUpdated", updateToken);
+    return () => window.removeEventListener("accessTokenUpdated", updateToken);
+  }, []);
+
+  useEffect(() => {
     const initAuth = async () => {
-      if (accessToken) {
-        try {
-          const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/private/members/me`, {
+
+      if (!accessToken) {
+        dispatch(setUserStatus(false));
+        setInit(true);
+        return;
+      }
+
+      try {
+        const response = await fetch(
+          `${process.env.REACT_APP_BACKEND_URL}/private/members/me`,
+          {
             method: "GET",
             headers: { Authorization: `Bearer ${accessToken}` },
-          });
+          }
+        );
 
-          if (!response.ok) throw new Error("토큰 만료");
+        if (!response.ok) throw new Error("토큰 만료");
 
-          const data = await response.json();
-          dispatch(setUser(data.data));
-          dispatch(setUserStatus(true));
-        } catch (error) {
-
-          const refreshResponse = await fetch(`${process.env.REACT_APP_BACKEND_URL}/auth/refresh`, {
+        const data = await response.json();
+        dispatch(setUser(data.data));
+        dispatch(setUserStatus(true));
+      } catch (error) {
+        const refreshResponse = await fetch(
+          `${process.env.REACT_APP_BACKEND_URL}/auth/refresh`,
+          {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             credentials: "include",
             body: JSON.stringify({ accessToken }),
-          });
-
-          if (!refreshResponse.ok) {
-            localStorage.removeItem("accessToken");
-            setAccessToken(null);
-            return;
           }
+        );
 
-          const newResponseData = await refreshResponse.json();
-          const newAccessToken = newResponseData.data.accessToken;
-          localStorage.setItem("accessToken", newAccessToken);
-          setAccessToken(newAccessToken);
+        if (!refreshResponse.ok) {
+          localStorage.removeItem("accessToken");
+          dispatch(setUserStatus(false));
+          setAccessToken(null);
+          setInit(true);
+          return;
         }
+
+        const newResponseData = await refreshResponse.json();
+        const newToken = newResponseData.data.accessToken;
+
+        localStorage.setItem("accessToken", newToken);
+        setAccessToken(newToken);
+
+        window.dispatchEvent(new Event("accessTokenUpdated"));
       }
 
       setInit(true);
@@ -56,7 +81,13 @@ function App() {
     initAuth();
   }, [accessToken, dispatch]);
 
-  if (!init) return <div style={{ textAlign: "center", marginTop: "100px" }}>로딩 중...</div>;
+  if (!init) {
+    return (
+      <div style={{ textAlign: "center", marginTop: "100px" }}>
+        로딩 중...
+      </div>
+    );
+  }
 
   return (
     <ThemeProvider theme={theme}>
