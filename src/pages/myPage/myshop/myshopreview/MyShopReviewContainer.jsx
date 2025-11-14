@@ -49,11 +49,13 @@ const MyShopReviewContainer = () => {
       setError(null);
       try {
         const memberId = currentUser.id;
-        const url = `${process.env.REACT_APP_BACKEND_URL}/mypage/myshop/review/${memberId}`;
+        const url = `${process.env.REACT_APP_BACKEND_URL}/private/mypage/myshop/review/${memberId}`;
 
         const res = await fetch(url, {
           method: "GET",
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "application/json" ,
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+           },
         });
         if (!res.ok) throw new Error("리뷰 조회 실패");
 
@@ -77,10 +79,12 @@ const MyShopReviewContainer = () => {
       cancelText: "취소",
       onConfirm: async () => {
 
-        const url = `${process.env.REACT_APP_BACKEND_URL}/mypage/myshop/review/${id}`
+        const url = `${process.env.REACT_APP_BACKEND_URL}/private/mypage/myshop/review/${id}`
         const res = await fetch(url, {
           method: "DELETE",
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "application/json" ,
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`
+          },
         })
 
         setReviews((prev) => prev.filter((r) => r.id !== id));
@@ -109,11 +113,13 @@ const MyShopReviewContainer = () => {
       content: content,
     };
 
-    const url = `${process.env.REACT_APP_BACKEND_URL}/mypage/myshop/review/${editing.id}`
+    const url = `${process.env.REACT_APP_BACKEND_URL}/private/mypage/myshop/review/${editing.id}`
 
     const res = await fetch(url, {
       method: "PUT",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json" ,
+        Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+      },
       body: JSON.stringify(reviewUpdateData),
     });
 

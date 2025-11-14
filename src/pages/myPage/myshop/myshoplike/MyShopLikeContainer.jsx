@@ -33,11 +33,12 @@ const MyShopLikeContainer = () => {
       setError(null);
       try {
 
-        const url = `${process.env.REACT_APP_BACKEND_URL}/mypage/myshop/like/${memberId}`;
+        const url = `${process.env.REACT_APP_BACKEND_URL}/private/mypage/myshop/like/${memberId}`;
 
         const res = await fetch(url, {
           method: "GET",
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "application/json" ,
+             Authorization: `Bearer ${localStorage.getItem("accessToken")}` },
         });
 
         if (!res.ok) throw new Error("찜 목록을 불러오지 못했습니다.");
@@ -69,11 +70,11 @@ const MyShopLikeContainer = () => {
 
     const likeData = { memberId, productId };
 
-    const url = `${process.env.REACT_APP_BACKEND_URL}/shop/like/toggle`
+    const url = `${process.env.REACT_APP_BACKEND_URL}/private/shop/like/toggle`
 
     const res = await fetch(url, {
       method: "POST",
-      headers: {"Content-Type": "application/json" },
+      headers: {"Content-Type": "application/json" , Authorization: `Bearer ${localStorage.getItem("accessToken")}`},
       body: JSON.stringify(likeData)
     })
 
