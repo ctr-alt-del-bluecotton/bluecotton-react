@@ -29,8 +29,8 @@ const MyPageContainer = () => {
           return;
         }
         
-        // /my-page/read-member API로 사용자 정보 가져오기
-        const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/my-page/read-member?id=${userId}`, {
+        // /private/my-page/read-member API로 사용자 정보 가져오기
+        const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/private/my-page/read-member?id=${userId}`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -63,7 +63,7 @@ const MyPageContainer = () => {
             localStorage.setItem("accessToken", newAccessToken);
             
             // 새 토큰으로 다시 사용자 정보 가져오기
-            const retryResponse = await fetch(`${process.env.REACT_APP_BACKEND_URL}/my-page/read-member?id=${userId}`, {
+            const retryResponse = await fetch(`${process.env.REACT_APP_BACKEND_URL}/private/my-page/read-member?id=${userId}`, {
               method: "GET",
               headers: {
                 "Content-Type": "application/json",

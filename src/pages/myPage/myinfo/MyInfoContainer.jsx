@@ -68,8 +68,12 @@ const MyInfoContainer = () => {
     // 서버에서 사용자 정보 가져오기
     const fetchMemberInfo = async () => {
         try {
-          const res = await fetch(`${process.env.REACT_APP_BACKEND_URL}/my-page/read-member?id=${memberId}`, {
-            headers: { "Content-Type": "application/json" },
+          const token = localStorage.getItem("accessToken");
+          const res = await fetch(`${process.env.REACT_APP_BACKEND_URL}/private/my-page/read-member?id=${memberId}`, {
+            headers: { 
+              "Content-Type": "application/json",
+              ...(token && { "Authorization": `Bearer ${token}` })
+            },
             method: "GET"
           });
     
@@ -127,7 +131,7 @@ const MyInfoContainer = () => {
             gender,
             postcode: memberVO.memberPostcode || '',
             address1: memberVO.memberAddress || '',
-            address2: memberVO.memberAddressDetail || '',
+            address2: memberVO.memberDetailAddress || memberVO.memberAddressDetail || '',
             picturePath: memberVO.memberPicturePath || '',
             pictureName: memberVO.memberPictureName || ''
           });
@@ -374,7 +378,7 @@ const MyInfoContainer = () => {
         memberNickname: formData.nickname,
         memberPhone: formData.phone,
         memberAddress: formData.address1,
-        memberAddressDetail: formData.address2,
+        memberDetailAddress: formData.address2,
         memberPostcode: formData.postcode,
         memberGender: memberGender,
         memberBirth: memberBirth,
@@ -412,7 +416,7 @@ const MyInfoContainer = () => {
         return;
       }
 
-      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/my-page/update-member`, {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/private/my-page/update-member`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
