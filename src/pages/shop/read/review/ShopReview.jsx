@@ -77,7 +77,7 @@ const ShopReview = () => {
     }
   }, [id]); 
 
-  // "상품 리뷰" 
+  // 상품 리뷰 
   useEffect(() => {
     const fetchReviews = async () => {
       setReviewsLoading(true);
