@@ -20,7 +20,7 @@ const OrderUserInfo = () => {
 
 
   const [addrModalOpen, setAddrModalOpen] = useState(false);
-  const [recipient, setRecipient] = useState(currentUser.memberName);
+  const [recipient, setRecipient] = useState(currentUser.memberNickname);
   const [phone, setPhone] = useState(currentUser.memberPhone);
   const [zip, setZip] = useState("");
   const [addr1, setAddr1] = useState(currentUser.memberAddress);
