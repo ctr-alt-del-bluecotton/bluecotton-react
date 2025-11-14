@@ -23,7 +23,6 @@ export const MainProvider = ({ children }) => {
     const { category } = useParams();
     const [ sortBy, setSortBy ] = useState("all");
     const [ somList, setSomList ] = useState([]);
-    const [ somisLikeList, setSomisLikeList ] = useState([]);
     const [ maxPage, setMaxPage ] = useState(1);
     const [ pageNumber, setPageNumber ] = useState(1);
     const { currentUser, isLogin } = useSelector((state) => state.user);
@@ -59,10 +58,15 @@ export const MainProvider = ({ children }) => {
         return () => window.removeEventListener("refreshSomList", handleRefresh);
     }, [category, sortBy, pageNumber]);
 
-    useEffect(() => {
-        // 초기 좋아요 목록 설정
-        setSomisLikeList(somIsLikeListDummy);
-    }, []);
+    const somLikeUpdate = async (somId, isLike) => {
+        const res = await fetchData(`som/like?somId=${somId}&memberEmail=${currentUser.memberEmail}&isLike=${isLike}`,
+            options.putOption()
+        ).then((res) => res)
+        .catch((res) => console.error(res))
+
+        return res;
+    }
+
 
     const formatDate = (isoString) => {
         const date = new Date(isoString); // ISO 8601 문자열 → Date 객체로 변환
@@ -79,14 +83,13 @@ export const MainProvider = ({ children }) => {
         sortBy,
         setSortBy,
         somList,
-        somisLikeList,
         currentUser,
         isLogin,
-        setSomisLikeList,
         pageNumber,
         setPageNumber,
         categoryMap,
         formatDate,
+        somLikeUpdate,
         maxPage, setMaxPage
     };
 

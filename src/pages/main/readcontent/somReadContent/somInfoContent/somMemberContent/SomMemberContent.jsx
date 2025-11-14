@@ -10,7 +10,7 @@ const SomMemberContent = ({memberData}) => {
 
   return (
     <S.memberInfoContainer>
-      <S.memberInfoIamge src={memberProfilePath} alt={memberProfileName}/>
+      <S.memberInfoIamge src={memberProfilePath + memberProfileName} alt={memberProfileName}/>
       <S.memberInfoName>{memberName}</S.memberInfoName>
     </S.memberInfoContainer>
   );
