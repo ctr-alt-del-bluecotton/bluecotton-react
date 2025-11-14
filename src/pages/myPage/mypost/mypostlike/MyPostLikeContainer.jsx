@@ -55,10 +55,14 @@ const MyPostLikeContainer = () => {
           return;
         }
         
-        const url = `${process.env.REACT_APP_BACKEND_URL}/my-page/read-post-like?id=${userId}`;
+        const token = localStorage.getItem("accessToken");
+        const url = `${process.env.REACT_APP_BACKEND_URL}/private/my-page/read-post-like?id=${userId}`;
         
         const response = await fetch(url, {
-          headers: { "Content-Type": "application/json" },
+          headers: { 
+            "Content-Type": "application/json",
+            ...(token && { "Authorization": `Bearer ${token}` })
+          },
           method: "GET",
           credentials: "include"
         });
@@ -92,9 +96,13 @@ const MyPostLikeContainer = () => {
 
   const handleDelete = async (postId) => {
     try {
-      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/my-page/delete-post-like?id=${postId}`, {
+      const token = localStorage.getItem("accessToken");
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/private/my-page/delete-post-like?id=${postId}`, {
         method: 'DELETE',
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          ...(token && { "Authorization": `Bearer ${token}` })
+        },
         credentials: "include"
       });
 

@@ -1,13 +1,22 @@
 import React from 'react';
+import { useSelector } from 'react-redux';
 import S from '../style';
 
 const MySomCandyContainer = () => {
+  const { currentUser } = useSelector((state) => state.user);
+  const memberCandy = currentUser?.memberCandy || 0;
+  
+  // 숫자 포맷팅 함수 (천 단위 콤마)
+  const formatNumber = (num) => {
+    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  };
+
   return (
     <div>
       <S.SummaryContainer>
         <S.SummaryCard>
           <S.SummaryLabel>적립 캔디솜</S.SummaryLabel>
-          <S.SummaryValue>2,500 솜</S.SummaryValue>
+          <S.SummaryValue>{formatNumber(memberCandy)} 솜</S.SummaryValue>
         </S.SummaryCard>
         <S.SummaryCard>
           <S.SummaryLabel>사용 캔디솜</S.SummaryLabel>
@@ -15,7 +24,7 @@ const MySomCandyContainer = () => {
         </S.SummaryCard>
         <S.SummaryCard>
           <S.SummaryLabel>잔여 캔디솜</S.SummaryLabel>
-          <S.SummaryValue>2,500 솜</S.SummaryValue>
+          <S.SummaryValue>{formatNumber(memberCandy)} 솜</S.SummaryValue>
         </S.SummaryCard>
       </S.SummaryContainer>
 
