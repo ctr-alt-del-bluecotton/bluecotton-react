@@ -7,16 +7,18 @@ import { useModal } from "../../../components/modal/useModal";
 import { resolveUrl } from "../../../utils/url";
 import { useSelector } from "react-redux";
 
-
 const formatPrice = (type, value) => {
   const n = Number(value) || 0;
   return `${n.toLocaleString()}${type === "CANDY" ? "캔디" : "원"}`;
 };
 
 const parseSubs = (s) =>
-  typeof s === "string" ? s.split(",").map((v) => v.trim()).filter(Boolean) : [];
-
-
+  typeof s === "string"
+    ? s
+        .split(",")
+        .map((v) => v.trim())
+        .filter(Boolean)
+    : [];
 
 const Shop = () => {
   const { id } = useParams();
@@ -24,9 +26,8 @@ const Shop = () => {
   const { openModal } = useModal();
   const { currentUser, isLogin } = useSelector((state) => state.user);
 
-
-  const [headerData, setHeaderData] = useState(null); // 상품 상단 헤더
-  const [reviewStats, setReviewStats] = useState(null); // "리뷰 평점"
+  const [headerData, setHeaderData] = useState(null); 
+  const [reviewStats, setReviewStats] = useState(null); 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -44,8 +45,6 @@ const Shop = () => {
     const purchaseType = headerData.productPurchaseType || "CASH";
     return formatPrice(purchaseType, price * count);
   }, [headerData, count]);
-
-  // useEffect 1개로 2개 fetch 날리기
   useEffect(() => {
     const loadAllHeaderData = async () => {
       setLoading(true);
@@ -54,7 +53,6 @@ const Shop = () => {
       setReviewStats(null);
 
       try {
-        // 상품 헤더 (read/{id})
         const headerRes = await fetch(
           `${process.env.REACT_APP_BACKEND_URL}/shop/read/${id}`,
           {
@@ -65,7 +63,6 @@ const Shop = () => {
         if (!headerRes.ok) throw new Error("상품 정보 로딩 실패");
         const headerJson = await headerRes.json();
 
-        // 리뷰 평점 (review/status)
         const statsRes = await fetch(
           `${process.env.REACT_APP_BACKEND_URL}/shop/read/${id}/review/status`,
           {
@@ -76,14 +73,12 @@ const Shop = () => {
         if (!statsRes.ok) throw new Error("리뷰 통계 로딩 실패");
         const statsJson = await statsRes.json();
 
-        // 상태 저장
         setHeaderData(headerJson.data);
         setReviewStats(statsJson.data);
 
         setLikeCount(Number(headerJson.data.productLikeCount) || 0);
         const subs = parseSubs(headerJson.data.productSubImageUrl);
 
-        //  메인이미지/서브이미지에 resolveUrl 적용
         setSelectedImage(
           resolveUrl(headerJson.data.productMainImageUrl) ||
             resolveUrl(subs[0]) ||
@@ -101,9 +96,7 @@ const Shop = () => {
     }
   }, [id]);
 
-
   const toggleLike = () => {
-    // ✅ 비로그인: 공용 모달 안내
     if (!isLogin || !currentUser?.id) {
       openModal({
         title: "로그인이 필요합니다",
@@ -115,7 +108,6 @@ const Shop = () => {
       return;
     }
 
-    // ✅ 로그인 상태: 기존 로컬 토글 유지
     setIsLiked((prev) => {
       setLikeCount((v) => (prev ? v - 1 : v + 1));
       return !prev;
@@ -128,8 +120,19 @@ const Shop = () => {
   };
 
   const handleAddToCart = async () => {
+    if (!isLogin || !currentUser?.id) {
+      openModal({
+        title: "로그인이 필요합니다",
+        message: "장바구니는 로그인 후 이용할 수 있어요.",
+        confirmText: "로그인하러 가기",
+        cancelText: "취소",
+        onConfirm: () => navigate("/login"),
+      });
+      return;
+    }
+
     const itemData = {
-      memberId: currentUser.id, 
+      memberId: currentUser.id,
       productId: id,
       cartQuantity: count,
     };
@@ -166,6 +169,78 @@ const Shop = () => {
     }
   };
 
+  const handlePurchase = async () => {
+    if (!headerData || !id) return;
+
+    if (!isLogin || !currentUser?.id) {
+      openModal({
+        title: "로그인이 필요합니다",
+        message: "구매는 로그인 후 이용할 수 있어요.",
+        confirmText: "로그인하러 가기",
+        cancelText: "취소",
+        onConfirm: () => navigate("/login"),
+      });
+      return;
+    }
+
+    const itemData = {
+      memberId: currentUser.id,
+      productId: Number(id),
+      orderQuantity: count,
+      orderTotalPrice: Number(headerData.productPrice) * count,
+    };
+
+    console.log("[단일구매 itemData]", itemData);
+
+    const url = `${process.env.REACT_APP_BACKEND_URL}/order/single`;
+    setError(null);
+
+    try {
+
+      const res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(itemData),
+      });
+
+      if (!res.ok) {
+        throw new Error("단일 주문 생성에 실패했습니다.");
+      }
+
+      const result = await res.json();
+      const orderId = result?.data; 
+
+      if (!orderId) {
+        throw new Error("서버에서 유효한 주문 ID를 받지 못했습니다.");
+      }
+
+      const snapshot = {
+        items: [
+          {
+            productId: Number(id),
+            name: headerData.productName,
+            unitPrice: Number(headerData.productPrice),
+            quantity: count,
+            imageUrl: resolveUrl(headerData.productMainImageUrl),
+          },
+        ],
+        totalPrice: Number(headerData.productPrice) * count,
+        purchaseType: headerData.productPurchaseType,
+      };
+
+      navigate(`/main/shop/order?orderId=${orderId}`, {
+        state: { snapshot },
+      });
+    } catch (error) {
+      openModal({
+        title: "주문 오류",
+        message: error.message || "주문 진행 중 오류가 발생했습니다.",
+        confirmText: "확인",
+      });
+      console.error("단일 구매 중 오류 발생:", error);
+    }
+  };
+
   if (!headerData || !reviewStats) {
     return <S.Page>데이터를 표시할 수 없습니다.</S.Page>;
   }
@@ -182,70 +257,20 @@ const Shop = () => {
 
   const subImagesOnly = parseSubs(productSubImageUrl);
 
-  //  절대주소로 변환
+
   const allThumbnails = [
     resolveUrl(headerData.productMainImageUrl),
     ...subImagesOnly.map(resolveUrl),
   ].filter(Boolean);
 
-  const subImages = parseSubs(productSubImageUrl);
   const isNew = String(productType || "").includes("NEW");
   const isBest = String(productType || "").includes("BEST");
 
-  const handlePurchase = async () => {
-    if(!headerData || !id) return;
-
-    const itemData = {
-      memberId: currentUser.id,
-      productId: Number(id),
-      orderQuantity:count,
-      orderTotalPrice: Number(headerData.productPrice) * count,
-    };
-
-    console.log(itemData);
-
-    const url = `${process.env.REACT_APP_BACKEND_URL}/order/single`;
-   setError(null);
-
-    try {
-     // 2. 백엔드 주문 생성 API 호출 (POST /order/single)
-      const res = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-         body: JSON.stringify(itemData),
-      });
-
-      if (!res.ok) {
-       throw new Error("단일 주문 생성에 실패했습니다.");
-      }
-
-      const result = await res.json();
-      const orderId = result?.data; // Long 타입의 orderId를 백엔드에서 받음
-
-      if (!orderId) {
-        throw new Error("서버에서 유효한 주문 ID를 받지 못했습니다.");
-      }
-
-      // 3. 주문 페이지로 orderId를 쿼리 파라미터로 전달하여 이동
-      navigate(`/main/shop/order?orderId=${orderId}`);
-
-    } catch (error) {
-       openModal({
-          title: "주문 오류",
-          message: error.message || "주문 진행 중 오류가 발생했습니다.",
-          confirmText: "확인",
-        });
-      console.error("단일 구매 중 오류 발생:", error);
-     }
-
-  }
   return (
     <S.Page>
       <S.DetailContainer>
-        {/* 왼쪽: 이미지 */}
         <S.Left>
           <S.MainImage>
-
             <img src={resolveUrl(selectedImage)} alt="상품 메인 이미지" />
           </S.MainImage>
 
@@ -259,7 +284,6 @@ const Shop = () => {
             </S.SubImageArea>
           )}
 
-          {/* 정보/리뷰 탭 */}
           <S.InfoSection>
             <S.InfoTabs>
               <S.InfoTab
@@ -278,18 +302,15 @@ const Shop = () => {
 
             <S.InfoDivider />
 
-            {/* 정보 탭 */}
             <div style={{ display: activeTab === "info" ? "block" : "none" }}>
               <ShopInfo />
             </div>
-            {/* 리뷰 탭 */}
             <div style={{ display: activeTab === "review" ? "block" : "none" }}>
               <ShopReview stats={reviewStats} />
             </div>
           </S.InfoSection>
         </S.Left>
 
-        {/* 오른쪽: 상세 정보 */}
         <S.Right>
           <S.TagRow>
             {isNew && <S.DetailNewTag>NEW</S.DetailNewTag>}
@@ -325,7 +346,6 @@ const Shop = () => {
             </S.DeliveryRow>
           )}
 
-          {/* 수량 */}
           <S.CountWrap>
             <S.DeliveryCount>수량</S.DeliveryCount>
             <S.CountBox>
@@ -346,13 +366,12 @@ const Shop = () => {
 
           <S.ProductDetailBar />
 
-          {/* 합계 */}
+         
           <S.ProductRow>
             <S.ProductTotalCount>총 {count}개</S.ProductTotalCount>
             <S.ProductTotalPrice>{totalText}</S.ProductTotalPrice>
           </S.ProductRow>
 
-          {/* 버튼 */}
           <S.ButtonRow>
             <S.ProductLikeButton onClick={toggleLike}>
               <img

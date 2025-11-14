@@ -1,4 +1,3 @@
-// OrderProduct.jsx
 import React from "react";
 import S from "./style";
 import { useLocation } from "react-router-dom";
@@ -6,12 +5,28 @@ import { useLocation } from "react-router-dom";
 const OrderProduct = () => {
   const location = useLocation();
 
-  // ✅ 장바구니에서 넘겨준 스냅샷
-  const snapshot = location.state?.snapshot;
-  const items = snapshot?.items || [];
-  const totalPrice = snapshot?.totalPrice || 0;
+  console.log("[OrderProduct] location.state:", location.state);
 
-  // 총 수량
+  const state = location.state || {};
+
+  const snapshot = state.snapshot;
+
+  let items = [];
+  let totalPrice = 0;
+
+  if (snapshot?.items?.length) {
+    items = snapshot.items;
+    totalPrice =
+      snapshot.totalPrice ??
+      snapshot.items.reduce(
+        (sum, it) => sum + (it.unitPrice || 0) * (it.quantity ?? 1),
+        0
+      );
+  } else {
+    items = [];
+    totalPrice = 0;
+  }
+
   const totalCount = items.reduce(
     (sum, item) => sum + (item.quantity ?? 1),
     0
@@ -34,7 +49,8 @@ const OrderProduct = () => {
             <S.ProductContent>
               <S.ContentText1>{item.name}</S.ContentText1>
               <S.ContentText2>
-                {formatPrice(item.unitPrice)} / {item.quantity}개
+                {formatPrice(item.unitPrice || 0)} /{" "}
+                {item.quantity ?? 1}개
               </S.ContentText2>
             </S.ProductContent>
           </S.ProductRow>

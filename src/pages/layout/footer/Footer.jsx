@@ -21,11 +21,25 @@ const Footer = () => {
 
     const RightText = (
         <S.Text2>
-            <p>Follow Us</p>
-            <p>Instagram</p>
-            <p>YouTube</p>
-            <p>Facebook</p>
-            <p>X</p>
+            <S.IconContainer>
+            <p style={{margin:"0 20px 20px"}}>Follow Us</p>
+            </S.IconContainer>
+            <S.IconContainer>
+                <img style={{width:"25px", height:"15px" , padding:"0 auto", margin:"0 6px"}} src="/assets/icons/instagram.svg"/>
+                <p>Instagram</p>
+            </S.IconContainer>
+            <S.IconContainer>
+                <img style={{width:"20px", height:"28px" , padding:"0", margin:"0 9px"}} src="/assets/icons/youtube.svg" />
+                <p>YouTube</p>
+            </S.IconContainer>
+            <S.IconContainer>
+                <img style={{width:"18px", height:"15px" , padding:"0 auto", margin:"0 10px"}} src="/assets/icons/facebook.svg"/>
+                <p>Facebook</p>
+            </S.IconContainer>
+            <S.IconContainer>
+                <img style={{width:"15px", height:"20px" , padding:"0", margin:"0 12px"}} src="/assets/icons/twitter.svg" />
+                <p>X</p>
+            </S.IconContainer>
         </S.Text2>
     );
 
