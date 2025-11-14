@@ -61,20 +61,20 @@ const SignUp = () => {
 
           <S.Input
             placeholder="이름을 작성해주세요"
-            error={!!errors.memberName}
+            $error={!!errors.memberName}
             {...register("memberName", { required: true })}
           />
 
           <S.Input
             placeholder="닉네임을 작성해주세요(최대 8 글자)"
             maxLength={8}
-            error={!!errors.memberNickname}
+            $error={!!errors.memberNickname}
             {...register("memberNickname", { required: true })}
           />
 
           <S.Input
             placeholder="이메일을 작성해주세요"
-            error={!!errors.memberEmail}
+            $error={!!errors.memberEmail}
             {...register("memberEmail", {
               required: true,
               pattern: emailRegex,
@@ -84,7 +84,7 @@ const SignUp = () => {
           <S.Input
             placeholder="전화번호 (예: 010-1234-5678)"
             maxLength={13}
-            error={!!errors.memberPhone}
+            $error={!!errors.memberPhone}
             {...register("memberPhone", {
               required: true,
               pattern: /^01[0-9]-\d{3,4}-\d{4}$/,
@@ -94,7 +94,7 @@ const SignUp = () => {
           <S.Input
             type="password"
             placeholder="비밀번호를 작성해주세요"
-            error={!!errors.memberPassword}
+            $error={!!errors.memberPassword}
             {...register("memberPassword", {
               required: true,
               pattern: passwordRegex,
@@ -104,7 +104,7 @@ const SignUp = () => {
           <S.Input
             type="password"
             placeholder="비밀번호 확인"
-            error={!!errors.memberPasswordConfirm}
+            $error={!!errors.memberPasswordConfirm}
             {...register("memberPasswordConfirm", {
               required: true,
               validate: (value) =>
@@ -116,7 +116,7 @@ const SignUp = () => {
             <S.AddressInput
               readOnly
               placeholder="주소 검색"
-              error={!!errors.memberAddress}
+              $error={!!errors.memberAddress}
               {...register("memberAddress", { required: true })}
             />
             <S.SmallButton
@@ -134,21 +134,21 @@ const SignUp = () => {
 
           <S.Input
             placeholder="상세주소를 입력해주세요"
-            error={!!errors.memberDetailAddress}
+            $error={!!errors.memberDetailAddress}
             {...register("memberDetailAddress", { required: true })}
           />
 
           <S.Input
             readOnly
             placeholder="우편번호 (자동 입력)"
-            error={!!errors.memberPostcode}
+            $error={!!errors.memberPostcode}
             {...register("memberPostcode", { required: true })}
           />
 
           <S.GenderSelectBox>
             <S.GenderOption
               selected={gender === "남"}
-              error={!!errors.memberGender}
+              $error={!!errors.memberGender}
               onClick={() => {
                 setGender("남");
                 setValue("memberGender", "남", { shouldValidate: true }); // ⭐ 수정
@@ -159,7 +159,7 @@ const SignUp = () => {
 
             <S.GenderOption
               selected={gender === "여"}
-              error={!!errors.memberGender}
+              $error={!!errors.memberGender}
               onClick={() => {
                 setGender("여");
                 setValue("memberGender", "여", { shouldValidate: true }); // ⭐ 수정
@@ -172,7 +172,7 @@ const SignUp = () => {
 
           <S.DateInputBox>
             <S.DateInput
-              error={!!errors.memberBirth}
+              $error={!!errors.memberBirth}
               {...register("memberBirth", { required: true })}
             />
             <S.SmallButton type="button">확인</S.SmallButton>
