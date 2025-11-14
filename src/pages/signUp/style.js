@@ -15,12 +15,10 @@ import { Link } from "react-router-dom";
 
 const S = {};
 
-// Logo
 S.Logo = styled.h1`
   ${headerLogo}
 `;
 
-// Sign-up Container
 S.SignUpContainer = styled.div`
   width: 100%;
   height: 100vh;
@@ -28,7 +26,6 @@ S.SignUpContainer = styled.div`
   background-color: ${({ theme }) => theme.PALLETE.white};
 `;
 
-// SignUpForm
 S.SignUpForm = styled.form`
   display: flex;
   flex-direction: column;
@@ -37,7 +34,6 @@ S.SignUpForm = styled.form`
   align-items: center;
 `;
 
-// Background
 S.BackgroundBox = styled.div`
   width: 70%;
   height: 100%;
@@ -46,7 +42,6 @@ S.BackgroundBox = styled.div`
   background-repeat: no-repeat;
 `;
 
-// Sign-up Box
 S.SignUpBox = styled.div`
   width: 30%;
   height: 100%;
@@ -55,13 +50,12 @@ S.SignUpBox = styled.div`
   gap: 20px;
 `;
 
-// ⭐ Input (error props 적용)
 S.Input = styled.input`
   width: 296px;
   height: 40px;
   border: 1px solid
-    ${({ theme, error }) =>
-      error ? theme.PALLETE.warning : theme.PALLETE.grey.greyScale1};
+    ${({ theme, $error }) =>
+      $error ? theme.PALLETE.warning : theme.PALLETE.grey.greyScale1};
   border-radius: 4px;
   padding: 0 12px;
   outline: none;
@@ -73,7 +67,6 @@ S.Input = styled.input`
   }
 `;
 
-// Address Box
 S.AddressBox = styled.div`
   display: flex;
   align-items: center;
@@ -82,13 +75,12 @@ S.AddressBox = styled.div`
   gap: 8px;
 `;
 
-// ⭐ AddressInput (error props 적용)
 S.AddressInput = styled.input`
   flex: 1;
   height: 40px;
   border: 1px solid
-    ${({ theme, error }) =>
-      error ? theme.PALLETE.warning : theme.PALLETE.grey.greyScale1};
+    ${({ theme, $error }) =>
+      $error ? theme.PALLETE.warning : theme.PALLETE.grey.greyScale1};
   border-radius: 4px;
   padding: 0 12px;
   outline: none;
@@ -100,7 +92,6 @@ S.AddressInput = styled.input`
   }
 `;
 
-// Small Button (원래 border 없음 유지)
 S.SmallButton = styled.button`
   width: 85px;
   height: 40px;
@@ -117,7 +108,6 @@ S.SmallButton = styled.button`
   }
 `;
 
-// ⭐ Gender Box (각 옵션 개별 border 관리 → container border 없음)
 S.GenderSelectBox = styled.div`
   display: flex;
   align-items: center;
@@ -126,13 +116,12 @@ S.GenderSelectBox = styled.div`
   gap: 8px;
 `;
 
-// ⭐ GenderOption (각각 error props 적용)
 S.GenderOption = styled.div`
   flex: 1;
   height: 35px;
   border: 1px solid
-    ${({ theme, selected, error }) =>
-      error
+    ${({ theme, selected, $error }) =>
+      $error
         ? theme.PALLETE.warning
         : selected
         ? theme.PALLETE.primary.main
@@ -153,7 +142,6 @@ S.GenderOption = styled.div`
   }
 `;
 
-// Date Input Box
 S.DateInputBox = styled.div`
   display: flex;
   align-items: center;
@@ -162,13 +150,12 @@ S.DateInputBox = styled.div`
   gap: 8px;
 `;
 
-// ⭐ DateInput (error props 적용)
 S.DateInput = styled.input.attrs({ type: "date" })`
   flex: 1;
   height: 40px;
   border: 1px solid
-    ${({ theme, error }) =>
-      error ? theme.PALLETE.warning : theme.PALLETE.grey.greyScale1};
+    ${({ theme, $error }) =>
+      $error ? theme.PALLETE.warning : theme.PALLETE.grey.greyScale1};
   border-radius: 4px;
   padding: 0 12px;
   outline: none;
@@ -185,7 +172,6 @@ S.DateInput = styled.input.attrs({ type: "date" })`
   }
 `;
 
-// Sign-up Button
 S.SignUpButton = styled(Link)`
   width: 320px;
   height: 40px;
@@ -205,7 +191,6 @@ S.SignUpButton = styled(Link)`
   }
 `;
 
-// Divider (⭐ "또는" 복구)
 S.Divider = styled.div`
   width: 320px;
   height: 1px;
@@ -226,7 +211,6 @@ S.Divider = styled.div`
   }
 `;
 
-// Login Text
 S.LoginText = styled.p`
   color: ${({ theme }) => theme.PALLETE.basic};
   ${smallText3Light};
