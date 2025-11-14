@@ -411,6 +411,9 @@ width: 80px;
   border-radius: 4px;
   background-color: #E0E0E0;
   margin-right: 16px;
+  background-repeat: no-repeat;  
+  background-position: center;   
+  background-size: cover; 
 `;
 
 S.ActionButton = styled.button`
@@ -420,9 +423,7 @@ S.ActionButton = styled.button`
   background-color: ${props => props.primary ? '#0051FF' : '#fff'};
   color: ${props => props.primary ? '#fff' : '#111111'};
   
-  /* border: ${({ $primary }) => $primary ? 'none' : '1px solid #E0E0E0'};
- background-color: ${({ $primary }) => $primary ? '#0051FF' : '#fff'};
- color: ${({ $primary }) => $primary ? '#fff' : '#111111'}; */
+
   ${C.smallText2Regular}
   font-family: 'Daeojamjil', sans-serif;
   cursor: pointer;
@@ -433,17 +434,24 @@ S.ActionButton = styled.button`
     background-color: ${props => props.primary ? '#003DB8' : '#F5F5F5'};
      /* background-color: ${({ $primary }) => $primary ? '#003DB8' : '#F5F5F5'}; */
   }
+
+  &:disabled {
+    background-color: #e0e0e0;
+  }
 `;
 
-S.OrderItemImage = styled.div`
+S.OrderItemImage = styled.img`
   width: 80px;
   height: 80px;
-  background-color: #E0E0E0;
   border-radius: 4px;
   margin-right: 16px;
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: cover;
+  background-repeat: no-repeat;   
+  background-position: center;    
+  background-size: cover; 
+
+  object-fit: cover;   
+  object-position: center;
+  display: block;
 `;
 
 S.ItemContent = styled.div`
@@ -477,6 +485,12 @@ S.OrderActionButton = styled.button`
   
   &:hover {
     background-color: #003BBF;
+  }
+
+  &:disabled {
+  background-color: #e0e0e0;
+  color: #BDBDBD;
+  cursor: not-allowed;
   }
 `;
 
