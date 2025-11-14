@@ -64,7 +64,7 @@ const Shop = () => {
         : `${base}/shop/read/${id}`;
 
         // 상품 헤더 (read/{id})
-        const headerRes = await fetch(`${base}/shop/read/${id}`, {
+        const headerRes = await fetch(headerUrl, {
           headers: { "Content-Type": "application/json" },
           method: "GET",
         });
