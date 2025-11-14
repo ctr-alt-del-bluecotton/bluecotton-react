@@ -1,8 +1,7 @@
 import React from "react";
 import S from "./style";
 
-const PostNumberSelect = ({ postList, pageNumber, setPageNumber }) => {
-  const totalPages = Math.ceil(postList.length / 9); // 실제 totalPages가 있다면 내려받으면 됨.
+const PostNumberSelect = ({ totalPages, pageNumber, setPageNumber }) => {
   const groupSize = 10;
 
   // 현재 페이지 그룹의 시작 번호 계산
@@ -19,6 +18,7 @@ const PostNumberSelect = ({ postList, pageNumber, setPageNumber }) => {
       >
         &lt; 이전
       </S.PrevButton>
+
       <S.PageList>
         {/* 페이지 리스트 */}
         {Array.from({ length: endPage - startPage + 1 }, (_, i) => {
@@ -27,10 +27,10 @@ const PostNumberSelect = ({ postList, pageNumber, setPageNumber }) => {
             <button
               key={page}
               className={pageNumber === page ? "active" : ""}
-              onClick={() => 
-                {setPageNumber(page);
-                  window.scrollTo(0, 0);
-                }}
+              onClick={() => {
+                setPageNumber(page);
+                window.scrollTo(0, 0);
+              }}
             >
               {page}
             </button>

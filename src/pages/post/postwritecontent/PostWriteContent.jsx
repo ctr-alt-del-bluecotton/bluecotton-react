@@ -1,4 +1,3 @@
-// 📄 PostWriteContent.jsx
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
@@ -26,17 +25,18 @@ const PostWriteContent = () => {
   const { openModal } = useModal();
   const navigate = useNavigate();
   const editorRef = useRef();
-  const [imageUrls, setImageUrls] = useState([]);
-  const location = useLocation();
 
-  // ✅ 로그인 정보
+  // ⭐ 이미지 URL 배열 제거됨 → PostImageIds로만 처리
+  const [postImageIds, setPostImageIds] = useState([]);
+
+  const location = useLocation();
   const { currentUser, isLogin } = useSelector((state) => state.user);
 
   const draftId = new URLSearchParams(location.search).get("draftId");
   const mode = draftId ? "draft" : "new";
   const BASE_URL = process.env.REACT_APP_BACKEND_URL;
 
-  // ✅ 참여 중 솜 카테고리 목록 불러오기
+  // 🔥 참여 중 솜 카테고리 + draft 자동불러오기
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -56,9 +56,7 @@ const PostWriteContent = () => {
         const data = await res.json();
         setCategories(data);
 
-        if (draftId) {
-          fetchDraft(data);
-        }
+        if (draftId) fetchDraft(data);
       } catch (err) {
         console.error("카테고리 로드 오류:", err);
       }
@@ -72,30 +70,24 @@ const PostWriteContent = () => {
           },
         });
 
-        if (!res.ok) throw new Error("임시저장 글 불러오기 실패");
         const result = await res.json();
 
         if (result.data) {
-          const titleValue = result.data.postDraftTitle ?? "";
-          const contentValue = result.data.postDraftContent ?? "";
-          const somIdValue = result.data.somId
-            ? result.data.somId.toString()
-            : "";
-
-          setTitle(titleValue);
-          setCategory(somIdValue);
-
-          const matchedCategory = categoryList.find(
-            (cat) => String(cat.id) === somIdValue
-          );
-          if (matchedCategory) setCategory(matchedCategory.somId.toString());
+          setTitle(result.data.postDraftTitle ?? "");
+          setCategory(String(result.data.somId ?? ""));
 
           if (editorRef.current) {
-            editorRef.current.getInstance().setMarkdown(contentValue);
+            editorRef.current.getInstance().setMarkdown(result.data.postDraftContent ?? "");
+          }
+
+          const matchedCategory = categoryList.find(
+            (cat) => String(cat.id ?? cat.somId) === String(result.data.somId)
+          );
+          if (matchedCategory) {
+            setCategory(String(matchedCategory.id ?? matchedCategory.somId));
           }
         }
       } catch (error) {
-        console.error("임시저장 로드 오류:", error);
         openModal({
           title: "불러오기 실패",
           message: "임시저장된 글을 불러오지 못했습니다.",
@@ -108,64 +100,89 @@ const PostWriteContent = () => {
     fetchCategories();
   }, [draftId, isLogin, currentUser, navigate, openModal]);
 
-  // ✅ 글자 수 카운트
+  // 🔥 글자 수 카운트
   useEffect(() => {
-    const editorInstance = editorRef.current?.getInstance();
-    if (!editorInstance) return;
+    const editor = editorRef.current?.getInstance();
+    if (!editor) return;
 
     const handleChange = () => {
-      const text = editorInstance.getMarkdown();
+      const text = editor.getMarkdown();
       const length = text.trim().length;
       if (length > MAX_LENGTH) {
-        editorInstance.setMarkdown(text.substring(0, MAX_LENGTH));
+        editor.setMarkdown(text.substring(0, MAX_LENGTH));
         setCharCount(MAX_LENGTH);
-      } else setCharCount(length);
+      } else {
+        setCharCount(length);
+      }
     };
 
-    editorInstance.on("change", handleChange);
-    return () => editorInstance.off("change", handleChange);
+    editor.on("change", handleChange);
+    return () => editor.off("change", handleChange);
   }, []);
 
-  // ✅ 이미지 업로드
   const handleImageUpload = async (blob, callback) => {
     try {
-      const formData = new FormData();
-      formData.append("image", blob);
+      const now = new Date();
+      const y = now.getFullYear();
+      const m = String(now.getMonth() + 1).padStart(2, "0");
+      const d = String(now.getDate()).padStart(2, "0");
 
-      const res = await fetch(`${BASE_URL}/upload/post-image`, {
+      const folderPath = `post/${y}/${m}/${d}`;
+
+      const formData = new FormData();
+      formData.append("file", blob);
+      formData.append("folder", folderPath);
+
+      const uploadRes = await fetch(`${BASE_URL}/file/upload-image`, {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-        },
         body: formData,
       });
 
-      if (!res.ok) throw new Error("이미지 업로드 실패");
+      if (!uploadRes.ok) throw new Error("이미지 서버 업로드 실패");
 
-      const imageUrl = await res.text();
-      setImageUrls((prev) => [...prev, imageUrl]);
-      callback(imageUrl, "업로드된 이미지");
+      const uploadJson = await uploadRes.json();
+
+      const imgUrl = uploadJson.url;
+      const imgName = imgUrl.substring(imgUrl.lastIndexOf("/") + 1);
+      const imgPath = imgUrl.replace(imgName, "");
+
+      const tempImageData = {
+        postImagePath: imgPath,
+        postImageName: imgName,
+      };
+
+      const tempRes = await fetch(`${BASE_URL}/post-image/insert`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(tempImageData),
+      });
+
+      const tempJson = await tempRes.json();
+
+      setPostImageIds((prev) => [...prev, tempJson.data.id]);
+
+      callback(imgUrl, "image");
     } catch (err) {
-      console.error("이미지 업로드 실패:", err);
+      console.error("Toast UI 이미지 업로드 실패:", err);
       callback(URL.createObjectURL(blob), "임시 이미지");
     }
   };
 
-  // ✅ 임시저장 (유효성 검사 없음)
+  // 🔥 임시 저장
   const handleTempSave = async (e) => {
     e.preventDefault();
+
     if (!isLogin || !currentUser?.id) {
       alert("로그인이 필요한 기능입니다.");
       return;
     }
 
-    const content = editorRef.current?.getInstance().getMarkdown().trim() || "";
-
+    const content = editorRef.current.getInstance().getMarkdown().trim();
     const draft = {
       postDraftTitle: title || null,
       postDraftContent: content || null,
       memberId: currentUser.id,
-      somId: category ? parseInt(category) : null,
+      somId: category ? Number(category) : null,
     };
 
     try {
@@ -186,8 +203,7 @@ const PostWriteContent = () => {
         confirmText: "확인",
         onConfirm: () => navigate("/main/post/all"),
       });
-    } catch (err) {
-      console.error(err);
+    } catch {
       openModal({
         title: "오류",
         message: "임시 저장 중 문제가 발생했습니다.",
@@ -196,101 +212,79 @@ const PostWriteContent = () => {
     }
   };
 
-  // ✅ 작성 완료 / 등록 (유효성 검사 O)
+  // 🔥 게시글 등록
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!isLogin || !currentUser?.id) {
-      alert("로그인이 필요한 기능입니다.");
-      return;
-    }
 
-    const content = editorRef.current?.getInstance().getMarkdown().trim() || "";
+    const content = editorRef.current.getInstance().getMarkdown().trim() || "";
 
-    // ✅ 작성 완료 버튼 클릭 시 필수값 검사
     if (!title.trim()) {
-      return openModal({
-        title: "제목을 입력해주세요",
-        message: "등록하려면 제목이 필요합니다.",
-        confirmText: "확인",
-      });
+      return openModal({ title: "제목을 입력해주세요", confirmText: "확인" });
     }
     if (!category.trim()) {
-      return openModal({
-        title: "카테고리를 선택해주세요",
-        message: "등록하려면 솜 카테고리를 선택해야 합니다.",
-        confirmText: "확인",
-      });
+      return openModal({ title: "카테고리를 선택해주세요", confirmText: "확인" });
     }
     if (!content.trim()) {
-      return openModal({
-        title: "내용을 입력해주세요",
-        message: "등록하려면 본문 내용을 작성해야 합니다.",
-        confirmText: "확인",
-      });
+      return openModal({ title: "내용을 입력해주세요", confirmText: "확인" });
     }
 
-    try {
-      const post = {
-        postTitle: title || null,
-        postContent: content || null,
-        memberId: currentUser.id,
-        somId: category ? parseInt(category) : null,
-        imageUrls,
-      };
+    const postData = {
+      postTitle: title,
+      postContent: content,
+      memberId: currentUser.id,
+      somId: Number(category),
+      postImageIds: postImageIds,
+      draftId: draftId ? Number(draftId) : null,
+    };
 
-      const res = await fetch(`${BASE_URL}/private/post/write`, {
+    let res;
+    try {
+      res = await fetch(`${BASE_URL}/private/post/write`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
         },
-        body: JSON.stringify(post),
+        body: JSON.stringify(postData),
       });
-
-      // 1일 1회 제한 (409 CONFLICT)
-      if (res.status === 409) {
-        const errData = await res.json();
-        return openModal({
-          title: "작성 제한",
-          message: errData?.message || "이미 오늘 해당 솜에 게시글을 작성했습니다.",
-          confirmText: "확인",
-        });
-      }
-
-      // 서버 내부 오류 (500)
-      if (res.status >= 500) {
-        return openModal({
-          title: "서버 오류",
-          message: "서버에서 오류가 발생했습니다. 잠시 후 다시 시도해주세요.",
-          confirmText: "확인",
-        });
-      }
-
-      if (!res.ok) throw new Error("게시글 등록 실패");
-
-      const result = await res.json();
-      const newPostId = result.data?.postId || result.data?.id;
-
-      openModal({
-        title: "등록 완료",
-        message:
-          mode === "draft"
-            ? "임시저장 글이 등록되었습니다."
-            : "게시글이 등록되었습니다.",
-        confirmText: "확인",
-        onConfirm: () => navigate(`/main/post/read/${newPostId}`),
-      });
-    } catch (err) {
-      console.error("게시글 등록 실패:", err);
-      openModal({
-        title: "오류",
-        message: "등록 중 문제가 발생했습니다.",
+    } catch (error) {
+      return openModal({
+        title: "네트워크 오류",
+        message: "서버와 통신할 수 없습니다.",
         confirmText: "확인",
       });
     }
+
+    const result = await res.json();
+
+    // ⭐⭐⭐ 409 Conflict — 하루 1회 작성 제한
+    if (res.status === 409) {
+      return openModal({
+        title: "작성 불가",
+        message: result?.message || "오늘은 이미 게시글을 작성하셨습니다.",
+        confirmText: "확인",
+      });
+    }
+
+    // ⭐ 일반 실패
+    if (!res.ok) {
+      return openModal({
+        title: "등록 실패",
+        message: result?.message || "오류가 발생했습니다.",
+        confirmText: "확인",
+      });
+    }
+
+    // ⭐ 성공
+    openModal({
+      title: "등록 완료",
+      message: mode === "draft" ? "임시저장 글이 등록되었습니다." : "게시글이 등록되었습니다.",
+      confirmText: "확인",
+      onConfirm: () => navigate(`/main/post/read/${result.data.postId}`),
+    });
   };
 
-  // ✅ 취소 버튼
+  // 뒤로가기
   const handleCancel = () => {
     openModal({
       title: "작성 중인 내용이 사라집니다.",
@@ -320,26 +314,21 @@ const PostWriteContent = () => {
 
         <S.FormRow>
           <label>카테고리</label>
-          <select
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-          >
+          <select value={category} onChange={(e) => setCategory(e.target.value)}>
             <option value="">참여 중인 솜을 선택해주세요</option>
-
             {categories.map((cat) => (
               <option
-                key={cat.id}
-                value={cat.id}
-                disabled={cat.somDayDiff < 1} 도전 전 솜 비활성화
+                key={cat.id ?? cat.somId}
+                value={cat.id ?? cat.somId}
+                disabled={cat.somDayDiff < 1}
               >
-                {/* 예: 학습 - 하루 한 문제 풀기 (도전 3일차) */}
+                {/* 예: 학습 - 코딩 30일 챌린지 - 도전 4일 */}
                 {categoryMap[cat.somCategory] || cat.somCategory}
                 {" - "}
                 {cat.somTitle}
-                {" "}
-                {cat.somDayDiff < 1
-                  ? "(예정)" 
-                  : `(도전 ${cat.somDayDiff}일차)`} 
+                {" - 도전 "}
+                {cat.somDayDiff}
+                {"일"}
               </option>
             ))}
           </select>
@@ -355,15 +344,11 @@ const PostWriteContent = () => {
             placeholder="솜을 하면서 느낀 점이나 기록하고 싶은 순간을 자유롭게 적어주세요"
             hooks={{ addImageBlobHook: handleImageUpload }}
           />
-          <div className="char-count">
-            {charCount}/{MAX_LENGTH}
-          </div>
+          <div className="char-count">{charCount}/{MAX_LENGTH}</div>
         </S.FormGroup>
 
         <S.ButtonBox>
-          <button type="button" className="cancel" onClick={handleCancel}>
-            취소
-          </button>
+          <button type="button" className="cancel" onClick={handleCancel}>취소</button>
 
           {mode === "new" && (
             <button type="button" className="temp-save" onClick={handleTempSave}>

@@ -78,7 +78,7 @@ S.FormGroup = styled.div`
   flex-direction: column;
   gap: 8px;
 
-  /* ✅ 기본 상태 */
+  /* 기본 UI */
   .toastui-editor-defaultUI {
     border: 1px solid ${({ theme }) => theme.PALLETE.grey.greyScale2};
     border-radius: 6px;
@@ -95,7 +95,9 @@ S.FormGroup = styled.div`
     font-size: ${({ theme }) => theme.FONT_SIZE["smallText3"]};
     color: ${({ theme }) => theme.PALLETE.basic};
 
-    p, li, span {
+    p,
+    li,
+    span {
       font-family: inherit;
       font-size: ${({ theme }) => theme.FONT_SIZE["smallText3"]};
       color: ${({ theme }) => theme.PALLETE.basic};
@@ -103,13 +105,22 @@ S.FormGroup = styled.div`
     }
   }
 
-  /* ✅ ✨ placeholder 색상 변경 (핵심 부분) */
+  /* ✨ placeholder 색상 변경 */
   .toastui-editor-contents::before {
     color: ${({ theme }) => theme.PALLETE.grey.greyScale3} !important;
     opacity: 1 !important;
   }
 
-  /* ✅ 글자수 카운트 */
+  /* 🔥🔥🔥 이미지 크기 자동 조정 — 핵심 부분 */
+  .toastui-editor-contents img {
+    max-width: 100% !important;   /* 컨테이너 너비 안에서만 */
+    height: auto !important;      /* 비율 유지 */
+    display: block;
+    margin: 16px auto;            /* 가운데 정렬 + 여백 */
+    border-radius: 10px;          /* 디자인 핏 업! */
+  }
+
+  /* ✨ 글자 수 카운트 */
   .char-count {
     font-size: ${({ theme }) => theme.FONT_SIZE["smallText3"]};
     color: ${({ theme }) => theme.PALLETE.grey.greyScale3};
@@ -117,7 +128,6 @@ S.FormGroup = styled.div`
     margin-top: 6px;
   }
 `;
-
 
 /* === 버튼 === */
 S.ButtonBox = styled.div`
