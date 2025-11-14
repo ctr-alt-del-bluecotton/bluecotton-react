@@ -55,10 +55,14 @@ const MyPostCommnetContainer = () => {
           return;
         }
         
-        const url = `${process.env.REACT_APP_BACKEND_URL}/my-page/read-post-comment?id=${userId}`;
+        const token = localStorage.getItem("accessToken");
+        const url = `${process.env.REACT_APP_BACKEND_URL}/private/my-page/read-post-comment?id=${userId}`;
         
         const response = await fetch(url, {
-          headers: { "Content-Type": "application/json" },
+          headers: { 
+            "Content-Type": "application/json",
+            ...(token && { "Authorization": `Bearer ${token}` })
+          },
           method: "GET",
           credentials: "include"
         });
@@ -77,7 +81,8 @@ const MyPostCommnetContainer = () => {
             postId: item.postId,
             type: categoryMap[item.somCategory] || item.somCategory || '기타',
             title: item.postTitle || '',
-            // 댓글인지 대댓글인지에 따라 날짜 선택
+            // 댓글인지 대댓글인지에 따라 내용과 날짜 선택
+            content: item.replyId ? (item.postReplyContent || '') : (item.postCommentContent || ''),
             date: formatDate(item.replyId ? item.postReplyCreateAt : item.postCommentCreateAt),
             isReply: item.replyId !== null, // 대댓글 여부
           }));
@@ -102,19 +107,23 @@ const MyPostCommnetContainer = () => {
       let deleteId;
       
       // 대댓글인 경우와 댓글인 경우 다른 엔드포인트 사용
+      const token = localStorage.getItem("accessToken");
       if (isReply && replyId) {
         // 대댓글 삭제
-        url = `${process.env.REACT_APP_BACKEND_URL}/my-page/delete-post-reply?id=${replyId}`;
+        url = `${process.env.REACT_APP_BACKEND_URL}/private/my-page/delete-post-reply?id=${replyId}`;
         deleteId = replyId;
       } else {
         // 댓글 삭제
-        url = `${process.env.REACT_APP_BACKEND_URL}/my-page/delete-post-comment?id=${commentId}`;
+        url = `${process.env.REACT_APP_BACKEND_URL}/private/my-page/delete-post-comment?id=${commentId}`;
         deleteId = commentId;
       }
 
       const response = await fetch(url, {
         method: 'DELETE',
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          ...(token && { "Authorization": `Bearer ${token}` })
+        },
         credentials: "include"
       });
 
@@ -171,6 +180,18 @@ const MyPostCommnetContainer = () => {
                   <S.ItemTitle>
                     {comment.isReply ? ' ' : ''}{comment.title}
                   </S.ItemTitle>
+                  {comment.content && (
+                    <div style={{ 
+                      fontSize: '16px', 
+                      color: '#666', 
+                      marginTop: '8px',
+                      marginBottom: '8px',
+                      lineHeight: '1.5',
+                      wordBreak: 'break-word'
+                    }}>
+                      {comment.content}
+                    </div>
+                  )}
                   <S.ItemDetails>
                     <span>{comment.isReply ? '대댓글' : '댓글'} · {comment.date}</span>
                   </S.ItemDetails>

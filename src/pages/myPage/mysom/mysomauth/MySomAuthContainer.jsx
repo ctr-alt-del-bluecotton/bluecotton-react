@@ -24,8 +24,12 @@ const MySomAuthContainer = () => {
 
       try {
         setLoading(true);
-        const res = await fetch(`${process.env.REACT_APP_BACKEND_URL}/my-page/read-som-check?id=${userId}`, {
-          headers: { "Content-Type": "application/json" },
+        const token = localStorage.getItem("accessToken");
+        const res = await fetch(`${process.env.REACT_APP_BACKEND_URL}/private/my-page/read-som-check?id=${userId}`, {
+          headers: { 
+            "Content-Type": "application/json",
+            ...(token && { "Authorization": `Bearer ${token}` })
+          },
           method: "GET",
           credentials: "include"
         });

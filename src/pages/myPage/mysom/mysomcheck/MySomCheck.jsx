@@ -310,6 +310,7 @@ const SubmitButton = styled.button`
   const [somData, setSomData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false); // 제출 중 상태
+  const [isAlreadyChecked, setIsAlreadyChecked] = useState(false); // 인증 완료 여부
 
   // 카테고리 매핑
   const categoryMap = {
@@ -341,7 +342,7 @@ const SubmitButton = styled.button`
     return `${hours}:${minutes}`;
   };
 
-  // 챌린지 정보 가져오기
+  // 챌린지 정보 가져오기 및 인증 완료 여부 확인
   useEffect(() => {
     const loadSomData = async () => {
       try {
@@ -349,17 +350,23 @@ const SubmitButton = styled.button`
         
         // location state에서 챌린지 데이터 가져오기
         const stateData = location.state?.somData;
+        let somId = null;
         
         if (stateData) {
           setSomData(stateData);
+          somId = stateData.id;
         } else {
           // state가 없으면 URL 파라미터나 쿼리에서 ID를 가져와서 API 호출
           const searchParams = new URLSearchParams(location.search);
-          const somId = searchParams.get('id');
+          somId = searchParams.get('id');
           
           if (somId) {
-            const res = await fetch(`${process.env.REACT_APP_BACKEND_URL}/my-page/read-som?id=${somId}`, {
-              headers: { "Content-Type": "application/json" },
+            const token = localStorage.getItem("accessToken");
+            const res = await fetch(`${process.env.REACT_APP_BACKEND_URL}/private/my-page/read-som?id=${somId}`, {
+              headers: { 
+                "Content-Type": "application/json",
+                ...(token && { "Authorization": `Bearer ${token}` })
+              },
               method: "GET",
               credentials: "include"
             });
@@ -370,6 +377,35 @@ const SubmitButton = styled.button`
             }
           }
         }
+
+        // 인증 완료 여부 확인
+        if (currentUser?.id && somId) {
+          try {
+            const checkToken = localStorage.getItem("accessToken");
+            const checkRes = await fetch(`${process.env.REACT_APP_BACKEND_URL}/private/my-page/read-som-check?id=${currentUser.id}`, {
+              headers: { 
+                "Content-Type": "application/json",
+                ...(checkToken && { "Authorization": `Bearer ${checkToken}` })
+              },
+              method: "GET",
+              credentials: "include"
+            });
+
+            if (checkRes.ok) {
+              const checkResult = await checkRes.json();
+              const checkData = checkResult.data || [];
+              
+              // 현재 챌린지에 대한 인증이 완료되었는지 확인
+              const completedCheck = checkData.find(
+                item => String(item.somId) === String(somId) && item.somCheckIsChecked === true
+              );
+              
+              setIsAlreadyChecked(!!completedCheck);
+            }
+          } catch (error) {
+            console.error('인증 완료 여부 확인 실패:', error);
+          }
+        }
       } catch (error) {
         console.error('챌린지 정보 로딩 실패:', error);
       } finally {
@@ -378,7 +414,7 @@ const SubmitButton = styled.button`
     };
 
     loadSomData();
-  }, [location]);
+  }, [location, currentUser]);
 
   const handleFileChange = (e) => {
     const files = Array.from(e.target.files);
@@ -437,6 +473,11 @@ const SubmitButton = styled.button`
   };
 
   const handleSubmit = async () => {
+    if (isAlreadyChecked) {
+      alert('이미 인증이 완료된 챌린지입니다.');
+      return;
+    }
+
     if (!currentUser || !somData) {
       alert('로그인이 필요하거나 챌린지 정보를 불러올 수 없습니다.');
       return;
@@ -511,10 +552,16 @@ const SubmitButton = styled.button`
       console.log('전송할 데이터:', checkData);
 
       // API 호출
-      const response = await fetchData(
-        'my-page/insert-som-check',
-        options.postOption(checkData)
-      );
+      const token = localStorage.getItem("accessToken");
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/private/my-page/insert-som-check`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token && { "Authorization": `Bearer ${token}` })
+        },
+        credentials: "include",
+        body: JSON.stringify(checkData)
+      });
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -635,8 +682,24 @@ const SubmitButton = styled.button`
         <CharCount>{textLength}/1000</CharCount>
       </ContentSection>
 
-      <SubmitButton onClick={handleSubmit} disabled={submitting}>
-        {submitting ? '등록 중...' : '등록'}
+      {isAlreadyChecked && (
+        <div style={{ 
+          padding: '16px', 
+          marginBottom: '16px', 
+          backgroundColor: '#F5F5F5', 
+          borderRadius: '6px',
+          textAlign: 'center',
+          color: '#757575',
+          fontSize: '14px'
+        }}>
+          ✅ 이미 인증이 완료된 챌린지입니다.
+        </div>
+      )}
+      <SubmitButton 
+        onClick={handleSubmit} 
+        disabled={submitting || isAlreadyChecked}
+      >
+        {submitting ? '등록 중...' : isAlreadyChecked ? '인증완료' : '등록'}
       </SubmitButton>
     </Container>
   );
