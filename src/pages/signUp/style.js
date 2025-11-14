@@ -5,13 +5,15 @@ import {
   headerLogo,
   secondary,
   smallText1Regular,
+  smallText2Light,
+  smallText2Regular,
   smallText3Light,
   smallText3Regular,
   white,
 } from "../../styles/common";
 import { Link } from "react-router-dom";
 
-const S = {}
+const S = {};
 
 // Logo
 S.Logo = styled.h1`
@@ -27,20 +29,13 @@ S.SignUpContainer = styled.div`
 `;
 
 // SignUpForm
-// 로그인 폼
 S.SignUpForm = styled.form`
   display: flex;
   flex-direction: column;
   gap: 20px;
   width: 100%;
   align-items: center;
-`
-
-S.InputErrorMessage = styled.p`
-  ${secondary};
-  ${smallText1Regular};
-`
-
+`;
 
 // Background
 S.BackgroundBox = styled.div`
@@ -51,7 +46,7 @@ S.BackgroundBox = styled.div`
   background-repeat: no-repeat;
 `;
 
-// Sign-up
+// Sign-up Box
 S.SignUpBox = styled.div`
   width: 30%;
   height: 100%;
@@ -60,15 +55,17 @@ S.SignUpBox = styled.div`
   gap: 20px;
 `;
 
-// Input
+// ⭐ Input (error props 적용)
 S.Input = styled.input`
   width: 296px;
-  height: 55px;
-  border: 1px solid ${({ theme }) => theme.PALLETE.grey.greyScale1};
+  height: 40px;
+  border: 1px solid
+    ${({ theme, error }) =>
+      error ? theme.PALLETE.warning : theme.PALLETE.grey.greyScale1};
   border-radius: 4px;
   padding: 0 12px;
   outline: none;
-  ${smallText3Light};
+  ${smallText2Light};
   ${basic};
 
   &:focus {
@@ -85,15 +82,17 @@ S.AddressBox = styled.div`
   gap: 8px;
 `;
 
-// Address Input
+// ⭐ AddressInput (error props 적용)
 S.AddressInput = styled.input`
   flex: 1;
   height: 40px;
-  border: 1px solid ${({ theme }) => theme.PALLETE.grey.greyScale1};
+  border: 1px solid
+    ${({ theme, error }) =>
+      error ? theme.PALLETE.warning : theme.PALLETE.grey.greyScale1};
   border-radius: 4px;
   padding: 0 12px;
   outline: none;
-  ${smallText3Light};
+  ${smallText2Light};
   ${basic};
 
   &:focus {
@@ -101,13 +100,13 @@ S.AddressInput = styled.input`
   }
 `;
 
-// Small Button
+// Small Button (원래 border 없음 유지)
 S.SmallButton = styled.button`
   width: 85px;
   height: 40px;
   background-color: ${({ theme }) => theme.PALLETE.primary.main};
   color: ${({ theme }) => theme.PALLETE.white};
-  ${smallText3Regular};
+  ${smallText2Regular};
   border: none;
   border-radius: 4px;
   cursor: pointer;
@@ -118,7 +117,7 @@ S.SmallButton = styled.button`
   }
 `;
 
-// Gender Box
+// ⭐ Gender Box (각 옵션 개별 border 관리 → container border 없음)
 S.GenderSelectBox = styled.div`
   display: flex;
   align-items: center;
@@ -127,18 +126,25 @@ S.GenderSelectBox = styled.div`
   gap: 8px;
 `;
 
-// Gender Input
+// ⭐ GenderOption (각각 error props 적용)
 S.GenderOption = styled.div`
   flex: 1;
-  height: 40px;
+  height: 35px;
   border: 1px solid
-    ${({ selected, theme }) =>
-      selected ? theme.PALLETE.primary.main : theme.PALLETE.grey.greyScale1};
+    ${({ theme, selected, error }) =>
+      error
+        ? theme.PALLETE.warning
+        : selected
+        ? theme.PALLETE.primary.main
+        : theme.PALLETE.grey.greyScale1};
+
   border-radius: 4px;
   ${flexCenterColumn};
-  ${smallText3Light};
-  color: ${({ selected, theme }) =>
+  ${smallText2Light};
+
+  color: ${({ theme, selected }) =>
     selected ? theme.PALLETE.primary.main : theme.PALLETE.basic};
+
   cursor: pointer;
   transition: all 0.2s;
 
@@ -147,7 +153,7 @@ S.GenderOption = styled.div`
   }
 `;
 
-// Birth Box
+// Date Input Box
 S.DateInputBox = styled.div`
   display: flex;
   align-items: center;
@@ -156,15 +162,17 @@ S.DateInputBox = styled.div`
   gap: 8px;
 `;
 
-// Birth Input
+// ⭐ DateInput (error props 적용)
 S.DateInput = styled.input.attrs({ type: "date" })`
   flex: 1;
   height: 40px;
-  border: 1px solid ${({ theme }) => theme.PALLETE.grey.greyScale1};
+  border: 1px solid
+    ${({ theme, error }) =>
+      error ? theme.PALLETE.warning : theme.PALLETE.grey.greyScale1};
   border-radius: 4px;
   padding: 0 12px;
   outline: none;
-  ${smallText3Light};
+  ${smallText2Light};
   ${basic};
 
   &:focus {
@@ -182,21 +190,22 @@ S.SignUpButton = styled(Link)`
   width: 320px;
   height: 40px;
   background-color: ${({ theme }) => theme.PALLETE.primary.main};
-  ${smallText3Regular};
+  ${smallText2Regular};
   ${white};
   text-decoration: none;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: none;
+  border: none; /* 유지 */
   border-radius: 4px;
   cursor: pointer;
+
   &:hover {
     background-color: ${({ theme }) => theme.PALLETE.primary.dark};
   }
 `;
 
-// Divider
+// Divider (⭐ "또는" 복구)
 S.Divider = styled.div`
   width: 320px;
   height: 1px;
@@ -217,36 +226,13 @@ S.Divider = styled.div`
   }
 `;
 
-// Social Buttons
-S.SocialButtons = styled.div`
-  ${flexCenterColumn};
-  gap: 15px;
-  width: 320px;
-`;
-
-S.SocialButton = styled(Link)`
-  text-decoration: none;
-  cursor: pointer;
-  ${smallText3Light};
-  color: ${({ theme }) => theme.PALLETE.grey.greyScale3};
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 5px;
-
-  img {
-    width: 25px;
-    height: 25px;
-  }
-`;
-
-// 로그인 텍스트
+// Login Text
 S.LoginText = styled.p`
   color: ${({ theme }) => theme.PALLETE.basic};
   ${smallText3Light};
 
   a {
-    ${smallText3Light};
+    ${smallText2Light};
     color: ${({ theme }) => theme.PALLETE.primary.main};
     text-decoration: none;
 
