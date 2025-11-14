@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import { fetchData, options } from '../../../../context/FetchContext';
 import S from '../style';
 
 const feedbackOptions = [
@@ -28,9 +30,11 @@ const feedbackOptions = [
 
 const MySomPartyContainer = () => {
   const navigate = useNavigate();
+  const { currentUser } = useSelector((state) => state.user);
   const [activeFilter, setActiveFilter] = useState('scheduled');
   const [showPopup, setShowPopup] = useState(false);
   const [selected, setSelected] = useState([]);
+  const [selectedSom, setSelectedSom] = useState(null); // 리뷰할 솜 정보 저장
   const [partySoms, setPartySoms] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -240,12 +244,18 @@ const MySomPartyContainer = () => {
                       </S.ActionButton>
                     ) : (
                       <S.ActionButton 
+                        $disabled={som.somReviewIsChecked === true}
                         onClick={(e) => {
+                          if (som.somReviewIsChecked === true) {
+                            e.stopPropagation();
+                            return;
+                          }
                           e.stopPropagation();
+                          setSelectedSom(som); // 리뷰할 솜 정보 저장
                           setShowPopup(true);
                         }}
                       >
-                        {getButtonLabel()}
+                        {som.somReviewIsChecked === true ? '인증완료' : getButtonLabel()}
                       </S.ActionButton>
                     )}
                     {activeFilter === 'progress' && (
@@ -277,7 +287,11 @@ const MySomPartyContainer = () => {
       {showPopup && (
         <S.PopupModalOverlay>
           <S.PopupModal>
-            <S.CloseButton onClick={()=>setShowPopup(false)}>×</S.CloseButton>
+            <S.CloseButton onClick={()=>{
+              setShowPopup(false);
+              setSelected([]);
+              setSelectedSom(null);
+            }}>×</S.CloseButton>
             <S.PopupTitle>{teamLeaderName}팀장의 어떤 점이 좋았는지 선택해주세요! <span style={{fontSize:'14px',fontWeight:'normal',color:'#222'}}>(최대 3개, 복수선택가능)</span></S.PopupTitle>
             <div style={{fontSize:'13px',color:'#AAB6BF',margin:'0 0 8px'}}>설문은 익명으로 저장되며 더 나은 소식지를 위해 활용됩니다.</div>
             <S.OptionGrid>
@@ -288,7 +302,82 @@ const MySomPartyContainer = () => {
               ))}
             </S.OptionGrid>
             <S.PopupFooter>
-              <S.ActionButton type="button" onClick={()=>{setShowPopup(false);setSelected([]);}}>완료</S.ActionButton>
+              <S.ActionButton 
+                type="button" 
+                onClick={async () => {
+                  if (selected.length === 0) {
+                    alert('최소 1개 이상 선택해주세요.');
+                    return;
+                  }
+                  
+                  if (!selectedSom || !currentUser) {
+                    alert('리뷰 정보를 불러오는데 실패했습니다.');
+                    return;
+                  }
+
+                  try {
+                    // 선택한 feedbackOptions를 문자열로 합치기
+                    const somReviewContent = selected
+                      .map(idx => feedbackOptions[idx])
+                      .join(', ');
+
+                    // API 요청 데이터 준비
+                    const reviewData = {
+                      somReviewIsChecked: true,
+                      somReviewContent: somReviewContent,
+                      memberId: currentUser.id,
+                      somId: selectedSom.id,
+                      somReviewIsCheckedYn: 'Y'
+                    };
+
+                    // API 호출
+                    const response = await fetchData(
+                      'my-page/insert-som-review',
+                      options.postOption(reviewData)
+                    );
+
+                    if (!response.ok) {
+                      const errorText = await response.text();
+                      console.error('리뷰 등록 실패:', errorText);
+                      alert('리뷰 등록에 실패했습니다.');
+                      return;
+                    }
+
+                    const result = await response.json();
+                    console.log('리뷰 등록 성공:', result);
+
+                    // 성공 시 데이터 다시 불러오기
+                    const refreshRes = await fetch(`${process.env.REACT_APP_BACKEND_URL}/my-page/read-som`, {
+                      headers: { "Content-Type": "application/json" },
+                      method: "GET",
+                      credentials: "include"
+                    });
+
+                    if (refreshRes.ok) {
+                      const refreshResult = await refreshRes.json();
+                      const allData = refreshResult.data || [];
+                      const partyData = allData.filter(s => {
+                        const somType = s.somType?.toLowerCase();
+                        return somType === 'party';
+                      });
+                      setPartySoms(partyData);
+                    }
+
+                    // 성공 시 팝업 닫기 및 선택 초기화
+                    setShowPopup(false);
+                    setSelected([]);
+                    setSelectedSom(null);
+                    
+                    // 성공 메시지 (선택사항)
+                    // alert('리뷰가 등록되었습니다.');
+                  } catch (error) {
+                    console.error('리뷰 등록 중 오류 발생:', error);
+                    alert('리뷰 등록 중 오류가 발생했습니다.');
+                  }
+                }}
+              >
+                완료
+              </S.ActionButton>
             </S.PopupFooter>
           </S.PopupModal>
         </S.PopupModalOverlay>
