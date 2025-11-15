@@ -1,11 +1,13 @@
+// src/pages/shop/order/ShopOrderMenu.jsx
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import S from "./style";
 import OrderUserInfo from "./OrderUserInfo";
 import OrderProduct from "./OrderProduct";
 import PaymentMethod from "./PaymentMathod";
 import { useModal } from "../../../components/modal/useModal";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
+import { updateMemberCandy } from "../../../store/userSlice"
 
 const PORTONE_IMP_KEY = process.env.REACT_APP_PORTONE_IMP_KEY;
 const API = process.env.REACT_APP_BACKEND_URL;
@@ -56,7 +58,8 @@ const enforceIframeStyles = () => {
 
 const ShopOrderMenu = () => {
   const { openModal } = useModal();
-  const { currentUser, isLogin } = useSelector((s) => s.user);
+  const { currentUser } = useSelector((s) => s.user);
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -72,6 +75,14 @@ const ShopOrderMenu = () => {
   const [payLoading, setPayLoading] = useState(false);
 
   const merchantUidRef = useRef(null);
+
+  // 🔹 보유 캔디는 state로 관리 (결제 후 즉시 반영)
+  const [candyBalance, setCandyBalance] = useState(0);
+
+  // 로그인 유저 정보 바뀔 때 초기 잔액 세팅
+  useEffect(() => {
+    setCandyBalance(Number(currentUser?.memberCandy ?? 0) || 0);
+  }, [currentUser]);
 
   // ✅ 스냅샷(장바구니 → 주문서로 넘어온 경우) 있을 때
   useEffect(() => {
@@ -213,11 +224,12 @@ const ShopOrderMenu = () => {
       }
     };
 
-    if (isLogin && currentUser?.id && orderId) {
+    if (currentUser?.id && orderId) {
       fetchOrderData();
     }
-  }, [API, currentUser, isLogin, navigate, openModal, orderId, snapshot]);
+  }, [API, currentUser, navigate, openModal, orderId, snapshot]);
 
+  // 🔹 상품 총 금액 (배송비 제외)
   const rawTotal = useMemo(() => {
     if (!orderData) return 0;
 
@@ -239,22 +251,30 @@ const ShopOrderMenu = () => {
   }, [orderData]);
 
   const FIXED_SHIPPING_FEE = 3000;
-  const shippingFee = useMemo(
-    () => (rawTotal >= 30000 ? 0 : FIXED_SHIPPING_FEE),
-    [rawTotal]
-  );
-  const shippingFeeDisplay =
-    shippingFee === 0
-      ? "30,000원 이상 결제시 배송비 무료"
-      : `${shippingFee.toLocaleString()}원`;
+
+  const isCandy = payType === "candy";
+
+  const shippingFee = useMemo(() => {
+    if (isCandy) return 0; // 🔥 캔디 결제면 배송비 0
+    return rawTotal >= 30000 ? 0 : FIXED_SHIPPING_FEE;
+  }, [rawTotal, isCandy]);
+
+  const shippingFeeDisplay = useMemo(() => {
+    if (isCandy) return "캔디 결제 시 배송비 무료";
+    if (shippingFee === 0) return "30,000원 이상 결제시 배송비 무료";
+    return `${shippingFee.toLocaleString()}원`;
+  }, [isCandy, shippingFee]);
+
   const itemPrice = useMemo(() => rawTotal, [rawTotal]);
+
+  // 💡 캔디 결제에 필요한 캔디 = 상품금액 (배송비 제외)
+  const candyNeedAmount = itemPrice;
 
   const totalAmount = useMemo(
     () => itemPrice + shippingFee,
     [itemPrice, shippingFee]
   );
 
-  const isCandy = payType === "candy";
   const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(
     navigator.userAgent
   );
@@ -270,9 +290,10 @@ const ShopOrderMenu = () => {
     );
   }, [openModal]);
 
+  console.log("[ShopOrderMenu] render candyBalance:", candyBalance);
+
   // ✅ 결제 버튼 클릭 핸들러
   const handlePortOnePay = async () => {
-    // 공통 체크
     if (payLoading || isLoadingOrder || !orderData) {
       return openModal({
         title: "준비 중",
@@ -280,7 +301,7 @@ const ShopOrderMenu = () => {
       });
     }
 
-    if (!isLogin || !currentUser?.id) {
+    if (!currentUser?.id) {
       return openModal({
         title: "로그인이 필요합니다",
         message: "결제 진행을 위해 로그인해주세요.",
@@ -307,6 +328,24 @@ const ShopOrderMenu = () => {
         });
       }
 
+      const effectiveOrderId = Number(orderData?.orderId ?? orderId);
+      if (!Number.isFinite(effectiveOrderId) || effectiveOrderId <= 0) {
+        return openModal({
+          title: "주문번호 확인 필요",
+          message:
+            "주문번호가 없어 캔디 결제를 시작할 수 없습니다. 장바구니에서 다시 시도해 주세요.",
+          confirmText: "확인",
+        });
+      }
+
+      if (candyBalance < candyNeedAmount) {
+        return openModal({
+          title: "캔디 부족",
+          message: "보유 캔디가 결제 금액보다 적습니다.",
+          confirmText: "확인",
+        });
+      }
+
       try {
         setPayLoading(true);
 
@@ -314,6 +353,10 @@ const ShopOrderMenu = () => {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           credentials: "include",
+          body: JSON.stringify({
+            orderId: effectiveOrderId,
+            memberId: currentUser.id,
+          }),
         });
 
         if (!res.ok) {
@@ -326,6 +369,13 @@ const ShopOrderMenu = () => {
           json?.message ||
           json?.data?.message ||
           "캔디 결제가 완료되었습니다.";
+
+        // 🔥 로컬 state + Redux 둘 다 갱신
+        setCandyBalance((prev) => {
+          const next = Math.max(0, prev - candyNeedAmount);
+          dispatch(updateMemberCandy(next)); // 전역 currentUser도 수정
+          return next;
+        });
 
         openModal({
           title: "캔디 결제 완료",
@@ -348,8 +398,6 @@ const ShopOrderMenu = () => {
       } finally {
         setPayLoading(false);
       }
-
-      // 캔디 결제는 여기서 끝, 아래 PortOne(카드) 로직 안 탄다
       return;
     }
 
@@ -528,7 +576,12 @@ const ShopOrderMenu = () => {
       <S.OrderMainSection>
         <OrderUserInfo />
         <OrderProduct orderData={orderData} />
-        <PaymentMethod value={payType} onChange={setPayType} />
+        <PaymentMethod
+          value={payType}
+          onChange={setPayType}
+          candyBalance={candyBalance}
+          candyPrice={itemPrice}
+        />
       </S.OrderMainSection>
 
       <S.OrderSideSection>
@@ -540,7 +593,7 @@ const ShopOrderMenu = () => {
           </S.SideRow>
           <S.SideRow>
             <span>배송비</span>
-            <span>{shippingFeeDisplay.toLocaleString()}</span>
+            <span>{shippingFeeDisplay}</span>
           </S.SideRow>
           <S.SideTotal>
             <span>합계</span>
@@ -548,6 +601,7 @@ const ShopOrderMenu = () => {
               {totalAmount.toLocaleString()}원
             </span>
           </S.SideTotal>
+
           <S.PayButton
             onClick={handlePortOnePay}
             disabled={
