@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import S from "./style";
 import Report from "../../../components/Report/Report";
 import { useModal } from "../../../components/modal";
 import { useSelector } from "react-redux";
+
 
 const PostComment = ({
   showComments,
@@ -27,7 +28,40 @@ const PostComment = ({
   const BASE_URL = process.env.REACT_APP_BACKEND_URL;
   const { openModal } = useModal();
   const { currentUser, isLogin } = useSelector((state) => state.user);
+  const [localProfileImage, setLocalProfileImage] = useState(null);
 
+  // 프로필사진 실시간 업데이트
+  useEffect(() => {
+  const fetchProfile = async () => {
+    if (!isLogin || !currentUser?.id) return;
+
+    try {
+      const res = await fetch(
+        `${BASE_URL}/member/profile?memberId=${currentUser.id}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          },
+        }
+      );
+
+      if (!res.ok) throw new Error("프로필 불러오기 실패");
+
+      const result = await res.json();
+      const data = result.data;
+
+      // 서버에서 주는 path + name
+      setLocalProfileImage(data.memberProfilePath + data.memberProfileName);
+    } catch (err) {
+      console.error(err);
+      setLocalProfileImage("/images/default_profile.png");
+    }
+  };
+
+    fetchProfile();
+  }, [isLogin, currentUser?.id]);
+  
   /* ===========================================================
      1) 좋아요 토글 → 서버 → fetchPostDetail() 호출로 최신 상태 반영
   ============================================================ */
@@ -257,7 +291,6 @@ const PostComment = ({
           <S.CommentList>
             {comments.map((c) => (
               <React.Fragment key={c.id}>
-                {/* === 댓글 본문 === */}
                 <S.CommentItem>
                   <div className="left">
                     <img
@@ -271,7 +304,6 @@ const PostComment = ({
                       alt="프로필"
                       className="profile"
                     />
-
                     <div className="text-box">
                       <div className="header-row">
                         <div className="writer">{c.memberNickname}</div>
@@ -363,8 +395,11 @@ const PostComment = ({
                       <div className="avatar">
                         <img
                           src={
-                            currentUser?.profilePath ||
-                            "/postImages/profile.png"
+                            c.memberProfileUrl
+                              ? c.memberProfileUrl.startsWith("/upload/")
+                                ? `http://localhost:10000${c.memberProfileUrl}`
+                                : c.memberProfileUrl
+                              : "/images/default_profile.png"
                           }
                           alt="내 프로필"
                         />
@@ -506,13 +541,16 @@ const PostComment = ({
                       showReplyTarget?.parentId === c.id && (
                         <S.CommentForm $nested>
                           <div className="avatar">
-                            <img
-                              src={
-                                currentUser?.profilePath ||
-                                "/postImages/profile.png"
-                              }
-                              alt="내 프로필"
-                            />
+                          <img
+                            src={
+                              c.memberProfileUrl
+                                ? c.memberProfileUrl.startsWith("/upload/")
+                                  ? `http://localhost:10000${c.memberProfileUrl}`
+                                  : c.memberProfileUrl
+                                : "/images/default_profile.png"
+                            }
+                            alt="내 프로필"
+                          />
                             <span className="nickname">
                               {currentUser?.memberNickname}
                             </span>
@@ -551,7 +589,7 @@ const PostComment = ({
           <S.CommentForm>
             <div className="avatar">
               <img
-                src={currentUser?.profilePath || "/postImages/profile.png"}
+                src={localProfileImage || "/images/default_profile.png"}
                 alt="내 프로필"
               />
               <span className="nickname">

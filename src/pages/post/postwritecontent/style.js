@@ -116,7 +116,7 @@ S.FormGroup = styled.div`
     max-width: 100% !important;   /* 컨테이너 너비 안에서만 */
     height: auto !important;      /* 비율 유지 */
     display: block;
-    margin: 16px auto;            /* 가운데 정렬 + 여백 */
+    margin: 12px 0;
     border-radius: 10px;          /* 디자인 핏 업! */
   }
 

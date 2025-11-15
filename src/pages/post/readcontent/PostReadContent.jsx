@@ -4,7 +4,7 @@ import { useSelector } from "react-redux";
 import S from "./style";
 import { useModal } from "../../../components/modal";
 import PostComment from "../commentcomponent/PostComment";
-import { marked } from "marked"; // ⭐ 마크다운 → HTML 변환기
+import { marked } from "marked";
 
 const PostReadContent = () => {
   const { id } = useParams();
@@ -203,9 +203,10 @@ const PostReadContent = () => {
   if (loading) return <S.Container>로딩 중...</S.Container>;
   if (!post) return <S.Container>게시글이 없습니다.</S.Container>;
 
-  /** Markdown → HTML 변환 (이미지 포함해서 전부 렌더링) */
-    // HTML 전체 문자열
-  let htmlContent = marked.parse(post.postContent || "");
+
+  let raw = post.postContent || "";
+
+  let htmlContent = marked.parse(raw);
 
   return (
     <S.Container>
