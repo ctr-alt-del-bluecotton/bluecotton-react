@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { basic, smallText3Light, smallText3Regular, title } from "../../../../../../styles/common";
+import { basic, smallText3Regular, title } from "../../../../../../styles/common";
 
 const S = {};
 

@@ -24,6 +24,33 @@ export const ReadProvider = ({ children }) => {
     const [somMemberList, setSomMemberList] = useState([]);
     const [somIsLike, setSomIsLike] = useState(false);
 
+    const loadReadData = async () => {
+        setLoading(true);
+        await fetchData(`som/read?somId=${id}&memberEmail=${currentUser.memberEmail}`, options.getOption())
+            .then(async (res) => {
+                const target = await res.json();
+                const readData = target.data;
+                console.log(readData)
+    
+                // .find((som) => String(som.id) === String(id));
+                setSomInfo(readData || {});
+        
+                const likeInfo = readData.somLike;
+                setSomIsLike(likeInfo ? likeInfo.isLike : false);
+        
+                const leaderInfo = leaderData.find(({ somId }) => String(somId) === String(id));
+                setSomLeader(leaderInfo || {});
+        
+                const contentData = readData.somContent
+                setSomContent(contentData ? contentData.somContent : "");
+        
+                console.log("참여 멤버 데이터:", readData.somJoinList);
+                setSomMemberList(readData.somJoinList || []);
+                
+                setLoading(false);
+            })
+    }
+
     const insertFetch = async () => {
         await fetchData('som/join', options.postOption({
             somId : id,
@@ -32,6 +59,8 @@ export const ReadProvider = ({ children }) => {
         .then((res) => {
             console.log(res);
             window.dispatchEvent(new CustomEvent("refreshSomList"));
+            // 참여 후 데이터 새로고침
+            loadReadData();
         })
     }
     
@@ -67,16 +96,17 @@ export const ReadProvider = ({ children }) => {
     }
 
     const somJoin = () => {
-
-        console.log(somMemberList.forEach((member) => console.log(member.id === currentUser.id)))
-        if(somMemberList.filter((member) => member.id === currentUser.id)){
+        // 현재 사용자가 이미 참여 중인지 확인
+        const isAlreadyJoined = somMemberList && currentUser && somMemberList.some((member) => member.memberId === currentUser.id);
+        
+        if (isAlreadyJoined) {
             openModal({
-                title: "이미 해당 솜에 참가하고 있습니다.",
-                message: "다른 솜을 둘러보러 가볼까요?",
+                title: "이미 참여중",
+                message: "이미 해당 솜에 참가하고 있습니다.",
                 confirmText: "확인"
             });
-
         } else {
+            // 참여 확인 모달 표시 후 참여 쿼리 실행
             openModal({
                 title: "해당 솜에 참가합니다.",
                 message: "참가하시겠습니까?",
@@ -88,42 +118,19 @@ export const ReadProvider = ({ children }) => {
     }
 
     useEffect(() => {
-        const loadReadData = async () => {
-            setLoading(true);
-            await fetchData(`som/read?somId=${id}&memberEmail=${currentUser.memberEmail}`, options.getOption())
-                .then(async (res) => {
-                    const target = await res.json();
-                    const readData = target.data;
-                    console.log(readData)
-        
-                    // .find((som) => String(som.id) === String(id));
-                    setSomInfo(readData || {});
-            
-                    const likeInfo = readData.somLike;
-                    setSomIsLike(likeInfo ? likeInfo.isLike : false);
-            
-                    const leaderInfo = leaderData.find(({ somId }) => String(somId) === String(id));
-                    setSomLeader(leaderInfo || {});
-            
-                    const contentData = readData.somContent
-                    setSomContent(contentData ? contentData.somContent : "");
-            
-                    console.log("참여 멤버 데이터:", readData.somJoinList);
-                    setSomMemberList(readData.somJoinList || []);
-                    
-                    setLoading(false);
-                })
+        if (currentUser && currentUser.memberEmail) {
+            loadReadData();
         }
 
-        loadReadData();
-
         const handleRefresh = () => {
-            loadReadData(); 
+            if (currentUser && currentUser.memberEmail) {
+                loadReadData(); 
+            }
         };
 
         window.addEventListener("refreshSomList", handleRefresh);
         return () => window.removeEventListener("refreshSomList", handleRefresh);
-    }, [id]);
+    }, [id, currentUser]);
 
     useEffect(() => {
         if (somLeader.memberId) {

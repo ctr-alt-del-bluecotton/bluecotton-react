@@ -12,95 +12,74 @@ const FloatingSomWritePage1 = () => {
     setValue,
     isAllError,
     watch,
-    formState: { touchedFields },
-    somType, setSomType
+    formState: { errors, touchedFields },
+    somType, 
+    setSomType
   } = useFloatingAction();
 
   const valueWatch = watch();
 
   const somCategoryList = [
-    {
-      value: "study",
-      label: "학습"
-    },
-    {
-      value: "health",
-      label: "건강"
-    },
-    {
-      value: "social",
-      label: "소셜"
-    },
-    {
-      value: "hobbies",
-      label: "취미"
-    },
-    {
-      value: "life-style",
-      label: "생활"
-    },
-    {
-      value: "rookie",
-      label: "루키"
-    }
-  ]
+    { value: "study", label: "학습" },
+    { value: "health", label: "건강" },
+    { value: "social", label: "소셜" },
+    { value: "hobbies", label: "취미" },
+    { value: "life-style", label: "생활" },
+    { value: "rookie", label: "루키" }
+  ];
 
   const somTypeList = [
-    {
-      value: "solo",
-      label: "솔로솜"
-    },
-    {
-      value: "party",
-      label: "파티솜"
-    }
-  ]
+    { value: "solo", label: "솔로솜" },
+    { value: "party", label: "파티솜" }
+  ];
 
   const openPostcode = () => {
     new window.daum.Postcode({
       oncomplete: function(data) {
         const address = data.roadAddress;
-        setValue("somAddress", address,{shouldValidate:true});
+        setValue("somAddress", address, { shouldValidate:true });
       }
     }).open();
   };
 
   const handleSelect = (value, option) => {
     setSelected(option);
-    setFormData(value)
-    setValue("somCategory", value);
+    setFormData(value);
+    setValue("somCategory", value, { shouldValidate: true });
     setOpen(false);
   };
+
   return (
     <S.floatingFormWrap>
+
+      {/* 제목 */}
       <S.floatingInputWrap>
         <S.floatingInputTitles>제목</S.floatingInputTitles>
-        <S.floatingInputs placeholder='제목을 입력하세요' 
-          {...register("somTitle",{
-            required: true
-          })}
-          $isEmpty={!valueWatch.somTitle?.trim()}
-          $isError={valueWatch.somTitle?.trim() === '' || valueWatch.somTitle === null || valueWatch.somTitle === undefined}
-          $isAllError={isAllError}
-          $isTouched={touchedFields.somTitle}
+        <S.floatingInputs
+          placeholder='제목을 입력하세요'
+          {...register("somTitle", { required: true })}
+          $isError={errors.somTitle && (touchedFields.somTitle || isAllError)}
         />
       </S.floatingInputWrap>
+
+      {/* 카테고리 */}
       <S.floatingInputWrap>
         <S.floatingInputTitles>카테고리</S.floatingInputTitles>
         <input type="hidden" {...register("somCategory", { required: true })} />
+
         <S.floatingSomCategoryInputWrap>
-          <S.floatingSomCategoryInputValue 
-            $isTouched={touchedFields.somCategory} 
-            $isEmpty={!valueWatch.somCategory?.trim()}
-            $isError={valueWatch.somCategory?.trim() === '' || valueWatch.somCategory === null || valueWatch.somCategory === undefined}
-            $isAllError={isAllError}
-            $hasValue={!!selected} open={open} onClick={() => setOpen(!open)}>
-            {selected || "카테고리를 선택하세요"} 
+          <S.floatingSomCategoryInputValue
+            $isError={errors.somCategory && (touchedFields.somCategory || isAllError)}
+            $hasValue={!!selected}
+            open={open}
+            onClick={() => setOpen(!open)}
+          >
+            {selected || "카테고리를 선택하세요"}
             <S.floatingSomCategoryInputArrow open={open} />
           </S.floatingSomCategoryInputValue>
 
           <S.floatingSomCategoryOptionList open={open}>
-            {somCategoryList.map(({value, label}, index) => (
+            {somCategoryList.map(({ value, label }, index) => (
               <S.floatingSomCategoryOption
                 key={index}
                 selected={label === selected}
@@ -112,57 +91,75 @@ const FloatingSomWritePage1 = () => {
           </S.floatingSomCategoryOptionList>
         </S.floatingSomCategoryInputWrap>
       </S.floatingInputWrap>
+
+      {/* 장소 */}
       <S.floatingInputWrap>
         <S.floatingInputTitles>장소</S.floatingInputTitles>
         <S.floatingSomAddressInputWrap>
-          <S.floatingInputs placeholder="주소 검색" readOnly
-            {...register("somAddress",{
-              required: true
-            })}
-            $isEmpty={!valueWatch.somAddress?.trim()}
-            $isError={valueWatch.somAddress?.trim() === '' || valueWatch.somAddress === null || valueWatch.somAddress === undefined}
-            $isAllError={isAllError}
-            $isTouched={touchedFields.somAddress}
+          <S.floatingInputs
+            placeholder="주소 검색"
+            readOnly
+            {...register("somAddress", { required: true })}
+            $isError={errors.somAddress && (touchedFields.somAddress || isAllError)}
           />
-          <S.floatingSomAddressButton onClick={openPostcode}>주소 검색</S.floatingSomAddressButton>
+          <S.floatingSomAddressButton onClick={openPostcode}>
+            주소 검색
+          </S.floatingSomAddressButton>
         </S.floatingSomAddressInputWrap>
       </S.floatingInputWrap>
+
+      {/* 날짜 */}
       <S.floatingInputWrap>
         <S.floatingInputTitles>날짜</S.floatingInputTitles>
         <S.floatingSomDateSelectWrap>
-          <S.floatingDateInputs type='datetime-local' placeholder='시작 날짜를 입력하세요' 
-            {...register("somStartDate",{
-              required: true
-            })}
-            $isEmpty={!valueWatch.somStartDate?.trim()}
-            $isError={valueWatch.somStartDate?.trim() === '' || valueWatch.somStartDate === null || valueWatch.somStartDate === undefined}
-            $isAllError={isAllError}
-            $isTouched={touchedFields.somStartDate}
+
+          <S.floatingDateInputs
+            type='datetime-local'
+            {...register("somStartDate", { required: true })}
+            $isError={errors.somStartDate && (touchedFields.somStartDate || isAllError)}
           />
-          <S.floatingDateInputs type='datetime-local' placeholder='종료 날짜를 입력하세요'
-            {...register("somEndDate",{
-              required: true
-            })}
-            $isEmpty={!valueWatch.somEndDate?.trim()}
-            $isError={valueWatch.somEndDate?.trim() === '' || valueWatch.somEndDate === null || valueWatch.somEndDate === undefined}
-            $isAllError={isAllError}
-            $isTouched={touchedFields.somEndDate}
+
+          <S.floatingDateInputs
+            type='datetime-local'
+            {...register("somEndDate", { required: true })}
+            $isError={errors.somEndDate && (touchedFields.somEndDate || isAllError)}
           />
+
         </S.floatingSomDateSelectWrap>
       </S.floatingInputWrap>
+
+      {/* 솜 종류 */}
       <S.floatingInputWrap>
         <S.floatingInputTitles>솜 종류</S.floatingInputTitles>
+
         <S.floatingSomTypeWrap>
-          {somTypeList.map(({value, label}, index) => 
+          {somTypeList.map(({ value, label }, index) => (
             <S.floatingSomTypeLabelWrap key={index}>
-              <S.floatingSomTypeLabel htmlFor={value}>{label}</S.floatingSomTypeLabel>
-              <S.floatingSomTypeRadio value={value} id={label} checked={somType[value]} onClick={() => setSomType({ solo: value === "solo", party: value === "party" })} type="radio" {...register("somType",{
-              required: true
-            })}/>
+
+              <S.floatingSomTypeLabel htmlFor={value}>
+                {label}
+              </S.floatingSomTypeLabel>
+
+              <S.floatingSomTypeRadio
+                id={value}
+                value={value}
+                type="radio"
+                checked={valueWatch.somType === value}
+                {...register("somType", { required: true })}
+                onClick={() =>
+                  setSomType({
+                    solo: value === "solo",
+                    party: value === "party"
+                  })
+                }
+                $isError={errors.somType && (touchedFields.somType || isAllError)}
+              />
             </S.floatingSomTypeLabelWrap>
-          )}
+          ))}
         </S.floatingSomTypeWrap>
+
       </S.floatingInputWrap>
+
     </S.floatingFormWrap>
   );
 };
