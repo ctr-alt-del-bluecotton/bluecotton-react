@@ -5,8 +5,8 @@ import { useSelector } from 'react-redux';
 import { useState } from 'react';
 
 const SomReadInfo = () => {
-  const { isLogin } = useSelector((state) => state.user);
-  const { somInfo, formatDate, somJoinSoloSom, somJoin, somJoinNotLogin, somLikeUpdate } = useRead();
+  const { isLogin, currentUser } = useSelector((state) => state.user);
+  const { somInfo, formatDate, somJoinSoloSom, somJoin, somJoinNotLogin, somLikeUpdate, somMemberList } = useRead();
   const {
     id,
     somTitle,
@@ -35,7 +35,34 @@ const SomReadInfo = () => {
     })
   }
   const somTypeText = somType === "solo" ? "솔로솜" : "파티솜";
-  const somOnClick = somType !== "solo" ? () => { isLogin ? somJoin() :  somJoinNotLogin() } :  () => { somJoinSoloSom() };
+  
+  // 참여 버튼 클릭 핸들러
+  const somOnClick = () => {
+    // 1. 솔로솜인 경우 - 솔로솜 모달 표시
+    if (somType === "solo") {
+      somJoinSoloSom();
+      return;
+    }
+    
+    // 2. 파티솜인 경우
+    // 2-1. 로그인 안 되어 있으면 로그인 모달
+    if (!isLogin) {
+      somJoinNotLogin();
+      return;
+    }
+    
+    // 2-2. 이미 참여 중인지 확인
+    const isAlreadyJoined = somMemberList && currentUser && somMemberList.some((member) => member.memberId === currentUser.id);
+    if (isAlreadyJoined) {
+      // 이미 참여중 모달 표시 (somJoin 함수에서 처리)
+      somJoin();
+      return;
+    }
+    
+    // 2-3. 파티솜이고 로그인되어 있고 참여 안 되어 있으면 참여 쿼리 실행
+    // somJoin 함수에서 참여 확인 모달을 띄우고 참여 쿼리 실행
+    somJoin();
+  };
 
   const somButton = somType !== "solo" ? <S.somButton onClick={somOnClick}>참여 - {somTypeText}({somCount})</S.somButton>
   : <S.fullSomButton onClick={somOnClick}>참여 - {somTypeText}({somCount})</S.fullSomButton> ;

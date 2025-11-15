@@ -44,7 +44,7 @@ const SomContent = ({ content }) => {
     </span>
   </S.LikeButton> :
   <S.LikeButton onClick={isLikeButtonOnclick} $isLike={false}>
-    <S.somLikeIcon src="../../assets/icons/som_list_like_inactive.png" alt="좋아요 아이콘"/> {/* 여기 하트 아이콘 들어갈 자리 ♡ */}
+    <S.somLikeIcon src="../../assets/icons/som_read_like_inactive.png" alt="좋아요 아이콘"/> {/* 여기 하트 아이콘 들어갈 자리 ♡ */}
     <span>
       {likeCount}
     </span>
@@ -60,7 +60,7 @@ const SomContent = ({ content }) => {
       <S.SomImage onClick={somOnClick} bgsrc={somTitleImagePath} alt={somTitleImageName} />
       <S.SomInfo>
         <S.SomTitleArea onClick={somOnClick}>
-          <img src={memberSomLeader.memberPicturePath} alt={memberSomLeader.memberName} />
+          <img src={memberSomLeader.memberPicturePath + memberSomLeader.memberPictureName} alt={memberSomLeader.memberPictureName} />
           <S.SomTitle>{somTitle}</S.SomTitle>
         </S.SomTitleArea>
         <S.SomExplanation>
@@ -81,8 +81,8 @@ const SomContent = ({ content }) => {
         </S.SomExplanation>
       </S.SomInfo>
       <S.SomButtonArea>
-        <S.SomButton>귓솜말하기</S.SomButton>
-        {somButton}
+        {somType === "solo" && <S.SomButton>귓솜말하기</S.SomButton>}
+        {somType === "solo" ? somButton : <S.PartySomButton>참여 - {somTypeText}({somCount})</S.PartySomButton>}
         {isLikeButton}
       </S.SomButtonArea>
     </S.Card>
