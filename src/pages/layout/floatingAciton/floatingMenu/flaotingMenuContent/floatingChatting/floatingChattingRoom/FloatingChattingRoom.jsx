@@ -15,6 +15,7 @@ const FloatingChattingRoom = () => {
   const [offset, setOffset] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [chatRoomName, setChatRoomName] = useState("");
+  const [memberList, setMemberList] = useState([]);
 
   const chatBoxRef = useRef(null);
   const stompClientRef = useRef(null);
@@ -39,13 +40,12 @@ const FloatingChattingRoom = () => {
     );
     const datas = await res.json();
     const msgs = Array.isArray(datas) ? datas : datas.data;
-
+    console.log(msgs)
     const box = chatBoxRef.current;
 
     await fetchData(
       `chat/get-rooms/${chatId}`
     ).then( async (res) => { const data = await res.json();
-      
       setChatRoomName(data.chatTitle)
       
      });
@@ -182,7 +182,7 @@ const FloatingChattingRoom = () => {
       <S.ChatBody ref={chatBoxRef}>
         {chatList.map((chat, idx) => chat.chatMessageType == "MESSAGE" ? (
           <S.ChatContent>
-            <S.chatSenderName isUser={chat.chatMessageSenderId == memberId}>{chat.chatMessageSenderId}</S.chatSenderName>
+            <S.chatSenderName isUser={chat.chatMessageSenderId == memberId}>{chat.memberName}</S.chatSenderName>
             <S.Bubble key={idx} isUser={chat.chatMessageSenderId == memberId}>
               {chat.chatMessageContent}
             </S.Bubble>
