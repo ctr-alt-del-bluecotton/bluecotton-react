@@ -101,6 +101,26 @@ S.SomButton = styled.div`
   }
 `;
 
+S.PartySomButton = styled.div`
+  ${smallText1Regular}
+  ${white}
+  border-radius: 4px;
+  width: 254px;
+  height: 32px;
+  background-color: ${({ theme }) => theme.PALLETE.primary.main};
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  
+  transition: all 0.2s;
+
+  &:hover {
+    background-color: ${({ theme }) => theme.PALLETE.primary.dark};
+    ${white}
+  }
+`;
+
 S.FullSomButton = styled.div`
   ${smallText1Regular}
   ${white}
