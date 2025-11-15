@@ -13,7 +13,7 @@ const categoryMap = {
   health: "건강",
   social: "소셜",
   hobby: "취미",
-  life: "생활",
+  "life-style": "생활",
   rookie: "루키",
 };
 
@@ -324,11 +324,9 @@ const PostWriteContent = () => {
               >
                 {/* 예: 학습 - 코딩 30일 챌린지 - 도전 4일 */}
                 {categoryMap[cat.somCategory] || cat.somCategory}
-                {" - "}
+                {" : "}
                 {cat.somTitle}
-                {" - 도전 "}
-                {cat.somDayDiff}
-                {"일"}
+                {cat.somDayDiff > 0 ? ` [도전${cat.somDayDiff}일]` : ` [예정 D${cat.somDayDiff - 1}]`}
               </option>
             ))}
           </select>
