@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import S from "./style";
 import { useModal } from "../../components/modal";
+import { useSelector } from "react-redux";
 
 /*
  props:
@@ -12,6 +13,8 @@ const Report = ({ target, onClose }) => {
   const [selectedReason, setSelectedReason] = useState("");
   const [customText, setCustomText] = useState("");
   const { openModal } = useModal(); // 전역 확인 모달
+  const { currentUser } = useSelector((state) => state.user); // ✅ 추가
+  const memberId = currentUser.id;                            // ✅ 신고자 ID
 
   // 등록 버튼 눌렀을 때
   const handleSubmit = async () => {
@@ -49,6 +52,13 @@ const Report = ({ target, onClose }) => {
       body = {
         postReplyReportContent: finalReason,
         postReplyId: target.id,
+      };
+    }  else if (target.type === "shopComment") {
+      url = `${BASE_URL}/shop/read/review/report`;
+      body = {
+        productReviewReportContent: finalReason, 
+        memberId,              
+        productReviewId: target.id,  
       };
     }
 

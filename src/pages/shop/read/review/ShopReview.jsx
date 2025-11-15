@@ -229,7 +229,7 @@ const ShopReview = () => {
                   <S.Dot>·</S.Dot>
                   <S.ReportButton
                     onClick={() => {
-                      setReportTarget({ type: "comment", id: rv.id });
+                      setReportTarget({ type: "shopComment", id: rv.id });
                       setShowReportModal(true);
                     }}
                   >
