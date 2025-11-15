@@ -1,3 +1,4 @@
+// src/pages/.../OrderManagement/AdminDashboard.jsx
 import React, { useEffect, useMemo, useState } from "react";
 import S from "./style";
 import {
@@ -27,7 +28,10 @@ const AdminDashboard = ({ orders = [], products = [] }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // 1) 프론트에서 주문 리스트로 일자별 매출 집계 (전체 기간 기준)
+  // 0) 날짜 문자열 -> Date 객체
+  const toDate = (s) => new Date(`${s}T00:00:00`);
+
+  // 1) 프론트에서 주문 리스트로 일자별 매출 집계
   const dailyRevenue = useMemo(() => {
     const map = new Map();
 
@@ -37,23 +41,15 @@ const AdminDashboard = ({ orders = [], products = [] }) => {
       map.set(date, prev + (o.total || 0));
     });
 
+    console.log("[dailyRevenue]", dailyRevenue);
+
+
     const result = Array.from(map.entries())
       .map(([date, revenue]) => ({ date, revenue }))
       .sort((a, b) => (a.date > b.date ? 1 : -1));
+
     return result;
   }, [orders]);
-
-  // 1-1) 선택된 기간 기준으로 "히스토리" 잘라내기
-  const limitedDailyRevenue = useMemo(() => {
-    const currentPeriod = PERIOD_OPTIONS.find((p) => p.key === period);
-    const limit = currentPeriod?.horizon ?? 7;
-
-    if (!dailyRevenue.length) return [];
-    if (dailyRevenue.length <= limit) return dailyRevenue;
-
-    // 가장 최근 limit일만 사용
-    return dailyRevenue.slice(-limit);
-  }, [dailyRevenue, period]);
 
   // 2) XGBoost 예측 결과 호출 (백엔드 연동)
   useEffect(() => {
@@ -73,7 +69,7 @@ const AdminDashboard = ({ orders = [], products = [] }) => {
         }
 
         const data = await res.json();
-        // 백엔드에서 { history: [...], forecast: [...] } 또는 { data: [...] } 형태로 내려온다고 가정
+        // 백엔드에서 { history: [...], forecast: [...] } 형태로 내려온다고 가정
         const rawForecast = Array.isArray(data.forecast)
           ? data.forecast
           : data.data || [];
@@ -89,13 +85,10 @@ const AdminDashboard = ({ orders = [], products = [] }) => {
         console.error(e);
         setError(e.message);
 
-        // 🔧 예측 API가 죽었을 때 임시 더미 데이터
-        const currentPeriod = PERIOD_OPTIONS.find((p) => p.key === period);
-        const horizon = currentPeriod?.horizon ?? 7;
-
+        // 🔧 예측 API가 죽었을 때 임시 더미 데이터 (마지막 매출 기준 7일만)
         if (dailyRevenue.length) {
           const last = dailyRevenue[dailyRevenue.length - 1];
-          const dummy = Array.from({ length: horizon }).map((_, i) => {
+          const dummy = Array.from({ length: 7 }).map((_, i) => {
             const base = last.revenue || 0;
             return {
               date: `예측+${i + 1}일`,
@@ -118,16 +111,14 @@ const AdminDashboard = ({ orders = [], products = [] }) => {
     }
   }, [orders, dailyRevenue, period]);
 
-  // 3) 차트에 쓸 최종 데이터 (히스토리 + 예측)
+  // 3) 실제 + 예측 합친 전체 데이터
   const chartData = useMemo(() => {
     const map = new Map();
 
-    // 🔹 선택된 기간만 반영된 실제 매출
-    limitedDailyRevenue.forEach((d) => {
+    dailyRevenue.forEach((d) => {
       map.set(d.date, { date: d.date, actual: d.revenue, predicted: null });
     });
 
-    // 🔹 예측 매출
     forecastData.forEach((f) => {
       const prev = map.get(f.date) || { date: f.date, actual: null };
       map.set(f.date, { ...prev, predicted: f.predicted });
@@ -136,9 +127,32 @@ const AdminDashboard = ({ orders = [], products = [] }) => {
     return Array.from(map.values()).sort((a, b) =>
       a.date > b.date ? 1 : -1
     );
-  }, [limitedDailyRevenue, forecastData]);
+  }, [dailyRevenue, forecastData]);
 
-  // 4) 카테고리별 매출 / 주문 수 (전체 기준)
+  // 4) 기간(주간/월간/연간)에 따라 보여줄 데이터만 슬라이싱
+  const filteredChartData = useMemo(() => {
+    if (!chartData.length) return [];
+
+    const sorted = [...chartData].sort(
+      (a, b) => toDate(a.date) - toDate(b.date)
+    );
+    const last = sorted[sorted.length - 1];
+    const lastDate = toDate(last.date);
+
+    let days = 7;
+    if (period === "month") days = 30;
+    else if (period === "year") days = 365;
+
+    const from = new Date(lastDate);
+    from.setDate(from.getDate() - (days - 1)); // 최근 N일
+
+    return sorted.filter((d) => {
+      const dt = toDate(d.date);
+      return dt >= from && dt <= lastDate;
+    });
+  }, [chartData, period]);
+
+  // 5) 카테고리별 매출 / 주문수 집계
   const categoryStats = useMemo(() => {
     const map = new Map();
 
@@ -157,7 +171,7 @@ const AdminDashboard = ({ orders = [], products = [] }) => {
     return Array.from(map.values()).sort((a, b) => b.revenue - a.revenue);
   }, [orders, products]);
 
-  // 5) 상단 요약 카드 지표
+  // 6) 상단 요약 카드 지표
   const summary = useMemo(() => {
     const totalRevenue = dailyRevenue.reduce(
       (sum, d) => sum + (d.revenue || 0),
@@ -170,8 +184,8 @@ const AdminDashboard = ({ orders = [], products = [] }) => {
     const orderCount = orders.length;
 
     return {
-      totalRevenue, // 전체 누적 매출
-      predictedSum, // 선택 기간 horizon만큼의 예측 합계
+      totalRevenue,
+      predictedSum,
       orderCount,
     };
   }, [dailyRevenue, forecastData, orders]);
@@ -236,7 +250,7 @@ const AdminDashboard = ({ orders = [], products = [] }) => {
         <S.ChartWrapper>
           <ResponsiveContainer width="100%" height={300}>
             <LineChart
-              data={chartData}
+              data={filteredChartData}
               margin={{ top: 10, right: 20, left: 0, bottom: 0 }}
             >
               <CartesianGrid strokeDasharray="3 3" />
@@ -262,6 +276,7 @@ const AdminDashboard = ({ orders = [], products = [] }) => {
         </S.ChartWrapper>
       </S.ChartSection>
 
+      {/* 카테고리별 매출 / 주문 수 */}
       <S.ChartSection>
         <S.SectionTitle>카테고리별 매출 / 주문 수</S.SectionTitle>
 
