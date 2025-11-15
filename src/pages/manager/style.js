@@ -314,5 +314,167 @@ S.TabButton = styled.button`
   }
 `;
 
+S.DashboardGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+
+  @media (max-width: 1024px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+S.StatCard = styled.div`
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 16px 20px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+`;
+
+S.StatTitle = styled.div`
+  font-size: 14px;
+  color: #666;
+`;
+
+S.StatValue = styled.div`
+  font-size: 20px;
+  font-weight: 700;
+  color: #333;
+`;
+
+S.StatDescription = styled.div`
+  font-size: 12px;
+  color: #999;
+`;
+
+S.SectionTitle = styled.h3`
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  margin-top: 8px;
+  color: #333;
+`;
+
+
+S.DashboardHeaderRow = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 16px;
+`;
+
+S.DashboardSubTitle = styled.p`
+  font-size: 13px;
+  color: #777;
+`;
+
+S.DashboardGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+
+  @media (max-width: 1024px) {
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+  }
+`;
+
+S.DashboardCard = styled.div`
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 16px 20px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+`;
+
+S.MetricLabel = styled.div`
+  font-size: 13px;
+  color: #888;
+`;
+
+S.MetricValue = styled.div`
+  font-size: 20px;
+  font-weight: 700;
+  color: #222;
+`;
+
+S.ChartSection = styled.section`
+  margin-top: 24px;
+`;
+
+S.SectionTitle = styled.h3`
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 12px;
+`;
+
+S.ChartWrapper = styled.div`
+  width: 100%;
+  height: 320px;
+  background: #fff;
+  border-radius: 12px;
+  padding: 12px 16px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+`;
+
+S.ChartGrid = styled.div`
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 16px;
+
+  @media (max-width: 1024px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+S.CategoryList = styled.div`
+  background: #fff;
+  border-radius: 12px;
+  padding: 12px 16px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+  max-height: 320px;
+  overflow-y: auto;
+`;
+
+S.CategoryItem = styled.div`
+  padding: 8px 0;
+  border-bottom: 1px solid #f1f1f1;
+  &:last-child {
+    border-bottom: none;
+  }
+`;
+
+S.CategoryName = styled.div`
+  font-size: 14px;
+  font-weight: 600;
+`;
+
+S.CategoryMeta = styled.div`
+  font-size: 12px;
+  color: #777;
+`;
+
+S.InfoText = styled.div`
+  margin-top: 8px;
+  font-size: 12px;
+  color: #777;
+`;
+
+S.ErrorText = styled.div`
+  margin-top: 8px;
+  font-size: 12px;
+  color: #d9534f;
+`;
+
 export default S;
 
