@@ -26,6 +26,13 @@ export const ChattingProvider = ({ children }) => {
 
     useEffect(() => {
         getRooms();
+        
+        const handleRefresh = () => {
+            getRooms();
+        };
+        
+        window.addEventListener("refreshChatList", handleRefresh);
+        return () => window.removeEventListener("refreshChatList", handleRefresh);
     }, []);
 
     const value = {
