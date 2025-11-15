@@ -1,3 +1,4 @@
+// src/pages/.../mypage/myshop/MyShopOrderContainer.jsx
 import React, { useEffect, useState } from "react";
 import S from "../style";
 import ReviewModal from "../review/ReviewModal";
@@ -14,10 +15,10 @@ const MyShopOrderContainer = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  //  key: productId, value: true(이미 리뷰 있음) / false(리뷰 없음)
+  // key: productId, value: true(이미 리뷰 있음) / false(리뷰 없음)
   const [reviewExists, setReviewExists] = useState({});
 
-  // 모달
+  // 리뷰 모달
   const [open, setOpen] = useState(false);
   const [target, setTarget] = useState(null);
 
@@ -37,7 +38,7 @@ const MyShopOrderContainer = () => {
     setTarget(null);
   };
 
-  // 구매내역
+  // ✅ 구매내역 조회 (결제완료만 필터링)
   useEffect(() => {
     if (!memberId) return;
 
@@ -64,7 +65,18 @@ const MyShopOrderContainer = () => {
 
         const json = await res.json();
         const list = Array.isArray(json?.data) ? json.data : [];
-        setOrders(list);
+
+        // ✅ 결제 상태 기준으로 "완료된 주문"만 남김
+        //   - paymentStatus, orderStatus, status 중 들어오는 값에 따라 체크
+        const filtered = list.filter((o) => {
+          const status =
+            o.paymentStatus || o.orderStatus || o.status || o.payment_status;
+
+          // 결제 완료만 표시 (나머지: 취소, 실패, 대기 등은 안 보이게)
+          return status === "COMPLETED";
+        });
+
+        setOrders(filtered);
       } catch (e) {
         setError(e.message || "주문 조회 실패");
       } finally {
@@ -73,9 +85,9 @@ const MyShopOrderContainer = () => {
     };
 
     fetchOrders();
-  }, [memberId]); 
+  }, [memberId]);
 
-  // 구매내역에 있는 productId 들에 대해 "리뷰 존재 여부" 조회
+  // ✅ 구매내역에 있는 productId 들에 대해 "리뷰 존재 여부" 조회
   useEffect(() => {
     if (!isLogin || !memberId) {
       setReviewExists({});
@@ -102,7 +114,6 @@ const MyShopOrderContainer = () => {
               },
             });
 
-
             if (!res.ok) {
               return [productId, false];
             }
@@ -127,14 +138,14 @@ const MyShopOrderContainer = () => {
     fetchReviewExists();
   }, [orders, isLogin, memberId]);
 
-  const totalCount = orders[0]?.orderTotalCount ?? orders.length;
-
+  // ✅ 실제 화면에 보이는 주문 개수
+  const totalCount = orders.length;
 
   const handleSubmit = ({ productId }) => {
     if (productId) {
       setReviewExists((prev) => ({
         ...prev,
-        [productId]: true, 
+        [productId]: true,
       }));
     }
     closeReview();
@@ -184,7 +195,6 @@ const MyShopOrderContainer = () => {
                   </S.PurchaseDate>
                 </S.ItemContent>
 
-
                 <S.OrderActionButton
                   disabled={alreadyReviewed}
                   onClick={() => {
@@ -217,7 +227,7 @@ const MyShopOrderContainer = () => {
           name: target?.name,
           imageUrl: target?.image,
         }}
-        onSubmit={handleSubmit} 
+        onSubmit={handleSubmit}
       />
     </div>
   );

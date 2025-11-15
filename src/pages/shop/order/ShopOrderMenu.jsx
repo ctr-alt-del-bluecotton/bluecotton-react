@@ -7,7 +7,7 @@ import PaymentMethod from "./PaymentMathod";
 import { useModal } from "../../../components/modal/useModal";
 import { useSelector, useDispatch } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
-import { updateMemberCandy } from "../../../store/userSlice"; // 경로 확인
+import { updateMemberCandy } from "../../../store/userSlice"
 
 const PORTONE_IMP_KEY = process.env.REACT_APP_PORTONE_IMP_KEY;
 const API = process.env.REACT_APP_BACKEND_URL;
