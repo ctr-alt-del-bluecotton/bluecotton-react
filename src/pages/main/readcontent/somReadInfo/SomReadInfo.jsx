@@ -6,11 +6,14 @@ import { useState } from 'react';
 
 const SomReadInfo = () => {
   const { isLogin, currentUser } = useSelector((state) => state.user);
-  const { somInfo, formatDate, somJoinSoloSom, somJoin, somJoinNotLogin, somLikeUpdate, somMemberList } = useRead();
+  const { somInfo, formatDate, 
+    somJoinSoloSom, somJoin, 
+    somJoinNotLogin, somLikeUpdate, 
+    somMemberList, somCategoryInfo, 
+    wisperSoloSom, isLater } = useRead();
   const {
     id,
     somTitle,
-    somCategory,
     somAddress,
     somStartDate,
     somType,
@@ -22,6 +25,7 @@ const SomReadInfo = () => {
 
   const [ isLike, setIsLike ] = useState(isSomLike);
   const [ likeCount, setLikeCount ] = useState(somLikeCount); 
+  
   
 
   // 증가 쿼리 fetch 예정
@@ -64,7 +68,8 @@ const SomReadInfo = () => {
     somJoin();
   };
 
-  const somButton = somType !== "solo" ? <S.somButton onClick={somOnClick}>참여 - {somTypeText}({somCount})</S.somButton>
+  const isSolo = somType === "solo" ;
+  const somButton = !isSolo ? <S.soloSomButton onClick={somOnClick}>참여 - {somTypeText}({somCount})</S.soloSomButton>
   : <S.fullSomButton onClick={somOnClick}>참여 - {somTypeText}({somCount})</S.fullSomButton> ;
 
   const somLikeButton = isLike ?
@@ -83,7 +88,7 @@ const SomReadInfo = () => {
         <S.somCategoryIcon src='../../../../assets/icons/som_read_category_icon.png' alt="카테고리 아이콘"/>
         <S.somCategoryTitle>카테고리</S.somCategoryTitle>
         <span>{'>'}</span>
-        <S.somCategory>{somCategory}</S.somCategory>
+        <S.somCategory>{somCategoryInfo}</S.somCategory>
       </S.somCategoryWrap>
       <S.somTitle>{somTitle}</S.somTitle>
       <S.somCountWrap>
@@ -107,9 +112,15 @@ const SomReadInfo = () => {
         <S.somAddress>{somAddress}</S.somAddress>
       </S.somAddressWrap>
       <S.somButtonWrap>
-        <S.somButton>귓솜말하기</S.somButton>
-        {somButton}
-        {somLikeButton}
+        { !isLater ? 
+        '기간이 지난 솜입니다.' : 
+        <>
+          {isSolo && <S.somButton onClick={() => wisperSoloSom(somTitle)}>귓솜말하기</S.somButton>}
+          {somButton}
+          {somLikeButton}
+        </>
+        }
+        
       </S.somButtonWrap>
     </S.somInfoWrap>
   );

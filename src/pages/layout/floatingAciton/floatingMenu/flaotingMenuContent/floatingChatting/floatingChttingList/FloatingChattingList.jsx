@@ -18,8 +18,7 @@ const FloatingChattingListContainer = () => {
 
     return (
         <S.chattingListWrap>
-            { !isLoding ? '로딩 중입니다.' :
-                joinRooms?.map((content, i) => (
+            { joinRooms?.map((content, i) => (
                     <FloatingChattingContent key={i} content={content} setChattingMenu={setChattingMenu} />
                 ))
             }

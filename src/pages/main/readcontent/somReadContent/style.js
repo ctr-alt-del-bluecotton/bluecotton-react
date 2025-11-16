@@ -13,6 +13,8 @@ S.somReadContentContainer = styled.div`
 
 S.somImage = styled.img`
   width: 100%;
+  height: 400px;
+  object-fit: cover;
 `
 
 S.somInfoMenu = styled.div`

@@ -8,7 +8,7 @@ S.floatingChattingContent = styled.div`
   ${white}
   width: calc(100% - 60px);
   padding: 10px 30px;
-  background-color: ${({theme}) => theme.PALLETE.primary.light1};
+  background-color: ${({theme}) => theme.PALLETE.primary.main};
   border-radius: 5px;
   cursor: pointer;
   
