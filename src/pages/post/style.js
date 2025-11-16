@@ -1,5 +1,4 @@
 import styled from "styled-components";
-import * as C from "../../styles/common";
 const S = {};
 
 /* === 전체 컨테이너 === */
@@ -16,12 +15,12 @@ S.Container = styled.div`
 S.Banner = styled.div`
   width: 100%;
   display: flex;
-  justify-content: center; /* ✅ 중앙 기준으로 정렬 */
+  justify-content: center; 
   margin: 40px 0 40px;
-  background: transparent; /* ✅ 혹시나 배경 겹침 방지 */
+  background: transparent; 
 
   .banner-inner {
-    width: 1160px; /* ✅ 진짜 배너 폭 고정 */
+    width: 1160px; 
     height: 250px;
     border-radius: 4px;
     background: url("/assets/images/post_banner.png") center/cover no-repeat;
@@ -119,9 +118,9 @@ S.Pagination = styled.div`
 `;
 
 S.WriteButtonWrapper = styled.div`
-  width: 1160px; /* ✅ 그리드 너비에 맞춤 */
+  width: 1160px; 
   display: flex;
-  justify-content: flex-end; /* ✅ 우측 끝 정렬 */
+  justify-content: flex-end; 
   margin-top: 0;
   margin-bottom: 24px;
 

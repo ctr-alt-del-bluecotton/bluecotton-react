@@ -105,13 +105,13 @@ S.FormGroup = styled.div`
     }
   }
 
-  /* ✨ placeholder 색상 변경 */
+  /* placeholder 색상 변경 */
   .toastui-editor-contents::before {
     color: ${({ theme }) => theme.PALLETE.grey.greyScale3} !important;
     opacity: 1 !important;
   }
 
-  /* 🔥🔥🔥 이미지 크기 자동 조정 — 핵심 부분 */
+  /* 이미지 크기 자동 조정 — 핵심 부분 */
   .toastui-editor-contents img {
     max-width: 100% !important;   /* 컨테이너 너비 안에서만 */
     height: auto !important;      /* 비율 유지 */
@@ -120,7 +120,7 @@ S.FormGroup = styled.div`
     border-radius: 10px;          /* 디자인 핏 업! */
   }
 
-  /* ✨ 글자 수 카운트 */
+  /* 글자 수 카운트 */
   .char-count {
     font-size: ${({ theme }) => theme.FONT_SIZE["smallText3"]};
     color: ${({ theme }) => theme.PALLETE.grey.greyScale3};
