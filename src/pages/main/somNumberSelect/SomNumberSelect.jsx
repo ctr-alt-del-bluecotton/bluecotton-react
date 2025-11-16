@@ -4,25 +4,24 @@ import { useMain } from "../../../context/MainContext";
 
 const SomNumberSelect = () => {
   const { pageNumber, setPageNumber, maxPage } = useMain();
-  const totalPages = maxPage; 
+  const totalPages = maxPage;
   const groupSize = 10;
 
-  // 현재 페이지 그룹의 시작 번호 계산
   const currentGroup = Math.floor((pageNumber - 1) / groupSize);
   const startPage = currentGroup * groupSize + 1;
   const endPage = Math.min(startPage + groupSize - 1, totalPages);
 
   return (
     <S.Wrapper>
-      {/* 이전 그룹 */}
+      {/* 이전 */}
       <S.PrevButton
-        disabled={startPage === 1}
-        onClick={() => setPageNumber(startPage - groupSize)}
+        disabled={pageNumber === 1}
+        onClick={() => setPageNumber((prev) => prev - 1)}
       >
         &lt; 이전
       </S.PrevButton>
+
       <S.PageList>
-        {/* 페이지 리스트 */}
         {Array.from({ length: endPage - startPage + 1 }, (_, i) => {
           const page = startPage + i;
           return (
@@ -30,7 +29,7 @@ const SomNumberSelect = () => {
               key={page}
               className={pageNumber === page ? "active" : ""}
               onClick={() => {
-                setPageNumber(page)
+                setPageNumber(page);
                 window.scrollTo(0, 0);
               }}
             >
@@ -40,10 +39,10 @@ const SomNumberSelect = () => {
         })}
       </S.PageList>
 
-      {/* 다음 그룹 */}
+      {/* 다음 */}
       <S.AfterButton
-        disabled={endPage >= totalPages}
-        onClick={() => setPageNumber(startPage + groupSize)}
+        disabled={pageNumber === totalPages}
+        onClick={() => setPageNumber((prev) => prev + 1)}
       >
         다음 &gt;
       </S.AfterButton>

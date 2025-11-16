@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import S from "./style";
+import { useModal } from "../../components/modal/useModal";
 
 export default function FindEmail() {
   const [memberName, setMemberName] = useState("");
@@ -8,9 +9,14 @@ export default function FindEmail() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const { openModal } = useModal();
+
   const findEmail = async () => {
     if (!memberName.trim() || !memberPhone.trim()) {
-      alert("이름과 전화번호를 모두 입력해주세요.");
+      openModal({
+        title: "이름과 전화번호를\n모두 입력해주세요.",
+        confirmText: "확인",
+      });
       return;
     }
 
@@ -25,15 +31,23 @@ export default function FindEmail() {
       const json = await res.json();
 
       if (!json.data || !json.data.email) {
-        alert("일치하는 회원 정보를 찾을 수 없습니다.");
+        openModal({
+          title: "일치하는 회원 정보를 찾을 수 없습니다.",
+          confirmText: "확인",
+        });
         setEmail("");
         return;
       }
 
       setEmail(json.data.email);
+
     } catch (err) {
       console.error(err);
-      alert("서버 요청 중 오류가 발생했습니다.");
+      openModal({
+        title: "서버 요청 중 오류가 발생했습니다.",
+        confirmText: "확인",
+      });
+
     } finally {
       setLoading(false);
     }

@@ -203,10 +203,21 @@ const PostReadContent = () => {
   if (loading) return <S.Container>로딩 중...</S.Container>;
   if (!post) return <S.Container>게시글이 없습니다.</S.Container>;
 
-
   let raw = post.postContent || "";
-
   let htmlContent = marked.parse(raw);
+
+  /** 🔥 공유용 썸네일 함수 */
+  const getThumbnail = () => {
+    if (post.postImageList && post.postImageList.length > 0) {
+      const img = post.postImageList[0];
+      const url = `${img.postImagePath}${img.postImageName}`;
+      if (url.startsWith("http")) return url;
+      return `http://localhost:10000${url.startsWith("/") ? url : "/" + url}`;
+    }
+    return "/assets/images/postDefault.jpg";
+  };
+
+  const thumbnail = getThumbnail();
 
   return (
     <S.Container>
@@ -221,16 +232,15 @@ const PostReadContent = () => {
       </S.MetaBox>
 
       <S.Content>
-        {/* ✨ 본인 글이면 수정/삭제 */}
         {isLogin && currentUser?.id === post.memberId && (
           <S.EditBox>
-            <span onClick={() => navigate(`/main/post/modify/${id}`)}>수정</span>{" "}
+            <span onClick={() => navigate(`/main/post/modify/${id}`)}>
+              수정
+            </span>{" "}
             | <span onClick={handleDelete}>삭제</span>
           </S.EditBox>
         )}
 
-
-        {/* ⭐ 마크다운 → HTML 렌더링 (이미지 포함) */}
         <div
           className="post-content"
           dangerouslySetInnerHTML={{ __html: htmlContent }}
@@ -255,14 +265,15 @@ const PostReadContent = () => {
         <S.ShareButton
           onClick={() => {
             if (!window.Kakao) return;
+
             const shareUrl = `${window.location.origin}/main/post/read/${id}`;
 
             window.Kakao.Share.sendDefault({
               objectType: "feed",
               content: {
                 title: post.postTitle,
-                description: `${post.memberNickname}님의 도전`,
-                imageUrl: post.postImageUrl,
+                description: `${post.memberNickname}의 오늘한 도전이 보고싶다면!?`,
+                imageUrl: thumbnail,
                 link: { mobileWebUrl: shareUrl, webUrl: shareUrl },
               },
             });
@@ -273,7 +284,6 @@ const PostReadContent = () => {
         </S.ShareButton>
       </S.PostSocialBox>
 
-      {/* 댓글 */}
       <PostComment
         showComments={showComments}
         setShowComments={setShowComments}
