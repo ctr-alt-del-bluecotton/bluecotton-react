@@ -1,5 +1,5 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import { useNavigate, useParams } from "react-router-dom";
+import { matchPath, useLocation, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { fetchData, options } from './FetchContext';
 import { useSelector } from 'react-redux';
 import { useModal } from '../components/modal';
@@ -26,9 +26,32 @@ export const MainProvider = ({ children }) => {
     const { openModal } = useModal();
     const [ sortBy, setSortBy ] = useState("all");
     const [ somList, setSomList ] = useState([]);
+    const [searchParams, setSearchParams] = useSearchParams();
     const [ maxPage, setMaxPage ] = useState(1);
     const [ pageNumber, setPageNumber ] = useState(1);
     const { currentUser, isLogin } = useSelector((state) => state.user);
+    const location = useLocation();
+    const isRead = matchPath("/main/som/read/:id", location.pathname);
+    
+    const params = new URLSearchParams();
+    const keyword = (searchParams.get("q") || "").trim();
+
+    useEffect(() => {
+        if (isRead) return;
+    
+        const next = new URLSearchParams(searchParams);
+        let changed = false;
+    
+        // if ((searchParams.get("page") || "1") !== "1") {
+        //   next.set("page", "1");
+        //   changed = true;
+        // }
+    
+        if (changed) setSearchParams(next, { replace: true });
+    
+        // eslint-disable-next-line
+      }, [category, sortBy, keyword]);
+
     useEffect(() => {
         setPageNumber(1);
     }, [category]);
@@ -36,7 +59,10 @@ export const MainProvider = ({ children }) => {
     useEffect(() => {
         const loadSomList = async () => {
             try {
-                await fetchData(`som/category?somCategory=${category}&somType=${sortBy}&page=${pageNumber}&memberEmail=${currentUser.memberEmail}` ,options.getOption())
+
+                if (keyword) params.set("q", keyword);
+
+                await fetchData(`som/category?somCategory=${category}&somType=${sortBy}&page=${pageNumber}&memberEmail=${currentUser.memberEmail}&somKeyword=${keyword}` ,options.getOption())
                 .then(async (res) => {
                     const jsonData = await res.json(); 
                     const somListData = jsonData.data.somList;
@@ -57,7 +83,7 @@ export const MainProvider = ({ children }) => {
         window.addEventListener("refreshSomList", handleRefresh);
         return () => window.removeEventListener("refreshSomList", handleRefresh);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [category, sortBy, pageNumber]);
+    }, [category, sortBy, pageNumber, keyword]);
 
     const somLikeUpdate = async (somId, isLike) => {
         const res = await fetchData(`som/like?somId=${somId}&memberEmail=${currentUser.memberEmail}&isLike=${isLike}`,
