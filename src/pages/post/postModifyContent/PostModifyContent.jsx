@@ -6,7 +6,7 @@ import { useModal } from "../../../components/modal";
 import { Editor } from "@toast-ui/react-editor";
 import "@toast-ui/editor/dist/toastui-editor.css";
 
-const MAX_LENGTH = 1000;
+const MAX_LENGTH = 3000;
 
 const categoryMap = {
   study: "학습",
@@ -15,6 +15,18 @@ const categoryMap = {
   hobby: "취미",
   life: "생활",
   rookie: "루키",
+};
+
+const extractImageUrlsFromMarkdown = (md) => {
+  const regex = /!\[.*?\]\((.*?)\)/g;
+  let result;
+  const urls = [];
+  if (!md) return urls;
+
+  while ((result = regex.exec(md)) !== null) {
+    urls.push(result[1]);
+  }
+  return urls;
 };
 
 const PostModifyContent = () => {
@@ -31,6 +43,11 @@ const PostModifyContent = () => {
   const [charCount, setCharCount] = useState(0);
   const [loading, setLoading] = useState(true);
 
+  // ⭐ 이미지 상태
+  const [originalImages, setOriginalImages] = useState([]); // [{id, url}]
+  const [newImages, setNewImages] = useState([]); // [{id, url}]
+  const [currentEditorUrls, setCurrentEditorUrls] = useState([]);
+
   // 로그인 체크
   useEffect(() => {
     if (!isLogin || !currentUser?.id) {
@@ -43,7 +60,7 @@ const PostModifyContent = () => {
     }
   }, [isLogin, currentUser, navigate, openModal]);
 
-  // 🔥 이미지 업로드 (Markdown 기반)
+  // 🔥 이미지 업로드
   const handleImageUpload = async (blob, callback) => {
     try {
       const BASE_URL = process.env.REACT_APP_BACKEND_URL;
@@ -67,9 +84,11 @@ const PostModifyContent = () => {
       const uploadJson = await uploadRes.json();
       const imgUrl = uploadJson.url;
 
-      // 📌 Markdown 모드 공식 콜백 방식
-      callback(imgUrl, "image");
+      if (uploadJson.imageId) {
+        setNewImages((prev) => [...prev, { id: uploadJson.imageId, url: imgUrl }]);
+      }
 
+      callback(imgUrl, "image");
     } catch (err) {
       console.error(err);
       callback(URL.createObjectURL(blob), "image");
@@ -98,14 +117,29 @@ const PostModifyContent = () => {
         setTitle(post.postTitle || "");
         setCategory(post.somId?.toString() || "");
 
-        // 에디터 초기 세팅
+        // ⭐ 기존 이미지 세팅
+        const imageList = post.postImages || post.postImageList;
+        if (imageList && Array.isArray(imageList)) {
+          const imgs = imageList.map((img) => ({
+            id: img.id,
+            url: (img.postImagePath || "") + (img.postImageName || ""),
+          }));
+          setOriginalImages(imgs);
+        }
+
+        // 에디터 초기화
         setTimeout(() => {
-          if (editorRef.current) {
-            const ins = editorRef.current.getInstance();
-            ins.setMarkdown(post.postContent || "");
-            setCharCount(ins.getMarkdown().trim().length);
-          }
-        }, 150);
+          if (!editorRef.current) return;
+          const ins = editorRef.current.getInstance();
+
+          ins.setMarkdown(post.postContent || "");
+
+          const text = ins.getMarkdown() || "";
+          setCharCount(text.trim().length);
+
+          const urls = extractImageUrlsFromMarkdown(text);
+          setCurrentEditorUrls(urls);
+        }, 200);
       } catch (err) {
         console.error("게시글 불러오기 실패", err);
         openModal({
@@ -121,7 +155,7 @@ const PostModifyContent = () => {
     fetchPostData();
   }, [id, navigate, openModal]);
 
-  // 🔥 참여 중 솜 목록 (카테고리)
+  // 🔥 참여 중 솜 목록 불러오기
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -144,14 +178,16 @@ const PostModifyContent = () => {
     fetchCategories();
   }, []);
 
-  // 🔥 글자 수 카운트
+  // 🔥 글자 수 + 이미지 URL 추출
   useEffect(() => {
     const ins = editorRef.current?.getInstance();
     if (!ins) return;
 
     const handleChange = () => {
-      const text = ins.getMarkdown();
+      const text = ins.getMarkdown() || "";
       const len = text.trim().length;
+
+      setCurrentEditorUrls(extractImageUrlsFromMarkdown(text));
 
       if (len > MAX_LENGTH) {
         ins.setMarkdown(text.substring(0, MAX_LENGTH));
@@ -165,11 +201,12 @@ const PostModifyContent = () => {
     return () => ins.off("change", handleChange);
   }, []);
 
-  // 🔥 수정 저장
+  // 수정 제출
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const content = editorRef.current.getInstance().getMarkdown().trim();
+    const editor = editorRef.current?.getInstance();
+    const content = editor?.getMarkdown().trim() || "";
 
     if (!title.trim()) {
       return openModal({ title: "제목을 입력해주세요", confirmText: "확인" });
@@ -177,6 +214,40 @@ const PostModifyContent = () => {
     if (!content.trim()) {
       return openModal({ title: "내용을 입력해주세요", confirmText: "확인" });
     }
+
+    // 파일명 비교 함수
+    const extractFileName = (url) => url.split("/").pop();
+
+    // 남아있는 기존 이미지
+    const remainOldIds = originalImages
+      .filter((img) =>
+        currentEditorUrls.some(
+          (u) => extractFileName(u) === extractFileName(img.url)
+        )
+      )
+      .map((img) => img.id);
+
+    // 남아있는 새 이미지
+    const remainNewIds = newImages
+      .filter((img) =>
+        currentEditorUrls.some(
+          (u) => extractFileName(u) === extractFileName(img.url)
+        )
+      )
+      .map((img) => img.id);
+
+    // 삭제된 기존 이미지
+    const deleteImageIds = originalImages
+      .filter(
+        (img) =>
+          !currentEditorUrls.some(
+            (u) => extractFileName(u) === extractFileName(img.url)
+          )
+      )
+      .map((img) => img.id);
+
+    // 최종 이미지
+    const finalPostImageIds = [...remainOldIds, ...remainNewIds];
 
     try {
       const BASE_URL = process.env.REACT_APP_BACKEND_URL;
@@ -189,9 +260,12 @@ const PostModifyContent = () => {
         },
         body: JSON.stringify({
           postTitle: title,
-          somId: parseInt(category),
-          postContent: content, // ← Markdown 저장
+          somId: parseInt(category, 10),
+          postContent: content,
           memberId: currentUser.id,
+          postImageIds: finalPostImageIds,
+          newImageIds: remainNewIds,
+          deleteImageIds,
         }),
       });
 
@@ -253,14 +327,16 @@ const PostModifyContent = () => {
           <Editor
             ref={editorRef}
             previewStyle="vertical"
-            height="400px"
+            height="800px"
             initialEditType="wysiwyg"
             hideModeSwitch={true}
             placeholder="수정할 내용을 자유롭게 입력해주세요"
             useCommandShortcut={true}
             hooks={{ addImageBlobHook: handleImageUpload }}
           />
-          <div className="char-count">{charCount}/{MAX_LENGTH}</div>
+          <div className="char-count">
+            {charCount}/{MAX_LENGTH}
+          </div>
         </S.FormGroup>
 
         <S.ButtonBox>
