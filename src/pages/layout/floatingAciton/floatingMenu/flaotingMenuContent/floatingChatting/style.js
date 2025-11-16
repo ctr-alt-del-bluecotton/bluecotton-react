@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { flexCenterColumn, primary, title } from "../../../../../../styles/common";
+import { primary, title } from "../../../../../../styles/common";
 
 const S = {};
 

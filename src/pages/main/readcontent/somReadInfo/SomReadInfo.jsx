@@ -72,7 +72,11 @@ const SomReadInfo = () => {
   const somButton = !isSolo ? <S.soloSomButton onClick={somOnClick}>참여 - {somTypeText}({somCount})</S.soloSomButton>
   : <S.fullSomButton onClick={somOnClick}>참여 - {somTypeText}({somCount})</S.fullSomButton> ;
 
-  const somLikeButton = isLike ?
+  const somLikeButton = !isLogin ? 
+  <S.somLikeButton onClick={() => somJoinNotLogin()}>
+    <S.somLikeIcon src='../../../../assets/icons/som_read_like_inactive.png' alt='솜 좋아요 true'/>
+    <S.somLikeCount>{likeCount}</S.somLikeCount>
+  </S.somLikeButton> : isLike ?
     <S.somLikeButton onClick={isLikeButtonOnclick}>
       <S.somLikeIcon src='../../../../assets/icons/som_read_like_active.png' alt='솜 좋아요 true'/>
       <S.somLikeCount>{likeCount}</S.somLikeCount>
