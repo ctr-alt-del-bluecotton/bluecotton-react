@@ -6,7 +6,7 @@ import { useModal } from "../../../components/modal";
 import { Editor } from "@toast-ui/react-editor";
 import "@toast-ui/editor/dist/toastui-editor.css";
 
-const MAX_LENGTH = 1000;
+const MAX_LENGTH = 3000;
 
 const categoryMap = {
   study: "학습",
