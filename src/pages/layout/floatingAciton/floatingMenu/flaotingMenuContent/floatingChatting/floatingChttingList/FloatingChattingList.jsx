@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import S from './style';
-import { ChattingProvider, useChatting } from '../../../../../../../context/ChattingContext';
+import { useChatting } from '../../../../../../../context/ChattingContext';
 import FloatingChattingContent from './floatingChattingCotent/FloatingChattingContent';
 
 
@@ -11,7 +11,7 @@ const FloatingChattingListContainer = () => {
     const [ isLoding, setIsLoding ] = useState(false);
     
     useState(() => {
-        if(joinRooms?.length == 0) {
+        if(joinRooms?.length === 0) {
             setIsLoding(true)
         }
     },[isLoding, joinRooms])
@@ -28,7 +28,7 @@ const FloatingChattingListContainer = () => {
 
 const FloatingChattingList = () => {
     return (
-            <FloatingChattingListContainer />
+        <FloatingChattingListContainer />
     )
 }
 
