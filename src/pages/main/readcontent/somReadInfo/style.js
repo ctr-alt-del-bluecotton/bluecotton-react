@@ -128,6 +128,7 @@ S.somAddress = styled.div`
 
 S.somButtonWrap = styled.div`
   display: flex;
+  width: 100%;
   justify-content: space-between;
   gap: 15px;
 `;
@@ -137,6 +138,26 @@ S.somButton = styled.div`
   ${white}
   border-radius: 10px;
   width: calc(40% - 15px);
+  height: 58px;
+  background-color: ${({ theme }) => theme.PALLETE.primary.main};
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  
+  transition: all 0.2s;
+
+  &:hover {
+    background-color: ${({ theme }) => theme.PALLETE.primary.dark};
+    ${white}
+  }
+`;
+
+S.soloSomButton = styled.div`
+  ${smallText3Regular}
+  ${white}
+  border-radius: 10px;
+  width: calc(80% - 15px);
   height: 58px;
   background-color: ${({ theme }) => theme.PALLETE.primary.main};
   cursor: pointer;
