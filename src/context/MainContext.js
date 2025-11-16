@@ -1,6 +1,5 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { useParams } from "react-router-dom";
-import somIsLikeListDummy from "../pages/main/dummyData/somIsLikeDummy.json";
 import { fetchData, options } from './FetchContext';
 import { useSelector } from 'react-redux';
 
@@ -14,10 +13,11 @@ const categoryMap = {
     study: "학습",
     health: "건강",
     social: "소셜",
-    hobbies: "취미",
-    "life-style": "생활",
+    hobby: "취미",
+    life: "생활",
     rookie: "루키"
 };
+
 
 export const MainProvider = ({ children }) => {
     const { category } = useParams();
@@ -26,7 +26,6 @@ export const MainProvider = ({ children }) => {
     const [ maxPage, setMaxPage ] = useState(1);
     const [ pageNumber, setPageNumber ] = useState(1);
     const { currentUser, isLogin } = useSelector((state) => state.user);
-    
     useEffect(() => {
         setPageNumber(1);
     }, [category]);
@@ -34,12 +33,10 @@ export const MainProvider = ({ children }) => {
     useEffect(() => {
         const loadSomList = async () => {
             try {
-                console.log(category)
                 await fetchData(`som/category?somCategory=${category}&somType=${sortBy}&page=${pageNumber}&memberEmail=${currentUser.memberEmail}` ,options.getOption())
                 .then(async (res) => {
-                    const jsonData = await res.json();
-                    console.log(jsonData)
-                    const somListData = jsonData.data.somList;
+                    const jsonData = await res.json(); 
+                    const somListData = jsonData.data.somList.filter((content) => new Date(content.somEndDate) > new Date());
                     const somMaxPage = jsonData.data.maxPage;
                     setSomList(somListData);
                     setMaxPage(somMaxPage);
@@ -56,6 +53,7 @@ export const MainProvider = ({ children }) => {
 
         window.addEventListener("refreshSomList", handleRefresh);
         return () => window.removeEventListener("refreshSomList", handleRefresh);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [category, sortBy, pageNumber]);
 
     const somLikeUpdate = async (somId, isLike) => {

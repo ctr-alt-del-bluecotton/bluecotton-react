@@ -48,6 +48,7 @@ S.somLeaderProfileImage = styled.img`
     width: 80px;
     height: 80px;
     border-radius: 100%;
+    object-fit: cover;
     border: 1px solid ${({ theme }) => theme.PALLETE.grey.greyScale3};
 `
 
@@ -68,6 +69,12 @@ S.somLeaderReviewCount = styled.div`
     ${paragraphRegular}
     color: ${({ theme }) => theme.PALLETE.primary.light1};
 `
+
+S.somLeaderNoReview = styled.div`
+    ${smallText3Regular}
+    color: ${({ theme }) => theme.PALLETE.grey.greyScale3};
+`
+
 
 S.somLeaderProfileTitleWrap = styled.div`
 

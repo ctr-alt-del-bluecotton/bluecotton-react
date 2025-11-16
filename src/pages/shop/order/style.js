@@ -279,7 +279,7 @@ S.PaymentWrap = styled.div`
 
 S.PaymentContainer = styled.div`
   width: 1120px;
-  height: 280px;
+  height: 400px;
   display: flex;
   flex-direction: column;
   padding-top: 29px;

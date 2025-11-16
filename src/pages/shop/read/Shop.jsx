@@ -23,8 +23,8 @@ const Shop = () => {
   const { openModal } = useModal();
   const { currentUser, isLogin } = useSelector((state) => state.user);
 
-  const [headerData, setHeaderData] = useState(null); // 상품 상단 헤더
-  const [reviewStats, setReviewStats] = useState(null); // "리뷰 평점"
+  const [headerData, setHeaderData] = useState(null); 
+  const [reviewStats, setReviewStats] = useState(null); 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -33,7 +33,7 @@ const Shop = () => {
   const [isLiked, setIsLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
   const [selectedImage, setSelectedImage] = useState(null);
-  const [goCart, setGoCart] = useState([]);
+  const [setGoCart] = useState([]);
 
   const totalText = useMemo(() => {
     if (!headerData) return "";
@@ -43,7 +43,6 @@ const Shop = () => {
     return formatPrice(purchaseType, price * count);
   }, [headerData, count]);
 
-  // useEffect 1개로 2개 fetch
   useEffect(() => {
     const loadAllHeaderData = async () => {
       setLoading(true);
@@ -52,18 +51,15 @@ const Shop = () => {
       setReviewStats(null);
 
       try {
+        const base = process.env.REACT_APP_BACKEND_URL;
 
-        const base = process.env.REACT_APP_BACKEND_URL; 
+        const memberId =
+          isLogin && currentUser && currentUser.id ? currentUser.id : null;
 
-
-        const memberId = isLogin && currentUser && currentUser.id ? currentUser.id : null;
-
-        // memberId 를 URL에 반영
         const headerUrl = memberId
-        ? `${base}/shop/read/${id}?memberId=${memberId}`
-        : `${base}/shop/read/${id}`;
+          ? `${base}/shop/read/${id}?memberId=${memberId}`
+          : `${base}/shop/read/${id}`;
 
-        // 상품 헤더 (read/{id})
         const headerRes = await fetch(headerUrl, {
           headers: { "Content-Type": "application/json" },
           method: "GET",
@@ -71,7 +67,7 @@ const Shop = () => {
         if (!headerRes.ok) throw new Error("상품 정보 로딩 실패");
         const headerJson = await headerRes.json();
 
-        // 리뷰 평점 (review/status)
+    
         const statsRes = await fetch(
           `${base}/shop/read/${id}/review/status`,
           {
@@ -82,14 +78,13 @@ const Shop = () => {
         if (!statsRes.ok) throw new Error("리뷰 통계 로딩 실패");
         const statsJson = await statsRes.json();
 
-        // 상태 저장
         setHeaderData(headerJson.data);
         setReviewStats(statsJson.data);
 
-        // 좋아요 갯수
+        
         setLikeCount(Number(headerJson.data.productLikeCount) || 0);
 
-        // ★ 서버에서 isLiked 내려주면 초기값 세팅
+   
         const likedFlag =
           headerJson.data.productIsLiked ?? headerJson.data.isLiked;
         if (likedFlag !== undefined && likedFlag !== null) {
@@ -100,7 +95,6 @@ const Shop = () => {
 
         const subs = parseSubs(headerJson.data.productSubImageUrl);
 
-        // 메인/서브 이미지 resolveUrl 적용
         setSelectedImage(
           resolveUrl(headerJson.data.productMainImageUrl) ||
             resolveUrl(subs[0]) ||
@@ -116,9 +110,8 @@ const Shop = () => {
     if (id) {
       loadAllHeaderData();
     }
-  }, [id, isLogin, currentUser?.id]); 
+  }, [id, isLogin, currentUser?.id]);
 
-  // 로그인 시에만 토글 사용
   const toggleLike = async () => {
     if (!isLogin || !currentUser?.id) {
       openModal({
@@ -148,7 +141,6 @@ const Shop = () => {
       const json = await res.json();
       const data = json.data || {};
 
-      // 서버에서 내려주는 값으로 동기화
       setLikeCount(Number(data.productLikeCount) || 0);
 
       const likedFlag = data.productIsLiked ?? data.isLiked ?? 0;
@@ -212,19 +204,18 @@ const Shop = () => {
     productPurchaseType,
     productSubImageUrl,
     productType,
+    productMainImageUrl,
   } = headerData;
 
   const { avgScore, totalCount: reviewCount } = reviewStats;
 
   const subImagesOnly = parseSubs(productSubImageUrl);
 
-  // 절대주소로 변환
   const allThumbnails = [
-    resolveUrl(headerData.productMainImageUrl),
+    resolveUrl(productMainImageUrl),
     ...subImagesOnly.map(resolveUrl),
   ].filter(Boolean);
 
-  const subImages = parseSubs(productSubImageUrl);
   const isNew = String(productType || "").includes("NEW");
   const isBest = String(productType || "").includes("BEST");
 
@@ -235,7 +226,7 @@ const Shop = () => {
       memberId: currentUser.id,
       productId: Number(id),
       orderQuantity: count,
-      orderTotalPrice: Number(headerData.productPrice) * count,
+      orderTotalPrice: Number(productPrice) * count,
     };
 
     const url = `${process.env.REACT_APP_BACKEND_URL}/order/single`;
@@ -258,8 +249,23 @@ const Shop = () => {
       if (!orderId) {
         throw new Error("서버에서 유효한 주문 ID를 받지 못했습니다.");
       }
-
-      navigate(`/main/shop/order?orderId=${orderId}`);
+      navigate(`/main/shop/order?orderId=${orderId}`, {
+        state: {
+          snapshot: {
+            items: [
+              {
+                productId: Number(id),
+                name: productName,
+                unitPrice: Number(productPrice),
+                quantity: count,
+                imageUrl: resolveUrl(productMainImageUrl),
+                purchaseType: productPurchaseType,
+              },
+            ],
+            totalPrice: Number(productPrice) * count,
+          },
+        },
+      });
     } catch (error) {
       openModal({
         title: "주문 오류",
@@ -288,7 +294,6 @@ const Shop = () => {
             </S.SubImageArea>
           )}
 
-          {/* 정보/리뷰 탭 */}
           <S.InfoSection>
             <S.InfoTabs>
               <S.InfoTab

@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { basic, flexStartColumn, smallText3Regular, title } from "../../../../../../../styles/common";
+import { basic, flexStartColumn, smallText0Regular, smallText1Regular, smallText2Regular, smallText3Regular, title, white } from "../../../../../../../styles/common";
 const S = {};
 
 S.Container = styled.div`
@@ -15,9 +15,26 @@ S.Header = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 18px 20px;
+  padding: 10px 20px;
 `;
 
+S.backButton = styled.div`
+  ${smallText2Regular}
+  ${white}
+  background-color: ${({ theme }) => theme.PALLETE.primary.main}; 
+  position: absolute;
+  left: 0;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+  padding: 5px 15px;
+  transition: all 0.2s;
+
+  &:hover{
+    background-color: ${({ theme }) => theme.PALLETE.primary.dark}; 
+  }
+
+`
 
 S.Title = styled.h3`
   ${smallText3Regular}
@@ -34,6 +51,29 @@ S.ChatBody = styled.div`
   display: flex;
   flex-direction: column;
   gap: 12px;
+
+  /* 스크롤바 - Chrome, Edge, Safari */
+  &::-webkit-scrollbar {
+    width: 8px;         /* 스크롤바 너비 */
+  }
+
+  &::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);  /* 트랙 배경 */
+    border-radius: 4px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: ${({ theme }) => theme.PALLETE.primary.light0};  /* 색상 */
+    border-radius: 4px;                                       /* 둥글기 */
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: ${({ theme }) => theme.PALLETE.primary.dark1}; /* hover 색상 */
+  }
+
+  /* Firefox 전용 */
+  scrollbar-width: thin;
+  scrollbar-color: ${({ theme }) => theme.PALLETE.primary.light1} transparent;
 `;
 
 S.ChatContent = styled.div`

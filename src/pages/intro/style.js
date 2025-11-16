@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { basic, fontGreyScale0,  fontGreyScale3, heading1, heading2, heading3, heading4, paragraphLight, paragraphRegular, paragraphStrong, primary, primaryLight1, secondary, secondaryDark, secondaryLight, smallText3Regular,title, titleBold, white } from "../../styles/common";
+import { basic, fontGreyScale0,  fontGreyScale1,  fontGreyScale2,  fontGreyScale3, heading1, heading2, heading3, heading4, paragraphLight, paragraphRegular, paragraphStrong, primary, primaryLight1, secondary, secondaryDark, secondaryLight, smallText3Regular,title, titleBold, white } from "../../styles/common";
 import {shapeCSS, sizeCSS } from "../../components/button/style";
 
 const S = {};
@@ -71,7 +71,7 @@ S.IntroBannerButton = styled.button `
 S.WhatIsSomWrap = styled.div `
     width: 100%;
     box-sizing: border-box;
-    background-color: #9D90EF; 
+    background-color: #3182F6; 
     
 `
 S.WhatIsSomContainer = styled.div `
@@ -86,7 +86,7 @@ S.WhatIsSomContainer = styled.div `
 `
 
 S.WhatIsSomImg = styled.img `
-    width: 255px;
+    width: 370px;
     height: 392px;
 `
 
@@ -98,25 +98,25 @@ S.WhatIsSomTextContainer = styled.div `
 
 S.WhatIsSomText1 = styled.p `
     ${heading4}
-    ${basic}
+    color: #FFFFFF;
 `
 S.WhatIsSomBlueText1 = styled.span `
     ${heading4}
-    ${primary}
+    color: yellow;
 `
 
 S.WhatIsSomText2 = styled.p `
     ${heading1}
-    ${basic}
+    color: #FFFFFF;
 `
 
 S.WhatIsSomBlueText2 = styled.span `
     ${heading1}
-    ${primary}
+    color: yellow;
 `
 S.WhatIsSomBlueText3 = styled.div `
     ${title}
-    ${fontGreyScale0}
+    color: #BDBDBD;
 `
 
 //인트로 - 주변 솜 찾기

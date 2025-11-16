@@ -4,8 +4,7 @@ import SomContent from "../somContent/SomContent";
 import { useMain } from "../../../context/MainContext";
 
 const SomContentList = () => {
-  const { somList, somisLikeList } = useMain();
-  console.log(somList)
+  const { somList } = useMain();
 
   return (
     <Grid>

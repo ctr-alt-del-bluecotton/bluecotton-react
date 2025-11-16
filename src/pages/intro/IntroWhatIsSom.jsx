@@ -7,7 +7,7 @@ const IntroWhatIsSom = () => {
     return (
         <S.WhatIsSomWrap>
             <S.WhatIsSomContainer>
-                <S.WhatIsSomImg src="/assets/images/intro_chs.png"  alt="솜이란?이미지"/>
+                <S.WhatIsSomImg src="/assets/images/intro_banner.png"  alt="솜이란?이미지"/>
                 <S.WhatIsSomTextContainer>
                     <S.WhatIsSomText1>
                         부드럽지만 <S.WhatIsSomBlueText1>단단한</S.WhatIsSomBlueText1> 우리의 도전

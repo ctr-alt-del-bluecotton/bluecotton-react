@@ -26,8 +26,6 @@ const FloatingSomWritePage2 = () => {
   const handleImageUpload = async (blob, callback) => {
     try {
       const result = await uploadImageToServer(blob, "som");
-      console.log("[DEBUG] Image uploaded:", result);
-      
       
       if (result && result.url) {
         const cleanUrl = result.url
@@ -40,7 +38,6 @@ const FloatingSomWritePage2 = () => {
         throw new Error("이미지 URL이 응답에 없음");
       }
     } catch (err) {
-      console.log("리테스트")
       console.error("이미지 업로드 실패:", err);
       alert("이미지 업로드에 실패했습니다.");
     }
