@@ -54,7 +54,7 @@ export const ReadProvider = ({ children }) => {
                 
                 setLoading(false);
             })
-    },[id])
+    },[currentUser.memberEmail, id])
 
     const wisperJoin = async (somTitle) => {
         await fetchData(`chat/join-room?somTitle=${somTitle}&memberEmail=${currentUser.memberEmail}`, options.getOption())
