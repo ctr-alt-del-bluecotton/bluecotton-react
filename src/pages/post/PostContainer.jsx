@@ -112,7 +112,6 @@ const PostContainer = () => {
             post.somCategory ||
             "기타",
         }));
-
         setPosts(mappedPosts);
         setTotalCount(result.data.totalCount);
 
@@ -127,7 +126,7 @@ const PostContainer = () => {
     };
 
     fetchPosts();
-
+       // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [category, orderType, keyword, pageNumber, isLogin, currentUser]);
 
   // 좋아요 토글 UI 반영

@@ -98,6 +98,7 @@ const PostWriteContent = () => {
     };
 
     fetchCategories();
+     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [draftId, isLogin, currentUser, navigate, openModal]);
 
   // 글자 수 카운트

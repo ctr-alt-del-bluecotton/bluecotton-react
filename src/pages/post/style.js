@@ -1,5 +1,4 @@
 import styled from "styled-components";
-import * as C from "../../styles/common";
 const S = {};
 
 /* === 전체 컨테이너 === */

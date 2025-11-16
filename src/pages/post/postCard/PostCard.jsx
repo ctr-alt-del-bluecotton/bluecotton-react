@@ -113,8 +113,6 @@ const PostCard = ({
         throw new Error(`좋아요 요청 실패 (status: ${response.status})`);
       }
 
-      const result = await response.json();
-
       // UI 즉시 반영
       setIsLiked((prev) => {
         setLikeCount((prevCount) => (prev ? prevCount - 1 : prevCount + 1));

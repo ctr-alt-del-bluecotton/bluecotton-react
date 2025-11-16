@@ -60,6 +60,7 @@ const PostComment = ({
   };
 
     fetchProfile();
+     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLogin, currentUser?.id]);
   
     //  좋아요 토글 → 서버 → fetchPostDetail() 호출로 최신 상태 반영
