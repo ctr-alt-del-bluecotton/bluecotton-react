@@ -620,7 +620,6 @@ const PostComment = ({
           target={reportTarget}
           onClose={() => setShowReportModal(false)}
           onSubmit={(reason) => {
-            console.log("신고 완료:", reason);
             setShowReportModal(false);
           }}
         />

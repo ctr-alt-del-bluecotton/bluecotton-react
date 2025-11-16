@@ -114,7 +114,6 @@ const PostCard = ({
       }
 
       const result = await response.json();
-      console.log("좋아요 토글 결과:", result);
 
       // UI 즉시 반영
       setIsLiked((prev) => {
