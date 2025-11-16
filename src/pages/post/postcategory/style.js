@@ -70,13 +70,13 @@ S.FilterSelect = styled.select`
   cursor: pointer;
   appearance: none;
 
-  /* ▼ 기본 상태: drop_down.svg */
+  /* 기본 상태: drop_down.svg */
   background-image: url("/assets/icons/drop_down.svg");
   background-repeat: no-repeat;
   background-position: right 8px center;
   background-size: 12px;
 
-  /* ▼ 드롭다운이 활성화될 때 (focus 상태): drop_down_acv.svg */
+  /* 드롭다운이 활성화될 때 (focus 상태): drop_down_acv.svg */
   &:focus {
     border-color: ${({ theme }) => theme.PALLETE.primary.main};
     outline: none;

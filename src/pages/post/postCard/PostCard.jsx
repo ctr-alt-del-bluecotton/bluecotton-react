@@ -15,7 +15,7 @@ const categoryMap = {
   rookie: "루키",
 };
 
-// 🔥 excerpt에서 텍스트만 추출하는 함수
+// excerpt에서 텍스트만 추출하는 함수
 const extractTextOnly = (htmlOrMd) => {
   if (!htmlOrMd) return "";
 
@@ -113,9 +113,6 @@ const PostCard = ({
         throw new Error(`좋아요 요청 실패 (status: ${response.status})`);
       }
 
-      const result = await response.json();
-      console.log("좋아요 토글 결과:", result);
-
       // UI 즉시 반영
       setIsLiked((prev) => {
         setLikeCount((prevCount) => (prev ? prevCount - 1 : prevCount + 1));
@@ -134,7 +131,7 @@ const PostCard = ({
   const translatedCategory =
     categoryMap[category?.toLowerCase()] || category || "기타";
 
-  // 🔥 excerpt → 텍스트만 남기기
+  // excerpt → 텍스트만 남기기
   const cleanedExcerpt = extractTextOnly(excerpt || "");
   const finalExcerpt =
     cleanedExcerpt.length > 150
@@ -178,7 +175,7 @@ const PostCard = ({
 
         <S.Title>{title}</S.Title>
 
-        {/* 🔥 텍스트만 보여주는 excerpt */}
+        {/* 텍스트만 보여주는 excerpt */}
         <S.Excerpt>{finalExcerpt}</S.Excerpt>
 
         <S.MetaBottom>
