@@ -229,7 +229,7 @@ const ShopReview = () => {
                   <S.Dot>·</S.Dot>
                   <S.ReportButton
                     onClick={() => {
-                      setReportTarget({ type: "comment", id: rv.id });
+                      setReportTarget({ type: "shopComment", id: rv.id });
                       setShowReportModal(true);
                     }}
                   >
@@ -238,14 +238,7 @@ const ShopReview = () => {
                 </S.UserMeta>
               </S.UserInfoWrap>
 
-              {/* 도움돼요 버튼(백엔드 연결 X)*/}
-              <S.HelpfulButton
-                $active={helpfulState[rv.id]?.active}
-                onClick={() => toggleHelpful(rv.id)}
-              >
-                <img src="/assets/icons/shop_smile.svg" alt="도움돼요" /> 도움돼요{" "}
-                {helpfulState[rv.id]?.count ?? 0}
-              </S.HelpfulButton>
+
             </S.ReviewHeader>
 
             {rv.images && rv.images.length > 0 && (

@@ -1,8 +1,11 @@
+// src/pages/.../mypage/myshop/MyShopDeliveryContainer.jsx
 import React, { useMemo, useState, useEffect } from "react";
 import S from "../style";
 import ReviewModal from "../review/ReviewModal";
 import { useSelector } from "react-redux";
 import { resolveUrl } from "../../../../utils/url";
+import { useNavigate } from "react-router-dom";
+import { useModal } from "../../../../components/modal/useModal";
 
 const formatDotDate = (str) => {
   if (!str) return "";
@@ -10,13 +13,13 @@ const formatDotDate = (str) => {
 };
 
 const toClient = (dto) => ({
-  id: dto.orderId, // 주문 ID
-  deliveryId: dto.deliveryId, // 배송 ID
-  productId: dto.productId, // 상품 ID
-  name: dto.productName || "상품명 없음",
-  date: dto.orderCreateAt, // YYYY-MM-DD
-  status: dto.deliveryStatus.toLowerCase(),
-  imageUrl: resolveUrl(dto.productMainImageUrl) || "/assets/images/abc.png",
+  id: dto.orderId, // ✅ [수정] deliveryId(NULL 가능) 대신 orderId(고유값)를 id로 사용
+  orderId: dto.orderId, // 주문 ID는 별도 보관
+  productId: dto.productId, // 상품 ID
+  name: dto.productName || "상품명 없음",
+  date: dto.orderCreateAt, // YYYY-MM-DD
+  status: dto.deliveryStatus.toLowerCase(),
+  imageUrl: resolveUrl(dto.productMainImageUrl) || "/assets/images/abc.png",
 });
 
 const MyShopDeliveryContainer = () => {
@@ -27,9 +30,12 @@ const MyShopDeliveryContainer = () => {
   const [open, setOpen] = useState(false);
   const [target, setTarget] = useState(null);
 
-  const [allItems, setAllItems] = useState([]); 
-  const [loading, setLoading] = useState(true); 
-  const [error, setError] = useState(null); 
+  const [allItems, setAllItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const navigate = useNavigate();
+  const { openModal } = useModal();
 
   // key: productId, value: true(이미 리뷰 있음) / false(리뷰 없음)
   const [reviewExists, setReviewExists] = useState({});
@@ -76,7 +82,7 @@ const MyShopDeliveryContainer = () => {
     fetchDeliveries();
   }, [isLogin, currentUser?.id]);
 
-
+  // 리뷰 존재 여부 조회 (배송완료 기준)
   useEffect(() => {
     if (!isLogin || !currentUser?.id) {
       setReviewExists({});
@@ -130,19 +136,36 @@ const MyShopDeliveryContainer = () => {
     fetchReviewExists();
   }, [allItems, isLogin, currentUser?.id]);
 
-  const handleCancel = async (orderId) => {
-    const url = `${process.env.REACT_APP_BACKEND_URL}/private/mypage/myshop/delivery/${orderId}`;
+  // ⚠️ 여기 수정: orderId 기준으로 삭제
+  const handleCancel = (orderId) => {
+    openModal({
+      title: "구매를 취소하시겠습니까?",
+      message: "취소 후에는 되돌릴 수 없습니다.",
+      confirmText: "취소",
+      cancelText: "닫기",
+      onConfirm: async () => {
+        try {
+          const url = `${process.env.REACT_APP_BACKEND_URL}/private/mypage/myshop/delivery/${orderId}`;
 
-    const res = await fetch(url, {
-      method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          const res = await fetch(url, {
+            method: "DELETE",
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+            },
+          });
+
+          if (!res.ok) {
+            const errorData = await res.json().catch(() => ({}));
+            throw new Error(errorData.message || "구매 취소에 실패했습니다.");
+          }
+
+          // ✅ orderId로 필터링해서 해당 주문 row 제거
+          setAllItems((prev) => prev.filter((it) => it.orderId !== orderId));
+        } catch (e) {
+          alert(e.message);
+        }
       },
     });
-    if (!res.ok) throw new Error("구매 취소에 실패했습니다.");
-
-    setAllItems((prev) => prev.filter((it) => it.id !== orderId));
-    alert("구매가 취소되었습니다.");
   };
 
   const openReview = (item) => {
@@ -155,11 +178,14 @@ const MyShopDeliveryContainer = () => {
     setTarget(null);
   };
 
-    const handleReviewSubmit = () => {
+  const handleReviewSubmit = () => {
     if (target?.productId) {
-      setReviewExists((prev) => ({...prev, [target.productId]: true,}));}closeReview();
+      setReviewExists((prev) => ({ ...prev, [target.productId]: true }));
+    }
+    closeReview();
   };
 
+  // 현재 탭(activeFilter)에 해당하는 항목만 필터
   const items = useMemo(
     () => allItems.filter((it) => it.status === activeFilter),
     [activeFilter, allItems]
@@ -222,7 +248,10 @@ const MyShopDeliveryContainer = () => {
           const alreadyReviewed = reviewExists[item.productId] === true;
 
           return (
-            <S.ListItem key={item.id}>
+            <S.ListItem
+              key={item.id} // ✅ 이제 deliveryId라서 중복 없음
+              onClick={() => navigate(`/main/shop/read/${item.productId}`)}
+            >
               <div
                 style={{
                   display: "flex",
@@ -243,7 +272,13 @@ const MyShopDeliveryContainer = () => {
 
                 <div>
                   {activeFilter === "paid" && (
-                    <S.ActionButton onClick={() => handleCancel(item.id)}>
+                    <S.ActionButton
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        // ✅ 주문 ID 기준으로 취소
+                        handleCancel(item.orderId);
+                      }}
+                    >
                       구매 취소
                     </S.ActionButton>
                   )}
@@ -252,7 +287,8 @@ const MyShopDeliveryContainer = () => {
                     <S.ActionButton
                       primary
                       disabled={alreadyReviewed}
-                      onClick={() => {
+                      onClick={(e) => {
+                        e.stopPropagation();
                         if (!alreadyReviewed) openReview(item);
                       }}
                     >
