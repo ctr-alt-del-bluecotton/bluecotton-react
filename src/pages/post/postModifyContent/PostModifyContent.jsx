@@ -43,7 +43,7 @@ const PostModifyContent = () => {
   const [charCount, setCharCount] = useState(0);
   const [loading, setLoading] = useState(true);
 
-  // ⭐ 이미지 상태
+  // 이미지 상태
   const [originalImages, setOriginalImages] = useState([]); // [{id, url}]
   const [newImages, setNewImages] = useState([]); // [{id, url}]
   const [currentEditorUrls, setCurrentEditorUrls] = useState([]);
@@ -60,7 +60,7 @@ const PostModifyContent = () => {
     }
   }, [isLogin, currentUser, navigate, openModal]);
 
-  // 🔥 이미지 업로드
+  // 이미지 업로드
   const handleImageUpload = async (blob, callback) => {
     try {
       const BASE_URL = process.env.REACT_APP_BACKEND_URL;
@@ -95,7 +95,7 @@ const PostModifyContent = () => {
     }
   };
 
-  // 🔥 기존 게시글 불러오기
+  // 기존 게시글 불러오기
   useEffect(() => {
     const fetchPostData = async () => {
       try {
@@ -117,7 +117,7 @@ const PostModifyContent = () => {
         setTitle(post.postTitle || "");
         setCategory(post.somId?.toString() || "");
 
-        // ⭐ 기존 이미지 세팅
+        // 기존 이미지 세팅
         const imageList = post.postImages || post.postImageList;
         if (imageList && Array.isArray(imageList)) {
           const imgs = imageList.map((img) => ({
@@ -155,7 +155,7 @@ const PostModifyContent = () => {
     fetchPostData();
   }, [id, navigate, openModal]);
 
-  // 🔥 참여 중 솜 목록 불러오기
+  // 참여 중 솜 목록 불러오기
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -178,7 +178,7 @@ const PostModifyContent = () => {
     fetchCategories();
   }, []);
 
-  // 🔥 글자 수 + 이미지 URL 추출
+  // 글자 수 + 이미지 URL 추출
   useEffect(() => {
     const ins = editorRef.current?.getInstance();
     if (!ins) return;

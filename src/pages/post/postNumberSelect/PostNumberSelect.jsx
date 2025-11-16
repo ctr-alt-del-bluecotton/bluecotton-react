@@ -4,23 +4,36 @@ import S from "./style";
 const PostNumberSelect = ({ totalPages, pageNumber, setPageNumber }) => {
   const groupSize = 10;
 
-  // 현재 페이지 그룹의 시작 번호 계산
   const currentGroup = Math.floor((pageNumber - 1) / groupSize);
   const startPage = currentGroup * groupSize + 1;
   const endPage = Math.min(startPage + groupSize - 1, totalPages);
 
+  const hasPrevPage = pageNumber > 1;
+  const hasNextPage = pageNumber < totalPages;
+
+  const hasPrevGroup = startPage > 1;
+  const hasNextGroup = endPage < totalPages;
+
   return (
     <S.Wrapper>
-      {/* 이전 그룹 */}
+      {/* 1) 이전 그룹 이동 (<<) */}
       <S.PrevButton
-        disabled={startPage === 1}
+        disabled={!hasPrevGroup}
         onClick={() => setPageNumber(startPage - groupSize)}
+      >
+        &lt;&lt;
+      </S.PrevButton>
+
+      {/* 2) 이전 페이지 이동 (< 이전) */}
+      <S.PrevButton
+        disabled={!hasPrevPage}
+        onClick={() => setPageNumber(pageNumber - 1)}
       >
         &lt; 이전
       </S.PrevButton>
 
+      {/* 페이지 번호 */}
       <S.PageList>
-        {/* 페이지 리스트 */}
         {Array.from({ length: endPage - startPage + 1 }, (_, i) => {
           const page = startPage + i;
           return (
@@ -38,12 +51,20 @@ const PostNumberSelect = ({ totalPages, pageNumber, setPageNumber }) => {
         })}
       </S.PageList>
 
-      {/* 다음 그룹 */}
+      {/* 3) 다음 페이지 이동 (다음 >) */}
       <S.AfterButton
-        disabled={endPage >= totalPages}
-        onClick={() => setPageNumber(startPage + groupSize)}
+        disabled={!hasNextPage}
+        onClick={() => setPageNumber(pageNumber + 1)}
       >
         다음 &gt;
+      </S.AfterButton>
+
+      {/* 4) 다음 그룹 이동 (>>) */}
+      <S.AfterButton
+        disabled={!hasNextGroup}
+        onClick={() => setPageNumber(startPage + groupSize)}
+      >
+        &gt;&gt;
       </S.AfterButton>
     </S.Wrapper>
   );

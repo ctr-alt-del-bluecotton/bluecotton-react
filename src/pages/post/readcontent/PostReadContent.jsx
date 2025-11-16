@@ -37,7 +37,7 @@ const PostReadContent = () => {
     });
   };
 
-  /** 🔥 Kakao init */
+  /** Kakao init */
   useEffect(() => {
     const initKakao = () => {
       if (window.Kakao && !window.Kakao.isInitialized()) {
@@ -57,7 +57,7 @@ const PostReadContent = () => {
     }
   }, []);
 
-  /** 🔥 게시글 + 댓글 + prev/next 전체 불러오기 */
+  /** 게시글 + 댓글 + prev/next 전체 불러오기 */
   const fetchPostDetail = useCallback(async () => {
     try {
       const BASE_URL = process.env.REACT_APP_BACKEND_URL;
@@ -87,7 +87,7 @@ const PostReadContent = () => {
       setPrevPost(fetchedPrev);
       setNextPost(fetchedNext);
 
-      /** 🔥 DTO → 프론트 UI 변환 */
+      /** DTO → 프론트 UI 변환 */
       const mappedComments = (fetchedPost.comments || []).map((c) => ({
         ...c,
         liked: c.isCommentLiked === 1,
@@ -111,12 +111,12 @@ const PostReadContent = () => {
     }
   }, [id, navigate, openModal]);
 
-  /** 🔥 최초 로드 */
+  /** 최초 로드 */
   useEffect(() => {
     fetchPostDetail();
   }, [fetchPostDetail]);
 
-  /** 🔥 최근 본 글 등록 */
+  /** 최근 본 글 등록 */
   useEffect(() => {
     const register = async () => {
       const BASE_URL = process.env.REACT_APP_BACKEND_URL;
@@ -206,7 +206,7 @@ const PostReadContent = () => {
   let raw = post.postContent || "";
   let htmlContent = marked.parse(raw);
 
-  /** 🔥 공유용 썸네일 함수 */
+  /** 공유용 썸네일 함수 */
   const getThumbnail = () => {
     if (post.postImageList && post.postImageList.length > 0) {
       const img = post.postImageList[0];

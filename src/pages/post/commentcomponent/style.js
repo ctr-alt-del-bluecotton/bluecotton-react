@@ -40,7 +40,7 @@ S.CommentItem = styled.div`
   align-items: flex-start;
   border-bottom: 1px solid ${({ theme }) => theme.PALLETE.grey.greyScale1};
   padding: 20px 0;
-  margin-left: ${({ indent }) => (indent ? "46px" : "0")};
+  margin-left: ${({ $indent }) => ($indent ? "46px" : "0")};
   position: relative;
 
   .left {
