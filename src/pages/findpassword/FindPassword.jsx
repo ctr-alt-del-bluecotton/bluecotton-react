@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import S from "./style";
+import { useModal } from "../../components/modal/useModal";
 
 export default function FindPassword() {
   const [step, setStep] = useState(1);
@@ -10,34 +11,57 @@ export default function FindPassword() {
   const [newPassword, setNewPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const { openModal } = useModal();
+
   const sendCode = async () => {
-    if (!email.trim()) return alert("이메일을 입력해주세요.");
+    if (!email.trim()) {
+      openModal({
+        title: "이메일을 입력해주세요.",
+        confirmText: "확인",
+      });
+      return;
+    }
 
     setLoading(true);
 
     try {
-      const res = await fetch(`${process.env.REACT_APP_BACKEND_URL}/auth/codes/email?toEmail=${email}`,{
-        method: "POST",
-        credentials: "include"
-      });
+      const res = await fetch(
+        `${process.env.REACT_APP_BACKEND_URL}/auth/codes/email?toEmail=${email}`,
+        { method: "POST", credentials: "include" }
+      );
 
       const json = await res.json();
 
       if (json.message.includes("성공")) {
-        alert("인증번호가 이메일로 전송되었습니다.");
+        openModal({
+          title: "인증번호가 이메일로 전송되었습니다.",
+          confirmText: "확인",
+        });
         setStep(2);
       } else {
-        alert("이메일 전송 실패");
+        openModal({
+          title: "이메일 전송 실패",
+          confirmText: "확인",
+        });
       }
     } catch {
-      alert("서버 오류가 발생했습니다.");
+      openModal({
+        title: "서버 오류가 발생했습니다.",
+        confirmText: "확인",
+      });
     } finally {
       setLoading(false);
     }
   };
 
   const verify = async () => {
-    if (!verifyCode.trim()) return alert("인증번호를 입력해주세요.");
+    if (!verifyCode.trim()) {
+      openModal({
+        title: "인증번호를 입력해주세요.",
+        confirmText: "확인",
+      });
+      return;
+    }
 
     const res = await fetch(
       `${process.env.REACT_APP_BACKEND_URL}/auth/codes/verify?userAuthentificationCode=${verifyCode}`,
@@ -47,16 +71,27 @@ export default function FindPassword() {
     const json = await res.json();
 
     if (json.data.verified) {
-      alert("인증 성공!");
+      openModal({
+        title: "인증이 완료되었습니다.",
+        confirmText: "확인",
+      });
       setStep(3);
     } else {
-      alert("인증번호가 틀립니다.");
+      openModal({
+        title: "인증번호가 틀립니다.",
+        confirmText: "확인",
+      });
     }
   };
 
   const resetPassword = async () => {
-    if (!newPassword.trim())
-      return alert("새 비밀번호를 입력해주세요.");
+    if (!newPassword.trim()) {
+      openModal({
+        title: "새 비밀번호를 입력해주세요.",
+        confirmText: "확인",
+      });
+      return;
+    }
 
     const res = await fetch(
       `${process.env.REACT_APP_BACKEND_URL}/auth/reset-password?memberEmail=${email}&newPassword=${newPassword}`,
@@ -64,12 +99,19 @@ export default function FindPassword() {
     );
 
     const json = await res.json();
-    console.log(json)
+    console.log(json);
+
     if (json.message.includes("완료")) {
-      alert("비밀번호가 성공적으로 변경되었습니다.");
-      window.location.href = "/login";
+      openModal({
+        title: "비밀번호가 성공적으로 변경되었습니다.",
+        confirmText: "확인",
+        onConfirm: () => (window.location.href = "/login"),
+      });
     } else {
-      alert("비밀번호 변경 실패");
+      openModal({
+        title: "비밀번호 변경 실패",
+        confirmText: "확인",
+      });
     }
   };
 
@@ -123,7 +165,7 @@ export default function FindPassword() {
         <S.Divider />
 
         <S.BottomText>
-            <Link to="/login">로그인 페이지로 돌아가기</Link>
+          <Link to="/login">로그인 페이지로 돌아가기</Link>
         </S.BottomText>
       </S.Box>
     </S.Container>
