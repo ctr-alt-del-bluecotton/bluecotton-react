@@ -6,14 +6,14 @@ import { useModal } from "../../../components/modal";
 import { Editor } from "@toast-ui/react-editor";
 import "@toast-ui/editor/dist/toastui-editor.css";
 
-const MAX_LENGTH = 1000;
+const MAX_LENGTH = 3000;
 
 const categoryMap = {
   study: "학습",
   health: "건강",
   social: "소셜",
   hobby: "취미",
-  "life-style": "생활",
+  life: "생활",
   rookie: "루키",
 };
 
@@ -336,7 +336,7 @@ const PostWriteContent = () => {
           <Editor
             ref={editorRef}
             previewStyle="vertical"
-            height="400px"
+            height="800px"
             initialEditType="wysiwyg"
             hideModeSwitch={true}
             placeholder="솜을 하면서 느낀 점이나 기록하고 싶은 순간을 자유롭게 적어주세요"

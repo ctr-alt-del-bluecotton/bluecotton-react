@@ -8,8 +8,8 @@ const categories = [
   { name: "학습", path: "/main/post/study" },
   { name: "건강", path: "/main/post/health" },
   { name: "소셜", path: "/main/post/social" },
-  { name: "취미", path: "/main/post/hobbies" },
-  { name: "생활", path: "/main/post/life-style" },
+  { name: "취미", path: "/main/post/hobby" },
+  { name: "생활", path: "/main/post/life" },
   { name: "루키", path: "/main/post/rookie" },
 ];
 
