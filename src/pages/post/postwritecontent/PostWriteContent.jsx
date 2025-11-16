@@ -26,7 +26,7 @@ const PostWriteContent = () => {
   const navigate = useNavigate();
   const editorRef = useRef();
 
-  // ⭐ 이미지 URL 배열 제거됨 → PostImageIds로만 처리
+  // 이미지 URL 배열 제거됨 → PostImageIds로만 처리
   const [postImageIds, setPostImageIds] = useState([]);
 
   const location = useLocation();
@@ -36,7 +36,7 @@ const PostWriteContent = () => {
   const mode = draftId ? "draft" : "new";
   const BASE_URL = process.env.REACT_APP_BACKEND_URL;
 
-  // 🔥 참여 중 솜 카테고리 + draft 자동불러오기
+  // 참여 중 솜 카테고리 + draft 자동불러오기
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -100,7 +100,7 @@ const PostWriteContent = () => {
     fetchCategories();
   }, [draftId, isLogin, currentUser, navigate, openModal]);
 
-  // 🔥 글자 수 카운트
+  // 글자 수 카운트
   useEffect(() => {
     const editor = editorRef.current?.getInstance();
     if (!editor) return;
@@ -168,7 +168,7 @@ const PostWriteContent = () => {
     }
   };
 
-  // 🔥 임시 저장
+  // 임시 저장
   const handleTempSave = async (e) => {
     e.preventDefault();
 
@@ -212,7 +212,7 @@ const PostWriteContent = () => {
     }
   };
 
-  // 🔥 게시글 등록
+  // 게시글 등록
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -257,7 +257,7 @@ const PostWriteContent = () => {
 
     const result = await res.json();
 
-    // ⭐⭐⭐ 409 Conflict — 하루 1회 작성 제한
+    // 409 Conflict — 하루 1회 작성 제한
     if (res.status === 409) {
       return openModal({
         title: "작성 불가",
@@ -266,7 +266,7 @@ const PostWriteContent = () => {
       });
     }
 
-    // ⭐ 일반 실패
+    // 일반 실패
     if (!res.ok) {
       return openModal({
         title: "등록 실패",
@@ -275,7 +275,7 @@ const PostWriteContent = () => {
       });
     }
 
-    // ⭐ 성공
+    // 성공
     openModal({
       title: "등록 완료",
       message: mode === "draft" ? "임시저장 글이 등록되었습니다." : "게시글이 등록되었습니다.",
@@ -326,7 +326,7 @@ const PostWriteContent = () => {
                 {categoryMap[cat.somCategory] || cat.somCategory}
                 {" : "}
                 {cat.somTitle}
-                {cat.somDayDiff > 0 ? ` [도전${cat.somDayDiff}일]` : ` [예정 D${cat.somDayDiff - 1}]`}
+                {cat.somDayDiff > 0 ? ` [도전 ${cat.somDayDiff}일]` : ` [예정 D${cat.somDayDiff - 1}]`}
               </option>
             ))}
           </select>

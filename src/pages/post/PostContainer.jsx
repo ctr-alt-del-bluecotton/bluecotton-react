@@ -128,7 +128,6 @@ const PostContainer = () => {
 
     fetchPosts();
 
-    // eslint-disable-next-line
   }, [category, orderType, keyword, pageNumber, isLogin, currentUser]);
 
   // 좋아요 토글 UI 반영

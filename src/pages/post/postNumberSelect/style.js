@@ -43,7 +43,7 @@ S.PrevButton = styled.button`
     opacity: 0.4;
   }
 
-  /* ✅ 오른쪽 구분선 */
+  /* 오른쪽 구분선 */
   &::after {
     content: "";
     position: absolute;
@@ -69,7 +69,7 @@ S.AfterButton = styled.button`
     opacity: 0.4;
   }
 
-  /* ✅ 왼쪽 구분선 */
+  /* 왼쪽 구분선 */
   &::before {
     content: "";
     position: absolute;

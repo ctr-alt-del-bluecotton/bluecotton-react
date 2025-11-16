@@ -23,7 +23,7 @@ const PostComment = ({
   reportTarget,
   setReportTarget,
   postId,
-  fetchPostDetail,   // ⭐️ 추가됨: 상위(PostReadContent)에서 전달받음
+  fetchPostDetail,   
 }) => {
   const BASE_URL = process.env.REACT_APP_BACKEND_URL;
   const { openModal } = useModal();
@@ -62,9 +62,7 @@ const PostComment = ({
     fetchProfile();
   }, [isLogin, currentUser?.id]);
   
-  /* ===========================================================
-     1) 좋아요 토글 → 서버 → fetchPostDetail() 호출로 최신 상태 반영
-  ============================================================ */
+    //  좋아요 토글 → 서버 → fetchPostDetail() 호출로 최신 상태 반영
   const handleLike = async (targetId, isReply = false) => {
     if (!isLogin) {
       return openModal({
@@ -93,16 +91,14 @@ const PostComment = ({
 
       if (!res.ok) throw new Error("좋아요 요청 실패");
 
-      // ⭐️ 댓글 상태 새로 불러오기
+      // 댓글 상태 새로 불러오기
       fetchPostDetail();
     } catch (err) {
       console.error("좋아요 실패:", err);
     }
   };
 
-  /* ===========================================================
-     2) 멘션 강조 처리
-  ============================================================ */
+    //  2) 멘션 강조 처리
   const renderTextWithTags = (text = "") => {
     const parts = text.split(/(@\S+)/g);
     return parts.map((part, i) =>
@@ -110,9 +106,7 @@ const PostComment = ({
     );
   };
 
-  /* ===========================================================
-     3) 댓글 등록 → 서버 → fetchPostDetail()
-  ============================================================ */
+    //  3) 댓글 등록 → 서버 → fetchPostDetail()
   const handleCommentSubmit = async () => {
     if (!isLogin) {
       return openModal({
@@ -141,15 +135,13 @@ const PostComment = ({
       if (!res.ok) throw new Error("댓글 등록 실패");
 
       setComment("");
-      fetchPostDetail(); // ⭐ 새로 불러오기
+      fetchPostDetail();
     } catch (err) {
       console.error("댓글 등록 실패:", err);
     }
   };
 
-  /* ===========================================================
-     4) 답글 등록 → 서버 → fetchPostDetail()
-  ============================================================ */
+    //  4) 답글 등록 → 서버 → fetchPostDetail()
   const handleReplySubmit = async (parentId, targetId) => {
     const text = (replyInputs[targetId] || "").trim();
     if (!text) return;
@@ -181,15 +173,13 @@ const PostComment = ({
       setReplyInputs((prev) => ({ ...prev, [targetId]: "" }));
       setShowReplyTarget(null);
 
-      fetchPostDetail(); // ⭐ 최신 상태 반영
+      fetchPostDetail(); 
     } catch (err) {
       console.error("답글 등록 실패:", err);
     }
   };
 
-  /* ===========================================================
-     5) 답글 입력창 토글
-  ============================================================ */
+    //  5) 답글 입력창 토글
   const handleReplyClick = (parentId, targetId, nickname, type) => {
     setShowReplyTarget((prev) => {
       if (
@@ -209,9 +199,7 @@ const PostComment = ({
     }));
   };
 
-  /* ===========================================================
-     6) 댓글/답글 삭제 → 서버 → fetchPostDetail()
-  ============================================================ */
+    //  6) 댓글/답글 삭제 → 서버 → fetchPostDetail()
   const handleCommentDelete = async () => {
     if (!deleteTarget) return;
 
@@ -248,7 +236,7 @@ const PostComment = ({
           if (!res.ok) throw new Error("삭제 실패");
 
           setDeleteTarget(null);
-          fetchPostDetail(); // ⭐ 삭제 후 최신 데이터 불러오기
+          fetchPostDetail(); // 삭제 후 최신 데이터 불러오기
         } catch (err) {
           console.error("삭제 실패:", err);
         }
