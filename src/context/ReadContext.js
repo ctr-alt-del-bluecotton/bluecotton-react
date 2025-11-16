@@ -41,8 +41,6 @@ export const ReadProvider = ({ children }) => {
             .then(async (res) => {
                 const target = await res.json();
                 const readData = target.data;
-    
-                // .find((som) => String(som.id) === String(id));
                 setSomInfo(readData || {}); 
         
                 const likeInfo = readData.somLike;
@@ -56,7 +54,7 @@ export const ReadProvider = ({ children }) => {
                 
                 setLoading(false);
             })
-    },[currentUser.memberEmail, id])
+    },[id])
 
     const wisperJoin = async (somTitle) => {
         await fetchData(`chat/join-room?somTitle=${somTitle}&memberEmail=${currentUser.memberEmail}`, options.getOption())
@@ -139,14 +137,11 @@ export const ReadProvider = ({ children }) => {
     }
 
     useEffect(() => {
-        if (currentUser && currentUser.memberEmail) {
-            loadReadData();
-        }
+
+        loadReadData();
 
         const handleRefresh = () => {
-            if (currentUser && currentUser.memberEmail) {
-                loadReadData(); 
-            }
+            loadReadData(); 
         };
 
         window.addEventListener("refreshSomList", handleRefresh);

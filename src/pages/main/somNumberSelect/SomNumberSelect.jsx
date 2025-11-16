@@ -16,7 +16,7 @@ const SomNumberSelect = () => {
     <S.Wrapper>
       {/* 이전 그룹 */}
       <S.PrevButton
-        disabled={startPage === 1}
+        disabled={pageNumber == 1}
         onClick={() => setPageNumber(startPage - groupSize)}
       >
         &lt; 이전
@@ -37,12 +37,12 @@ const SomNumberSelect = () => {
               {page}
             </button>
           );
-        })}
+        })} 
       </S.PageList>
 
       {/* 다음 그룹 */}
       <S.AfterButton
-        disabled={endPage >= totalPages}
+        disabled={endPage === totalPages}
         onClick={() => setPageNumber(startPage + groupSize)}
       >
         다음 &gt;
