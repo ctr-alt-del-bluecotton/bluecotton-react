@@ -3,6 +3,7 @@ import S from "../style";
 import ReviewModal from "../review/ReviewModal";
 import { useSelector } from "react-redux";
 import { resolveUrl } from "../../../../utils/url";
+import { Navigate, useNavigate } from "react-router-dom";
 
 const formatDotDate = (str) => (str ? str.split("T")[0].replace(/-/g, ".") : "");
 
@@ -13,6 +14,9 @@ const MyShopOrderContainer = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  const navigate = useNavigate();
+  const productDetail = (productId) => navigate(`main/shop/read/${productId}`);
 
   //  key: productId, value: true(이미 리뷰 있음) / false(리뷰 없음)
   const [reviewExists, setReviewExists] = useState({});
@@ -166,7 +170,9 @@ const MyShopOrderContainer = () => {
           const alreadyReviewed = reviewExists[order.productId] === true;
 
           return (
-            <S.ListItem key={order.orderId}>
+            <S.ListItem key={order.orderId}
+              onClick={() => navigate(`/main/shop/read/${order.productId}`)}
+            >
               <div
                 style={{
                   display: "flex",
@@ -187,7 +193,8 @@ const MyShopOrderContainer = () => {
 
                 <S.OrderActionButton
                   disabled={alreadyReviewed}
-                  onClick={() => {
+                  onClick={(e) => {
+                    e.stopPropagation();
                     if (!alreadyReviewed) openReview(order);
                   }}
                 >

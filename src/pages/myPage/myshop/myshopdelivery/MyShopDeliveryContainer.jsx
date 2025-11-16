@@ -3,6 +3,8 @@ import S from "../style";
 import ReviewModal from "../review/ReviewModal";
 import { useSelector } from "react-redux";
 import { resolveUrl } from "../../../../utils/url";
+import { useNavigate } from "react-router-dom";
+import { useModal } from "../../../../components/modal/useModal";
 
 const formatDotDate = (str) => {
   if (!str) return "";
@@ -27,9 +29,13 @@ const MyShopDeliveryContainer = () => {
   const [open, setOpen] = useState(false);
   const [target, setTarget] = useState(null);
 
-  const [allItems, setAllItems] = useState([]); 
-  const [loading, setLoading] = useState(true); 
-  const [error, setError] = useState(null); 
+  const [allItems, setAllItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const navigate = useNavigate();
+  const productDetail = (productId) => navigate(`main/shop/read/${productId}`);
+  const { openModal } = useModal();
 
   // key: productId, value: true(이미 리뷰 있음) / false(리뷰 없음)
   const [reviewExists, setReviewExists] = useState({});
@@ -75,7 +81,6 @@ const MyShopDeliveryContainer = () => {
 
     fetchDeliveries();
   }, [isLogin, currentUser?.id]);
-
 
   useEffect(() => {
     if (!isLogin || !currentUser?.id) {
@@ -130,19 +135,34 @@ const MyShopDeliveryContainer = () => {
     fetchReviewExists();
   }, [allItems, isLogin, currentUser?.id]);
 
-  const handleCancel = async (orderId) => {
-    const url = `${process.env.REACT_APP_BACKEND_URL}/private/mypage/myshop/delivery/${orderId}`;
+  const handleCancel = (orderId) => {
+    openModal({
+      title: "구매를 취소하시겠습니까?",
+      message: "취소 후에는 되돌릴 수 없습니다.",
+      confirmText: "취소",
+      cancelText: "닫기",
+      onConfirm: async () => {
+        try {
+          const url = `${process.env.REACT_APP_BACKEND_URL}/private/mypage/myshop/delivery/${orderId}`;
 
-    const res = await fetch(url, {
-      method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          const res = await fetch(url, {
+            method: "DELETE",
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+            },
+          });
+
+          if (!res.ok) {
+            const errorData = await res.json().catch(() => ({}));
+            throw new Error(errorData.message || "구매 취소에 실패했습니다.");
+          }
+
+          setAllItems((prev) => prev.filter((it) => it.id !== orderId));
+        } catch (e) {
+          alert(e.message);
+        }
       },
     });
-    if (!res.ok) throw new Error("구매 취소에 실패했습니다.");
-
-    setAllItems((prev) => prev.filter((it) => it.id !== orderId));
-    alert("구매가 취소되었습니다.");
   };
 
   const openReview = (item) => {
@@ -155,9 +175,11 @@ const MyShopDeliveryContainer = () => {
     setTarget(null);
   };
 
-    const handleReviewSubmit = () => {
+  const handleReviewSubmit = () => {
     if (target?.productId) {
-      setReviewExists((prev) => ({...prev, [target.productId]: true,}));}closeReview();
+      setReviewExists((prev) => ({ ...prev, [target.productId]: true }));
+    }
+    closeReview();
   };
 
   const items = useMemo(
@@ -222,7 +244,10 @@ const MyShopDeliveryContainer = () => {
           const alreadyReviewed = reviewExists[item.productId] === true;
 
           return (
-            <S.ListItem key={item.id}>
+            <S.ListItem
+              key={item.id}
+              onClick={() => navigate(`/main/shop/read/${item.productId}`)}
+            >
               <div
                 style={{
                   display: "flex",
@@ -243,7 +268,12 @@ const MyShopDeliveryContainer = () => {
 
                 <div>
                   {activeFilter === "paid" && (
-                    <S.ActionButton onClick={() => handleCancel(item.id)}>
+                    <S.ActionButton
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleCancel(item.id);
+                      }}
+                    >
                       구매 취소
                     </S.ActionButton>
                   )}
@@ -252,7 +282,8 @@ const MyShopDeliveryContainer = () => {
                     <S.ActionButton
                       primary
                       disabled={alreadyReviewed}
-                      onClick={() => {
+                      onClick={(e) => {
+                        e.stopPropagation();
                         if (!alreadyReviewed) openReview(item);
                       }}
                     >
