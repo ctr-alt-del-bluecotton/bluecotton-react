@@ -71,11 +71,9 @@ const FloatingSomWriteInner = () => {
       );
   
       // ✅ 백엔드로 전송
-      console.log("전송 데이터:", data);
       await fetchData('som/register', options.postOption(trimData))
       .then(async (somRes) => {
         const somData = await somRes.json()
-        console.log("솜 등록 완료:", somData);
         if (uploadImageTempIds.length !== 0){
           await fetchData('som-image/update', options.putOption({ 
             somId : somData.data.id,
@@ -85,7 +83,7 @@ const FloatingSomWriteInner = () => {
 
         const createChatData = {
           chatTitle: somData.data.somTitle,
-          chatType: somData.data.somType == "solo" ? 'DM' : 'PUBLIC',
+          chatType: somData.data.somType === "solo" ? 'DM' : 'PUBLIC',
           chatMemberRole: 'OWNER',
           memberId: currentUser.id,
         }
@@ -104,8 +102,6 @@ const FloatingSomWriteInner = () => {
       setSelected("")
       window.scrollTo(0, 0);   
       window.dispatchEvent(new CustomEvent("refreshSomList"));
-  
-      console.log("초기화 과정 완료")
     })
   };
   

@@ -1,5 +1,6 @@
 import S from './style'
 import { useFloatingAction } from '../../../../../../../../context/FloatingActionContext';
+import { useEffect } from 'react';
 
 const FloatingSomWritePage1 = () => {
   const {
@@ -13,7 +14,6 @@ const FloatingSomWritePage1 = () => {
     isAllError,
     watch,
     formState: { errors, touchedFields },
-    somType, 
     setSomType
   } = useFloatingAction();
 
@@ -23,8 +23,8 @@ const FloatingSomWritePage1 = () => {
     { value: "study", label: "학습" },
     { value: "health", label: "건강" },
     { value: "social", label: "소셜" },
-    { value: "hobbies", label: "취미" },
-    { value: "life-style", label: "생활" },
+    { value: "hobby", label: "취미" },
+    { value: "life", label: "생활" },
     { value: "rookie", label: "루키" }
   ];
 
@@ -48,6 +48,67 @@ const FloatingSomWritePage1 = () => {
     setValue("somCategory", value, { shouldValidate: true });
     setOpen(false);
   };
+
+  const addMinutes = (date, minutes) => {
+    if (!date || isNaN(date.getTime())) return null;
+    const d = new Date(date);
+    d.setMinutes(d.getMinutes() + minutes);
+    return d;
+  };
+  
+  const addHours = (date, hours) => {
+    if (!date || isNaN(date.getTime())) return null;
+    const d = new Date(date);
+    d.setHours(d.getHours() + hours);
+    return d;
+  };
+  
+  const formatDateTimeLocal = (date) => {
+    if (!date || isNaN(date.getTime())) return "";
+    return date.toISOString().slice(0, 16);
+  };
+  
+
+  useEffect(() => {
+    const now = new Date();
+    const minStart = addMinutes(now, 10);
+  
+    const rawStart = valueWatch.somStartDate;
+    if (!rawStart) return;
+  
+    const userStart = new Date(rawStart);
+    if (isNaN(userStart.getTime())) return;
+  
+    if (userStart < minStart) {
+      setValue("somStartDate", formatDateTimeLocal(minStart), {
+        shouldValidate: true,
+      });
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [valueWatch.somStartDate]);
+  
+
+  useEffect(() => {
+    const rawStart = valueWatch.somStartDate;
+    const rawEnd = valueWatch.somEndDate;
+  
+    if (!rawStart || !rawEnd) return;
+  
+    const start = new Date(rawStart);
+    const end = new Date(rawEnd);
+  
+    if (isNaN(start.getTime()) || isNaN(end.getTime())) return;
+  
+    const minEnd = addHours(start, 1);
+  
+    if (end < minEnd) {
+      setValue("somEndDate", formatDateTimeLocal(minEnd), {
+        shouldValidate: true,
+      });
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [valueWatch.somEndDate, valueWatch.somStartDate]);
+  
 
   return (
     <S.floatingFormWrap>
@@ -117,12 +178,15 @@ const FloatingSomWritePage1 = () => {
             type='datetime-local'
             {...register("somStartDate", { required: true })}
             $isError={errors.somStartDate && (touchedFields.somStartDate || isAllError)}
+            min={formatDateTimeLocal(addMinutes(new Date(), 10))}
           />
 
           <S.floatingDateInputs
             type='datetime-local'
             {...register("somEndDate", { required: true })}
             $isError={errors.somEndDate && (touchedFields.somEndDate || isAllError)}
+            min={formatDateTimeLocal(addHours(new Date(valueWatch.somStartDate), 1))}
+            disabled={!valueWatch.somStartDate}
           />
 
         </S.floatingSomDateSelectWrap>
