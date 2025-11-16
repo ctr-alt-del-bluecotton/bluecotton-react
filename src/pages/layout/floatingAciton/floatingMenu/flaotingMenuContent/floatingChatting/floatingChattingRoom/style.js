@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { basic, flexStartColumn, smallText0Regular, smallText1Regular, smallText2Regular, smallText3Regular, title, white } from "../../../../../../../styles/common";
+import { basic, flexStartColumn, smallText2Regular, smallText3Regular, white } from "../../../../../../../styles/common";
 const S = {};
 
 S.Container = styled.div`

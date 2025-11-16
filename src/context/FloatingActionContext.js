@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, { createContext, useState, useContext } from 'react';
 import { useForm } from 'react-hook-form';
 import { fetchData, options } from './FetchContext';
 import { useSelector } from 'react-redux';
@@ -26,9 +26,6 @@ export const FloatingActionProvider = ({ children }) => {
     const [isReset, setIsReset] = useState(false);
     const { currentUser, isLogin } = useSelector((state) => state.user);
     
-    useEffect(() => {
-        console.log(uploadImageTempIds)
-    }, [uploadImageTempIds])
 
     const somMenuSelect = (contentName) => {
         if (isDisplayFloatingMenu === false) {
@@ -77,8 +74,6 @@ export const FloatingActionProvider = ({ children }) => {
         )
 
         const resJson = await res.json();
-
-        console.log(resJson);
 
         setUploadImageTempIds((prev) => [...prev, resJson.data.id])
 
