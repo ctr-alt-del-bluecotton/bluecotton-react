@@ -46,6 +46,7 @@ S.ListBox = styled.div`
   max-height: 600px;
   overflow-y: auto;
   padding-right: 8px;
+ background-color: ${({ theme }) => theme.PALLETE.white};
 
   &::-webkit-scrollbar {
     width: 6px;
@@ -58,6 +59,7 @@ S.ListBox = styled.div`
     background-color: ${({ theme }) => theme.PALLETE.grey.greyScale};
   }
 `;
+
 
 S.SomTitle = styled.h3`
   font-size: 18px;
@@ -178,6 +180,53 @@ S.InfoAddress = styled.span`
   color: ${({ theme }) => theme.PALLETE.grey.greyScale4};
   line-height: 1.4;
   word-break: keep-all;
+`;
+
+S.SomItem = styled.div`
+  display: flex;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid #e0e0e0;
+  border-radius: 8px;
+  background-color: ${({ theme }) => theme.PALLETE.grey.greyScale0};
+  margin-bottom: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background-color: ${({ theme }) => theme.PALLETE.primary.main};
+    color: ${({ theme }) => theme.PALLETE.white};
+    transform: translateY(-2px);
+
+    ${S.SomTitle}, ${S.SomAddress}, ${S.SomDate} {
+      color: ${({ theme }) => theme.PALLETE.white};
+    }
+  }
+`;
+
+S.SomThumb = styled.div`
+  width: 68px;
+  height: 68px;
+  border-radius: 8px;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: ${({ theme }) => theme.PALLETE.grey.greyScale0};
+  border: 1px solid ${({ theme }) => theme.PALLETE.grey.greyScale1};
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+`;
+
+
+S.SomInfoRight = styled.div`
+  display: flex;
+  flex-direction: column;
+  margin-left: 15px;
+  gap: 2px;
+  width: calc(100% - 70px);
 `;
 
 

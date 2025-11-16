@@ -40,6 +40,7 @@ const MapContainer = () => {
     try {
       const res = await fetch(`${process.env.REACT_APP_BACKEND_URL}/som/all`);
       const result = await res.json();
+
       setSomList(result.data || []);
 
       if (!result.data || result.data.length === 0) {
@@ -50,8 +51,6 @@ const MapContainer = () => {
       setIsLoaded(true);
     }
   };
-
-
 
   useEffect(() => {
     fetchMyLocation();
@@ -65,7 +64,7 @@ const MapContainer = () => {
 
     const geocoder = new window.kakao.maps.services.Geocoder();
 
-    let completed = 0; 
+    let completed = 0;
     const nextMarkers = [];
 
     somList.forEach((som) => {
@@ -123,6 +122,7 @@ const MapContainer = () => {
     <S.MapContainer>
       <S.Content>
         <S.Title>솜이 진행 중인 장소 / 솜 찾기</S.Title>
+
         <S.MapAndListWrapper>
           <S.MapBox>
             <S.Map center={center} level={5} ref={mapRef}>
@@ -199,7 +199,10 @@ const MapContainer = () => {
           </S.MapBox>
 
           <S.ListBox>
-            {somList.map((som) => (
+            {somList.map((som) => {
+              const somImage = som.somImageList?.[0]?.somImagePath || `${process.env.PUBLIC_URL}/assets/icons/defaultSom.png`;
+
+              return (
               <S.SomItem
                 key={som.id}
                 onClick={() => {
@@ -209,17 +212,19 @@ const MapContainer = () => {
                   setSelectedMarkerId(marker.id);
                 }}
               >
-                <S.SomTitle>{som.somTitle}</S.SomTitle>
-                <S.SomAddress>{som.somAddress}</S.SomAddress>
+                <S.SomThumb>
+                  <img src={somImage} alt="som thumbnail" />
+                </S.SomThumb>
 
-                <S.SomDate>
-                  시작일: {som.somStartDate?.slice(0, 10).replaceAll(".", "-")}
-                </S.SomDate>
-                <S.SomDate>
-                  마감일: {som.somEndDate?.slice(0, 10).replaceAll(".", "-")}
-                </S.SomDate>
+                <S.SomInfoRight>
+                  <S.SomTitle>{som.somTitle}</S.SomTitle>
+                  <S.SomAddress>{som.somAddress}</S.SomAddress>
+                  <S.SomDate>시작일: {som.somStartDate?.slice(0, 10).replaceAll('.', '-')}</S.SomDate>
+                  <S.SomDate>마감일: {som.somEndDate?.slice(0, 10).replaceAll('.', '-')}</S.SomDate>
+                </S.SomInfoRight>
               </S.SomItem>
-            ))}
+              );
+            })}
           </S.ListBox>
         </S.MapAndListWrapper>
       </S.Content>
