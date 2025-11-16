@@ -159,7 +159,7 @@ const Header = () => {
                     src={profileImage || "/assets/icons/login.svg"}
                     alt="프로필아이콘"
                   />
-                  <S.ProfileName nClick={toogleDropdown} style={{cursor:"pointer"}}>
+                  <S.ProfileName onClick={toogleDropdown} style={{cursor:"pointer"}}>
                     {currentUser.memberNickname || "사용자"}
                   </S.ProfileName>
                 </S.ProfileBox>

@@ -91,6 +91,7 @@ const ShopContainer = () => {
                 }
 
                 const json = await response.json();
+                console.log(json.data)
                 setProducts(json.data || []); 
                 setPageNumber(1); 
 

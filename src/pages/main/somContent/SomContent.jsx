@@ -6,7 +6,7 @@ import { useMain } from "../../../context/MainContext";
 const SomContent = ({ content }) => {
   const nav = useNavigate();
   const { formatDate, 
-    somLikeUpdate } = useMain();
+    somLikeUpdate, isLogin, somJoinNotLogin } = useMain();
   const {
     id,
     somTitle,
@@ -36,7 +36,12 @@ const SomContent = ({ content }) => {
 
 
   const somTypeText = somType === "solo" ? "솔로솜" : "파티솜"
-  const isLikeButton = isLike ?
+  const isLikeButton = !isLogin ? <S.LikeButton onClick={() => somJoinNotLogin()} $isLike={true}>
+  <S.somLikeIcon src="../../assets/icons/som_read_like_inactive.png" alt="좋아요 아이콘"/> {/* 여기 하트 아이콘 들어갈 자리 ♥ */}
+  <span>
+    {likeCount}
+  </span>
+</S.LikeButton> : isLike ?
   <S.LikeButton onClick={isLikeButtonOnclick} $isLike={true}>
     <S.somLikeIcon src="../../assets/icons/som_read_like_active.png" alt="좋아요 아이콘"/> {/* 여기 하트 아이콘 들어갈 자리 ♥ */}
     <span>

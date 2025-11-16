@@ -4,6 +4,7 @@ import S from "../style";
 import ReviewModal from "../review/ReviewModal";
 import { useSelector } from "react-redux";
 import { resolveUrl } from "../../../../utils/url";
+import { useNavigate } from "react-router-dom"; // ✅ 추가
 
 const formatDotDate = (str) => (str ? str.split("T")[0].replace(/-/g, ".") : "");
 
@@ -21,6 +22,8 @@ const MyShopOrderContainer = () => {
   // 모달
   const [open, setOpen] = useState(false);
   const [target, setTarget] = useState(null);
+
+  const navigate = useNavigate(); // ✅ 추가
 
   const openReview = (order) => {
     setTarget({
@@ -209,7 +212,11 @@ const MyShopOrderContainer = () => {
           const alreadyReviewed = reviewExists[order.productId] === true;
 
           return (
-            <S.ListItem key={order.orderId}>
+            <S.ListItem
+              key={order.orderId}
+              // ✅ 리스트 아이템 클릭 시 상세 페이지로 이동
+              onClick={() => navigate(`/main/shop/read/${order.productId}`)}
+            >
               <div
                 style={{
                   display: "flex",
@@ -229,7 +236,8 @@ const MyShopOrderContainer = () => {
 
                 <S.OrderActionButton
                   disabled={alreadyReviewed}
-                  onClick={() => {
+                  onClick={(e) => {
+                    e.stopPropagation(); // ✅ 버튼 클릭 시 상세 이동 막기
                     if (!alreadyReviewed) openReview(order);
                   }}
                 >
