@@ -46,6 +46,7 @@ S.ListBox = styled.div`
   max-height: 600px;
   overflow-y: auto;
   padding-right: 8px;
+ background-color: ${({ theme }) => theme.PALLETE.white};
 
   &::-webkit-scrollbar {
     width: 6px;
@@ -59,6 +60,7 @@ S.ListBox = styled.div`
   }
 `;
 
+
 S.SomTitle = styled.h3`
   font-size: 18px;
   font-weight: 600;
@@ -68,6 +70,12 @@ S.SomTitle = styled.h3`
 
 S.SomAddress = styled.p`
   font-size: 13px;
+  color: ${({ theme }) => theme.PALLETE.grey.greyScale4};
+`;
+
+S.SomDate = styled.div`
+  font-size: 12px;
+  margin-top: 4px;
   color: ${({ theme }) => theme.PALLETE.grey.greyScale4};
 `;
 
@@ -86,7 +94,7 @@ S.SomItem = styled.div`
     color: ${({ theme }) => theme.PALLETE.white};
     transform: translateY(-2px);
 
-    ${S.SomTitle}, ${S.SomAddress} {
+    ${S.SomTitle}, ${S.SomAddress}, ${S.SomDate} {
       color: ${({ theme }) => theme.PALLETE.white};
     }
   }
@@ -112,12 +120,29 @@ S.MyLocationButton = styled.img`
 `;
 
 S.InfoBox = styled.div`
+  position: relative;
   width: 200px;
   min-height: 160px;
   background: ${({ theme }) => theme.PALLETE.white};
   border-radius: 8px;
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
   padding: 10px 12px;
+  cursor: pointer;
+`;
+
+S.CloseButton = styled.img`
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 12px;
+  height: 12px;
+  cursor: pointer;
+  opacity: 0.75;
+  transition: opacity 0.15s ease;
+
+  &:hover {
+    opacity: 1;
+  }
 `;
 
 S.InfoImage = styled.img`
@@ -126,7 +151,12 @@ S.InfoImage = styled.img`
   border-radius: 8px;
   object-fit: cover;
   object-position: center;
+  margin-top: 8px;
   margin-bottom: 6px;
+`;
+
+S.InfoContent = styled.div`
+  cursor: pointer;
 `;
 
 S.InfoTitle = styled.h4`
@@ -136,13 +166,13 @@ S.InfoTitle = styled.h4`
   color: ${({ theme }) => theme.PALLETE.basic};
   line-height: 1.4;
   display: -webkit-box;
-  -webkit-line-clamp: 2;       
+  -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
-  word-break: break-word;      
-  white-space: normal;         
-  max-height: 3.2em;            
+  word-break: break-word;
+  white-space: normal;
+  max-height: 3.2em;
 `;
 
 S.InfoAddress = styled.span`
@@ -151,5 +181,55 @@ S.InfoAddress = styled.span`
   line-height: 1.4;
   word-break: keep-all;
 `;
+
+S.SomItem = styled.div`
+  display: flex;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid #e0e0e0;
+  border-radius: 8px;
+  background-color: ${({ theme }) => theme.PALLETE.grey.greyScale0};
+  margin-bottom: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background-color: ${({ theme }) => theme.PALLETE.primary.main};
+    color: ${({ theme }) => theme.PALLETE.white};
+    transform: translateY(-2px);
+
+    ${S.SomTitle}, ${S.SomAddress}, ${S.SomDate} {
+      color: ${({ theme }) => theme.PALLETE.white};
+    }
+  }
+`;
+
+S.SomThumb = styled.div`
+  width: 68px;
+  height: 68px;
+  border-radius: 8px;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: ${({ theme }) => theme.PALLETE.grey.greyScale0};
+  border: 1px solid ${({ theme }) => theme.PALLETE.grey.greyScale1};
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+`;
+
+
+S.SomInfoRight = styled.div`
+  display: flex;
+  flex-direction: column;
+  margin-left: 15px;
+  gap: 2px;
+  width: calc(100% - 70px);
+`;
+
+
+
 
 export default S;
