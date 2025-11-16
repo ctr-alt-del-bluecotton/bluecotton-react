@@ -52,7 +52,8 @@ const SomContent = ({ content }) => {
 
   const somOnClick = () => nav(`/main/som/read/${id}`);
 
-  const somButton = <S.SomButton onClick={somOnClick}>참여 - {somTypeText}({somCount})</S.SomButton> 
+  const somButton = somType === "solo" ? <S.SomButton onClick={somOnClick}>참여 - {somTypeText}({somCount})</S.SomButton> 
+  : <S.PartySomButton onClick={somOnClick}>참여 - {somTypeText}({somCount})</S.PartySomButton>
   ;
 
   return (
@@ -81,8 +82,8 @@ const SomContent = ({ content }) => {
         </S.SomExplanation>
       </S.SomInfo>
       <S.SomButtonArea>
-        {somType === "solo" && <S.SomButton>귓솜말하기</S.SomButton>}
-        {somType === "solo" ? somButton : <S.PartySomButton>참여 - {somTypeText}({somCount})</S.PartySomButton>}
+        {somType === "solo" && <S.SomButton onClick={() => somOnClick()}>귓솜말하기</S.SomButton>}
+        {somButton}
         {isLikeButton}
       </S.SomButtonArea>
     </S.Card>

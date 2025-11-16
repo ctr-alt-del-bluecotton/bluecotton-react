@@ -1,7 +1,5 @@
-import { createContext, useState, useContext, useEffect } from 'react';
+import { createContext, useState, useContext, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import leaderData from '../pages/main/dummyData/readDummys/somLeaderDummy.json';
-import reviewData from '../pages/main/dummyData/readDummys/somReviewDummy.json';
 import { fetchData, options } from './FetchContext';
 import { useModal } from './../components/modal';
 import { useSelector } from 'react-redux';
@@ -23,32 +21,48 @@ export const ReadProvider = ({ children }) => {
     const [infoMenuSelect, setInfoMenuSelect] = useState("info");
     const [somMemberList, setSomMemberList] = useState([]);
     const [somIsLike, setSomIsLike] = useState(false);
+    const isLater = new Date(somInfo.somEndDate) > new Date();
 
-    const loadReadData = async () => {
+    const somCategoryMap = {
+        "study": "학습",
+        "health": "건강",
+        "social": "소셜",
+        "hobby": "취미",
+        "life": "생활",
+        "rookie": "루키"
+    }
+
+    const somCategoryInfo = somCategoryMap[somInfo.somCategory];
+    const isOver = new Date(somInfo.somEndDate) > new Date();
+
+    const loadReadData = useCallback(async () => {
         setLoading(true);
         await fetchData(`som/read?somId=${id}&memberEmail=${currentUser.memberEmail}`, options.getOption())
             .then(async (res) => {
                 const target = await res.json();
                 const readData = target.data;
-                console.log(readData)
     
                 // .find((som) => String(som.id) === String(id));
-                setSomInfo(readData || {});
+                setSomInfo(readData || {}); 
         
                 const likeInfo = readData.somLike;
                 setSomIsLike(likeInfo ? likeInfo.isLike : false);
-        
-                const leaderInfo = leaderData.find(({ somId }) => String(somId) === String(id));
-                setSomLeader(leaderInfo || {});
+    
+                setSomLeader(readData.memberSomLeader || {});
         
                 const contentData = readData.somContent
                 setSomContent(contentData ? contentData.somContent : "");
-        
-                console.log("참여 멤버 데이터:", readData.somJoinList);
                 setSomMemberList(readData.somJoinList || []);
                 
                 setLoading(false);
             })
+    },[currentUser.memberEmail, id])
+
+    const wisperJoin = async (somTitle) => {
+        await fetchData(`chat/join-room?somTitle=${somTitle}&memberEmail=${currentUser.memberEmail}`, options.getOption())
+        .then((res) => {
+
+        })
     }
 
     const insertFetch = async () => {
@@ -57,7 +71,6 @@ export const ReadProvider = ({ children }) => {
             memberId : currentUser.id
         }))
         .then((res) => {
-            console.log(res);
             window.dispatchEvent(new CustomEvent("refreshSomList"));
             // 참여 후 데이터 새로고침
             loadReadData();
@@ -73,13 +86,21 @@ export const ReadProvider = ({ children }) => {
         return res;
     }
 
+    const wisperSoloSom = (somTitle) => {
+        openModal({
+            title: "귓솜말을 시작합니다.",
+            message: `해당 솜의 리더인 ${somInfo.memberSomLeader.memberName}(${somInfo.memberSomLeader.memberNickname})님에게 귓솜말을 겁니다.`,
+            cancelText: "취소",
+            confirmText: "귓솜말 걸기",
+            onConfirm: () => { wisperJoin(somTitle) }
+        });
+    }
+
     const somJoinSoloSom = () => {
         openModal({
             title: "솔로 솜에는 참가 할 수 없습니다.",
             message: "귓솜말로 문의를 해보는건 어떨까요?",
-            cancelText: "더 둘러보기",
-            confirmText: "확인",
-            onConfirm: () => { alert('귓솜말 연결 코드') }
+            cancelText: "더 둘러보기"
         });
     }
 
@@ -130,11 +151,11 @@ export const ReadProvider = ({ children }) => {
 
         window.addEventListener("refreshSomList", handleRefresh);
         return () => window.removeEventListener("refreshSomList", handleRefresh);
-    }, [id, currentUser]);
+    }, [id, currentUser, loadReadData]);
 
     useEffect(() => {
         if (somLeader.memberId) {
-            setSomReviews(reviewData.filter(({ memberId }) => String(memberId) === String(somLeader.memberId)));
+            setSomReviews(somLeader.somReviewList);
         }
     }, [somLeader]);
     
@@ -153,6 +174,7 @@ export const ReadProvider = ({ children }) => {
         somLeader,
         somReviews,
         somLikeUpdate,
+        somCategoryInfo,
         loading,
         somContent,
         infoMenuSelect,
@@ -164,7 +186,10 @@ export const ReadProvider = ({ children }) => {
         somIsLike,
         setSomIsLike,
         formatDate,
-        somJoinNotLogin
+        isLater,
+        somJoinNotLogin,
+        wisperSoloSom,
+        isOver
     };
 
     return (

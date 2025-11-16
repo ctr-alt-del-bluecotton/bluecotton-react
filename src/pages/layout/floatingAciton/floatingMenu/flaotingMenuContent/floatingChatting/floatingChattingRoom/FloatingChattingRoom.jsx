@@ -1,82 +1,79 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import SockJS from 'sockjs-client';
 import { Client } from '@stomp/stompjs';
 import { useChatting } from '../../../../../../../context/ChattingContext';
 import { fetchData } from '../../../../../../../context/FetchContext';
 import S from './style';
 
-
 const FloatingChattingRoom = () => {
-  const { chattingMenu, memberId, memberName } = useChatting();
-  const { chatId } = chattingMenu;
-
+  const { chattingMenu, memberId, memberName, setChattingMenu } = useChatting();
+  const { chatId } = chattingMenu; 
   const [message, setMessage] = useState('');
   const [chatList, setChatList] = useState([]);
   const [offset, setOffset] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [chatRoomName, setChatRoomName] = useState("");
-  const [memberList, setMemberList] = useState([]);
+  const [joinedKey, setJoinedKey] = useState(`joined_${chatId}_${memberId}`);
 
   const chatBoxRef = useRef(null);
   const stompClientRef = useRef(null);
 
-  /** JOIN 중복 방지용 키 */
-  const joinedKey = `joined_${chatId}_${memberId}`;
-  const hasJoinedBefore = localStorage.getItem(joinedKey);
+  useEffect(() => {
+    setJoinedKey(`joined_${chatId}_${memberId}`)
+  },[chatId, memberId])
 
-  /** 자동 스크롤 함수 */
-  const scrollToBottom = () => {
+  /** 자동 스크롤 */
+  const scrollToBottom = useCallback(() => {
     const box = chatBoxRef.current;
     if (!box) return;
     box.scrollTop = box.scrollHeight;
-  };
+  }, []);
 
-  /** 메시지 불러오기 */
-  const loadMessages = async (newOffset = 0) => {
-    setIsLoading(true);
+  /** 메시지 불러오기 (안정화 버전) */
+  const loadMessages = useCallback(
+    async (newOffset = 0) => {
+      setIsLoading(true);
 
-    const res = await fetchData(
-      `chats/${chatId}/messages?offset=${newOffset}&limit=50`
-    );
-    const datas = await res.json();
-    const msgs = Array.isArray(datas) ? datas : datas.data;
-    console.log(msgs)
-    const box = chatBoxRef.current;
+      // 메시지 목록
+      const res = await fetchData(
+        `chats/${chatId}/messages?offset=${newOffset}&limit=50`
+      );
+      const body = await res.json();
+      const msgs = Array.isArray(body) ? body : body.data;
 
-    await fetchData(
-      `chat/get-rooms/${chatId}`
-    ).then( async (res) => { const data = await res.json();
-      setChatRoomName(data.chatTitle)
-      
-     });
+      // 채팅방 제목
+      const roomRes = await fetchData(`chat/get-rooms/${chatId}`);
+      const roomData = await roomRes.json();
+      setChatRoomName(roomData.chatTitle);
 
-    // setChatRoomName(res.json().chatTitle)
+      const box = chatBoxRef.current;
 
-    if (newOffset === 0) {
-      // 최초 로드 → 최신 메시지 50개
-      setChatList(msgs);
-      setTimeout(() => scrollToBottom(), 0);
-    } else {
-      // 과거 메시지 로드 → scroll 유지
-      const prevHeight = box.scrollHeight;
+      if (newOffset === 0) {
+        setChatList(msgs);
+        setTimeout(scrollToBottom, 0);
+      } else {
+        const prevHeight = box.scrollHeight;
 
-      setChatList(prev => [...msgs, ...prev]);
+        setChatList((prev) => [...msgs, ...prev]);
 
-      setTimeout(() => {
-        const newHeight = box.scrollHeight;
-        box.scrollTop = newHeight - prevHeight;
-      }, 0);
-    }
+        setTimeout(() => {
+          const newHeight = box.scrollHeight;
+          box.scrollTop = newHeight - prevHeight;
+        }, 0);
+      }
 
-    setIsLoading(false);
-  };
+      setIsLoading(false);
+    },
+    [chatId, scrollToBottom] // 안정된 dependency
+  );
 
   /** 첫 로딩 */
   useEffect(() => {
     loadMessages(0);
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [chatId]);
 
-  /** 무한 스크롤: 위로 올리면 더 불러오기 */
+  /** 무한 스크롤 */
   useEffect(() => {
     const box = chatBoxRef.current;
     if (!box) return;
@@ -89,9 +86,13 @@ const FloatingChattingRoom = () => {
       }
     };
 
-    box.addEventListener('scroll', handler);
-    return () => box.removeEventListener('scroll', handler);
-  }, [offset, isLoading]);
+    box.addEventListener("scroll", handler);
+    return () => box.removeEventListener("scroll", handler);
+  }, [offset, isLoading, loadMessages]);
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [chatList]);
 
   /** WebSocket 연결 */
   useEffect(() => {
@@ -101,10 +102,6 @@ const FloatingChattingRoom = () => {
       reconnectDelay: 5000,
 
       onConnect: () => {
-        console.log('WS 연결됨');
-
-        // JOIN 메시지 — 최초 1회만
-        const joinedKey = `joined_${chatId}_${memberId}`;
         const hasJoinedBefore = localStorage.getItem(joinedKey);
 
         if (!hasJoinedBefore) {
@@ -115,33 +112,39 @@ const FloatingChattingRoom = () => {
               chatMessageSenderId: memberId,
               chatMessageReceiverId: null,
               chatMessageContent: `${memberName}님이 입장하셨습니다.`,
-              chatMessageType: 'JOIN',
+              chatMessageType: 'JOIN'
             })
           });
 
           localStorage.setItem(joinedKey, "1");
         }
 
-        // 구독
         client.subscribe(`/sub/chat/room/${chatId}`, (msg) => {
-          const body = JSON.parse(msg.body);
-
-          setChatList(prev => {
+          const raw = JSON.parse(msg.body);
+        
+          // 메시지 표준화
+          const normalized = {
+            ...raw,
+            memberName: raw.memberName ?? memberName, // 🔥 없으면 보내는 사람 본인 이름으로 채움
+            createdAt: raw.createdAt ?? new Date().toISOString()
+          };
+        
+          setChatList((prev) => {
             // JOIN 중복 방지
-            if (body.chatMessageType === "JOIN") {
+            if (normalized.chatMessageType === "JOIN") {
               const exists = prev.some(
-                m =>
+                (m) =>
                   m.chatMessageType === "JOIN" &&
-                  m.chatMessageSenderId === body.chatMessageSenderId
+                  m.chatMessageSenderId === normalized.chatMessageSenderId
               );
               if (exists) return prev;
             }
-
-            return [...prev, body];
+            return [...prev, normalized];
           });
-
-          setTimeout(() => scrollToBottom(), 0);
+        
+          setTimeout(scrollToBottom, 0);
         });
+        
       }
     });
 
@@ -152,11 +155,11 @@ const FloatingChattingRoom = () => {
       stompClientRef.current?.deactivate();
       localStorage.removeItem(joinedKey);
     };
-  }, [chatId, memberId, memberName]);
+  }, [chatId, memberId, memberName, scrollToBottom, joinedKey]);
 
   /** 메시지 전송 */
-  const handleKeyDown = e => {
-    if (e.key === 'Enter' && message.trim()) {
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter" && message.trim()) {
       stompClientRef.current?.publish({
         destination: '/pub/chat/send',
         body: JSON.stringify({
@@ -164,35 +167,57 @@ const FloatingChattingRoom = () => {
           chatMessageSenderId: memberId,
           chatMessageReceiverId: null,
           chatMessageContent: message,
-          chatMessageType: 'MESSAGE',
+          chatMessageType: 'MESSAGE'
         })
       });
 
       setMessage('');
-      setTimeout(() => scrollToBottom(), 0);
+      setTimeout(scrollToBottom, 0);
     }
+  };
+
+  const handleSend = (e) => {
+    stompClientRef.current?.publish({
+      destination: '/pub/chat/send',
+      body: JSON.stringify({
+        chatId,
+        chatMessageSenderId: memberId,
+        chatMessageReceiverId: null,
+        chatMessageContent: message,
+        chatMessageType: 'MESSAGE'
+      })
+    });
+
+    setMessage('');
+    setTimeout(scrollToBottom, 0)
   };
 
   return (
     <S.Container>
       <S.Header>
+        <S.backButton onClick={() => setChattingMenu({ menu: "list", chatId: 0 })}>이전으로</S.backButton>
         <S.Title>{chatRoomName}</S.Title>
       </S.Header>
 
       <S.ChatBody ref={chatBoxRef}>
-        {chatList.map((chat, idx) => chat.chatMessageType == "MESSAGE" ? (
-          <S.ChatContent>
-            <S.chatSenderName isUser={chat.chatMessageSenderId == memberId}>{chat.memberName}</S.chatSenderName>
-            <S.Bubble key={idx} isUser={chat.chatMessageSenderId == memberId}>
-              {chat.chatMessageContent}
-            </S.Bubble>
-          </S.ChatContent>
-        ) : <S.systemMessage>{chat.chatMessageContent}</S.systemMessage>)}
+        {chatList?.map((chat, idx) =>
+          chat.chatMessageType === "MESSAGE" ? (
+            <S.ChatContent key={idx}>
+              <S.chatSenderName isUser={chat.chatMessageSenderId === memberId}>
+                {chat.memberName}
+              </S.chatSenderName>
+
+              <S.Bubble isUser={chat.chatMessageSenderId === memberId}>
+                {chat.chatMessageContent}
+              </S.Bubble>
+            </S.ChatContent>
+          ) : (
+            <S.systemMessage key={idx}>{chat.chatMessageContent}</S.systemMessage>
+          )
+        )}
 
         {isLoading && (
-          <S.Bubble isUser={false}>
-            이전 메시지를 불러오는 중...
-          </S.Bubble>
+          <S.Bubble isUser={false}>이전 메시지를 불러오는 중...</S.Bubble>
         )}
       </S.ChatBody>
 
@@ -201,9 +226,12 @@ const FloatingChattingRoom = () => {
           type="text"
           placeholder="메시지를 입력하고 엔터를 누르세요"
           value={message}
-          onChange={e => setMessage(e.target.value)}
+          onChange={(e) => setMessage(e.target.value)}
           onKeyDown={handleKeyDown}
         />
+        <S.SendBtn onClick={handleSend}>
+          {"전송"}
+        </S.SendBtn>
       </S.InputArea>
     </S.Container>
   );
