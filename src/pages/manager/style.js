@@ -1,8 +1,12 @@
+// src/pages/manager/order/style.jsx
 import styled from "styled-components";
-import * as C from '../../styles/common';
+import * as C from '../../styles/common'; // common.js가 있다고 가정
 
 const S = {};
 
+// =======================================================
+// [공통 레이아웃 & 테이블] - 기존 코드에서 가져옴
+// =======================================================
 S.ManagerWrapper = styled.div`
   width: 100%;
   min-height: 100vh;
@@ -314,167 +318,144 @@ S.TabButton = styled.button`
   }
 `;
 
-S.DashboardGrid = styled.div`
+// =======================================================
+// [Dashboard 전용 스타일] - 필수 추가
+// =======================================================
+
+S.DashboardWrapper = S.ContentSection; // ContentSection 재사용
+
+S.SummaryGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
-  margin-bottom: 24px;
-
-  @media (max-width: 1024px) {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  @media (max-width: 768px) {
-    grid-template-columns: 1fr;
-  }
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+  margin-bottom: 32px;
 `;
 
-S.StatCard = styled.div`
-  background: #ffffff;
+S.SummaryCard = styled.div`
+  background: ${({ theme }) => theme.PALLETE.white};
   border-radius: 12px;
-  padding: 16px 20px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.04);
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+  padding: 24px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+  border: 1px solid ${({ theme }) => theme.PALLETE.grey.greyScale1};
 `;
 
-S.StatTitle = styled.div`
-  font-size: 14px;
-  color: #666;
+S.SummaryLabel = styled.p`
+  ${C.smallText2Regular}
+  color: ${({ theme }) => theme.PALLETE.grey.greyScale3};
+  margin-bottom: 8px;
 `;
 
-S.StatValue = styled.div`
-  font-size: 20px;
-  font-weight: 700;
-  color: #333;
-`;
-
-S.StatDescription = styled.div`
-  font-size: 12px;
-  color: #999;
-`;
-
-S.SectionTitle = styled.h3`
-  font-size: 16px;
-  font-weight: 600;
-  margin-bottom: 12px;
-  margin-top: 8px;
-  color: #333;
-`;
-
-
-S.DashboardHeaderRow = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  margin-bottom: 16px;
-`;
-
-S.DashboardSubTitle = styled.p`
-  font-size: 13px;
-  color: #777;
-`;
-
-S.DashboardGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
-  margin-bottom: 24px;
-
-  @media (max-width: 1024px) {
-    grid-template-columns: repeat(1, minmax(0, 1fr));
-  }
-`;
-
-S.DashboardCard = styled.div`
-  background: #ffffff;
-  border-radius: 12px;
-  padding: 16px 20px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.04);
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-`;
-
-S.MetricLabel = styled.div`
-  font-size: 13px;
-  color: #888;
-`;
-
-S.MetricValue = styled.div`
-  font-size: 20px;
-  font-weight: 700;
-  color: #222;
-`;
-
-S.ChartSection = styled.section`
-  margin-top: 24px;
-`;
-
-S.SectionTitle = styled.h3`
-  font-size: 16px;
-  font-weight: 600;
-  margin-bottom: 12px;
-`;
-
-S.ChartWrapper = styled.div`
-  width: 100%;
-  height: 320px;
-  background: #fff;
-  border-radius: 12px;
-  padding: 12px 16px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+S.SummaryValue = styled.h2`
+  ${C.heading2}
+  ${C.primary}
 `;
 
 S.ChartGrid = styled.div`
   display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 16px;
+  grid-template-columns: 1fr;
+  gap: 20px;
 
-  @media (max-width: 1024px) {
-    grid-template-columns: 1fr;
+  @media (min-width: 900px) {
+    grid-template-columns: 1fr 1fr;
   }
 `;
 
-S.CategoryList = styled.div`
-  background: #fff;
+S.ChartCard = styled.div`
+  background: ${({ theme }) => theme.PALLETE.white};
   border-radius: 12px;
-  padding: 12px 16px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.04);
-  max-height: 320px;
-  overflow-y: auto;
-`;
-
-S.CategoryItem = styled.div`
-  padding: 8px 0;
-  border-bottom: 1px solid #f1f1f1;
-  &:last-child {
-    border-bottom: none;
+  padding: 24px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+  border: 1px solid ${({ theme }) => theme.PALLETE.grey.greyScale1};
+  /* ChartGrid가 1fr 1fr일 때 두 칸을 모두 차지하도록 설정 */
+  &:first-child, &:last-child {
+    grid-column: span 1;
+    @media (max-width: 900px) {
+        grid-column: span 1;
+    }
   }
 `;
 
-S.CategoryName = styled.div`
-  font-size: 14px;
-  font-weight: 600;
+S.ChartHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
 `;
 
-S.CategoryMeta = styled.div`
-  font-size: 12px;
-  color: #777;
+S.ChartTitle = styled.h3`
+  ${C.heading4}
+  ${C.basic}
 `;
 
-S.InfoText = styled.div`
-  margin-top: 8px;
-  font-size: 12px;
-  color: #777;
+S.ChartBody = styled.div`
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 `;
 
-S.ErrorText = styled.div`
-  margin-top: 8px;
-  font-size: 12px;
-  color: #d9534f;
+S.HorizonButtons = styled.div`
+  display: flex;
+  gap: 4px;
 `;
+
+S.HorizonButton = styled.button`
+  ${C.smallText3Regular}
+  padding: 6px 10px;
+  border: 1px solid ${({ theme }) => theme.PALLETE.grey.greyScale1};
+  border-radius: 4px;
+  background-color: ${({ $active, theme }) => 
+    $active ? theme.PALLETE.primary.main : theme.PALLETE.white};
+  color: ${({ $active, theme }) => 
+    $active ? theme.PALLETE.white : theme.PALLETE.grey.greyScale4};
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    background-color: ${({ $active, theme }) => 
+      $active ? theme.PALLETE.primary.dark : theme.PALLETE.grey.greyScale0};
+  }
+`;
+
+S.SimpleList = styled.ul`
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  max-height: 250px;
+  overflow-y: auto;
+
+  & > li {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px dashed ${({ theme }) => theme.PALLETE.grey.greyScale1};
+    ${C.smallText2Regular}
+    
+    &:last-child {
+      border-bottom: none;
+    }
+    
+    & > span:first-child {
+      color: ${({ theme }) => theme.PALLETE.grey.greyScale4};
+    }
+    
+    & > span:last-child {
+      font-weight: ${({ theme }) => theme.FONT_WEIGHT.bold};
+      color: ${({ theme }) => theme.PALLETE.basic};
+    }
+  }
+`;
+
+S.ErrorBox = styled.div`
+  ${C.smallText2Regular}
+  background-color: #ffebee;
+  color: #d32f2f;
+  border: 1px solid #d32f2f;
+  border-radius: 4px;
+  padding: 16px;
+  margin-bottom: 24px;
+  text-align: center;
+`;
+
 
 export default S;
-

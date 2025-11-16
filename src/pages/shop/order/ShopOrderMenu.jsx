@@ -7,11 +7,12 @@ import PaymentMethod from "./PaymentMathod";
 import { useModal } from "../../../components/modal/useModal";
 import { useSelector, useDispatch } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
-import { updateMemberCandy } from "../../../store/userSlice"
+import { updateMemberCandy } from "../../../store/userSlice";
 
 const PORTONE_IMP_KEY = process.env.REACT_APP_PORTONE_IMP_KEY;
 const API = process.env.REACT_APP_BACKEND_URL;
 
+// PortOne SDK 로더
 const getIMP = (() => {
   let promise;
   return () => {
@@ -70,21 +71,20 @@ const ShopOrderMenu = () => {
   const [orderData, setOrderData] = useState(null);
   const [isLoadingOrder, setIsLoadingOrder] = useState(true);
 
-  const [payType, setPayType] = useState(null); // 'toss' | 'kakao' | 'general' | 'candy'
-  const [generalMethod, setGeneralMethod] = useState("card");
+  // 'toss' | 'kakao' | 'general' | 'candy'
+  const [payType, setPayType] = useState(null);
+  const [generalMethod, setGeneralMethod] = useState("card"); // 'card' | 'trans' 등
   const [payLoading, setPayLoading] = useState(false);
 
   const merchantUidRef = useRef(null);
 
-  // 🔹 보유 캔디는 state로 관리 (결제 후 즉시 반영)
   const [candyBalance, setCandyBalance] = useState(0);
 
-  // 로그인 유저 정보 바뀔 때 초기 잔액 세팅
   useEffect(() => {
     setCandyBalance(Number(currentUser?.memberCandy ?? 0) || 0);
   }, [currentUser]);
 
-  // ✅ 스냅샷(장바구니 → 주문서로 넘어온 경우) 있을 때
+  // 1) snapshot(장바구니/단일상품)로 들어온 경우
   useEffect(() => {
     if (snapshot?.items?.length) {
       const items = snapshot.items.map((it) => {
@@ -119,11 +119,9 @@ const ShopOrderMenu = () => {
     }
   }, [snapshot, orderId]);
 
-  // ✅ 스냅샷이 없으면 서버에서 주문 상세 조회
+  // 2) 서버에서 주문 상세를 다시 조회하는 경우
   useEffect(() => {
-    if (snapshot?.items?.length) {
-      return;
-    }
+    if (snapshot?.items?.length) return;
 
     if (!orderId && !(snapshot?.items?.length)) {
       openModal({
@@ -229,7 +227,6 @@ const ShopOrderMenu = () => {
     }
   }, [API, currentUser, navigate, openModal, orderId, snapshot]);
 
-  // 🔹 상품 총 금액 (배송비 제외)
   const rawTotal = useMemo(() => {
     if (!orderData) return 0;
 
@@ -255,7 +252,7 @@ const ShopOrderMenu = () => {
   const isCandy = payType === "candy";
 
   const shippingFee = useMemo(() => {
-    if (isCandy) return 0; // 🔥 캔디 결제면 배송비 0
+    if (isCandy) return 0;
     return rawTotal >= 30000 ? 0 : FIXED_SHIPPING_FEE;
   }, [rawTotal, isCandy]);
 
@@ -266,8 +263,6 @@ const ShopOrderMenu = () => {
   }, [isCandy, shippingFee]);
 
   const itemPrice = useMemo(() => rawTotal, [rawTotal]);
-
-  // 💡 캔디 결제에 필요한 캔디 = 상품금액 (배송비 제외)
   const candyNeedAmount = itemPrice;
 
   const totalAmount = useMemo(
@@ -275,11 +270,16 @@ const ShopOrderMenu = () => {
     [itemPrice, shippingFee]
   );
 
+  const purchaseTypeForOrder = useMemo(() => {
+    if (!orderData?.items?.length) return "CASH";
+    const first = orderData.items[0].purchaseType || "CASH";
+    return String(first).toUpperCase();
+  }, [orderData]);
+
   const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(
     navigator.userAgent
   );
 
-  // PortOne SDK 미리 로딩
   useEffect(() => {
     getIMP().catch((e) =>
       openModal({
@@ -290,9 +290,21 @@ const ShopOrderMenu = () => {
     );
   }, [openModal]);
 
-  console.log("[ShopOrderMenu] render candyBalance:", candyBalance);
+  // 디버깅 로그
+  useEffect(() => {
+    console.log("[ShopOrderMenu] candyBalance:", candyBalance);
+    console.log("[ShopOrderMenu] purchaseTypeForOrder:", purchaseTypeForOrder);
+  }, [candyBalance, purchaseTypeForOrder]);
 
-  // ✅ 결제 버튼 클릭 핸들러
+  useEffect(() => {
+    console.log("[PRICE DEBUG]", {
+      rawTotal,
+      itemPrice,
+      shippingFee,
+      totalAmount,
+    });
+  }, [rawTotal, itemPrice, shippingFee, totalAmount]);
+
   const handlePortOnePay = async () => {
     if (payLoading || isLoadingOrder || !orderData) {
       return openModal({
@@ -317,7 +329,16 @@ const ShopOrderMenu = () => {
       });
     }
 
-    // 1️⃣ 캔디 결제 플로우
+    // CANDY 전용 상품인데 카드/토스/카카오 선택하면 막기
+    if (!isCandy && purchaseTypeForOrder === "CANDY") {
+      return openModal({
+        title: "결제 수단 오류",
+        message: "이 상품은 캔디 결제만 가능합니다.",
+        confirmText: "확인",
+      });
+    }
+
+    // ✅ 캔디 결제
     if (isCandy) {
       if (!orderData || !orderData.items?.length) {
         return openModal({
@@ -365,15 +386,14 @@ const ShopOrderMenu = () => {
         }
 
         const json = await res.json().catch(() => null);
+
         const msg =
           json?.message ||
           json?.data?.message ||
           "캔디 결제가 완료되었습니다.";
-
-        // 🔥 로컬 state + Redux 둘 다 갱신
         setCandyBalance((prev) => {
           const next = Math.max(0, prev - candyNeedAmount);
-          dispatch(updateMemberCandy(next)); // 전역 currentUser도 수정
+          dispatch(updateMemberCandy(next));
           return next;
         });
 
@@ -401,7 +421,7 @@ const ShopOrderMenu = () => {
       return;
     }
 
-    // 2️⃣ 일반 (카드/토스/카카오) PortOne 결제 플로우
+    // ✅ 일반(PG) 결제
     const effectiveOrderId = Number(orderData?.orderId ?? orderId);
     if (!Number.isFinite(effectiveOrderId) || effectiveOrderId <= 0) {
       return openModal({
@@ -441,9 +461,11 @@ const ShopOrderMenu = () => {
           pay_method = "card";
           break;
         case "general":
-          paymentType = generalMethod.toUpperCase();
-          pg = "nice_v2";
-          pay_method = generalMethod;
+          // 일반 결제는 카드로 고정
+          paymentType = "CARD";
+          // 포트원 테스트 NICE v2 상점
+          pg = "nice_v2.iamport00m";
+          pay_method = generalMethod; // 'card', 'trans' 등
           break;
         default:
           throw new Error("결제 수단을 확인해주세요.");
@@ -474,6 +496,14 @@ const ShopOrderMenu = () => {
       }
       merchantUidRef.current = merchantUid;
 
+      console.log("[PAY REQUEST]", {
+        pg,
+        pay_method,
+        merchantUid: merchantUidRef.current,
+        amountToPay,
+        paymentType,
+      });
+
       await new Promise((resolve) => {
         IMP.request_pay(
           {
@@ -497,56 +527,66 @@ const ShopOrderMenu = () => {
           async (rsp) => {
             requestAnimationFrame(enforceIframeStyles);
 
-            if (rsp?.success) {
-              try {
-                if (!isMobile && API) {
-                  const vRes = await fetch(`${API}/payment/verify`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                      impUid: rsp.imp_uid,
-                      merchantUid: merchantUidRef.current,
-                      memberId: currentUser.id,
-                      paymentType,
-                      pg: rsp.pg,
-                      easyPayProvider: rsp.easy_pay?.provider,
-                    }),
-                  });
-                  if (!vRes.ok) {
-                    const message = await vRes.text().catch(() => "");
-                    throw new Error(
-                      `검증 실패 : ${message || vRes.status}`
-                    );
-                  }
-                }
+            console.log("[IMP callback rsp]", rsp);
 
-                openModal({
-                  title: "결제 완료",
-                  message:
-                    "결제가 성공적으로 완료되었습니다. 주문 완료 페이지로 이동합니다.",
-                  confirmText: "확인",
-                  onConfirm: () =>
-                    navigate(
-                      `/main/my-page/my-shop/order?memberId=${currentUser.id}`
-                    ),
-                });
-              } catch (err) {
-                console.error(err);
-                openModal({
-                  title: "결제 검증 오류",
-                  message:
-                    err.message || "결제 검증 중 오류가 발생했습니다.",
-                  confirmText: "확인",
-                });
-              }
-            } else {
-              console.error("결제 실패: ", rsp);
+            // 1) imp_uid가 없으면 → 결제 자체가 완료되지 않음 (취소/실패)
+            if (!rsp?.imp_uid) {
+              console.error("[IMP 실패 - imp_uid 없음]", rsp);
+              const baseMsg =
+                rsp?.error_msg ||
+                rsp?.fail_reason ||
+                "사용자가 결제를 취소했거나, 결제가 완료되지 않았습니다.";
+
               openModal({
                 title: "결제 실패",
+                message: `${baseMsg}\n\nmerchant_uid: ${
+                  rsp?.merchant_uid || merchantUidRef.current || "없음"
+                }\nimp_uid: ${rsp?.imp_uid || "없음"}`,
+                confirmText: "확인",
+              });
+              resolve();
+              return;
+            }
+
+            // 2) imp_uid가 있다면 → 성공/실패 여부는 무조건 서버 검증이 최종 판단
+            try {
+              if (!isMobile && API) {
+                const vRes = await fetch(`${API}/payment/verify`, {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    impUid: rsp.imp_uid,
+                    merchantUid: merchantUidRef.current,
+                    memberId: currentUser.id,
+                    paymentType,
+                    pg: rsp.pg,
+                    easyPayProvider: rsp.easy_pay?.provider,
+                  }),
+                });
+
+                if (!vRes.ok) {
+                  const message = await vRes.text().catch(() => "");
+                  throw new Error(`검증 실패 : ${message || vRes.status}`);
+                }
+              }
+
+              openModal({
+                title: "결제 완료",
                 message:
-                  rsp?.error_msg ||
-                  rsp?.fail_reason ||
-                  "알 수 없는 오류",
+                  "결제가 성공적으로 완료되었습니다. 주문 완료 페이지로 이동합니다.",
+                confirmText: "확인",
+                onConfirm: () =>
+                  navigate(
+                    `/main/my-page/my-shop/order?memberId=${currentUser.id}`
+                  ),
+              });
+            } catch (err) {
+              console.error("[결제 검증 오류]", err);
+              openModal({
+                title: "결제 검증 오류",
+                message:
+                  err.message ||
+                  "결제는 승인되었으나, 주문 정보 반영 중 오류가 발생했습니다. 마이페이지 주문 내역을 확인해 주세요.",
                 confirmText: "확인",
               });
             }
@@ -581,6 +621,8 @@ const ShopOrderMenu = () => {
           onChange={setPayType}
           candyBalance={candyBalance}
           candyPrice={itemPrice}
+          purchaseType={purchaseTypeForOrder}
+          onGeneralMethodChange={setGeneralMethod}
         />
       </S.OrderMainSection>
 

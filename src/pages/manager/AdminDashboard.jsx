@@ -29,30 +29,20 @@ const AdminDashboard = ({ orders = [], products = [] }) => {
   const [error, setError] = useState(null);
 
   // 0) 날짜 문자열 -> Date 객체
-  const toDate = (s) => {
-    if (!s) return new Date("1970-01-01T00:00:00");
-    // "2025-11-16 10:20:30" 이런 형식이 올 수도 있으니 앞 10자리만 사용
-    const dateStr = String(s).slice(0, 10);
-    return new Date(`${dateStr}T00:00:00`);
-  };
+  const toDate = (s) => new Date(`${s}T00:00:00`);
 
   // 1) 프론트에서 주문 리스트로 일자별 매출 집계
   const dailyRevenue = useMemo(() => {
     const map = new Map();
 
-    (orders || []).forEach((o) => {
-      if (!o) return;
-
-      // 백엔드에서 내려주는 필드명에 맞춰서 한 번 더 방어코드
-      const date = o.orderDate || o.order_date || o.date;
-      if (!date) return;
-
-      const amount =
-        Number(o.total ?? o.totalPrice ?? o.orderTotalPrice ?? 0) || 0;
-
+    orders.forEach((o) => {
+      const date = o.orderDate; // 백엔드에서 보내주는 필드명에 맞춰서 사용
       const prev = map.get(date) || 0;
-      map.set(date, prev + amount);
+      map.set(date, prev + (o.total || 0));
     });
+
+    console.log("[dailyRevenue]", dailyRevenue);
+
 
     const result = Array.from(map.entries())
       .map(([date, revenue]) => ({ date, revenue }))
@@ -60,11 +50,6 @@ const AdminDashboard = ({ orders = [], products = [] }) => {
 
     return result;
   }, [orders]);
-
-  // 로그는 밖에서 찍기
-  useEffect(() => {
-    console.log("[AdminDashboard] dailyRevenue:", dailyRevenue);
-  }, [dailyRevenue]);
 
   // 2) XGBoost 예측 결과 호출 (백엔드 연동)
   useEffect(() => {
@@ -84,7 +69,6 @@ const AdminDashboard = ({ orders = [], products = [] }) => {
         }
 
         const data = await res.json();
-
         // 백엔드에서 { history: [...], forecast: [...] } 형태로 내려온다고 가정
         const rawForecast = Array.isArray(data.forecast)
           ? data.forecast
@@ -172,24 +156,15 @@ const AdminDashboard = ({ orders = [], products = [] }) => {
   const categoryStats = useMemo(() => {
     const map = new Map();
 
-    (orders || []).forEach((o) => {
-      if (!o) return;
-
-      // o.product 에 이름만 들고 있고, products 에 전체 정보가 있다고 가정
-      const product = (products || []).find(
-        (p) => p.name === o.product || p.productName === o.product
-      );
-      const category = product?.category || product?.categoryName || "기타";
-
-      const amount =
-        Number(o.total ?? o.totalPrice ?? o.orderTotalPrice ?? 0) || 0;
-      const qty = Number(o.quantity ?? o.orderQuantity ?? 1) || 1;
+    orders.forEach((o) => {
+      const product = products.find((p) => p.name === o.product);
+      const category = product?.category || "기타";
 
       const prev = map.get(category) || { category, revenue: 0, count: 0 };
       map.set(category, {
         category,
-        revenue: prev.revenue + amount,
-        count: prev.count + qty,
+        revenue: prev.revenue + (o.total || 0),
+        count: prev.count + (o.quantity || 1),
       });
     });
 
@@ -273,35 +248,31 @@ const AdminDashboard = ({ orders = [], products = [] }) => {
         {error && <S.ErrorText>예측 API 오류: {error}</S.ErrorText>}
 
         <S.ChartWrapper>
-          {filteredChartData.length === 0 ? (
-            <S.InfoText>표시할 매출 데이터가 없습니다.</S.InfoText>
-          ) : (
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart
-                data={filteredChartData}
-                margin={{ top: 10, right: 20, left: 0, bottom: 0 }}
-              >
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="date" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Line
-                  type="monotone"
-                  dataKey="actual"
-                  name="실제 매출"
-                  dot={{ r: 3 }}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="predicted"
-                  name="예측 매출"
-                  strokeDasharray="5 5"
-                  dot={{ r: 3 }}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          )}
+          <ResponsiveContainer width="100%" height={300}>
+            <LineChart
+              data={filteredChartData}
+              margin={{ top: 10, right: 20, left: 0, bottom: 0 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="date" />
+              <YAxis />
+              <Tooltip />
+              <Legend />
+              <Line
+                type="monotone"
+                dataKey="actual"
+                name="실제 매출"
+                dot={{ r: 3 }}
+              />
+              <Line
+                type="monotone"
+                dataKey="predicted"
+                name="예측 매출"
+                strokeDasharray="5 5"
+                dot={{ r: 3 }}
+              />
+            </LineChart>
+          </ResponsiveContainer>
         </S.ChartWrapper>
       </S.ChartSection>
 
@@ -311,23 +282,19 @@ const AdminDashboard = ({ orders = [], products = [] }) => {
 
         <S.ChartGrid>
           <S.ChartWrapper>
-            {categoryStats.length === 0 ? (
-              <S.InfoText>카테고리별 집계할 주문 데이터가 없습니다.</S.InfoText>
-            ) : (
-              <ResponsiveContainer width="100%" height={260}>
-                <BarChart
-                  data={categoryStats}
-                  margin={{ top: 10, right: 20, left: 0, bottom: 0 }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="category" />
-                  <YAxis />
-                  <Tooltip />
-                  <Legend />
-                  <Bar dataKey="revenue" name="매출" />
-                </BarChart>
-              </ResponsiveContainer>
-            )}
+            <ResponsiveContainer width="100%" height={260}>
+              <BarChart
+                data={categoryStats}
+                margin={{ top: 10, right: 20, left: 0, bottom: 0 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="category" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Bar dataKey="revenue" name="매출" />
+              </BarChart>
+            </ResponsiveContainer>
           </S.ChartWrapper>
 
           <S.CategoryList>
