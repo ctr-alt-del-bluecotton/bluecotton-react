@@ -56,6 +56,58 @@ S.PrevButton = styled.button`
   }
 `;
 
+S.GroupPrevButton = styled.button`
+  ${smallText1Regular};
+  padding: 6px 10px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  position: relative;
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.4;
+  }
+
+  /* ✅ 오른쪽 구분선 */
+  &::after {
+    content: "";
+    position: absolute;
+    right: -20px; /* ← 버튼과 선 간 간격 */
+    top: 50%;
+    transform: translateY(-50%);
+    width: 1px;
+    height: 9px;
+    background-color: ${({theme}) => theme.PALLETE.grey.greyScale1 };
+  }
+`
+
+S.GroupNextButton = styled.button`
+  ${smallText1Regular};
+  padding: 6px 10px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  position: relative;
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.4;
+  }
+
+  /* ✅ 오른쪽 구분선 */
+  &::after {
+    content: "";
+    position: absolute;
+    right: -20px; /* ← 버튼과 선 간 간격 */
+    top: 50%;
+    transform: translateY(-50%);
+    width: 1px;
+    height: 9px;
+    background-color: ${({theme}) => theme.PALLETE.grey.greyScale1 };
+  }
+`
+
 S.AfterButton = styled.button`
   ${smallText1Regular};
   padding: 6px 10px;
