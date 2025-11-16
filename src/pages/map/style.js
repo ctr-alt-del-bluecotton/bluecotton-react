@@ -71,6 +71,12 @@ S.SomAddress = styled.p`
   color: ${({ theme }) => theme.PALLETE.grey.greyScale4};
 `;
 
+S.SomDate = styled.div`
+  font-size: 12px;
+  margin-top: 4px;
+  color: ${({ theme }) => theme.PALLETE.grey.greyScale4};
+`;
+
 S.SomItem = styled.div`
   padding: 16px 20px;
   border-bottom: 1px solid #e0e0e0;
@@ -86,7 +92,7 @@ S.SomItem = styled.div`
     color: ${({ theme }) => theme.PALLETE.white};
     transform: translateY(-2px);
 
-    ${S.SomTitle}, ${S.SomAddress} {
+    ${S.SomTitle}, ${S.SomAddress}, ${S.SomDate} {
       color: ${({ theme }) => theme.PALLETE.white};
     }
   }
@@ -112,6 +118,7 @@ S.MyLocationButton = styled.img`
 `;
 
 S.InfoBox = styled.div`
+  position: relative;
   width: 200px;
   min-height: 160px;
   background: ${({ theme }) => theme.PALLETE.white};
@@ -121,13 +128,33 @@ S.InfoBox = styled.div`
   cursor: pointer;
 `;
 
+S.CloseButton = styled.img`
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 12px;
+  height: 12px;
+  cursor: pointer;
+  opacity: 0.75;
+  transition: opacity 0.15s ease;
+
+  &:hover {
+    opacity: 1;
+  }
+`;
+
 S.InfoImage = styled.img`
   width: 100%;
   aspect-ratio: 4 / 3;
   border-radius: 8px;
   object-fit: cover;
   object-position: center;
+  margin-top: 8px;
   margin-bottom: 6px;
+`;
+
+S.InfoContent = styled.div`
+  cursor: pointer;
 `;
 
 S.InfoTitle = styled.h4`
@@ -137,13 +164,13 @@ S.InfoTitle = styled.h4`
   color: ${({ theme }) => theme.PALLETE.basic};
   line-height: 1.4;
   display: -webkit-box;
-  -webkit-line-clamp: 2;       
+  -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
-  word-break: break-word;      
-  white-space: normal;         
-  max-height: 3.2em;            
+  word-break: break-word;
+  white-space: normal;
+  max-height: 3.2em;
 `;
 
 S.InfoAddress = styled.span`
@@ -152,5 +179,8 @@ S.InfoAddress = styled.span`
   line-height: 1.4;
   word-break: keep-all;
 `;
+
+
+
 
 export default S;

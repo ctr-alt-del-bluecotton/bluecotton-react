@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Map, MapMarker, CustomOverlayMap } from 'react-kakao-maps-sdk';
 import S from './style';
-import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 
 const MapContainer = () => {
@@ -13,12 +12,11 @@ const MapContainer = () => {
   const [selectedMarkerId, setSelectedMarkerId] = useState(null);
 
   const navigate = useNavigate();
-
   const mapRef = useRef(null);
 
   const handleInfoClick = (id) => {
     navigate(`/main/som/read/${id}`);
-  }
+  };
 
   const fetchMyLocation = () => {
     if (!navigator.geolocation) {
@@ -52,6 +50,8 @@ const MapContainer = () => {
       setIsLoaded(true);
     }
   };
+
+
 
   useEffect(() => {
     fetchMyLocation();
@@ -155,22 +155,33 @@ const MapContainer = () => {
                       xAnchor={0.5}
                       yAnchor={1.4}
                     >
-                      <S.InfoBox
-                        onClick={() => handleInfoClick(marker.id)}
-                        role="button"
-                        tabIndex={0}
-                        onKeyDown={(e) => {
-                          if(e.key === "Enter" || e.key === ''){
-                            handleInfoClick(marker.id);
-                          }
-                        }}
+                      <S.InfoBox>
+                        <S.CloseButton
+                          src={process.env.PUBLIC_URL + '/assets/icons/close.svg'}
+                          alt="닫기"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedMarkerId(null);
+                          }}
+                        />
 
-                      >
                         {marker.imageUrl && (
                           <S.InfoImage src={marker.imageUrl} alt={marker.title} />
                         )}
-                        <S.InfoTitle>{marker.title}</S.InfoTitle>
-                        <S.InfoAddress>{marker.address}</S.InfoAddress>
+
+                        <S.InfoContent
+                          onClick={() => handleInfoClick(marker.id)}
+                          role="button"
+                          tabIndex={0}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                              handleInfoClick(marker.id);
+                            }
+                          }}
+                        >
+                          <S.InfoTitle>{marker.title}</S.InfoTitle>
+                          <S.InfoAddress>{marker.address}</S.InfoAddress>
+                        </S.InfoContent>
                       </S.InfoBox>
                     </CustomOverlayMap>
                   )}
@@ -193,13 +204,20 @@ const MapContainer = () => {
                 key={som.id}
                 onClick={() => {
                   const marker = markers.find((marker) => marker.id === som.id);
-                  if (!marker) return; 
+                  if (!marker) return;
                   moveToLocation(marker.latitude, marker.longitude);
                   setSelectedMarkerId(marker.id);
                 }}
               >
                 <S.SomTitle>{som.somTitle}</S.SomTitle>
                 <S.SomAddress>{som.somAddress}</S.SomAddress>
+
+                <S.SomDate>
+                  시작일: {som.somStartDate?.slice(0, 10).replaceAll(".", "-")}
+                </S.SomDate>
+                <S.SomDate>
+                  마감일: {som.somEndDate?.slice(0, 10).replaceAll(".", "-")}
+                </S.SomDate>
               </S.SomItem>
             ))}
           </S.ListBox>
