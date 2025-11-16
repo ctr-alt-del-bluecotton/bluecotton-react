@@ -1,32 +1,12 @@
 // src/pages/.../mypage/myshop/MyShopOrderContainer.jsx
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import S from "../style";
 import ReviewModal from "../review/ReviewModal";
 import { useSelector } from "react-redux";
 import { resolveUrl } from "../../../../utils/url";
+import { useNavigate } from "react-router-dom"; // ✅ 추가
 
 const formatDotDate = (str) => (str ? str.split("T")[0].replace(/-/g, ".") : "");
-
-// ✅ 주문 객체에서 상태 문자열 뽑기 (필드명 여러 경우 대비)
-const getStatus = (order) =>
-  order.paymentStatus ||
-  order.orderStatus ||
-  order.status ||
-  order.payment_status ||
-  "";
-
-// ✅ "결제 완료"라고 볼 상태 판정
-const isCompletedStatus = (status) => {
-  const s = String(status || "").toUpperCase();
-
-  if (!s) return false;
-
-  // TODO: 여기 문자열은 실제 DB/DTO 값에 맞게 조정해도 됨
-  // 예: PAYMENT_COMPLETED, PAY_COMPLETED 등
-  const completedKeywords = ["COMPLETE", "SUCCESS", "PAID"];
-
-  return completedKeywords.some((key) => s.includes(key));
-};
 
 const MyShopOrderContainer = () => {
   const { currentUser, isLogin } = useSelector((state) => state.user);
@@ -36,12 +16,14 @@ const MyShopOrderContainer = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  //  key: productId, value: true(이미 리뷰 있음) / false(리뷰 없음)
+  // key: productId, value: true(이미 리뷰 있음) / false(리뷰 없음)
   const [reviewExists, setReviewExists] = useState({});
 
   // 모달
   const [open, setOpen] = useState(false);
   const [target, setTarget] = useState(null);
+
+  const navigate = useNavigate(); // ✅ 추가
 
   const openReview = (order) => {
     setTarget({
@@ -59,7 +41,7 @@ const MyShopOrderContainer = () => {
     setTarget(null);
   };
 
-  // ✅ 구매내역 가져오기 (일단 전체 가져옴)
+  // ✅ 1) 구매내역 가져오기 (한 번만 / memberId 바뀔 때만)
   useEffect(() => {
     if (!memberId) return;
 
@@ -69,26 +51,38 @@ const MyShopOrderContainer = () => {
         setError(null);
 
         const base = process.env.REACT_APP_BACKEND_URL || "";
-        const res = await fetch(
-          `${base}/private/mypage/myshop/order?memberId=${memberId}`,
-          {
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-            },
-            method: "GET",
-          }
-        );
+        const url = `${base}/private/mypage/myshop/order?memberId=${memberId}`;
+
+        console.log("[MyShopOrder] 요청 URL:", url);
+
+        const res = await fetch(url, {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          },
+          method: "GET",
+        });
 
         if (!res.ok) {
           throw new Error(`HTTP ${res.status}`);
         }
 
         const json = await res.json();
+        console.log("[MyShopOrder] 응답 json:", json);
+
         const list = Array.isArray(json?.data) ? json.data : [];
 
-        setOrders(list); // ✅ 원본 그대로 저장
+        console.log("[MyShopOrder] 전체 orders length:", list.length);
+        list.forEach((o, idx) => {
+          console.log(
+            `[MyShopOrder] orders[${idx}] => orderId=${o.orderId}, productId=${o.productId}, paymentStatus=${o.paymentStatus}, orderStatus=${o.orderStatus}`
+          );
+        });
+
+        // 🔹 이 시점에서는 "전체 주문"을 그대로 저장
+        setOrders(list);
       } catch (e) {
+        console.error("[MyShopOrder] 주문 조회 실패:", e);
         setError(e.message || "주문 조회 실패");
       } finally {
         setLoading(false);
@@ -98,23 +92,46 @@ const MyShopOrderContainer = () => {
     fetchOrders();
   }, [memberId]);
 
-  // ✅ "결제 완료된 주문"만 필터링
-  const completedOrders = orders.filter((o) => {
-    const status = getStatus(o);
-    return isCompletedStatus(status);
-  });
+  // ✅ 2) 결제 완료(COMPLETED)인 주문만 걸러내기
+  //    - paymentStatus 필드가 아예 없으면 전체 주문을 사용하도록 fallback
+  const completedOrders = useMemo(() => {
+    if (!orders || orders.length === 0) return [];
 
-  // ✅ 구매내역에 있는 productId 들에 대해 "리뷰 존재 여부" 조회
+    const hasPaymentStatus = orders.some((o) => o.paymentStatus != null);
+
+    if (!hasPaymentStatus) {
+      console.warn(
+        "[MyShopOrder] paymentStatus 필드가 없어서 전체 주문을 그대로 사용합니다. (백엔드에서 결제 상태 내려주도록 수정 필요)"
+      );
+      return orders; // 🔹 임시: 전부 보여주기
+    }
+
+    const filtered = orders.filter((o) => o.paymentStatus === "COMPLETED");
+
+    console.log("----------------------------------------------------");
+    console.log("[MyShopOrder] completedOrders 개수:", filtered.length);
+
+    return filtered;
+  }, [orders]);
+
+  // ✅ 3) completedOrders 기준으로 productId 목록 계산 (useMemo로 안정화)
+  const productIds = useMemo(() => {
+    const ids = [...new Set(completedOrders.map((o) => o.productId))];
+    console.log("[MyShopOrder] review 체크용 productIds:", ids);
+    return ids;
+  }, [completedOrders]);
+
+  // ✅ 4) 리뷰 존재 여부 조회
   useEffect(() => {
+    // 로그인 안 했거나 memberId 없으면 초기화만
     if (!isLogin || !memberId) {
       setReviewExists({});
       return;
     }
 
-    // ✅ 리뷰 체크도 "결제 완료된 주문들" 기준으로만
-    const productIds = [...new Set(completedOrders.map((o) => o.productId))];
-
+    // 구매내역 없으면 초기화만
     if (productIds.length === 0) {
+      console.log("[MyShopOrder] productIds 길이 0 → reviewExists 초기화");
       setReviewExists({});
       return;
     }
@@ -136,8 +153,7 @@ const MyShopOrderContainer = () => {
             }
 
             const json = await res.json();
-            // data === 1 이면 이미 리뷰 있음
-            const exists = json.data === 1;
+            const exists = json.data === 1; // data === 1 이면 이미 리뷰 있음
             return [productId, exists];
           })
         );
@@ -146,6 +162,8 @@ const MyShopOrderContainer = () => {
         entries.forEach(([productId, exists]) => {
           nextMap[productId] = exists;
         });
+
+        console.log("[MyShopOrder] 리뷰 존재 여부 map:", nextMap);
         setReviewExists(nextMap);
       } catch (e) {
         console.error("리뷰 존재 여부 조회 실패:", e);
@@ -153,9 +171,9 @@ const MyShopOrderContainer = () => {
     };
 
     fetchReviewExists();
-  }, [completedOrders, isLogin, memberId]);
+  }, [isLogin, memberId, productIds]);
 
-  // ✅ 실제 화면에 보이는 주문 개수 = "결제 완료된 주문" 개수
+  // ✅ 화면에 보이는 주문 개수
   const totalCount = completedOrders.length;
 
   const handleSubmit = ({ productId }) => {
@@ -194,7 +212,11 @@ const MyShopOrderContainer = () => {
           const alreadyReviewed = reviewExists[order.productId] === true;
 
           return (
-            <S.ListItem key={order.orderId}>
+            <S.ListItem
+              key={order.orderId}
+              // ✅ 리스트 아이템 클릭 시 상세 페이지로 이동
+              onClick={() => navigate(`/main/shop/read/${order.productId}`)}
+            >
               <div
                 style={{
                   display: "flex",
@@ -214,7 +236,8 @@ const MyShopOrderContainer = () => {
 
                 <S.OrderActionButton
                   disabled={alreadyReviewed}
-                  onClick={() => {
+                  onClick={(e) => {
+                    e.stopPropagation(); // ✅ 버튼 클릭 시 상세 이동 막기
                     if (!alreadyReviewed) openReview(order);
                   }}
                 >

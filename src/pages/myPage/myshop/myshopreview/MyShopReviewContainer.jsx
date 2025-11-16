@@ -4,6 +4,7 @@ import { useModal } from "../../../../components/modal/useModal";
 import ReviewModal from "../review/ReviewModal";
 import { useSelector } from "react-redux";
 import { resolveUrl } from "../../../../utils/url";
+import { Link, useNavigate } from "react-router-dom";
 
 const formatDotDate = (str) => (str.includes(".") ? str : str.replace(/-/g, "."));
 
@@ -28,7 +29,7 @@ const StarRating = ({ rating = 0, size = 19 }) => (
 
 const toClient = (dto) => ({
   id: dto.id,
-  productId: dto.prouductId,
+  productId: dto.productId,
   name: dto.productName || "상품명 없음",
   date: dto.productReviewDate || "",
   rating: dto.productReviewRating || 0,
@@ -42,6 +43,9 @@ const MyShopReviewContainer = () => {
 
   const [reviews, setReviews] = useState([]);
   const [error, setError] = useState(null);
+
+  const navigate = useNavigate();
+  const productDetail = (productId) => navigate(`main/shop/read/${productId}`);
 
   // 마이리뷰 조회
   useEffect(() => {
@@ -151,9 +155,11 @@ const MyShopReviewContainer = () => {
 
       <S.ListContainer>
         {reviews.map((review) => (
-          <S.ListItem key={review.id}>
+          <S.ListItem key={review.id}
+            onClick={() => navigate(`/main/shop/read/${review.productId}`)}
+          >
             <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
-  
+
               <S.OrderItemImage style={{ backgroundImage: `url("${review.imageUrl}")` }} />
 
               <S.ItemContent>
@@ -167,10 +173,12 @@ const MyShopReviewContainer = () => {
               </S.ItemContent>
 
               <S.ReviewActionButtons>
-                <S.ReviewButton primary onClick={() => openEdit(review)}>
+               <S.ReviewButton
+                  primary onClick={(e) => {e.stopPropagation();
+                    openEdit(review);}}>
                   리뷰 수정
                 </S.ReviewButton>
-                <S.ReviewButton onClick={() => handleDelete(review.id)}>
+                <S.ReviewButton onClick={(e) => { e.stopPropagation(); handleDelete(review.id)}}>
                   리뷰 삭제
                 </S.ReviewButton>
               </S.ReviewActionButtons>

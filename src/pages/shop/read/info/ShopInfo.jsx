@@ -21,7 +21,7 @@ const ShopInfo = () => {
 
   // 메인 이미지 : 1장
   // 서브 이미지 : 여러장
-  const [infoMainImage, setInfoMainImage] = useState("");
+  const [infoMainImage, setInfoMainImage] = useState(null);
   const [infoSubImages, setInfoSubImages] = useState([]);
 
   
@@ -70,10 +70,12 @@ const ShopInfo = () => {
         {subDesc && <S.InfoDesc>{subDesc}</S.InfoDesc>}
       </S.InfoTextWrap>
 
-      <S.InfoImage>          
-        <img src={resolveUrl(infoMainImage)} alt="상품 상세 메인 이미지" />
-      </S.InfoImage>
-
+      {infoMainImage && (
+        <S.InfoImage>
+          <img src={resolveUrl(infoMainImage)} alt="상품 상세 메인 이미지"/>
+        </S.InfoImage>
+      )}
+      
       {open && (
         <>
         {infoSubImages.map((src, i) => (
