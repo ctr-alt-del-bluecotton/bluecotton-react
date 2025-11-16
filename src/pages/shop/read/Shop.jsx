@@ -1,3 +1,4 @@
+// src/pages/.../shop/Shop.jsx
 import React, { useEffect, useMemo, useState } from "react";
 import S from "./style";
 import ShopInfo from "./info/ShopInfo";
@@ -14,7 +15,10 @@ const formatPrice = (type, value) => {
 
 const parseSubs = (s) =>
   typeof s === "string"
-    ? s.split(",").map((v) => v.trim()).filter(Boolean)
+    ? s
+        .split(",")
+        .map((v) => v.trim())
+        .filter(Boolean)
     : [];
 
 const Shop = () => {
@@ -23,8 +27,8 @@ const Shop = () => {
   const { openModal } = useModal();
   const { currentUser, isLogin } = useSelector((state) => state.user);
 
-  const [headerData, setHeaderData] = useState(null); 
-  const [reviewStats, setReviewStats] = useState(null); 
+  const [headerData, setHeaderData] = useState(null); // 상품 기본 정보
+  const [reviewStats, setReviewStats] = useState(null); // 리뷰 통계
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -32,8 +36,7 @@ const Shop = () => {
   const [count, setCount] = useState(1);
   const [isLiked, setIsLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
-  const [selectedImage, setSelectedImage] = useState(null);
-  const [setGoCart] = useState([]);
+  const [selectedImage, setSelectedImage] = useState(null); // 메인으로 보여줄 이미지 URL
 
   const totalText = useMemo(() => {
     if (!headerData) return "";
@@ -67,7 +70,6 @@ const Shop = () => {
         if (!headerRes.ok) throw new Error("상품 정보 로딩 실패");
         const headerJson = await headerRes.json();
 
-    
         const statsRes = await fetch(
           `${base}/shop/read/${id}/review/status`,
           {
@@ -78,30 +80,32 @@ const Shop = () => {
         if (!statsRes.ok) throw new Error("리뷰 통계 로딩 실패");
         const statsJson = await statsRes.json();
 
-        setHeaderData(headerJson.data);
+        const product = headerJson.data;
+
+        setHeaderData(product);
         setReviewStats(statsJson.data);
 
-        
-        setLikeCount(Number(headerJson.data.productLikeCount) || 0);
+        // 좋아요 카운트
+        setLikeCount(Number(product.productLikeCount) || 0);
 
-   
-        const likedFlag =
-          headerJson.data.productIsLiked ?? headerJson.data.isLiked;
+        // 좋아요 여부
+        const likedFlag = product.productIsLiked ?? product.isLiked;
         if (likedFlag !== undefined && likedFlag !== null) {
           setIsLiked(likedFlag === 1 || likedFlag === true);
         } else {
           setIsLiked(false);
         }
 
-        const subs = parseSubs(headerJson.data.productSubImageUrl);
+        // 메인 이미지 선택 (빈 src 방지)
+        const main = resolveUrl(product.productMainImageUrl);
+        const subs = parseSubs(product.productSubImageUrl)
+          .map(resolveUrl)
+          .filter(Boolean);
+        const firstAvailable = main || subs[0] || "/assets/images/fallback.png";
 
-        setSelectedImage(
-          resolveUrl(headerJson.data.productMainImageUrl) ||
-            resolveUrl(subs[0]) ||
-            "/assets/images/fallback.png"
-        );
+        setSelectedImage(firstAvailable);
       } catch (err) {
-        setError(err.message);
+        setError(err.message || "상품 정보를 불러오는 중 오류가 발생했습니다.");
       } finally {
         setLoading(false);
       }
@@ -156,9 +160,20 @@ const Shop = () => {
   };
 
   const handleAddToCart = async () => {
+    if (!isLogin || !currentUser?.id) {
+      openModal({
+        title: "로그인이 필요합니다",
+        message: "장바구니는 로그인 후 이용할 수 있어요.",
+        confirmText: "로그인하러 가기",
+        cancelText: "취소",
+        onConfirm: () => navigate("/login"),
+      });
+      return;
+    }
+
     const itemData = {
       memberId: currentUser.id,
-      productId: id,
+      productId: Number(id),
       cartQuantity: count,
     };
 
@@ -178,9 +193,7 @@ const Shop = () => {
         throw new Error("장바구니 담기 에러");
       }
 
-      const data = await res.json();
-      setGoCart(data);
-
+      // 서버에 담기만 하면 되고, 프론트는 모달만 띄우면 됨
       openModal({
         title: "장바구니에 상품을 담았습니다.",
         message: "",
@@ -189,38 +202,27 @@ const Shop = () => {
         onConfirm: () => navigate("/main/my-page/my-shop/cart"),
       });
     } catch (error) {
-      setError(error);
+      setError(error?.message || "장바구니 추가 중 오류 발생");
       console.log("장바구니 추가 중 오류 발생:", error);
     }
   };
 
-  if (!headerData || !reviewStats) {
-    return <S.Page>데이터를 표시할 수 없습니다.</S.Page>;
-  }
-
-  const {
-    productName,
-    productPrice,
-    productPurchaseType,
-    productSubImageUrl,
-    productType,
-    productMainImageUrl,
-  } = headerData;
-
-  const { avgScore, totalCount: reviewCount } = reviewStats;
-
-  const subImagesOnly = parseSubs(productSubImageUrl);
-
-  const allThumbnails = [
-    resolveUrl(productMainImageUrl),
-    ...subImagesOnly.map(resolveUrl),
-  ].filter(Boolean);
-
-  const isNew = String(productType || "").includes("NEW");
-  const isBest = String(productType || "").includes("BEST");
-
   const handlePurchase = async () => {
+    if (!isLogin || !currentUser?.id) {
+      openModal({
+        title: "로그인이 필요합니다",
+        message: "구매는 로그인 후 이용할 수 있어요.",
+        confirmText: "로그인하러 가기",
+        cancelText: "취소",
+        onConfirm: () => navigate("/login"),
+      });
+      return;
+    }
+
     if (!headerData || !id) return;
+
+    const { productName, productPrice, productPurchaseType, productMainImageUrl } =
+      headerData;
 
     const itemData = {
       memberId: currentUser.id,
@@ -249,6 +251,7 @@ const Shop = () => {
       if (!orderId) {
         throw new Error("서버에서 유효한 주문 ID를 받지 못했습니다.");
       }
+
       navigate(`/main/shop/order?orderId=${orderId}`, {
         state: {
           snapshot: {
@@ -276,18 +279,60 @@ const Shop = () => {
     }
   };
 
+  if (loading) {
+    return <S.Page>로딩 중...</S.Page>;
+  }
+
+  if (error) {
+    return <S.Page>오류가 발생했습니다: {String(error)}</S.Page>;
+  }
+
+  if (!headerData || !reviewStats) {
+    return <S.Page>데이터를 표시할 수 없습니다.</S.Page>;
+  }
+
+  const {
+    productName,
+    productPrice,
+    productPurchaseType,
+    productSubImageUrl,
+    productType,
+    productMainImageUrl,
+  } = headerData;
+
+  const { avgScore, totalCount: reviewCount } = reviewStats;
+
+  const subImagesOnly = parseSubs(productSubImageUrl);
+
+  const allThumbnails = [
+    resolveUrl(productMainImageUrl),
+    ...subImagesOnly.map(resolveUrl),
+  ].filter(Boolean);
+
+  // 메인 이미지 src (빈 문자열 방지)
+  const mainSrc =
+    selectedImage || allThumbnails[0] || "/assets/images/fallback.png";
+
+  const isNew = String(productType || "").includes("NEW");
+  const isBest = String(productType || "").includes("BEST");
+
   return (
     <S.Page>
       <S.DetailContainer>
         <S.Left>
           <S.MainImage>
-            <img src={resolveUrl(selectedImage)} alt="상품 메인 이미지" />
+            {mainSrc && (
+              <img src={mainSrc} alt="상품 메인 이미지" />
+            )}
           </S.MainImage>
 
           {!!allThumbnails.length && (
             <S.SubImageArea>
               {allThumbnails.map((src, i) => (
-                <S.SubImage key={i} onClick={() => setSelectedImage(src)}>
+                <S.SubImage
+                  key={i}
+                  onClick={() => setSelectedImage(src)}
+                >
                   <img src={src} alt={`서브 이미지 ${i + 1}`} />
                 </S.SubImage>
               ))}
@@ -316,6 +361,7 @@ const Shop = () => {
             <div style={{ display: activeTab === "info" ? "block" : "none" }}>
               <ShopInfo />
             </div>
+
             {/* 리뷰 탭 */}
             <div style={{ display: activeTab === "review" ? "block" : "none" }}>
               <ShopReview stats={reviewStats} />
@@ -372,7 +418,10 @@ const Shop = () => {
                 -
               </S.CountBtn>
               <S.CountNum>{count}</S.CountNum>
-              <S.CountBtn className="plus" onClick={() => changeCount("plus")}>
+              <S.CountBtn
+                className="plus"
+                onClick={() => changeCount("plus")}
+              >
                 +
               </S.CountBtn>
             </S.CountBox>

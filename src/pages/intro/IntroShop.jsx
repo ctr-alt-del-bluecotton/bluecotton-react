@@ -9,7 +9,7 @@ const IntroShop = () => {
         <S.IntroShopText1>캔디샵</S.IntroShopText1>
 
         <S.IntroShopImgcontainer>
-          <IntroShopProductList />
+          <img src="/assets/images/intro_shop.png" />
         </S.IntroShopImgcontainer>
 
         <S.IntroShopTextContainer>

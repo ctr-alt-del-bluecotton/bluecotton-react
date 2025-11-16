@@ -1,4 +1,3 @@
-// src/pages/shop/order/ShopOrderMenu.jsx
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import S from "./style";
 import OrderUserInfo from "./OrderUserInfo";
@@ -7,7 +6,7 @@ import PaymentMethod from "./PaymentMathod";
 import { useModal } from "../../../components/modal/useModal";
 import { useSelector, useDispatch } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
-import { updateMemberCandy } from "../../../store/userSlice"
+import { updateMemberCandy } from "../../../store/userSlice";
 
 const PORTONE_IMP_KEY = process.env.REACT_APP_PORTONE_IMP_KEY;
 const API = process.env.REACT_APP_BACKEND_URL;
@@ -76,15 +75,13 @@ const ShopOrderMenu = () => {
 
   const merchantUidRef = useRef(null);
 
-  // 🔹 보유 캔디는 state로 관리 (결제 후 즉시 반영)
+  
   const [candyBalance, setCandyBalance] = useState(0);
 
-  // 로그인 유저 정보 바뀔 때 초기 잔액 세팅
   useEffect(() => {
     setCandyBalance(Number(currentUser?.memberCandy ?? 0) || 0);
   }, [currentUser]);
 
-  // ✅ 스냅샷(장바구니 → 주문서로 넘어온 경우) 있을 때
   useEffect(() => {
     if (snapshot?.items?.length) {
       const items = snapshot.items.map((it) => {
@@ -119,7 +116,7 @@ const ShopOrderMenu = () => {
     }
   }, [snapshot, orderId]);
 
-  // ✅ 스냅샷이 없으면 서버에서 주문 상세 조회
+
   useEffect(() => {
     if (snapshot?.items?.length) {
       return;
@@ -229,7 +226,6 @@ const ShopOrderMenu = () => {
     }
   }, [API, currentUser, navigate, openModal, orderId, snapshot]);
 
-  // 🔹 상품 총 금액 (배송비 제외)
   const rawTotal = useMemo(() => {
     if (!orderData) return 0;
 
@@ -255,7 +251,7 @@ const ShopOrderMenu = () => {
   const isCandy = payType === "candy";
 
   const shippingFee = useMemo(() => {
-    if (isCandy) return 0; // 🔥 캔디 결제면 배송비 0
+    if (isCandy) return 0;
     return rawTotal >= 30000 ? 0 : FIXED_SHIPPING_FEE;
   }, [rawTotal, isCandy]);
 
@@ -267,7 +263,6 @@ const ShopOrderMenu = () => {
 
   const itemPrice = useMemo(() => rawTotal, [rawTotal]);
 
-  // 💡 캔디 결제에 필요한 캔디 = 상품금액 (배송비 제외)
   const candyNeedAmount = itemPrice;
 
   const totalAmount = useMemo(
@@ -275,11 +270,16 @@ const ShopOrderMenu = () => {
     [itemPrice, shippingFee]
   );
 
+  const purchaseTypeForOrder = useMemo(() => {
+    if (!orderData?.items?.length) return "CASH";
+    const first = orderData.items[0].purchaseType || "CASH";
+    return String(first).toUpperCase();
+  }, [orderData]);
+
   const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(
     navigator.userAgent
   );
 
-  // PortOne SDK 미리 로딩
   useEffect(() => {
     getIMP().catch((e) =>
       openModal({
@@ -291,8 +291,11 @@ const ShopOrderMenu = () => {
   }, [openModal]);
 
   console.log("[ShopOrderMenu] render candyBalance:", candyBalance);
+  console.log(
+    "[ShopOrderMenu] purchaseTypeForOrder:",
+    purchaseTypeForOrder
+  );
 
-  // ✅ 결제 버튼 클릭 핸들러
   const handlePortOnePay = async () => {
     if (payLoading || isLoadingOrder || !orderData) {
       return openModal({
@@ -317,7 +320,6 @@ const ShopOrderMenu = () => {
       });
     }
 
-    // 1️⃣ 캔디 결제 플로우
     if (isCandy) {
       if (!orderData || !orderData.items?.length) {
         return openModal({
@@ -365,15 +367,14 @@ const ShopOrderMenu = () => {
         }
 
         const json = await res.json().catch(() => null);
+
         const msg =
           json?.message ||
           json?.data?.message ||
           "캔디 결제가 완료되었습니다.";
-
-        // 🔥 로컬 state + Redux 둘 다 갱신
         setCandyBalance((prev) => {
           const next = Math.max(0, prev - candyNeedAmount);
-          dispatch(updateMemberCandy(next)); // 전역 currentUser도 수정
+          dispatch(updateMemberCandy(next)); 
           return next;
         });
 
@@ -401,7 +402,6 @@ const ShopOrderMenu = () => {
       return;
     }
 
-    // 2️⃣ 일반 (카드/토스/카카오) PortOne 결제 플로우
     const effectiveOrderId = Number(orderData?.orderId ?? orderId);
     if (!Number.isFinite(effectiveOrderId) || effectiveOrderId <= 0) {
       return openModal({
@@ -581,6 +581,7 @@ const ShopOrderMenu = () => {
           onChange={setPayType}
           candyBalance={candyBalance}
           candyPrice={itemPrice}
+          purchaseType={purchaseTypeForOrder}
         />
       </S.OrderMainSection>
 
