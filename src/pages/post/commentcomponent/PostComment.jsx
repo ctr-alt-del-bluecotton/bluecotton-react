@@ -424,7 +424,7 @@ const PostComment = ({
                 {/* === 대댓글 목록 === */}
                 {c.replies?.map((r) => (
                   <React.Fragment key={r.id}>
-                    <S.CommentItem indent>
+                    <S.CommentItem $indent>
                       <div className="left">
                         <img
                           src={

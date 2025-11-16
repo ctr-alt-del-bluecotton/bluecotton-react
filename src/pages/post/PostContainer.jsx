@@ -198,7 +198,6 @@ const PostContainer = () => {
               liked={post.postIsLike === 1}
               views={post.postReadCount}
               imageUrl={post.postImageUrl}
-              onLike={handleLike}
               onClick={() => navigate(`/main/post/read/${post.id}`)}
             />
           ))
