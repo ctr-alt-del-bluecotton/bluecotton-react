@@ -1,3 +1,4 @@
+// src/pages/.../mypage/myshop/MyShopDeliveryContainer.jsx
 import React, { useMemo, useState, useEffect } from "react";
 import S from "../style";
 import ReviewModal from "../review/ReviewModal";
@@ -12,13 +13,13 @@ const formatDotDate = (str) => {
 };
 
 const toClient = (dto) => ({
-  id: dto.orderId, // 주문 ID
-  deliveryId: dto.deliveryId, // 배송 ID
-  productId: dto.productId, // 상품 ID
-  name: dto.productName || "상품명 없음",
-  date: dto.orderCreateAt, // YYYY-MM-DD
-  status: dto.deliveryStatus.toLowerCase(),
-  imageUrl: resolveUrl(dto.productMainImageUrl) || "/assets/images/abc.png",
+  id: dto.orderId, // ✅ [수정] deliveryId(NULL 가능) 대신 orderId(고유값)를 id로 사용
+  orderId: dto.orderId, // 주문 ID는 별도 보관
+  productId: dto.productId, // 상품 ID
+  name: dto.productName || "상품명 없음",
+  date: dto.orderCreateAt, // YYYY-MM-DD
+  status: dto.deliveryStatus.toLowerCase(),
+  imageUrl: resolveUrl(dto.productMainImageUrl) || "/assets/images/abc.png",
 });
 
 const MyShopDeliveryContainer = () => {
@@ -34,7 +35,6 @@ const MyShopDeliveryContainer = () => {
   const [error, setError] = useState(null);
 
   const navigate = useNavigate();
-  const productDetail = (productId) => navigate(`main/shop/read/${productId}`);
   const { openModal } = useModal();
 
   // key: productId, value: true(이미 리뷰 있음) / false(리뷰 없음)
@@ -82,6 +82,7 @@ const MyShopDeliveryContainer = () => {
     fetchDeliveries();
   }, [isLogin, currentUser?.id]);
 
+  // 리뷰 존재 여부 조회 (배송완료 기준)
   useEffect(() => {
     if (!isLogin || !currentUser?.id) {
       setReviewExists({});
@@ -135,6 +136,7 @@ const MyShopDeliveryContainer = () => {
     fetchReviewExists();
   }, [allItems, isLogin, currentUser?.id]);
 
+  // ⚠️ 여기 수정: orderId 기준으로 삭제
   const handleCancel = (orderId) => {
     openModal({
       title: "구매를 취소하시겠습니까?",
@@ -157,7 +159,8 @@ const MyShopDeliveryContainer = () => {
             throw new Error(errorData.message || "구매 취소에 실패했습니다.");
           }
 
-          setAllItems((prev) => prev.filter((it) => it.id !== orderId));
+          // ✅ orderId로 필터링해서 해당 주문 row 제거
+          setAllItems((prev) => prev.filter((it) => it.orderId !== orderId));
         } catch (e) {
           alert(e.message);
         }
@@ -182,6 +185,7 @@ const MyShopDeliveryContainer = () => {
     closeReview();
   };
 
+  // 현재 탭(activeFilter)에 해당하는 항목만 필터
   const items = useMemo(
     () => allItems.filter((it) => it.status === activeFilter),
     [activeFilter, allItems]
@@ -245,7 +249,7 @@ const MyShopDeliveryContainer = () => {
 
           return (
             <S.ListItem
-              key={item.id}
+              key={item.id} // ✅ 이제 deliveryId라서 중복 없음
               onClick={() => navigate(`/main/shop/read/${item.productId}`)}
             >
               <div
@@ -271,7 +275,8 @@ const MyShopDeliveryContainer = () => {
                     <S.ActionButton
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleCancel(item.id);
+                        // ✅ 주문 ID 기준으로 취소
+                        handleCancel(item.orderId);
                       }}
                     >
                       구매 취소
