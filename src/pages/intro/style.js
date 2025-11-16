@@ -201,8 +201,19 @@ S.IntroShopImgcontainer = styled.div `
     height : 700px;
     display: flex;
     justify-content: center;
+    align-items: center;
     z-index: 1;
     background-color: #FFFFFF;
+
+    & img {
+        max-width: 100%; 
+        max-height: 100%; 
+        width: auto;      
+        height: auto;     
+        object-fit: contain; 
+        display: block; 
+        z-index: 2;
+    }
 `
 
 S.IntroShopImg = styled.img `
