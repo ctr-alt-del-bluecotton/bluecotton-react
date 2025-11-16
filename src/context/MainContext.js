@@ -1,7 +1,8 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { fetchData, options } from './FetchContext';
 import { useSelector } from 'react-redux';
+import { useModal } from '../components/modal';
 
 const MainContext = createContext();
 
@@ -21,6 +22,8 @@ const categoryMap = {
 
 export const MainProvider = ({ children }) => {
     const { category } = useParams();
+    const nav = useNavigate();
+    const { openModal } = useModal();
     const [ sortBy, setSortBy ] = useState("all");
     const [ somList, setSomList ] = useState([]);
     const [ maxPage, setMaxPage ] = useState(1);
@@ -36,7 +39,7 @@ export const MainProvider = ({ children }) => {
                 await fetchData(`som/category?somCategory=${category}&somType=${sortBy}&page=${pageNumber}&memberEmail=${currentUser.memberEmail}` ,options.getOption())
                 .then(async (res) => {
                     const jsonData = await res.json(); 
-                    const somListData = jsonData.data.somList.filter((content) => new Date(content.somEndDate) > new Date());
+                    const somListData = jsonData.data.somList;
                     const somMaxPage = jsonData.data.maxPage;
                     setSomList(somListData);
                     setMaxPage(somMaxPage);
@@ -65,6 +68,18 @@ export const MainProvider = ({ children }) => {
         return res;
     }
 
+    const somJoinNotLogin = () => {
+        if (!isLogin) {
+            openModal({
+                title: "로그인이 필요한 서비스입니다.",
+                message: "로그인을 해주세요.",
+                cancelText: "더 둘러보기",
+                confirmText: "확인", 
+                onConfirm: () => { nav('/login') }
+            });
+        }
+    }
+
 
     const formatDate = (isoString) => {
         const date = new Date(isoString); // ISO 8601 문자열 → Date 객체로 변환
@@ -88,7 +103,8 @@ export const MainProvider = ({ children }) => {
         categoryMap,
         formatDate,
         somLikeUpdate,
-        maxPage, setMaxPage
+        maxPage, setMaxPage,
+        somJoinNotLogin
     };
 
     return (

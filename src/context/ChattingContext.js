@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { fetchData } from "./FetchContext";
 
@@ -8,7 +8,7 @@ export const useChatting = () => useContext(ChattingContext);
 
 export const ChattingProvider = ({ children }) => {
     const { currentUser } = useSelector((state) => state.user);
-    const memberId = currentUser.id;
+    const memberId =  currentUser.id;
     const memberName = currentUser.memberName;
 
     const [joinRooms, setJoinRooms] = useState([]);
@@ -17,12 +17,11 @@ export const ChattingProvider = ({ children }) => {
         chatId: 0
     });
 
-    const getRooms = async () => {
+    const getRooms = useCallback(async () => {
         const res = await fetchData(`chat/get-join-rooms/${memberId}`)
         const json = await res.json();
-        console.log(json)
         setJoinRooms(json.data);
-    };
+    }, [memberId]);
 
     useEffect(() => {
         getRooms();
@@ -33,7 +32,7 @@ export const ChattingProvider = ({ children }) => {
         
         window.addEventListener("refreshChatList", handleRefresh);
         return () => window.removeEventListener("refreshChatList", handleRefresh);
-    }, []);
+    }, [getRooms]);
 
     const value = {
         joinRooms,

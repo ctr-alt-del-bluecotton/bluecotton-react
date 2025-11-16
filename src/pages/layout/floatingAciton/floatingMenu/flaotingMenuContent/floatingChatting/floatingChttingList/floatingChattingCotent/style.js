@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { basic, flexStartColumn, smallText2Light, smallText3Regular, white } from "../../../../../../../../styles/common";
+import { flexStartColumn, smallText2Light, smallText3Regular, white } from "../../../../../../../../styles/common";
 
 const S = {};
 
