@@ -118,6 +118,7 @@ S.InfoBox = styled.div`
   border-radius: 8px;
   box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
   padding: 10px 12px;
+  cursor: pointer;
 `;
 
 S.InfoImage = styled.img`

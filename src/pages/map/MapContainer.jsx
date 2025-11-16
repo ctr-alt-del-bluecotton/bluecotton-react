@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { Map, MapMarker, CustomOverlayMap } from 'react-kakao-maps-sdk';
 import S from './style';
 import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 
 const MapContainer = () => {
   const [somList, setSomList] = useState([]);
@@ -11,14 +12,17 @@ const MapContainer = () => {
   const [myLocation, setMyLocation] = useState(null);
   const [selectedMarkerId, setSelectedMarkerId] = useState(null);
 
-  const {currentUser} = useSelector((state) => state.user)
-  console.log(currentUser)
+  const navigate = useNavigate();
 
   const mapRef = useRef(null);
 
+  const handleInfoClick = (id) => {
+    navigate(`/main/som/read/${id}`);
+  }
+
   const fetchMyLocation = () => {
     if (!navigator.geolocation) {
-      alert("현재 브라우저에서는 위치 정보를 사용할 수 없습니다.");
+      alert('현재 브라우저에서는 위치 정보를 사용할 수 없습니다.');
       return;
     }
 
@@ -29,7 +33,7 @@ const MapContainer = () => {
         setMyLocation(current);
         setCenter(current);
       },
-      (error) => console.error("위치 정보를 가져오는 데 실패했습니다:", error),
+      (error) => console.error('위치 정보를 가져오는 데 실패했습니다:', error),
       { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
     );
   };
@@ -38,9 +42,14 @@ const MapContainer = () => {
     try {
       const res = await fetch(`${process.env.REACT_APP_BACKEND_URL}/som/all`);
       const result = await res.json();
-      setSomList(result.data);
+      setSomList(result.data || []);
+
+      if (!result.data || result.data.length === 0) {
+        setIsLoaded(true);
+      }
     } catch (error) {
-      console.error("솜 데이터를 불러오는 데 실패했습니다:", error);
+      console.error('솜 데이터를 불러오는 데 실패했습니다:', error);
+      setIsLoaded(true);
     }
   };
 
@@ -51,17 +60,23 @@ const MapContainer = () => {
   }, []);
 
   useEffect(() => {
-    if (somList.length === 0) return;
+    if (!somList.length) return;
+    if (!window.kakao || !window.kakao.maps || !window.kakao.maps.services) return;
+
     const geocoder = new window.kakao.maps.services.Geocoder();
-    const tempMarkers = [];
+
+    let completed = 0; 
+    const nextMarkers = [];
 
     somList.forEach((som) => {
       geocoder.addressSearch(som.somAddress, (result, status) => {
+        completed += 1;
+
         if (status === window.kakao.maps.services.Status.OK) {
           const latitude = parseFloat(result[0].y);
           const longitude = parseFloat(result[0].x);
 
-          tempMarkers.push({
+          nextMarkers.push({
             id: som.id,
             title: som.somTitle,
             address: som.somAddress,
@@ -69,21 +84,24 @@ const MapContainer = () => {
             latitude,
             longitude,
           });
+        } else {
+          console.warn('지오코딩 실패:', som.somAddress);
+        }
 
-          if (tempMarkers.length === somList.length) {
-            setMarkers(tempMarkers);
-            setIsLoaded(true);
-            if (!myLocation && tempMarkers.length > 0) {
-              setCenter({
-                lat: tempMarkers[0].latitude,
-                lng: tempMarkers[0].longitude,
-              });
-            }
+        if (completed === somList.length) {
+          setMarkers(nextMarkers);
+          setIsLoaded(true);
+
+          if (!myLocation && nextMarkers.length > 0) {
+            setCenter({
+              lat: nextMarkers[0].latitude,
+              lng: nextMarkers[0].longitude,
+            });
           }
         }
       });
     });
-  }, [somList]);
+  }, [somList, myLocation]);
 
   const moveToLocation = (lat, lng) => {
     const map = mapRef.current;
@@ -99,22 +117,20 @@ const MapContainer = () => {
     moveToLocation(lat, lng);
   };
 
-  if (!isLoaded || !center) return <div>지도 불러오는 중...</div>;
+  if (!center) return <div>지도 불러오는 중...</div>;
 
   return (
     <S.MapContainer>
       <S.Content>
         <S.Title>솜이 진행 중인 장소 / 솜 찾기</S.Title>
         <S.MapAndListWrapper>
-
           <S.MapBox>
             <S.Map center={center} level={5} ref={mapRef}>
-
               {myLocation && (
                 <MapMarker
                   position={myLocation}
                   image={{
-                    src: process.env.PUBLIC_URL + "/assets/icons/mapUserMarker.png",
+                    src: process.env.PUBLIC_URL + '/assets/icons/mapUserMarker.png',
                     size: { width: 60, height: 100 },
                   }}
                 />
@@ -125,12 +141,13 @@ const MapContainer = () => {
                   <MapMarker
                     position={{ lat: marker.latitude, lng: marker.longitude }}
                     image={{
-                      src: process.env.PUBLIC_URL + "/assets/icons/mapSomMarker.png",
+                      src: process.env.PUBLIC_URL + '/assets/icons/mapSomMarker.png',
                       size: { width: 60, height: 100 },
                     }}
-                    onClick={() => handleMarkerClick(marker.id, marker.latitude, marker.longitude)}
+                    onClick={() =>
+                      handleMarkerClick(marker.id, marker.latitude, marker.longitude)
+                    }
                   />
-
 
                   {selectedMarkerId === marker.id && (
                     <CustomOverlayMap
@@ -138,12 +155,19 @@ const MapContainer = () => {
                       xAnchor={0.5}
                       yAnchor={1.4}
                     >
-                      <S.InfoBox>
+                      <S.InfoBox
+                        onClick={() => handleInfoClick(marker.id)}
+                        role="button"
+                        tabIndex={0}
+                        onKeyDown={(e) => {
+                          if(e.key === "Enter" || e.key === ''){
+                            handleInfoClick(marker.id);
+                          }
+                        }}
+
+                      >
                         {marker.imageUrl && (
-                          <S.InfoImage
-                            src={marker.imageUrl}
-                            alt={marker.title}
-                          />
+                          <S.InfoImage src={marker.imageUrl} alt={marker.title} />
                         )}
                         <S.InfoTitle>{marker.title}</S.InfoTitle>
                         <S.InfoAddress>{marker.address}</S.InfoAddress>
@@ -155,7 +179,7 @@ const MapContainer = () => {
             </S.Map>
 
             <S.MyLocationButton
-              src={process.env.PUBLIC_URL + "/assets/icons/somfavicon.png"}
+              src={process.env.PUBLIC_URL + '/assets/icons/somfavicon.png'}
               alt="내 위치로 이동"
               onClick={() =>
                 myLocation && moveToLocation(myLocation.lat, myLocation.lng)
@@ -168,9 +192,10 @@ const MapContainer = () => {
               <S.SomItem
                 key={som.id}
                 onClick={() => {
-                  const m = markers.find((m) => m.id === som.id);
-                  if (m) moveToLocation(m.latitude, m.longitude);
-                  setSelectedMarkerId(m.id);
+                  const marker = markers.find((marker) => marker.id === som.id);
+                  if (!marker) return; 
+                  moveToLocation(marker.latitude, marker.longitude);
+                  setSelectedMarkerId(marker.id);
                 }}
               >
                 <S.SomTitle>{som.somTitle}</S.SomTitle>
@@ -178,7 +203,6 @@ const MapContainer = () => {
               </S.SomItem>
             ))}
           </S.ListBox>
-
         </S.MapAndListWrapper>
       </S.Content>
     </S.MapContainer>

@@ -140,6 +140,7 @@ S.ProfileBox = styled.div`
   img {
     width: 18px;
     height: 18px;
+    object-fit:cover;
     vertical-align: middle;
   }
 `;
