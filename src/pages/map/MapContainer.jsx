@@ -26,8 +26,7 @@ const MapContainer = () => {
 
     navigator.geolocation.getCurrentPosition(
       (position) => {
-        const { latitude, longitude } = position.coords;
-        const current = { lat: latitude, lng: longitude };
+        const current = { lat: position.coords.latitude, lng: position.coords.longitude };
         setMyLocation(current);
         setCenter(current);
       },
@@ -40,62 +39,54 @@ const MapContainer = () => {
     try {
       const res = await fetch(`${process.env.REACT_APP_BACKEND_URL}/som/all`);
       const result = await res.json();
-
       setSomList(result.data || []);
-
-      if (!result.data || result.data.length === 0) {
-        setIsLoaded(true);
-      }
-    } catch (error) {
-      console.error('솜 데이터를 불러오는 데 실패했습니다:', error);
+      if (!result.data || result.data.length === 0) setIsLoaded(true);
+    } catch (err) {
+      console.error(err);
       setIsLoaded(true);
     }
   };
 
   useEffect(() => {
     fetchMyLocation();
-    const timer = setTimeout(() => fetchSomList(), 1000);
+    const timer = setTimeout(fetchSomList, 800);
     return () => clearTimeout(timer);
   }, []);
 
+  const formatAddress = (address) => {
+    if (!address) return "";
+    const split = address.split(" ");
+    return split.length >= 2 ? `${split[0]} ${split[1]}` : address;
+  };
+
   useEffect(() => {
     if (!somList.length) return;
-    if (!window.kakao || !window.kakao.maps || !window.kakao.maps.services) return;
+    if (!window.kakao || !window.kakao.maps?.services) return;
 
     const geocoder = new window.kakao.maps.services.Geocoder();
-
-    let completed = 0;
-    const nextMarkers = [];
+    let done = 0;
+    const tmp = [];
 
     somList.forEach((som) => {
       geocoder.addressSearch(som.somAddress, (result, status) => {
-        completed += 1;
+        done++;
 
         if (status === window.kakao.maps.services.Status.OK) {
-          const latitude = parseFloat(result[0].y);
-          const longitude = parseFloat(result[0].x);
-
-          nextMarkers.push({
+          tmp.push({
             id: som.id,
             title: som.somTitle,
-            address: som.somAddress,
+            address: formatAddress(som.somAddress),
             imageUrl: som.somImageList?.[0]?.somImagePath || null,
-            latitude,
-            longitude,
+            latitude: parseFloat(result[0].y),
+            longitude: parseFloat(result[0].x),
           });
-        } else {
-          console.warn('지오코딩 실패:', som.somAddress);
         }
 
-        if (completed === somList.length) {
-          setMarkers(nextMarkers);
+        if (done === somList.length) {
+          setMarkers(tmp);
           setIsLoaded(true);
-
-          if (!myLocation && nextMarkers.length > 0) {
-            setCenter({
-              lat: nextMarkers[0].latitude,
-              lng: nextMarkers[0].longitude,
-            });
+          if (!myLocation && tmp.length > 0) {
+            setCenter({ lat: tmp[0].latitude, lng: tmp[0].longitude });
           }
         }
       });
@@ -104,15 +95,13 @@ const MapContainer = () => {
 
   const moveToLocation = (lat, lng) => {
     const map = mapRef.current;
-    if (map) {
-      const offsetY = 0.002;
-      const moveLatLon = new window.kakao.maps.LatLng(lat + offsetY, lng);
-      map.panTo(moveLatLon);
-    }
+    if (!map) return;
+    const offsetY = 0.002;
+    map.panTo(new window.kakao.maps.LatLng(lat + offsetY, lng));
   };
 
-  const handleMarkerClick = (id, lat, lng) => {
-    setSelectedMarkerId((prev) => (prev === id ? null : id));
+  const onMarkerClick = (id, lat, lng) => {
+    setSelectedMarkerId(prev => (prev === id ? null : id));
     moveToLocation(lat, lng);
   };
 
@@ -124,29 +113,28 @@ const MapContainer = () => {
         <S.Title>솜이 진행 중인 장소 / 솜 찾기</S.Title>
 
         <S.MapAndListWrapper>
+          
           <S.MapBox>
             <S.Map center={center} level={5} ref={mapRef}>
               {myLocation && (
                 <MapMarker
                   position={myLocation}
                   image={{
-                    src: process.env.PUBLIC_URL + '/assets/icons/mapUserMarker.png',
+                    src: "/assets/icons/mapUserMarker.png",
                     size: { width: 60, height: 100 },
                   }}
                 />
               )}
 
-              {markers.map((marker) => (
+              {markers.map(marker => (
                 <React.Fragment key={marker.id}>
                   <MapMarker
                     position={{ lat: marker.latitude, lng: marker.longitude }}
                     image={{
-                      src: process.env.PUBLIC_URL + '/assets/icons/mapSomMarker.png',
+                      src: "/assets/icons/mapSomMarker.png",
                       size: { width: 60, height: 100 },
                     }}
-                    onClick={() =>
-                      handleMarkerClick(marker.id, marker.latitude, marker.longitude)
-                    }
+                    onClick={() => onMarkerClick(marker.id, marker.latitude, marker.longitude)}
                   />
 
                   {selectedMarkerId === marker.id && (
@@ -157,28 +145,22 @@ const MapContainer = () => {
                     >
                       <S.InfoBox>
                         <S.CloseButton
-                          src={process.env.PUBLIC_URL + '/assets/icons/close.svg'}
-                          alt="닫기"
+                          src="/assets/icons/close.svg"
                           onClick={(e) => {
                             e.stopPropagation();
                             setSelectedMarkerId(null);
                           }}
                         />
 
-                        {marker.imageUrl && (
-                          <S.InfoImage src={marker.imageUrl} alt={marker.title} />
-                        )}
-
-                        <S.InfoContent
-                          onClick={() => handleInfoClick(marker.id)}
-                          role="button"
-                          tabIndex={0}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter' || e.key === ' ') {
-                              handleInfoClick(marker.id);
-                            }
+                        {marker.imageUrl && <S.InfoImage src={marker.imageUrl} 
+                        
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleInfoClick(marker.id);
                           }}
-                        >
+                        />}
+
+                        <S.InfoContent onClick={() => handleInfoClick(marker.id)}>
                           <S.InfoTitle>{marker.title}</S.InfoTitle>
                           <S.InfoAddress>{marker.address}</S.InfoAddress>
                         </S.InfoContent>
@@ -190,42 +172,52 @@ const MapContainer = () => {
             </S.Map>
 
             <S.MyLocationButton
-              src={process.env.PUBLIC_URL + '/assets/icons/somfavicon.png'}
-              alt="내 위치로 이동"
-              onClick={() =>
-                myLocation && moveToLocation(myLocation.lat, myLocation.lng)
-              }
+              src="/assets/icons/somfavicon.png"
+              onClick={() => myLocation && moveToLocation(myLocation.lat, myLocation.lng)}
             />
           </S.MapBox>
 
           <S.ListBox>
             {somList.map((som) => {
-              const somImage = som.somImageList?.[0]?.somImagePath || `${process.env.PUBLIC_URL}/assets/icons/defaultSom.png`;
+              const img = som.somImageList?.[0]?.somImagePath || "/assets/icons/defaultSom.png";
+              const likeCount = som.somLikeCount ?? 0;
 
               return (
-              <S.SomItem
-                key={som.id}
-                onClick={() => {
-                  const marker = markers.find((marker) => marker.id === som.id);
+                <S.SomItem key={som.id} onClick={() => {
+                  const marker = markers.find((m) => m.id === som.id);
                   if (!marker) return;
                   moveToLocation(marker.latitude, marker.longitude);
                   setSelectedMarkerId(marker.id);
-                }}
-              >
-                <S.SomThumb>
-                  <img src={somImage} alt="som thumbnail" />
-                </S.SomThumb>
+                }}>
+                  <S.SomThumb>
+                    <img src={img} alt="thumbnail" />
+                  </S.SomThumb>
 
-                <S.SomInfoRight>
-                  <S.SomTitle>{som.somTitle}</S.SomTitle>
-                  <S.SomAddress>{som.somAddress}</S.SomAddress>
-                  <S.SomDate>시작일: {som.somStartDate?.slice(0, 10).replaceAll('.', '-')}</S.SomDate>
-                  <S.SomDate>마감일: {som.somEndDate?.slice(0, 10).replaceAll('.', '-')}</S.SomDate>
-                </S.SomInfoRight>
-              </S.SomItem>
+                  <S.SomInfoRight>
+                    <S.SomTitle>{som.somTitle}</S.SomTitle>
+                    <S.SomAddress>{formatAddress(som.somAddress)}</S.SomAddress>
+
+                    <S.Row>
+                      <S.LikeArea>
+                        <S.LikeIcon src="/assets/icons/favorite_acv.svg" alt="like" />
+                        <span>{likeCount}</span>
+                      </S.LikeArea>
+
+                      <S.ViewButton
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/main/som/read/${som.id}`);
+                        }}
+                      >
+                        보러가기
+                      </S.ViewButton>
+                    </S.Row>
+                  </S.SomInfoRight>
+                </S.SomItem>
               );
             })}
           </S.ListBox>
+
         </S.MapAndListWrapper>
       </S.Content>
     </S.MapContainer>
