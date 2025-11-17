@@ -53,6 +53,7 @@ S.CommentItem = styled.div`
     width: 38px;
     height: 38px;
     border-radius: 50%;
+    object-fit:cover;
     background-color: ${({ theme }) => theme.PALLETE.grey.greyScale1};
   }
 
@@ -62,7 +63,7 @@ S.CommentItem = styled.div`
     gap: 6px;
     flex: 1;
 
-    /* ✅ 닉네임 + 좋아요 한 줄 정렬 */
+    /* 닉네임 + 좋아요 한 줄 정렬 */
     .header-row {
       display: flex;
       align-items: center;
