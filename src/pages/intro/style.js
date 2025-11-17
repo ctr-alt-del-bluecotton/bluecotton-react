@@ -70,12 +70,13 @@ S.IntroBannerButton = styled.button `
 
 S.DeviceWrap = styled.div`
   position: relative;
-  width: 300px;      // 원하는 크기
-  height: auto;
+  width: 432px;      
+  height: 932px;
 
   .device-img {
-    width: 100%;
+    width: 432px;
     display: block;
+    height: 932px;
     z-index: 1;
   }
 
@@ -83,8 +84,8 @@ S.DeviceWrap = styled.div`
     position: absolute;
     top: 56px;       // 디바이스 안쪽 화면의 Y 위치
     left: 27px;      // 디바이스 안쪽 화면의 X 위치
-    width: 246px;    // 화면 크기에 맞춰 값 조정
-    height: 532px;   // 필요한 경우 height도 조정
+    width: 432px;    // 화면 크기에 맞춰 값 조정
+    height: 532px;   
     border-radius: 24px; // 선택 (모서리 둥글게)
     z-index: 2;
     object-fit: cover;
