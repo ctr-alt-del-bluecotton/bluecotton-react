@@ -64,11 +64,28 @@ S.ListBox = styled.div`
 
 
 S.SomTitle = styled.h3`
-  ${smallText3Regular}
+  ${smallText3Regular};
   font-weight: 600;
   color: ${({ theme }) => theme.PALLETE.basic};
-  margin-bottom: 8px;
+
+  margin-bottom: 6px;
+  line-height: 1.35;
+  
+  display: -webkit-box;
+  -webkit-line-clamp: 2; 
+  -webkit-box-orient: vertical;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  white-space: normal;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+
+  max-height: calc(1.35em * 2);
 `;
+
+
 
 S.SomAddress = styled.p`
   font-size: 13px;
