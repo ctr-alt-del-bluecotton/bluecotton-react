@@ -37,8 +37,6 @@ const IntroPost = () => {
                 <p>바로 작성해보세요</p>
               </S.IntroPostText2>
             </motion.div>
-
-            {/* 🔽 여기: 이미지 대신 실제 게시글 리스트 프리뷰 */}
             <motion.div
               initial={{ opacity: 0, y: 80 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -46,7 +44,8 @@ const IntroPost = () => {
               viewport={{ once: true }}
             >
               <S.IntroPostBord>
-                <IntroPostList />
+                <S.Speaker />
+                <img src="/assets/images/intro_post.png" />
               </S.IntroPostBord>
             </motion.div>
 

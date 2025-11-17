@@ -36,7 +36,7 @@ const AdminDashboard = ({ orders = [], products = [] }) => {
     const map = new Map();
 
     orders.forEach((o) => {
-      const date = o.orderDate; // 백엔드에서 보내주는 필드명에 맞춰서 사용
+      const date = o.orderDate; 
       const prev = map.get(date) || 0;
       map.set(date, prev + (o.total || 0));
     });
@@ -47,6 +47,8 @@ const AdminDashboard = ({ orders = [], products = [] }) => {
     const result = Array.from(map.entries())
       .map(([date, revenue]) => ({ date, revenue }))
       .sort((a, b) => (a.date > b.date ? 1 : -1));
+
+      console.log("[dailyRevenue result]", result);
 
     return result;
   }, [orders]);

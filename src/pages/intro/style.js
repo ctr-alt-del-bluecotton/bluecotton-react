@@ -31,7 +31,7 @@ S.IntroBannerText1 = styled.div `
     z-index: 2;
     position: absolute;
     top: 15%;
-    left: 29%;
+    left: 30%;
     text-align: center;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
@@ -44,10 +44,10 @@ S.IntroBannerText2 = styled.span `
 `
 
 S.IntroBannerButtonContainer = styled.div `
-    width: 100%;
+    /* width: 100%; */
     height: 50px;
     top: 33%; 
-    left: 42%;
+    left: 40%;
     position: absolute;
     z-index: 2;
     gap: 10px;
@@ -59,19 +59,43 @@ S.IntroBannerButton = styled.button `
     background-color: #0051FF;
     border: none;
     border-radius: 4px;
+    margin-right: 50px;
     padding: 3px;
     cursor: pointer;
     ${shapeCSS.small}
     ${smallText3Regular}
     color: #FFFFFF;
-    
+    font-family: inherit;
 `
+
+S.DeviceWrap = styled.div`
+  position: relative;
+  width: 300px;      // 원하는 크기
+  height: auto;
+
+  .device-img {
+    width: 100%;
+    display: block;
+    z-index: 1;
+  }
+
+  .map-img {
+    position: absolute;
+    top: 56px;       // 디바이스 안쪽 화면의 Y 위치
+    left: 27px;      // 디바이스 안쪽 화면의 X 위치
+    width: 246px;    // 화면 크기에 맞춰 값 조정
+    height: 532px;   // 필요한 경우 height도 조정
+    border-radius: 24px; // 선택 (모서리 둥글게)
+    z-index: 2;
+    object-fit: cover;
+  }
+`;
 
 // 소개 페이지 (솜이란?)
 S.WhatIsSomWrap = styled.div `
     width: 100%;
     box-sizing: border-box;
-    background-color: #3182F6; 
+    background-color: #6977F0; 
     
 `
 S.WhatIsSomContainer = styled.div `
@@ -116,7 +140,7 @@ S.WhatIsSomBlueText2 = styled.span `
 `
 S.WhatIsSomBlueText3 = styled.div `
     ${title}
-    color: #BDBDBD;
+    color: #DBD7DE;
 `
 
 //인트로 - 주변 솜 찾기
@@ -149,7 +173,9 @@ S.IntroMapImg = styled.img `
 S.IntroMapImgAndText = styled.div `
     display: flex;
     flex-direction: column;
-    gap: 70px;
+    /* justify-content: center;
+    align-items: center; */
+    /* gap: 70px; */
 `
 
 S.IntroMapBlueText1 = styled.p `
@@ -160,11 +186,18 @@ S.IntroMapBlueText1 = styled.p `
 S.IntroMapText1 = styled.div `
     ${heading3}
     ${basic}
-    gap: 23px;
+    margin: 40px 0 80px 0;
+    padding: 0 auto;
+    gap: 10px;
 `
 S.IntroMapText2 = styled.div `
+    display: flex;
+    flex-direction: column;
     ${paragraphRegular}
     ${basic}
+    margin-top: 70px;
+    align-items: center;
+    justify-content: center;
 `
 
 //인트로 - 캔디샵
@@ -375,14 +408,52 @@ S.IntroPostText2 = styled.div `
 `
 
 S.IntroPostBord = styled.div `
-    height: 932px;
-    width: 430px;
-    border: 3px solid black;
-    border-radius: 50px;
-    background-color: #FFFFFF;
-    box-shadow: 0 15px 22px rgba(0, 0, 0, 0.1);
-    overflow: hidden; 
+  background: url("/assets/images/Device.png") no-repeat center/contain;
+    position: relative;
+  height: 932px;   
+  width: 430px;    
+
+  border-radius: 45px;
+
+  overflow: hidden;
+  box-shadow:
+    0 20px 40px rgba(0,0,0,0.25),
+    0 0 0 6px #111 inset; 
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
 `
+
+
+export const deviceImg = styled.img`
+  width: 100%;
+  display: block;
+`;
+
+export const mapImg = styled.img`
+  position: absolute;
+  top: 65px;      
+  left: 28px;     
+  width: 295px;   
+  height: 570px; 
+  object-fit: cover;
+  border-radius: 20px;  
+`;
+
+S.Speaker = styled.div`
+  width: 60px;
+  height: 6px;
+
+  background: black;
+  border-radius: 3px;
+  position: absolute;
+  top: 24px;      
+  left: 50%;
+  transform: translateX(-50%);
+  /* opacity: 0.7; */
+  z-index: 10;
+`;
 
 S.IntroPostContainer3 = styled.div `
     display: flex;

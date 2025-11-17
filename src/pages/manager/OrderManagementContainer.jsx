@@ -229,9 +229,6 @@ const DashboardContent = ({ orders = [], products = [] }) => {
   );
 };
 
-/* =========================================================
- * 2. 주문/배송/상품/리뷰 신고 관리 탭 + 대시보드 탭
- * =======================================================*/
 const OrderManagementContainer = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("dashboard");

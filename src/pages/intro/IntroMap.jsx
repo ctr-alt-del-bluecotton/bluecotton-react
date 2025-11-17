@@ -30,6 +30,7 @@ const IntroMap = () => {
                         viewport={{ once: true }}
                     >
                         <S.IntroPostBord>
+                            <S.Speaker />
                             <SomMapOnly />
                         </S.IntroPostBord>
                     </motion.div>
@@ -41,9 +42,10 @@ const IntroMap = () => {
                         transition={{ duration: 0.8 }}
                         viewport={{ once: true }}
                     >
-                    <S.IntroPostBord>
-                        <S.IntroMapImg src="/assets/images/intro_map_real2.png" alt="지도 이미지" />
-                    </S.IntroPostBord>
+                    <S.DeviceWrap>
+                        <img src="/assets/images/Device.png" alt="디바이스" className="device-img" />
+                        <img src="/assets/images/intro_map_real2.png" alt="지도 이미지" className="map-img" />
+                    </S.DeviceWrap>
                     </motion.div>
                     <motion.div
                         initial={{ opacity: 0, y: 80 }}
@@ -51,6 +53,7 @@ const IntroMap = () => {
                         transition={{ duration: 0.8 }}
                         viewport={{ once: true }}
                     >
+                    
                     <S.IntroMapText2>
                         <p>내 주변에 있는 솜을 1분 만에 확인해보세요!</p>
                         <p>내가 있는 장소에서 가장 가까운 솜과</p>
