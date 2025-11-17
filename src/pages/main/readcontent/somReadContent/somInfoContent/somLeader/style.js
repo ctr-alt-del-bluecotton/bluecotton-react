@@ -49,7 +49,6 @@ S.somLeaderProfileImage = styled.img`
     height: 80px;
     border-radius: 100%;
     object-fit: cover;
-    border: 1px solid ${({ theme }) => theme.PALLETE.grey.greyScale3};
 `
 
 S.somLeaderReviewCountWrap = styled.div`
