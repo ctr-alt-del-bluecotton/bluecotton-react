@@ -3,6 +3,7 @@ import S from './style';
 import FloatingSomWritePages from './floatingSomWriteCotent/FloatingSomWriteCotent';
 import { useFloatingAction } from '../../../../../../context/FloatingActionContext';
 import { fetchData, options } from '../../../../../../context/FetchContext';
+import { useNavigate } from 'react-router-dom';
 
 const FloatingSomWrite = () => {
   return <FloatingSomWriteInner />
@@ -13,6 +14,7 @@ const FloatingSomWriteInner = () => {
     uploadImageTempIds, setUploadImageTempIds, reset, currentUser, setValue, setSelected,
     setIsDisplayFloatingMenu, setIsReset
    } = useFloatingAction();
+  const nav = useNavigate();
    
   const contents = Object.keys(getValues()).filter((content) => content !== "somContent");
 
@@ -74,6 +76,7 @@ const FloatingSomWriteInner = () => {
       await fetchData('som/register', options.postOption(trimData))
       .then(async (somRes) => {
         const somData = await somRes.json()
+        console.log(somData)
         if (uploadImageTempIds.length !== 0){
           await fetchData('som-image/update', options.putOption({ 
             somId : somData.data.id,
@@ -88,6 +91,8 @@ const FloatingSomWriteInner = () => {
           memberId: currentUser.id,
         }
         
+        nav(`/main/som/read/${somData.data.id}`)
+
         await fetchData('chat/create-rooms', options.postOption(createChatData))
       })
     }
