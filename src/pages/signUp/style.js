@@ -3,12 +3,9 @@ import {
   basic,
   flexCenterColumn,
   headerLogo,
-  secondary,
-  smallText1Regular,
   smallText2Light,
   smallText2Regular,
   smallText3Light,
-  smallText3Regular,
   white,
 } from "../../styles/common";
 import { Link } from "react-router-dom";
@@ -17,6 +14,7 @@ const S = {};
 
 S.Logo = styled.h1`
   ${headerLogo}
+  margin-bottom: 30px;
 `;
 
 S.SignUpContainer = styled.div`
@@ -29,7 +27,7 @@ S.SignUpContainer = styled.div`
 S.SignUpForm = styled.form`
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 8px;
   width: 100%;
   align-items: center;
 `;
@@ -66,6 +64,41 @@ S.Input = styled.input`
     border-color: ${({ theme }) => theme.PALLETE.primary.main};
   }
 `;
+
+S.InputLabel = styled.div`
+  width: 320px;
+  ${smallText2Regular};
+  color: ${({ theme }) => theme.PALLETE.basic};
+`;
+
+S.InputGroup = styled.div`
+  width: 320px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px; 
+  margin-bottom: 16px; 
+`;
+
+S.PasswordWrapper = styled.div`
+  position: relative;
+  width: 320px;
+`;
+
+S.EyeIcon = styled.img`
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  width: 16px;
+  height: 16px;
+  transform: translateY(-50%);
+  cursor: pointer;
+  opacity: 0.6;
+
+  &:hover {
+    opacity: 1;
+  }
+`;
+
 
 S.AddressBox = styled.div`
   display: flex;
@@ -126,14 +159,11 @@ S.GenderOption = styled.div`
         : selected
         ? theme.PALLETE.primary.main
         : theme.PALLETE.grey.greyScale1};
-
   border-radius: 4px;
   ${flexCenterColumn};
   ${smallText2Light};
-
   color: ${({ theme, selected }) =>
     selected ? theme.PALLETE.primary.main : theme.PALLETE.basic};
-
   cursor: pointer;
   transition: all 0.2s;
 
@@ -143,15 +173,11 @@ S.GenderOption = styled.div`
 `;
 
 S.DateInputBox = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
   width: 320px;
-  gap: 8px;
 `;
 
 S.DateInput = styled.input.attrs({ type: "date" })`
-  flex: 1;
+  width: 296px;
   height: 40px;
   border: 1px solid
     ${({ theme, $error }) =>
@@ -182,13 +208,19 @@ S.SignUpButton = styled(Link)`
   display: flex;
   align-items: center;
   justify-content: center;
-  border: none; /* 유지 */
+  border: none;
   border-radius: 4px;
   cursor: pointer;
 
   &:hover {
     background-color: ${({ theme }) => theme.PALLETE.primary.dark};
   }
+`;
+
+S.ButtonRow = styled.div`
+  display: flex;
+  gap: 8px;
+  width: 320px;
 `;
 
 S.Divider = styled.div`
@@ -224,6 +256,39 @@ S.LoginText = styled.p`
       color: ${({ theme }) => theme.PALLETE.primary.dark};
     }
   }
+`;
+
+S.AgreeTitle = styled.h3`
+  font-size: 16px;
+  font-weight: bold;
+  margin: 12px 0 8px;
+`;
+
+S.AgreeBox = styled.div`
+  width: 296px;
+  border: 1px solid ${({ theme }) => theme.PALLETE.grey.greyScale3};
+  padding: 14px;
+  border-radius: 8px;
+  font-size: 14px;
+  line-height: 1.4;
+
+  p {
+    margin: 0 0 6px 0; 
+  }
+
+  label {
+    display: flex;
+    align-items: center;
+    gap: 5px;     
+    margin-top: 40px;
+    
+  }
+`;
+
+S.ErrorText = styled.div`
+  color: red;
+  font-size: 12px;
+  margin-top: 4px;
 `;
 
 export default S;
