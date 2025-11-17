@@ -39,6 +39,7 @@ S.MetaTop = styled.div`
   align-items: center;
   gap: 6px;
   margin-bottom: 6px;
+  width: 100%; 
 
   .category {
     color: ${({ theme }) => theme.PALLETE.secondary.main};
@@ -50,6 +51,11 @@ S.MetaTop = styled.div`
     color: ${({ theme }) => theme.PALLETE.basic};
     font-size: ${({ theme }) => theme.FONT_SIZE["smallText2"]};
     font-weight: ${({ theme }) => theme.FONT_WEIGHT["bold"]};
+    flex: 1;        
+    min-width: 0;   
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
   }
 
   .bar {
@@ -75,6 +81,7 @@ S.Title = styled.h3`
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  width: 100%;
 `;
 
 /* === 요약문 === */
