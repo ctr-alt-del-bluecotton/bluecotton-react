@@ -3,12 +3,13 @@ import { basic, smallText3Regular, title } from "../../../../../../styles/common
 
 const S = {};
 
+
 S.Container = styled.div`
   display: flex;
   flex-direction: column;
   width: 100%;
   height: 100%;
-  background-color: ${({theme}) => theme.PALLETE.white}
+  background-color: ${({ theme }) => theme.PALLETE.white};
 `;
 
 S.Header = styled.div`
@@ -20,12 +21,36 @@ S.Header = styled.div`
   margin-top: 50px;
 `;
 
-
 S.Title = styled.h3`
   ${title}
   color: ${({ theme }) => theme.PALLETE.primary.main};
   text-align: center;
   margin: 0;
+`;
+
+S.SuggestArea = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px 16px;
+  background-color: ${({ theme }) => theme.PALLETE.white};
+`;
+
+S.SuggestBtn = styled.button`
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 13px;
+  border: 1px solid ${({ theme }) => theme.PALLETE.primary.main};
+  background-color: ${({ theme }) => theme.PALLETE.white};
+  color: ${({ theme }) => theme.PALLETE.primary.main};
+  cursor: pointer;
+  transition: 0.2s;
+  white-space: nowrap;
+
+  &:hover {
+    background-color: ${({ theme }) => theme.PALLETE.primary.main};
+    color: ${({ theme }) => theme.PALLETE.white};
+  }
 `;
 
 S.ChatBody = styled.div`
@@ -41,10 +66,10 @@ S.ChatBody = styled.div`
 S.Bubble = styled.div`
   max-width: 80%;
   padding: 10px 14px;
-  border-radius: 8px; 
+  border-radius: 8px;
   line-height: 1.4;
   ${smallText3Regular}
-  background-color: ${({theme}) => theme.PALLETE.white};
+  background-color: ${({ theme }) => theme.PALLETE.white};
   ${basic};
   align-self: ${({ isUser }) => (isUser ? "flex-end" : "flex-start")};
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
@@ -64,6 +89,7 @@ S.Input = styled.input`
   font-size: 14px;
   color: #333;
   background-color: transparent;
+
   ::placeholder {
     color: #aaa;
   }
@@ -76,6 +102,7 @@ S.SendBtn = styled.button`
   font-size: 18px;
   color: ${({ theme }) => theme.PALLETE.primary};
   transition: 0.2s;
+
   &:hover {
     transform: scale(1.1);
   }
