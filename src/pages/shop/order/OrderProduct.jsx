@@ -1,4 +1,5 @@
-import React, { useEffect } from "react";
+// src/pages/.../shop/order/OrderProduct.jsx
+import React, { useEffect, useMemo } from "react";
 import S from "./style";
 import { useLocation } from "react-router-dom";
 
@@ -7,25 +8,42 @@ const OrderProduct = ({ onTotalPriceChange }) => {
 
   console.log("[OrderProduct] location.state:", location.state);
 
+  // 주문 페이지로 넘어올 때 넘긴 state
   const state = location.state || {};
-  const snapshot = state.snapshot;
+  const snapshot = state.snapshot || {};
 
-  let items = [];
-  let totalPrice = 0;
+  // snapshot.items: [{ id, productName, productPrice, productMainImageUrl, quantity, ... }, ...]
+  const rawItems = Array.isArray(snapshot.items) ? snapshot.items : [];
 
-  if (snapshot?.items?.length) {
-    items = snapshot.items;
-    totalPrice =
-      snapshot.totalPrice ??
-      snapshot.items.reduce(
-        (sum, it) => sum + (it.unitPrice || 0) * (it.quantity ?? 1),
-        0
-      );
-  }
+  // ✅ 방어적으로 items를 정규화
+  const items = useMemo(
+    () =>
+      rawItems.map((item) => ({
+        productId: item.productId ?? item.id,
+        name: item.name ?? item.productName,
+        unitPrice: item.unitPrice ?? item.productPrice ?? 0,
+        quantity: item.quantity ?? 1,
+        imageUrl:
+          item.imageUrl || item.productMainImageUrl || item.productSubImageUrl,
+      })),
+    [rawItems]
+  );
 
-  const totalCount = items.reduce(
-    (sum, item) => sum + (item.quantity ?? 1),
-    0
+  const totalPrice = useMemo(
+    () =>
+      typeof snapshot.totalPrice === "number"
+        ? snapshot.totalPrice
+        : items.reduce(
+            (sum, it) => sum + (Number(it.unitPrice) || 0) * (it.quantity ?? 1),
+            0
+          ),
+    [items, snapshot.totalPrice]
+  );
+
+  // ✅ 총 수량
+  const totalCount = useMemo(
+    () => items.reduce((sum, item) => sum + (item.quantity ?? 1), 0),
+    [items]
   );
 
   const formatPrice = (v) =>
@@ -33,7 +51,6 @@ const OrderProduct = ({ onTotalPriceChange }) => {
       maximumFractionDigits: 0,
     }) + "원";
 
-  // 🔥 여기서 부모에게 "총 결제 금액" 알려줌
   useEffect(() => {
     if (typeof onTotalPriceChange === "function") {
       onTotalPriceChange(totalPrice);
@@ -46,16 +63,15 @@ const OrderProduct = ({ onTotalPriceChange }) => {
         <S.OrderProductText>주문 상품 {totalCount}개</S.OrderProductText>
 
         {items.map((item) => (
-          <S.ProductRow key={item.productId || item.id}>
+          <S.ProductRow key={item.productId}>
             <S.ProductThumb
-              src={item.imageUrl || "/assets/images/default_product.png"}
-              alt={item.name}
+              src={item.productMainImageUrl || "/assets/images/default_product.png"}
+              alt={item.name || "상품 이미지"}
             />
             <S.ProductContent>
               <S.ContentText1>{item.name}</S.ContentText1>
               <S.ContentText2>
-                {formatPrice(item.unitPrice || 0)} /{" "}
-                {item.quantity ?? 1}개
+                {formatPrice(item.unitPrice)} / {item.quantity ?? 1}개
               </S.ContentText2>
             </S.ProductContent>
           </S.ProductRow>
