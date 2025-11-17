@@ -70,6 +70,7 @@ export const ReadProvider = ({ children }) => {
         }))
         .then((res) => {
             window.dispatchEvent(new CustomEvent("refreshSomList"));
+            somJoinSomComplete();
             // 참여 후 데이터 새로고침
             loadReadData();
         })
@@ -99,6 +100,14 @@ export const ReadProvider = ({ children }) => {
             title: "솔로 솜에는 참가 할 수 없습니다.",
             message: "귓솜말로 문의를 해보는건 어떨까요?",
             cancelText: "더 둘러보기"
+        });
+    }
+
+    const somJoinSomComplete = () => {
+        openModal({
+            title: "솜 참가가 완료되었습니다..",
+            message: "하단에서 채팅을 통해 팀원들과 이야기를 나눠보세요!",
+            onfirmText: "확인"
         });
     }
 
@@ -184,7 +193,8 @@ export const ReadProvider = ({ children }) => {
         isLater,
         somJoinNotLogin,
         wisperSoloSom,
-        isOver
+        isOver,
+        somJoinSomComplete
     };
 
     return (

@@ -20,11 +20,10 @@ S.SomImage = styled.div.withConfig({
   border-radius: 8px;
   background-size: cover;
   object-fit: cover;
-  cursor: pointer;
 `;
 
 S.SomInfo = styled.div`
-  padding: 12px 0;
+  padding: 15px 0 30px 0;
 `;
 
 S.SomLocationIcon = styled.img`
@@ -61,17 +60,19 @@ S.SomTitleArea = styled.div`
 
 S.SomTitle = styled.div`
   ${smallText3Bold}
-  cursor: pointer;
+  cursor: default;
 `;
 
 S.SomExplanation = styled.div`
   font-size: 14px;
   margin-top: 8px;
+  gap: 8px;
   display: flex;
   flex-direction: column;
   span {
     ${smallText0Regular}
   }
+  cursor: default;
 `;
 
 S.SomButtonArea = styled.div`
@@ -125,7 +126,7 @@ S.FullSomButton = styled.div`
   ${smallText1Regular}
   ${white}
   border-radius: 4px;
-  width: 122px;
+  width: 254px;
   height: 32px;
   background-color: ${({ theme }) => theme.PALLETE.grey.greyScale1};
   cursor: pointer;
