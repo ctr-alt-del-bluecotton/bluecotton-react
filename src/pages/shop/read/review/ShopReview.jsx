@@ -1,50 +1,56 @@
+// src/pages/shop/read/review/ShopReview.jsx
 import React, { useEffect, useState } from "react";
 import S from "./style";
 import Report from "../../../../components/Report/Report";
 import { useParams } from "react-router-dom";
 import { useSelector } from "react-redux";
+import { resolveUrl } from "../../../../utils/url";
 
-const toClient = (dto) => ({
-  id: dto.id,
-  userName: dto.userNickName ?? "익명",
-  date: dto.productReviewDate,
-  rating: dto.productReviewRating,
-  content: dto.productReviewContent,
-  images: dto.productReviewImageUrls
-    ? dto.productReviewImageUrls.split("|")
-    : [],
-  profile:
-    dto.memberProfileUrl || "/assets/images/shop_review_profile_default.png",
-});
+// ✅ 백엔드 DTO → 프론트용 데이터 변환
+const toClient = (dto) => {
+  // dto.productReviewImageUrls 예: "/file/REVIEW/aaa.png|/file/REVIEW/bbb.png"
+  const rawImages = dto.productReviewImageUrls
+    ? dto.productReviewImageUrls.split("|").filter(Boolean)
+    : [];
+
+  const images = rawImages.map((url) => resolveUrl(url));
+
+  return {
+    id: dto.id,
+    userName: dto.userNickName ?? "익명",
+    date: dto.productReviewDate,
+    rating: dto.productReviewRating,
+    content: dto.productReviewContent,
+    images,
+    profile:
+      resolveUrl(dto.memberProfileUrl) ||
+      "/assets/images/shop_review_profile_default.png",
+  };
+};
 
 const ShopReview = () => {
   const { id } = useParams();
   const { currentUser, isLogin } = useSelector((state) => state.user);
 
-
   const [sort, setSort] = useState("latest");
   const [type, setType] = useState("all");
   const [page, setPage] = useState(1);
 
-  const [stats, setStats] = useState(null); // 리뷰 '평점'
-  const [reviews, setReviews] = useState([]); // '상품 리뷰' 
-
+  const [stats, setStats] = useState(null);     // 리뷰 평점
+  const [reviews, setReviews] = useState([]);   // 상품 리뷰
 
   const [statsLoading, setStatsLoading] = useState(true);
   const [reviewsLoading, setReviewsLoading] = useState(true);
 
-
-  // 에러
   const [error, setError] = useState(null);
 
   const [writeOpen, setWriteOpen] = useState(false);
 
-
-  // 신고 모달창
+  // 신고 모달
   const [showReportModal, setShowReportModal] = useState(false);
   const [reportTarget, setReportTarget] = useState(null);
 
-  // "리뷰 평점"
+  // ------------------ 리뷰 평점 ------------------
   useEffect(() => {
     const fetchStats = async () => {
       setStatsLoading(true);
@@ -75,9 +81,9 @@ const ShopReview = () => {
     if (id) {
       fetchStats();
     }
-  }, [id]); 
+  }, [id]);
 
-  // 상품 리뷰 
+  // ------------------ 상품 리뷰 리스트 ------------------
   useEffect(() => {
     const fetchReviews = async () => {
       setReviewsLoading(true);
@@ -96,6 +102,11 @@ const ShopReview = () => {
 
         const json = await res.json();
         const list = Array.isArray(json.data) ? json.data.map(toClient) : [];
+
+        // 디버깅용
+        console.log("[ShopReview] 서버 리뷰 데이터:", json.data);
+        console.log("[ShopReview] 변환된 리뷰 데이터:", list);
+
         setReviews(list);
       } catch (err) {
         setError(err.message);
@@ -107,33 +118,38 @@ const ShopReview = () => {
     if (id) {
       fetchReviews();
     }
-  }, [id, type, sort, page]); // 필터가 바뀔 때마다 실행
+  }, [id, type, sort, page]);
 
-  // 도움돼요 버튼 (백엔드 X)
+  // ------------------ 도움돼요 (프론트 상태만) ------------------
   const [helpfulState, setHelpfulState] = useState({});
   useEffect(() => {
     setHelpfulState(
       Object.fromEntries(reviews.map((r) => [r.id, { active: false, count: 0 }]))
     );
   }, [reviews]);
+
   const toggleHelpful = (id) => {
     setHelpfulState((prev) => {
       const cur = prev[id] ?? { active: false, count: 0 };
       const nextActive = !cur.active;
       return {
         ...prev,
-        [id]: { active: nextActive, count: cur.count + (nextActive ? 1 : -1) },
+        [id]: {
+          active: nextActive,
+          count: cur.count + (nextActive ? 1 : -1),
+        },
       };
     });
   };
 
-
-
-  //  'stats'가 null이면 (데이터가 없으면) 
+  // ------------------ 렌더링 가드 ------------------
   if (!stats) {
+    // 처음 로딩 중일 때
+    if (statsLoading) {
+      return <S.ReviewSection>리뷰 데이터를 불러오는 중입니다...</S.ReviewSection>;
+    }
     return <S.ReviewSection>리뷰 데이터를 표시할 수 없습니다.</S.ReviewSection>;
   }
-
 
   const avgScore = stats.avgScore;
   const totalCount = stats.totalCount;
@@ -149,7 +165,7 @@ const ShopReview = () => {
     <S.ReviewSection>
       <S.ReviewTitle>리뷰 평점</S.ReviewTitle>
 
-      {/* "리뷰 평점"  */}
+      {/* ===== 리뷰 평점 ===== */}
       <S.ReviewContainer>
         <S.ReviewLeft>
           <S.ReviewAverage>{avgScore.toFixed(1)}</S.ReviewAverage>
@@ -176,7 +192,7 @@ const ShopReview = () => {
         </S.ReviewRight>
       </S.ReviewContainer>
 
-      {/* 드롭다운 */}
+      {/* ===== 드롭다운 (전체/사진, 정렬) ===== */}
       <S.ReviewProductWrap>
         <S.ReviewProduct>상품 리뷰</S.ReviewProduct>
         <S.ReviewFilters>
@@ -201,7 +217,7 @@ const ShopReview = () => {
         </S.ReviewFilters>
       </S.ReviewProductWrap>
 
-      {/* "상품 리뷰"  */}
+      {/* ===== 상품 리뷰 리스트 ===== */}
       <>
         {reviews.map((rv) => (
           <S.ReviewItem key={rv.id}>
@@ -209,7 +225,7 @@ const ShopReview = () => {
               <S.ProfileImage src={rv.profile} alt={`${rv.userName} 프로필`} />
               <S.UserInfoWrap>
                 <S.StarRow>
-                  {[...Array(5)].map((_, i) => (
+                  {Array.from({ length: 5 }).map((_, i) => (
                     <img
                       key={i}
                       src="/assets/icons/review.svg"
@@ -217,7 +233,10 @@ const ShopReview = () => {
                       style={{
                         width: "19px",
                         height: "18px",
-                        filter: i < rv.rating ? "none" : "grayscale(1) brightness(1.0)",
+                        filter:
+                          i < rv.rating
+                            ? "none"
+                            : "grayscale(1) brightness(1.0)",
                       }}
                     />
                   ))}
@@ -237,15 +256,15 @@ const ShopReview = () => {
                   </S.ReportButton>
                 </S.UserMeta>
               </S.UserInfoWrap>
-
-
             </S.ReviewHeader>
 
+            {/* ✅ 리뷰 이미지 (첫 장만 노출 / 원하면 map으로 여러 장 가능) */}
             {rv.images && rv.images.length > 0 && (
               <S.ReviewImage>
                 <img src={rv.images[0]} alt="리뷰 이미지" />
               </S.ReviewImage>
             )}
+
             <S.ReviewText>{rv.content}</S.ReviewText>
             <S.ReviewDivider />
           </S.ReviewItem>
@@ -259,7 +278,7 @@ const ShopReview = () => {
         )}
       </>
 
-      {/* 신고 모달창 */}
+      {/* 신고 모달 */}
       {showReportModal && (
         <Report
           target={reportTarget}

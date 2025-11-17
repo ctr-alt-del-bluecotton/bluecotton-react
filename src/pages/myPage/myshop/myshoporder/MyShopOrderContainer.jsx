@@ -61,7 +61,9 @@ const MyShopOrderContainer = () => {
           },
           method: "GET",
         });
-
+        console.log("테스트1")
+        console.log(url)
+        console.log(res)
         if (!res.ok) {
           throw new Error(`HTTP ${res.status}`);
         }
@@ -145,6 +147,8 @@ const MyShopOrderContainer = () => {
                 Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
               },
             });
+            console.log("테스트");
+            console.log(res);
 
             if (!res.ok) {
               return [productId, false];

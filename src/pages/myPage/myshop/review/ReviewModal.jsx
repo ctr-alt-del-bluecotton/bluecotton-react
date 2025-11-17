@@ -121,6 +121,9 @@ const ReviewModal = ({
         imageName,
       };
 
+
+      if( mode === "create"){
+        
         const res = fetch(`${process.env.REACT_APP_BACKEND_URL}/private/mypage/myshop/review`, {
         method: "POST",
         headers: { "Content-Type": "application/json" ,
@@ -128,6 +131,20 @@ const ReviewModal = ({
         },
         body: JSON.stringify(payload),
       });
+
+      }
+
+      else {
+        const res = fetch(`${process.env.REACT_APP_BACKEND_URL}/private/mypage/myshop/review/${initial.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" ,
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`
+        },
+        body: JSON.stringify(payload),
+      });
+
+      }
+
 
 
 
