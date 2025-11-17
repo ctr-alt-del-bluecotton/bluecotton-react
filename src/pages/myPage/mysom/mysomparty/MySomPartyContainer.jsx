@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { fetchData, options } from '../../../../context/FetchContext';
+import { useModal } from '../../../../components/modal';
 import S from '../style';
 
 const feedbackOptions = [
@@ -30,6 +31,7 @@ const feedbackOptions = [
 
 const MySomPartyContainer = () => {
   const navigate = useNavigate();
+  const { openModal } = useModal();
   const { currentUser } = useSelector((state) => state.user);
   const [activeFilter, setActiveFilter] = useState('scheduled');
   const [showPopup, setShowPopup] = useState(false);
@@ -37,6 +39,7 @@ const MySomPartyContainer = () => {
   const [selectedSom, setSelectedSom] = useState(null); // 리뷰할 솜 정보 저장
   const [partySoms, setPartySoms] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [reviewedSomIds, setReviewedSomIds] = useState([]); // 이미 리뷰한 챌린지 ID 목록
 
   // 모달용 팀/소식지명 변수 -> teamLeaderName 으로 변경
   const teamLeaderName = 'zl존준서';
@@ -106,17 +109,22 @@ const MySomPartyContainer = () => {
 
         const result = await res.json();
         console.log("서버 응답:", result);
-        console.log("전체 데이터:", result.data);
-        console.log("데이터 개수:", result.data?.length);
-
-        // somType이 "party"인 데이터만 필터링 (대소문자 구분 없이)
+          
+        // 서버 응답 구조: id는 챌린지 ID, memberId는 사용자 ID
         const allData = result.data || [];
-        console.log("필터링 전 데이터:", allData);
+        console.log("전체 솜 데이터:", allData);
+        
+        // somType이 "party"인 데이터만 필터링 (대소문자 구분 없이)
         const partyData = allData.filter(som => {
-          const somType = som.somType?.toLowerCase();
-          console.log(`som.id: ${som.id}, somType: ${som.somType}, 소문자: ${somType}`);
-          return somType === 'party';
+          // som.id: 챌린지 ID
+          // som.memberId: 사용자 ID
+          // som.somType: "party" 또는 "solo"
+          const somType = String(som.somType || '').toLowerCase();
+          const isParty = somType === 'party';
+          console.log(`챌린지 ID: ${som.id}, 사용자 ID: ${som.memberId}, 타입: ${som.somType}, 파티솜: ${isParty}`);
+          return isParty;
         });
+        
         console.log("필터링 후 파티솜 데이터:", partyData);
         console.log("파티솜 개수:", partyData.length);
         setPartySoms(partyData);
@@ -129,6 +137,48 @@ const MySomPartyContainer = () => {
     };
 
     fetchPartySoms();
+  }, [currentUser]);
+
+  // 리뷰 데이터 가져오기
+  useEffect(() => {
+    const fetchReviews = async () => {
+      if (!currentUser?.id) {
+        return;
+      }
+
+      try {
+        const token = localStorage.getItem("accessToken");
+        const res = await fetch(`${process.env.REACT_APP_BACKEND_URL}/private/my-page/read-som-review?id=${currentUser.id}`, {
+          headers: { 
+            "Content-Type": "application/json",
+            ...(token && { "Authorization": `Bearer ${token}` })
+          },
+          method: "GET",
+          credentials: "include"
+        });
+
+        if (!res.ok) {
+          console.error('리뷰 데이터 조회 실패');
+          return;
+        }
+
+        const result = await res.json();
+        console.log("리뷰 데이터 응답:", result);
+        
+        // 이미 리뷰한 챌린지 ID 목록 추출 (somId)
+        const reviewedIds = (result.data || [])
+          .filter(review => review.somReviewIsChecked === true)
+          .map(review => review.somId);
+        
+        console.log("이미 리뷰한 챌린지 ID 목록:", reviewedIds);
+        setReviewedSomIds(reviewedIds);
+      } catch (error) {
+        console.error('리뷰 데이터 로딩 실패:', error);
+        setReviewedSomIds([]);
+      }
+    };
+
+    fetchReviews();
   }, [currentUser]);
 
   // 현재 시간 기준으로 데이터 분류
@@ -254,9 +304,10 @@ const MySomPartyContainer = () => {
                       </S.ActionButton>
                     ) : (
                       <S.ActionButton 
-                        $disabled={som.somReviewIsChecked === true}
+                        $disabled={reviewedSomIds.includes(som.id)}
                         onClick={(e) => {
-                          if (som.somReviewIsChecked === true) {
+                          // 이미 리뷰한 챌린지는 클릭 불가
+                          if (reviewedSomIds.includes(som.id)) {
                             e.stopPropagation();
                             return;
                           }
@@ -265,7 +316,7 @@ const MySomPartyContainer = () => {
                           setShowPopup(true);
                         }}
                       >
-                        {som.somReviewIsChecked === true ? '인증완료' : getButtonLabel()}
+                        {reviewedSomIds.includes(som.id) ? '리뷰완료' : getButtonLabel()}
                       </S.ActionButton>
                     )}
                     {activeFilter === 'progress' && (
@@ -376,11 +427,30 @@ const MySomPartyContainer = () => {
                     if (refreshRes.ok) {
                       const refreshResult = await refreshRes.json();
                       const allData = refreshResult.data || [];
-                      const partyData = allData.filter(s => {
-                        const somType = s.somType?.toLowerCase();
+                      // somType이 "party"인 데이터만 필터링
+                      const partyData = allData.filter(som => {
+                        const somType = String(som.somType || '').toLowerCase();
                         return somType === 'party';
                       });
                       setPartySoms(partyData);
+                    }
+
+                    // 리뷰 데이터도 새로고침
+                    const reviewRefreshRes = await fetch(`${process.env.REACT_APP_BACKEND_URL}/private/my-page/read-som-review?id=${currentUser.id}`, {
+                      headers: { 
+                        "Content-Type": "application/json",
+                        ...(refreshToken && { "Authorization": `Bearer ${refreshToken}` })
+                      },
+                      method: "GET",
+                      credentials: "include"
+                    });
+
+                    if (reviewRefreshRes.ok) {
+                      const reviewRefreshResult = await reviewRefreshRes.json();
+                      const reviewedIds = (reviewRefreshResult.data || [])
+                        .filter(review => review.somReviewIsChecked === true)
+                        .map(review => review.somId);
+                      setReviewedSomIds(reviewedIds);
                     }
 
                     // 성공 시 팝업 닫기 및 선택 초기화
@@ -388,8 +458,12 @@ const MySomPartyContainer = () => {
                     setSelected([]);
                     setSelectedSom(null);
                     
-                    // 성공 메시지 (선택사항)
-                    // alert('리뷰가 등록되었습니다.');
+                    // 리뷰 완료 알림
+                    openModal({
+                      title: '리뷰 완료',
+                      message: '리뷰를 완료했습니다.',
+                      confirmText: '확인'
+                    });
                   } catch (error) {
                     console.error('리뷰 등록 중 오류 발생:', error);
                     alert('리뷰 등록 중 오류가 발생했습니다.');
