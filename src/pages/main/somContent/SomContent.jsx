@@ -73,7 +73,7 @@ const SomContent = ({ content }) => {
           <S.SomExplantionArea>
             <S.SomExplanationInfo>
               <S.SomLocationIcon src="../../assets/icons/som_list_location_icon.png" alt="위치 아이콘"/>
-              {somAddress}
+              {somAddress.length > 15 ? `${somAddress.slice(0, 15)}...` : somAddress}
             </S.SomExplanationInfo>
               {formatDate(somStartDate).split(' ')[0]}
           </S.SomExplantionArea>
