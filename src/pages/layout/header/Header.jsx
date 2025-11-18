@@ -55,6 +55,7 @@ const Header = () => {
 
   const handleLogoutClick = () => {
     localStorage.removeItem("accessToken");
+    localStorage.removeItem("chatMessages");
     window.location.reload();
   };
 

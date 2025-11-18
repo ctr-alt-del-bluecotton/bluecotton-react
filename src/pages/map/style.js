@@ -1,8 +1,9 @@
 import { Map } from "react-kakao-maps-sdk";
 import styled from "styled-components";
-import { basic, title, titleBold } from "../../styles/common";
+import { basic, smallText3Regular, title, titleBold } from "../../styles/common";
 
 const S = {};
+
 
 S.MapContainer = styled.div`
   width: 100%;
@@ -40,13 +41,14 @@ S.Map = styled(Map)`
   overflow: hidden;
 `;
 
+
 S.ListBox = styled.div`
   flex: 1 1 auto;
   min-width: 0;
   max-height: 600px;
   overflow-y: auto;
   padding-right: 8px;
- background-color: ${({ theme }) => theme.PALLETE.white};
+  background-color: ${({ theme }) => theme.PALLETE.white};
 
   &::-webkit-scrollbar {
     width: 6px;
@@ -62,11 +64,28 @@ S.ListBox = styled.div`
 
 
 S.SomTitle = styled.h3`
-  font-size: 18px;
+  ${smallText3Regular};
   font-weight: 600;
   color: ${({ theme }) => theme.PALLETE.basic};
-  margin-bottom: 8px;
+
+  margin-bottom: 6px;
+  line-height: 1.35;
+  
+  display: -webkit-box;
+  -webkit-line-clamp: 2; 
+  -webkit-box-orient: vertical;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  white-space: normal;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+
+  max-height: calc(1.35em * 2);
 `;
+
+
 
 S.SomAddress = styled.p`
   font-size: 13px;
@@ -79,26 +98,6 @@ S.SomDate = styled.div`
   color: ${({ theme }) => theme.PALLETE.grey.greyScale4};
 `;
 
-S.SomItem = styled.div`
-  padding: 16px 20px;
-  border-bottom: 1px solid #e0e0e0;
-  border-radius: 8px;
-  background-color: ${({ theme }) => theme.PALLETE.grey.greyScale0};
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-  margin-bottom: 12px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-
-  &:hover {
-    background-color: ${({ theme }) => theme.PALLETE.primary.main};
-    color: ${({ theme }) => theme.PALLETE.white};
-    transform: translateY(-2px);
-
-    ${S.SomTitle}, ${S.SomAddress}, ${S.SomDate} {
-      color: ${({ theme }) => theme.PALLETE.white};
-    }
-  }
-`;
 
 S.MyLocationButton = styled.img`
   position: absolute;
@@ -119,6 +118,21 @@ S.MyLocationButton = styled.img`
   }
 `;
 
+S.ViewButton = styled.button`
+  padding: 4px 10px;
+  font-size: 12px;
+  border-radius: 4px;
+  border: none;
+  color: ${({ theme }) => theme.PALLETE.white};
+  background-color: ${({ theme }) => theme.PALLETE.primary.main};
+  cursor: pointer;
+
+  &:hover {
+    background-color: ${({ theme }) => theme.PALLETE.primary.dark};
+  }
+`;
+
+
 S.InfoBox = styled.div`
   position: relative;
   width: 200px;
@@ -138,8 +152,7 @@ S.CloseButton = styled.img`
   height: 12px;
   cursor: pointer;
   opacity: 0.75;
-  transition: opacity 0.15s ease;
-
+  
   &:hover {
     opacity: 1;
   }
@@ -182,37 +195,33 @@ S.InfoAddress = styled.span`
   word-break: keep-all;
 `;
 
+
 S.SomItem = styled.div`
   display: flex;
   align-items: center;
   padding: 16px 20px;
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: 1px solid ${({ theme }) => theme.PALLETE.grey.greyScale1};
   border-radius: 8px;
-  background-color: ${({ theme }) => theme.PALLETE.grey.greyScale0};
+  background-color: ${({ theme }) => theme.PALLETE.white};
   margin-bottom: 12px;
   cursor: pointer;
   transition: all 0.2s ease;
 
   &:hover {
-    background-color: ${({ theme }) => theme.PALLETE.primary.main};
-    color: ${({ theme }) => theme.PALLETE.white};
+    background-color: ${({ theme }) => theme.PALLETE.grey.greyScale0};
     transform: translateY(-2px);
-
-    ${S.SomTitle}, ${S.SomAddress}, ${S.SomDate} {
-      color: ${({ theme }) => theme.PALLETE.white};
-    }
   }
 `;
 
 S.SomThumb = styled.div`
-  width: 68px;
-  height: 68px;
+  width: 100px;
+  height: 100px;
   border-radius: 8px;
   overflow: hidden;
   flex-shrink: 0;
   background: ${({ theme }) => theme.PALLETE.grey.greyScale0};
   border: 1px solid ${({ theme }) => theme.PALLETE.grey.greyScale1};
-
+  
   img {
     width: 100%;
     height: 100%;
@@ -220,16 +229,36 @@ S.SomThumb = styled.div`
   }
 `;
 
-
 S.SomInfoRight = styled.div`
   display: flex;
   flex-direction: column;
   margin-left: 15px;
-  gap: 2px;
+  gap: 13px;
   width: calc(100% - 70px);
+  height: 100px;
 `;
 
+S.Row = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 6px;
+`;
 
+S.LikeArea = styled.div`
+  display: flex;
+  border: 1px solid ${({ theme }) => theme.PALLETE.grey.greyScale1};
+  border-radius: 4px;
+  align-items: center;
+  padding: 3px 10px;
+  gap: 5px;
+  font-size: 13px;
+  color: ${({ theme }) => theme.PALLETE.secondary.main};
+`;
 
+S.LikeIcon = styled.img`
+  width: 13px;
+  height: 13px;
+`;
 
 export default S;
