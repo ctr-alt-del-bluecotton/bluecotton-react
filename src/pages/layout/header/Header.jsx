@@ -2,25 +2,25 @@ import React, { useEffect, useRef, useState } from "react";
 import S from "./style.js";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { color } from "framer-motion";
 
 const Header = () => {
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
+
   const [isMyPageHovered, setIsMyPageHovered] = useState(false);
   const [isLogoutHovered, setIsLogoutHovered] = useState(false);
   const [profileImage, setProfileImage] = useState(null);
 
-  const toogleDropdown = () => {
+  const toggleDropdown = () => {
     setIsOpen((prev) => !prev);
   };
 
   const hoverStyle = {
-    borderRadius:"4px",
-    backgroundColor: "#0015FF", 
-    color : "#FFFFFF"
+    borderRadius: "4px",
+    backgroundColor: "#0015FF",
+    color: "#FFFFFF",
   };
 
   const buttonBaseStyle = {
@@ -31,27 +31,26 @@ const Header = () => {
     background: "transparent",
     cursor: "pointer",
     fontSize: "13px",
-    transition: "background-color 0.1s", 
+    transition: "background-color 0.1s",
   };
 
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if(dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setIsOpen(false);
       }
     };
 
     document.addEventListener("mousedown", handleClickOutside);
-    return () => {document.removeEventListener("mousedown", handleClickOutside);};
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
   }, []);
 
-  //  리덕스에있는 유저 정보 유저 상태
   const { currentUser, isLogin } = useSelector((state) => state.user);
 
-  //  로그아웃
-  const handleLoginClick = () => {
-    navigate("/login");
-  };
+ 
+  const handleLoginClick = () => navigate("/login");
 
   const handleLogoutClick = () => {
     localStorage.removeItem("accessToken");
@@ -64,6 +63,7 @@ const Header = () => {
     setIsOpen(false);
   };
 
+  // 페이지별 이름
   const isIntroPage = pathname === "/";
   const isSomPage = pathname.startsWith("/main/som");
   const isShopPage = pathname.startsWith("/main/shop");
@@ -71,18 +71,17 @@ const Header = () => {
   const isPostPage = pathname.startsWith("/main/post");
   const isMapPage = pathname.startsWith("/main/map");
 
-  const goToLinkName =
-    isSomPage
-      ? "솜"
-      : isShopPage
-      ? "샵"
-      : isMyPage
-      ? "마이페이지"
-      : isPostPage
-      ? "오늘의 솜"
-      : isMapPage
-      ? "주변 솜"
-      : "";
+  const goToLinkName = isSomPage
+    ? "솜"
+    : isShopPage
+    ? "샵"
+    : isMyPage
+    ? "마이페이지"
+    : isPostPage
+    ? "오늘의 솜"
+    : isMapPage
+    ? "주변 솜"
+    : "";
 
   const Categories = (
     <>
@@ -93,41 +92,42 @@ const Header = () => {
     </>
   );
 
+  // 프로필 이미지 불러오기
   useEffect(() => {
-  const fetchProfile = async () => {
-    if (!isLogin || !currentUser?.id) return;
+    const fetchProfile = async () => {
+      if (!isLogin || !currentUser?.id) return;
 
-    try {
-      const res = await fetch(
-        `${process.env.REACT_APP_BACKEND_URL}/member/profile?memberId=${currentUser.id}`,
-        {
-          method: "GET",
-          headers: {
-            "Authorization": `Bearer ${localStorage.getItem("accessToken")}`
+      try {
+        const res = await fetch(
+          `${process.env.REACT_APP_BACKEND_URL}/member/profile?memberId=${currentUser.id}`,
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+            },
           }
-        }
-      );
+        );
 
-      if (!res.ok) throw new Error("프로필 로드 실패");
+        if (!res.ok) throw new Error("프로필 로드 실패");
 
-      const result = await res.json();
-      const data = result.data;
+        const result = await res.json();
+        const data = result.data;
 
-      setProfileImage(data.memberProfilePath + data.memberProfileName);
-    } catch (err) {
-      console.error(err);
-      setProfileImage("/assets/icons/login.svg");
-    }
-  };
+        setProfileImage(data.memberProfilePath + data.memberProfileName);
+      } catch (err) {
+        console.error(err);
+        setProfileImage("/assets/icons/login.svg");
+      }
+    };
 
-  fetchProfile();
-}, [isLogin, currentUser?.id]);
-
+    fetchProfile();
+  }, [isLogin, currentUser?.id]);
 
   return (
     <S.HeaderWrap>
       <S.HeaderContainer>
         <S.HeaderRow>
+          {/* 왼쪽 영역 */}
           <S.LeftGroup>
             <S.Logo to="/">blue cotton</S.Logo>
             {!isIntroPage && goToLinkName && (
@@ -138,18 +138,29 @@ const Header = () => {
             )}
           </S.LeftGroup>
 
-
+          {/* 가운데 영역 */}
           <S.CenterGroup>{isIntroPage && Categories}</S.CenterGroup>
 
-
+          {/* 오른쪽 영역 */}
           <S.RightGroup>
             {isLogin ? (
               <div
                 ref={dropdownRef}
                 style={{ position: "relative", display: "inline-block" }}
               >
-               
-                <S.ProfileBox onClick={toogleDropdown} style={{cursor:"pointer"}}>
+                {/* ⬇️ 이미지 + 이름 전체 클릭 */}
+                <button
+                  type="button"
+                  onClick={toggleDropdown}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    border: "none",
+                    background: "transparent",
+                    cursor: "pointer",
+                    padding: 0,
+                  }}
+                >
                   <img
                     style={{
                       width: "36px",
@@ -160,12 +171,11 @@ const Header = () => {
                     src={profileImage || "/assets/icons/login.svg"}
                     alt="프로필아이콘"
                   />
-                  <S.ProfileName onClick={toogleDropdown} style={{cursor:"pointer"}}>
-                    {currentUser.memberNickname || "사용자"}
-                  </S.ProfileName>
-                </S.ProfileBox>
 
-         
+                  <S.ProfileName>{currentUser.memberNickname}</S.ProfileName>
+                </button>
+
+                {/* 드롭다운 */}
                 {isOpen && (
                   <div
                     style={{
@@ -174,11 +184,9 @@ const Header = () => {
                       right: 0,
                       marginTop: "8px",
                       backgroundColor: "#FFFFFF",
-                      // border:"1px solid #E0E0E0",
                       boxShadow: "0 3px 4px rgba(0,0,0,0.25)",
                       borderRadius: "4px",
                       minWidth: "85px",
-                      // padding: "auto",
                       zIndex: 300,
                     }}
                   >
@@ -189,17 +197,18 @@ const Header = () => {
                       style={{
                         ...buttonBaseStyle,
                         ...(isMyPageHovered ? hoverStyle : {}),
-                    }}
+                      }}
                     >
                       마이페이지
                     </button>
+
                     <button
                       onClick={handleLogoutClick}
                       onMouseEnter={() => setIsLogoutHovered(true)}
                       onMouseLeave={() => setIsLogoutHovered(false)}
                       style={{
                         ...buttonBaseStyle,
-                        ...(isLogoutHovered ? hoverStyle: {}),
+                        ...(isLogoutHovered ? hoverStyle : {}),
                       }}
                     >
                       로그아웃
