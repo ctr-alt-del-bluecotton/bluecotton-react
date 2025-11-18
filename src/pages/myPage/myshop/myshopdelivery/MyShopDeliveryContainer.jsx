@@ -6,6 +6,7 @@ import { useSelector } from "react-redux";
 import { resolveUrl } from "../../../../utils/url";
 import { useNavigate } from "react-router-dom";
 import { useModal } from "../../../../components/modal/useModal";
+import Pagination from "../../components/Pagination";
 
 const formatDotDate = (str) => {
   if (!str) return "";
@@ -33,6 +34,8 @@ const MyShopDeliveryContainer = () => {
   const [allItems, setAllItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [pageNumber, setPageNumber] = useState(1);
+  const itemsPerPage = 10;
 
   const navigate = useNavigate();
   const { openModal } = useModal();
@@ -186,10 +189,21 @@ const MyShopDeliveryContainer = () => {
   };
 
   // 현재 탭(activeFilter)에 해당하는 항목만 필터
-  const items = useMemo(
+  const filteredItems = useMemo(
     () => allItems.filter((it) => it.status === activeFilter),
     [activeFilter, allItems]
   );
+
+  // 필터 변경 시 페이지를 1로 리셋
+  useEffect(() => {
+    setPageNumber(1);
+  }, [activeFilter]);
+
+  // 페이지네이션된 데이터 계산
+  const totalPages = Math.max(1, Math.ceil(filteredItems.length / itemsPerPage));
+  const startIndex = (pageNumber - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const items = filteredItems.slice(startIndex, endIndex);
 
   const label = {
     paid: "구매완료",
@@ -234,7 +248,7 @@ const MyShopDeliveryContainer = () => {
 
       {/* 제목 */}
       <S.ListHeader>
-        {label[activeFilter] || "배송현황"}({items.length}개)
+        {label[activeFilter] || "배송현황"}({filteredItems.length}개)
       </S.ListHeader>
 
       <S.ListContainer>
@@ -302,11 +316,11 @@ const MyShopDeliveryContainer = () => {
         })}
       </S.ListContainer>
 
-      <S.Pagination>
-        <S.PageButton disabled>&lt; 이전</S.PageButton>
-        <S.PageNumber>1</S.PageNumber>
-        <S.PageButton>다음 &gt;</S.PageButton>
-      </S.Pagination>
+      <Pagination 
+        totalPages={totalPages}
+        pageNumber={pageNumber}
+        setPageNumber={setPageNumber}
+      />
 
       <ReviewModal
         open={open}

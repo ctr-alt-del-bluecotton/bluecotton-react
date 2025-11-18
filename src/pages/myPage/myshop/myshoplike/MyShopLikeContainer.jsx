@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import S from "../style";
 import { resolveUrl } from "../../../../utils/url";
 import { useSelector } from "react-redux";
+import Pagination from "../../components/Pagination";
 
 const likeProduct = (data) => ({
   id: data.id,
@@ -22,6 +23,8 @@ const MyShopLikeContainer = () => {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [pageNumber, setPageNumber] = useState(1);
+  const itemsPerPage = 12; // 그리드 레이아웃이므로 12개씩
 
   const { currentUser, isLogin } = useSelector((state) => state.user);
   const memberId = currentUser?.id ?? null;  
@@ -84,6 +87,12 @@ const MyShopLikeContainer = () => {
 
 
 
+  // 페이지네이션된 데이터 계산
+  const totalPages = Math.max(1, Math.ceil(items.length / itemsPerPage));
+  const startIndex = (pageNumber - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedItems = items.slice(startIndex, endIndex);
+
   if (error) {
     return <S.ListHeader>에러: {error}</S.ListHeader>;
   }
@@ -93,7 +102,7 @@ const MyShopLikeContainer = () => {
       <S.ListHeader>찜한상품({items.length}개)</S.ListHeader>
 
       <S.LikeGrid>
-        {items.map((item) => {
+        {paginatedItems.map((item) => {
           //  항상 찜한 상태(active=true)
           const active = true;
 
@@ -160,11 +169,11 @@ const MyShopLikeContainer = () => {
         </div>
       )}
 
-      <S.Pagination>
-        <S.PageButton disabled>&lt; 이전</S.PageButton>
-        <S.PageNumber>1</S.PageNumber>
-        <S.PageButton disabled={true}>다음 &gt;</S.PageButton>
-      </S.Pagination>
+      <Pagination 
+        totalPages={totalPages}
+        pageNumber={pageNumber}
+        setPageNumber={setPageNumber}
+      />
     </>
   );
 };
