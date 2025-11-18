@@ -290,6 +290,13 @@ const MyInfoContainer = () => {
           picturePath: imagePath,
           pictureName: imageName
         }));
+        
+        // 이미지 저장 성공 알림
+        openModal({
+          title: '저장 완료',
+          message: '이미지가 저장되었습니다.',
+          confirmText: '확인'
+        });
       } else {
         console.warn("[DEBUG] 경로 또는 파일명이 없습니다. imagePath:", imagePath, "imageName:", imageName);
       }
@@ -426,8 +433,27 @@ const MyInfoContainer = () => {
       });
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.message || '회원 정보 수정에 실패했습니다.');
+        let errorMessage = '회원 정보 수정에 실패했습니다.';
+        
+        try {
+          const errorData = await response.json();
+          // 서버에서 반환하는 에러 메시지 추출 (다양한 형식 지원)
+          errorMessage = errorData.message || 
+                        errorData.error || 
+                        errorData.data?.message || 
+                        errorData.errorMessage ||
+                        errorMessage;
+        } catch (parseError) {
+          // JSON 파싱 실패 시 기본 메시지 사용
+          console.error('에러 응답 파싱 실패:', parseError);
+        }
+        
+        openModal({
+          title: '오류',
+          message: errorMessage,
+          confirmText: '확인'
+        });
+        return;
       }
 
       const result = await response.json();
@@ -458,8 +484,83 @@ const MyInfoContainer = () => {
       message:
         '정말 회원을 탈퇴하시겠습니까? 탈퇴 후 모든 정보가 삭제되며 복구할 수 없습니다.',
       confirmText: '탈퇴',
-      cancelText: '취소'
-      // onConfirm: () => { ... }
+      cancelText: '취소',
+      onConfirm: async () => {
+        try {
+          if (!memberId) {
+            openModal({
+              title: '오류',
+              message: '회원 정보를 불러올 수 없습니다.',
+              confirmText: '확인'
+            });
+            return;
+          }
+
+          const accessToken = localStorage.getItem("accessToken");
+          if (!accessToken) {
+            openModal({
+              title: '오류',
+              message: '로그인이 필요합니다.',
+              confirmText: '확인'
+            });
+            return;
+          }
+
+          const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/private/my-page/delete-member?id=${memberId}`, {
+            method: 'DELETE',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${accessToken}`
+            },
+            credentials: 'include'
+          });
+
+          if (!response.ok) {
+            let errorMessage = '회원 탈퇴에 실패했습니다.';
+            
+            try {
+              const errorData = await response.json();
+              errorMessage = errorData.message || 
+                            errorData.error || 
+                            errorData.data?.message || 
+                            errorData.errorMessage ||
+                            errorMessage;
+            } catch (parseError) {
+              console.error('에러 응답 파싱 실패:', parseError);
+            }
+            
+            openModal({
+              title: '오류',
+              message: errorMessage,
+              confirmText: '확인'
+            });
+            return;
+          }
+
+          const result = await response.json();
+          console.log('회원 탈퇴 성공:', result);
+
+          // 탈퇴 성공 시 로그아웃 처리
+          localStorage.removeItem("accessToken");
+          
+          openModal({
+            title: '회원 탈퇴',
+            message: '회원 탈퇴가 완료되었습니다.',
+            confirmText: '확인',
+            onConfirm: () => {
+              // 로그인 페이지로 이동
+              window.location.href = '/login';
+            }
+          });
+        } catch (error) {
+          console.error('회원 탈퇴 오류:', error);
+          openModal({
+            title: '오류',
+            message: error.message || '회원 탈퇴 중 오류가 발생했습니다.',
+            confirmText: '확인'
+          });
+        }
+      }
     });
   };
 
@@ -516,6 +617,7 @@ const MyInfoContainer = () => {
             name="nickname"
             value={formData.nickname}
             onChange={handleChange}
+            maxLength={8}
           />
         </S.FormSection>
 
@@ -637,17 +739,7 @@ const MyInfoContainer = () => {
           />
           <S.FileInfo>{selectedFile ? `선택된 파일: ${selectedFile.name}` : '선택된 파일 없음'}</S.FileInfo>
           <S.FileInfo>용량이 50.0M 이하 파일만 업로드 가능</S.FileInfo>
-          {selectedFile && (
-            <S.PrimaryButton
-              type="button"
-              onClick={() => {
-                console.log('파일 저장:', selectedFile);
-                // TODO: 파일 업로드 로직
-              }}
-            >
-              저장
-            </S.PrimaryButton>
-          )}
+
         </S.FormSection>
 
         <S.ActionButtons>
