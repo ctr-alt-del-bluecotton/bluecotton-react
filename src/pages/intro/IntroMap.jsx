@@ -29,10 +29,14 @@ const IntroMap = () => {
                         transition={{ duration: 0.8 }}
                         viewport={{ once: true }}
                     >
-                        <S.IntroPostBord>
-                            <S.Speaker />
-                            <SomMapOnly />
-                        </S.IntroPostBord>
+                        <S.DeviceWrap>
+                            <img
+                            src="/assets/images/Device.png"
+                            alt="디바이스"
+                            className="device-img"
+                            />
+                            <SomMapOnly className="map-img" />   
+                        </S.DeviceWrap>
                     </motion.div>
                 </S.IntroMapImgAndText>
                 <S.IntroMapImgAndText>
@@ -43,8 +47,17 @@ const IntroMap = () => {
                         viewport={{ once: true }}
                     >
                     <S.DeviceWrap>
-                        <img src="/assets/images/Device.png" alt="디바이스" className="device-img" />
-                        <img src="/assets/images/intro_map_real2.png" alt="지도 이미지" className="map-img" />
+  
+                        <img
+                            src="/assets/images/intro_map_real2.png"
+                            alt="지도 이미지"
+                            className="map-img"
+                        />
+                        <img
+                            src="/assets/images/Device.png"
+                            alt="디바이스"
+                            className="device-img"
+                        />
                     </S.DeviceWrap>
                     </motion.div>
                     <motion.div

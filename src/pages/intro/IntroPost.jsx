@@ -43,10 +43,12 @@ const IntroPost = () => {
               transition={{ duration: 0.8 }}
               viewport={{ once: true }}
             >
-              <S.IntroPostBord>
-                <S.Speaker />
-                <img src="/assets/images/intro_post.png" />
-              </S.IntroPostBord>
+              <S.DeviceWrap>
+                <img src="/assets/images/Device.png"alt="디바이스"className="device-img" />
+                <div className="screen" >
+                <img src="/assets/images/intro_post.png" className="map-img-post" />
+                </div>
+              </S.DeviceWrap>
             </motion.div>
 
             <motion.div

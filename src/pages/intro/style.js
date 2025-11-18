@@ -70,27 +70,72 @@ S.IntroBannerButton = styled.button `
 
 S.DeviceWrap = styled.div`
   position: relative;
-  width: 432px;      
+  width: 432px;
   height: 932px;
+  overflow: hidden;
+  filter: drop-shadow(0px 15px 22px rgba(0, 0, 0, 0.25));
 
   .device-img {
-    width: 432px;
+    position: relative;
+    width: 100%;
+    height: 100%;
     display: block;
-    height: 932px;
-    z-index: 1;
+    z-index: 2;          
+    pointer-events: none;
+    overflow: hidden;
   }
 
+  .screen {
+    position: absolute;
+    top: 90px;
+    left: 27px;
+    width: 380px;
+    height: 800px;
+    border-radius: 32px;
+    overflow: hidden;
+    z-index: 1;
+    background-color: #ffffff;
+  }
+  
   .map-img {
     position: absolute;
-    top: 56px;       // 디바이스 안쪽 화면의 Y 위치
-    left: 27px;      // 디바이스 안쪽 화면의 X 위치
-    width: 432px;    // 화면 크기에 맞춰 값 조정
-    height: 532px;   
-    border-radius: 24px; // 선택 (모서리 둥글게)
-    z-index: 2;
-    object-fit: cover;
+    top: 40px;    
+    left: 27px;    
+    width: 380px; 
+    height: 855px; 
+    border-radius: 32px;
+    overflow: hidden;
+    z-index: 1;
+    background-color: #ffffff;
+  }
+  .map-img .map-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    border-radius: inherit;
+    overflow: hidden;
+  }
+
+  .map-img .map-inner > div {
+    width: 100%;
+    height: 100%;
+  }
+
+  .map-img-post {
+    position: absolute;
+    top: 20px;
+    left: 10px;
+    width: 365px;
+    height: 850px;
+    border-radius: 24px;
+    overflow: hidden;
+    z-index: 1;
+    background-color: #FFFFFF;
+    object-fit: cover; 
+    background-color: #ffffff;
   }
 `;
+
 
 // 소개 페이지 (솜이란?)
 S.WhatIsSomWrap = styled.div `

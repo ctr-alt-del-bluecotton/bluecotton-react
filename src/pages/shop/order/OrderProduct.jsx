@@ -1,33 +1,33 @@
-// src/pages/.../shop/order/OrderProduct.jsx
 import React, { useEffect, useMemo } from "react";
 import S from "./style";
 import { useLocation } from "react-router-dom";
+import { resolveUrl } from "../../../utils/url";
 
 const OrderProduct = ({ onTotalPriceChange }) => {
   const location = useLocation();
 
   console.log("[OrderProduct] location.state:", location.state);
 
-  // 주문 페이지로 넘어올 때 넘긴 state
   const state = location.state || {};
   const snapshot = state.snapshot || {};
 
-  // snapshot.items: [{ id, productName, productPrice, productMainImageUrl, quantity, ... }, ...]
+
   const rawItems = Array.isArray(snapshot.items) ? snapshot.items : [];
 
-  // ✅ 방어적으로 items를 정규화
+
   const items = useMemo(
-    () =>
-      rawItems.map((item) => ({
-        productId: item.productId ?? item.id,
-        name: item.name ?? item.productName,
-        unitPrice: item.unitPrice ?? item.productPrice ?? 0,
-        quantity: item.quantity ?? 1,
-        imageUrl:
-          item.imageUrl || item.productMainImageUrl || item.productSubImageUrl,
-      })),
-    [rawItems]
-  );
+  () =>
+    rawItems.map((item) => ({
+      productId: item.productId ?? item.id,
+      name: item.name ?? item.productName,
+      unitPrice: item.unitPrice ?? item.productPrice ?? 0,
+      quantity: item.quantity ?? 1,
+      productMainImageUrl: resolveUrl(
+        item.productMainImageUrl || item.productImageUrl || item.imageUrl
+      ),
+    })),
+  [rawItems]
+);
 
   const totalPrice = useMemo(
     () =>
@@ -40,7 +40,11 @@ const OrderProduct = ({ onTotalPriceChange }) => {
     [items, snapshot.totalPrice]
   );
 
-  // ✅ 총 수량
+  console.log("[OrderProduct] snapshot:", snapshot);
+  console.log("[OrderProduct] rawItems:", rawItems);
+  console.log("[OrderProduct] mapped items:", items);
+
+
   const totalCount = useMemo(
     () => items.reduce((sum, item) => sum + (item.quantity ?? 1), 0),
     [items]
@@ -50,6 +54,8 @@ const OrderProduct = ({ onTotalPriceChange }) => {
     (Number(v) || 0).toLocaleString("ko-KR", {
       maximumFractionDigits: 0,
     }) + "원";
+  
+    
 
   useEffect(() => {
     if (typeof onTotalPriceChange === "function") {

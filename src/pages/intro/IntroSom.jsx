@@ -1,6 +1,7 @@
 import React from "react";
 import { motion } from "framer-motion";
 import S from "./style";
+import { useNavigate } from "react-router-dom";
 
 const IntroSom = () => {
   const sampleSomTitle = "아침 7시 기상 30일 챌린지";
@@ -11,6 +12,11 @@ const IntroSom = () => {
   const sampleSomType = "파티솜";
   const sampleMemberCount = "최대 6명";
   const sampleImageCount = 3;
+  const navigate= useNavigate();
+
+  const handleGoSOm = () => {
+    navigate("/main/som/all");
+  }
 
   return (
     <S.IntroSomWrpper>
@@ -724,6 +730,7 @@ const IntroSom = () => {
                 </S.IntroSomTextContainer2>
               </S.IntroSomContainer3>
             </motion.div>
+            <S.IntroBannerButton onClick={handleGoSOm}>솜 참여하기</S.IntroBannerButton>
           </S.IntroSomContainer2>
         </S.IntroSomTextContainer1>
       </S.IntroSomContainer1>

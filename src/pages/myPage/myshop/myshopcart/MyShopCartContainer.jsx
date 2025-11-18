@@ -1,26 +1,25 @@
+// src/pages/.../mypage/myshop/MyShopCartContainer.jsx
 import React, { useEffect, useState } from "react";
 import S from "../style";
 import { useNavigate } from "react-router-dom";
 import { useModal } from "../../../../components/modal/useModal";
 import { useSelector } from "react-redux";
+import { resolveUrl } from "../../../../utils/url";
 
 const MyShopCartContainer = () => {
   const { openModal } = useModal();
   const { currentUser, isLogin } = useSelector((s) => s.user);
   const navigate = useNavigate();
 
- 
   const [tab, setTab] = useState("general"); // "general" | "candy"
   const [generalItems, setGeneralItems] = useState([]);
   const [candyItems, setCandyItems] = useState([]);
   const currentItems = tab === "general" ? generalItems : candyItems;
   const setCurrentItems = tab === "general" ? setGeneralItems : setCandyItems;
 
-
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  
   const [checkedIds, setCheckedIds] = useState(new Set());
   const [qtyMap, setQtyMap] = useState({});
   const memberId = currentUser?.id;
@@ -33,7 +32,7 @@ const MyShopCartContainer = () => {
     }
   };
 
- 
+  // ✅ 주문하기
   const handleOrder = async () => {
     if (!isLogin || !memberId) {
       openModal({
@@ -45,9 +44,8 @@ const MyShopCartContainer = () => {
       return;
     }
 
- 
     const itemsToOrder = currentItems
-      .filter((item) => checkedIds.has(item.id)) 
+      .filter((item) => checkedIds.has(item.id))
       .map((item) => ({
         productId: item.productId,
         orderQuantity: qtyMap[item.id] || 1,
@@ -61,7 +59,6 @@ const MyShopCartContainer = () => {
       return;
     }
 
-    
     const snapshotItems = currentItems
       .filter((item) => checkedIds.has(item.id))
       .map((item) => {
@@ -70,7 +67,7 @@ const MyShopCartContainer = () => {
         return {
           productId: item.productId,
           name: item.productName,
-          imageUrl: item.productImageUrl ?? null,
+          imageUrl: resolveUrl(item.productImageUrl),
           unitPrice,
           quantity: q,
           purchaseType: String(item.productPurchaseType || "CASH")
@@ -82,11 +79,10 @@ const MyShopCartContainer = () => {
 
     const snapshotTotal = snapshotItems.reduce((s, v) => s + v.lineTotal, 0);
 
-
     const payload = {
       memberId,
       id: null,
-      items: itemsToOrder, 
+      items: itemsToOrder,
     };
 
     console.log("장바구니 확인용 payload:", payload);
@@ -166,8 +162,8 @@ const MyShopCartContainer = () => {
           productPrice: Number(item.productPrice) || 0,
           productPurchaseType: String(item.productPurchaseType || "")
             .toUpperCase()
-            .trim(), // "CASH" | "CANDY"
-          productImageUrl: item.productImageUrl || null,
+            .trim(),
+          productImageUrl: resolveUrl(item.productImageUrl),
         }));
 
         const general = normalized.filter(
@@ -238,18 +234,26 @@ const MyShopCartContainer = () => {
 
   const unit = tab === "general" ? "원" : "캔디";
   const hasSelection = selectedTotal > 0;
-  
+
   const shippingFee =
-  tab === "candy"
-    ? 0
-    : !hasSelection
-    ? 0
-    : selectedTotal >= 30000
-    ? 0
-    : 3000;
-  const shippingText = shippingFee === 0 ? hasSelection ? "30,000원 이상 무료배송" : "0원" :`${shippingFee.toLocaleString()}원`;
+    tab === "candy"
+      ? 0
+      : !hasSelection
+      ? 0
+      : selectedTotal >= 30000
+      ? 0
+      : 3000;
+
+  const shippingText =
+    shippingFee === 0
+      ? hasSelection
+        ? "30,000원 이상 무료배송"
+        : "0원"
+      : `${shippingFee.toLocaleString()}원`;
+
   const totalOrderAmount = selectedTotal + shippingFee;
-  
+
+  // ✅ 단일 삭제
   const handleDelete = (id) => {
     const item = currentItems.find((it) => it.id === id);
     openModal({
@@ -272,9 +276,8 @@ const MyShopCartContainer = () => {
             throw new Error(msg);
           }
 
-          
           setCurrentItems((prev) => prev.filter((it) => it.id !== id));
-        
+
           setCheckedIds((prev) => {
             const next = new Set(prev);
             next.delete(id);
@@ -297,6 +300,65 @@ const MyShopCartContainer = () => {
     });
   };
 
+  // ✅ 선택 삭제
+  const handleDeleteSelected = () => {
+    if (checkedIds.size === 0) {
+      openModal({
+        title: "선택된 상품이 없습니다",
+        message: "삭제할 상품을 먼저 선택해 주세요.",
+        confirmText: "확인",
+      });
+      return;
+    }
+
+    const selectedItems = currentItems.filter((it) => checkedIds.has(it.id));
+
+    openModal({
+      title: "선택한 상품을 삭제하시겠습니까?",
+      message: `${selectedItems.length}개 상품을 장바구니에서 삭제합니다.`,
+      confirmText: "삭제",
+      cancelText: "취소",
+      onConfirm: async () => {
+        try {
+          for (const item of selectedItems) {
+            const url = `${process.env.REACT_APP_BACKEND_URL}/cart/delete?memberId=${memberId}&productId=${item.productId}`;
+            const response = await fetch(url, {
+              method: "DELETE",
+              headers: { "Content-Type": "application/json" },
+            });
+
+            const payload = await safeJson(response);
+
+            if (!response.ok) {
+              const msg = payload?.message || `삭제 실패: ${response.status}`;
+              throw new Error(msg);
+            }
+          }
+
+          setCurrentItems((prev) =>
+            prev.filter((it) => !checkedIds.has(it.id))
+          );
+
+          setCheckedIds(new Set());
+          setQtyMap((prev) => {
+            const next = { ...prev };
+            selectedItems.forEach((it) => {
+              delete next[it.id];
+            });
+            return next;
+          });
+        } catch (err) {
+          console.error(err);
+          openModal({
+            title: "삭제 실패",
+            message: err?.message || "삭제 중 오류가 발생했습니다.",
+            confirmText: "확인",
+          });
+        }
+      },
+    });
+  };
+
   if (loading) return <div>불러오는 중…</div>;
   if (error) return <div>에러: {String(error.message || error)}</div>;
 
@@ -304,7 +366,6 @@ const MyShopCartContainer = () => {
     <div>
       <S.ListHeader>장바구니</S.ListHeader>
 
-      
       <S.FilterContainer>
         <S.FilterButton
           $active={tab === "general"}
@@ -322,7 +383,6 @@ const MyShopCartContainer = () => {
         </S.FilterButton>
       </S.FilterContainer>
 
-      
       <S.CartHeader>
         <S.SelectAll>
           <S.Checkbox
@@ -333,19 +393,26 @@ const MyShopCartContainer = () => {
           전체선택
         </S.SelectAll>
 
-        <S.ResetButton
-          $active={checkedIds.size > 0}
-          onClick={() => setCheckedIds(new Set())}
-        >
-          선택해제
-        </S.ResetButton>
+        <div style={{ display: "flex", gap: 8 }}>
+          <S.ResetButton
+            $active={checkedIds.size > 0}
+            onClick={() => setCheckedIds(new Set())}
+          >
+            선택해제
+          </S.ResetButton>
+
+          <S.DeleteButton
+            $active={checkedIds.size > 0}
+            onClick={handleDeleteSelected}
+          >
+            선택삭제
+          </S.DeleteButton>
+        </div>
       </S.CartHeader>
 
-   
       <S.ListContainer>
         {currentItems.map((item) => {
           const q = qtyMap[item.id] || 1;
-          const itemTotal = item.productPrice * q;
 
           return (
             <S.CartItem key={item.id}>
@@ -356,73 +423,36 @@ const MyShopCartContainer = () => {
               />
               <S.ItemImage>
                 {item.productImageUrl && (
-                  <img
-                    src={item.productImageUrl}
-                    alt={item.productName}
-                    style={{
-                      width: "100%",
-                      height: "100%",
-                      objectFit: "cover",
-                      borderRadius: 8,
-                    }}
-                  />
+                  <img src={item.productImageUrl} alt={item.productName} />
                 )}
               </S.ItemImage>
               <S.ItemInfo>
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "flex-start",
-                  }}
-                >
-                  <div>
-                    <S.ItemName>{item.productName}</S.ItemName>
-                    <div
-                      style={{
-                        color: "#757575",
-                        fontSize: 14,
-                        marginBottom: 8,
-                        cursor: "pointer",
-                      }}
-                      onClick={() => handleDelete(item.id)}
-                    >
-                      삭제
-                    </div>
-
-                    <S.QuantityControl>
-                      <S.QuantityButton
-                        onClick={() => dec(item.id)}
-                        disabled={q <= 1}
-                      >
-                        -
-                      </S.QuantityButton>
-                      <S.Quantity>{q}</S.Quantity>
-                      <S.QuantityButton onClick={() => inc(item.id)}>
-                        +
-                      </S.QuantityButton>
-                    </S.QuantityControl>
+                <div>
+                  <S.ItemName>{item.productName}</S.ItemName>
+                  <div
+                    style={{
+                      color: "#757575",
+                      fontSize: 14,
+                      marginBottom: 8,
+                      cursor: "pointer",
+                    }}
+                    onClick={() => handleDelete(item.id)}
+                  >
+                    삭제
                   </div>
 
-                  <S.PriceInfo>
-                    <S.PriceRow>
-                      상품금액({q}개){" "}
-                      <S.PriceValue>
-                        {item.productPrice.toLocaleString()}
-                        {unit}
-                      </S.PriceValue>
-                    </S.PriceRow>
-                    <S.PriceRow>
-                      할인금액 <S.PriceValue>0{unit}</S.PriceValue>
-                    </S.PriceRow>
-                    <S.PriceRow>
-                      주문금액{" "}
-                      <S.PriceValue>
-                        {itemTotal.toLocaleString()}
-                        {unit}
-                      </S.PriceValue>
-                    </S.PriceRow>
-                  </S.PriceInfo>
+                  <S.QuantityControl>
+                    <S.QuantityButton
+                      onClick={() => dec(item.id)}
+                      disabled={q <= 1}
+                    >
+                      -
+                    </S.QuantityButton>
+                    <S.Quantity>{q}</S.Quantity>
+                    <S.QuantityButton onClick={() => inc(item.id)}>
+                      +
+                    </S.QuantityButton>
+                  </S.QuantityControl>
                 </div>
               </S.ItemInfo>
             </S.CartItem>
@@ -430,7 +460,6 @@ const MyShopCartContainer = () => {
         })}
       </S.ListContainer>
 
-   
       <S.OrderSummary>
         <S.SummaryRow>
           <span>선택 상품 금액</span>
