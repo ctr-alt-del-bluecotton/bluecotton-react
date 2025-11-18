@@ -6,7 +6,7 @@ import { useMain } from "../../../context/MainContext";
 const SomContent = ({ content }) => {
   const nav = useNavigate();
   const { formatDate, 
-    somLikeUpdate, isLogin, somJoinNotLogin } = useMain();
+    somLikeUpdate, isLogin, somJoinNotLogin, currentUser } = useMain();
   const {
     id,
     somTitle,
@@ -15,6 +15,7 @@ const SomContent = ({ content }) => {
     somType,
     somEndDate,
     somCount,
+    somJoinList,
     isSomLike,
     somLikeCount,
     memberSomLeader,
@@ -23,6 +24,8 @@ const SomContent = ({ content }) => {
   } = content;
   const [ isLike, setIsLike ] = useState(isSomLike);
   const [ likeCount, setLikeCount ] = useState(somLikeCount);
+  const isAlreadyJoined = somJoinList && currentUser && somJoinList.some((member) => member.memberId === currentUser.id);
+  const isLater = new Date(somEndDate) > new Date();
 
   const isLikeButtonOnclick = async (e) => {
     await somLikeUpdate(id, isLike)
@@ -33,6 +36,7 @@ const SomContent = ({ content }) => {
       setLikeCount(resData.data.likeCount)
     })
   }
+
 
 
   const somTypeText = somType === "solo" ? "솔로솜" : "파티솜"
@@ -57,15 +61,34 @@ const SomContent = ({ content }) => {
 
   const somOnClick = () => nav(`/main/som/read/${id}`);
 
-  const somButton = somType === "solo" ? <S.SomButton onClick={somOnClick}>참여 - {somTypeText}({somCount})</S.SomButton> 
-  : <S.PartySomButton onClick={somOnClick}>참여 - {somTypeText}({somCount})</S.PartySomButton>
-  ;
+  const isSolo = somType === "solo" ;
+  const somButtonArea = () => {
+    if (!isLater){
+      return (
+        <S.FullSomButton onClick={somOnClick}>기간 만료</S.FullSomButton>
+      )
+    } else if (isAlreadyJoined) {
+      return (
+        <S.PartySomButton onClick={somOnClick}>참여 중({somCount})</S.PartySomButton>
+    )
+    } else if (isSolo) {
+      return (
+        <>
+          <S.SomButton onClick={() => somOnClick()}>귓솜말하기</S.SomButton>
+          <S.SomButton onClick={somOnClick}>참여 - {somTypeText}({somCount})</S.SomButton>
+        </>
+      )
+    } else if (!isSolo) {
+      return (
+      <S.PartySomButton onClick={somOnClick}>참여 - {somTypeText}({somCount})</S.PartySomButton>)
+    }
+  }
 
   return (
     <S.Card>
-      <S.SomImage onClick={somOnClick} bgsrc={somTitleImagePath} alt={somTitleImageName} />
+      <S.SomImage bgsrc={somTitleImagePath} alt={somTitleImageName} />
       <S.SomInfo>
-        <S.SomTitleArea onClick={somOnClick}>
+        <S.SomTitleArea>
           <img src={memberSomLeader.memberPicturePath + memberSomLeader.memberPictureName} alt={memberSomLeader.memberPictureName} />
           <S.SomTitle>{somTitle}</S.SomTitle>
         </S.SomTitleArea>
@@ -87,8 +110,7 @@ const SomContent = ({ content }) => {
         </S.SomExplanation>
       </S.SomInfo>
       <S.SomButtonArea>
-        {somType === "solo" && <S.SomButton onClick={() => somOnClick()}>귓솜말하기</S.SomButton>}
-        {somButton}
+        {somButtonArea()}
         {isLikeButton}
       </S.SomButtonArea>
     </S.Card>
