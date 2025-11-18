@@ -69,17 +69,6 @@ S.GroupPrevButton = styled.button`
     opacity: 0.4;
   }
 
-  /* ✅ 오른쪽 구분선 */
-  &::after {
-    content: "";
-    position: absolute;
-    right: -20px; /* ← 버튼과 선 간 간격 */
-    top: 50%;
-    transform: translateY(-50%);
-    width: 1px;
-    height: 9px;
-    background-color: ${({theme}) => theme.PALLETE.grey.greyScale1 };
-  }
 `
 
 S.GroupNextButton = styled.button`
@@ -93,18 +82,6 @@ S.GroupNextButton = styled.button`
   &:disabled {
     cursor: not-allowed;
     opacity: 0.4;
-  }
-
-  /* ✅ 오른쪽 구분선 */
-  &::after {
-    content: "";
-    position: absolute;
-    right: -20px; /* ← 버튼과 선 간 간격 */
-    top: 50%;
-    transform: translateY(-50%);
-    width: 1px;
-    height: 9px;
-    background-color: ${({theme}) => theme.PALLETE.grey.greyScale1 };
   }
 `
 
