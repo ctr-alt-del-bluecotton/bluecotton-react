@@ -1,10 +1,9 @@
-// src/pages/.../mypage/myshop/MyShopOrderContainer.jsx
 import React, { useEffect, useMemo, useState } from "react";
 import S from "../style";
 import ReviewModal from "../review/ReviewModal";
 import { useSelector } from "react-redux";
 import { resolveUrl } from "../../../../utils/url";
-import { useNavigate } from "react-router-dom"; // ✅ 추가
+import { useNavigate } from "react-router-dom"; 
 
 const formatDotDate = (str) => (str ? str.split("T")[0].replace(/-/g, ".") : "");
 
@@ -12,18 +11,18 @@ const MyShopOrderContainer = () => {
   const { currentUser, isLogin } = useSelector((state) => state.user);
   const memberId = currentUser?.id;
 
-  const [orders, setOrders] = useState([]); // 서버에서 온 "전체 주문"
+  const [orders, setOrders] = useState([]); 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // key: productId, value: true(이미 리뷰 있음) / false(리뷰 없음)
+
   const [reviewExists, setReviewExists] = useState({});
 
   // 모달
   const [open, setOpen] = useState(false);
   const [target, setTarget] = useState(null);
 
-  const navigate = useNavigate(); // ✅ 추가
+  const navigate = useNavigate(); 
 
   const openReview = (order) => {
     setTarget({
@@ -41,7 +40,7 @@ const MyShopOrderContainer = () => {
     setTarget(null);
   };
 
-  // ✅ 1) 구매내역 가져오기 (한 번만 / memberId 바뀔 때만)
+  //  1) 구매내역 가져오기 (한 번만 / memberId 바뀔 때만)
   useEffect(() => {
     if (!memberId) return;
 
@@ -53,7 +52,7 @@ const MyShopOrderContainer = () => {
         const base = process.env.REACT_APP_BACKEND_URL || "";
         const url = `${base}/private/mypage/myshop/order?memberId=${memberId}`;
 
-        console.log("[MyShopOrder] 요청 URL:", url);
+
 
         const res = await fetch(url, {
           headers: {
@@ -63,26 +62,25 @@ const MyShopOrderContainer = () => {
           method: "GET",
         });
 
+
         if (!res.ok) {
           throw new Error(`HTTP ${res.status}`);
         }
 
         const json = await res.json();
-        console.log("[MyShopOrder] 응답 json:", json);
+
 
         const list = Array.isArray(json?.data) ? json.data : [];
 
-        console.log("[MyShopOrder] 전체 orders length:", list.length);
+
         list.forEach((o, idx) => {
-          console.log(
-            `[MyShopOrder] orders[${idx}] => orderId=${o.orderId}, productId=${o.productId}, paymentStatus=${o.paymentStatus}, orderStatus=${o.orderStatus}`
-          );
+        
         });
 
-        // 🔹 이 시점에서는 "전체 주문"을 그대로 저장
+
         setOrders(list);
       } catch (e) {
-        console.error("[MyShopOrder] 주문 조회 실패:", e);
+        console.error("MyShopOrder 주문 조회 실패:", e);
         setError(e.message || "주문 조회 실패");
       } finally {
         setLoading(false);
@@ -92,8 +90,7 @@ const MyShopOrderContainer = () => {
     fetchOrders();
   }, [memberId]);
 
-  // ✅ 2) 결제 완료(COMPLETED)인 주문만 걸러내기
-  //    - paymentStatus 필드가 아예 없으면 전체 주문을 사용하도록 fallback
+
   const completedOrders = useMemo(() => {
     if (!orders || orders.length === 0) return [];
 
@@ -103,7 +100,7 @@ const MyShopOrderContainer = () => {
       console.warn(
         "[MyShopOrder] paymentStatus 필드가 없어서 전체 주문을 그대로 사용합니다. (백엔드에서 결제 상태 내려주도록 수정 필요)"
       );
-      return orders; // 🔹 임시: 전부 보여주기
+      return orders; 
     }
 
     const filtered = orders.filter((o) => o.paymentStatus === "COMPLETED");
@@ -114,16 +111,16 @@ const MyShopOrderContainer = () => {
     return filtered;
   }, [orders]);
 
-  // ✅ 3) completedOrders 기준으로 productId 목록 계산 (useMemo로 안정화)
+ 
   const productIds = useMemo(() => {
     const ids = [...new Set(completedOrders.map((o) => o.productId))];
     console.log("[MyShopOrder] review 체크용 productIds:", ids);
     return ids;
   }, [completedOrders]);
 
-  // ✅ 4) 리뷰 존재 여부 조회
+
   useEffect(() => {
-    // 로그인 안 했거나 memberId 없으면 초기화만
+
     if (!isLogin || !memberId) {
       setReviewExists({});
       return;
@@ -147,13 +144,15 @@ const MyShopOrderContainer = () => {
                 Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
               },
             });
+            console.log("테스트");
+            console.log(res);
 
             if (!res.ok) {
               return [productId, false];
             }
 
             const json = await res.json();
-            const exists = json.data === 1; // data === 1 이면 이미 리뷰 있음
+            const exists = json.data === 1; 
             return [productId, exists];
           })
         );
@@ -163,17 +162,15 @@ const MyShopOrderContainer = () => {
           nextMap[productId] = exists;
         });
 
-        console.log("[MyShopOrder] 리뷰 존재 여부 map:", nextMap);
         setReviewExists(nextMap);
       } catch (e) {
-        console.error("리뷰 존재 여부 조회 실패:", e);
+
       }
     };
 
     fetchReviewExists();
   }, [isLogin, memberId, productIds]);
 
-  // ✅ 화면에 보이는 주문 개수
   const totalCount = completedOrders.length;
 
   const handleSubmit = ({ productId }) => {
@@ -209,12 +206,12 @@ const MyShopOrderContainer = () => {
       <S.ListContainer>
         {completedOrders.map((order) => {
           const src = resolveUrl(order.productMainImageUrl);
+
           const alreadyReviewed = reviewExists[order.productId] === true;
 
           return (
             <S.ListItem
               key={order.orderId}
-              // ✅ 리스트 아이템 클릭 시 상세 페이지로 이동
               onClick={() => navigate(`/main/shop/read/${order.productId}`)}
             >
               <div
@@ -237,7 +234,7 @@ const MyShopOrderContainer = () => {
                 <S.OrderActionButton
                   disabled={alreadyReviewed}
                   onClick={(e) => {
-                    e.stopPropagation(); // ✅ 버튼 클릭 시 상세 이동 막기
+                    e.stopPropagation();
                     if (!alreadyReviewed) openReview(order);
                   }}
                 >
