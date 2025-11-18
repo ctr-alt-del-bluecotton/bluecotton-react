@@ -5,6 +5,7 @@ import ReviewModal from "../review/ReviewModal";
 import { useSelector } from "react-redux";
 import { resolveUrl } from "../../../../utils/url";
 import { Link, useNavigate } from "react-router-dom";
+import Pagination from "../../components/Pagination";
 
 const formatDotDate = (str) =>
   (str.includes(".") ? str : str.replace(/-/g, "."));
@@ -43,6 +44,8 @@ const MyShopReviewContainer = () => {
 
   const [reviews, setReviews] = useState([]);
   const [error, setError] = useState(null);
+  const [pageNumber, setPageNumber] = useState(1);
+  const itemsPerPage = 10;
 
   const navigate = useNavigate();
   const productDetail = (productId) => navigate(`main/shop/read/${productId}`);
@@ -117,7 +120,11 @@ const MyShopReviewContainer = () => {
     );
   };
 
-  const pageNumber = 1;
+  // 페이지네이션된 데이터 계산
+  const totalPages = Math.max(1, Math.ceil(reviews.length / itemsPerPage));
+  const startIndex = (pageNumber - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedReviews = reviews.slice(startIndex, endIndex);
 
   return (
     <div>
@@ -130,7 +137,7 @@ const MyShopReviewContainer = () => {
       )}
 
       <S.ListContainer>
-        {reviews.map((review) => (
+        {paginatedReviews.map((review) => (
           <S.ListItem
             key={review.id}
             onClick={() => navigate(`/main/shop/read/${review.productId}`)}
@@ -186,11 +193,11 @@ const MyShopReviewContainer = () => {
         </div>
       )}
 
-      <S.Pagination>
-        <S.PageButton disabled>&lt; 이전</S.PageButton>
-        <S.PageNumber>{pageNumber}</S.PageNumber>
-        <S.PageButton>다음 &gt;</S.PageButton>
-      </S.Pagination>
+      <Pagination 
+        totalPages={totalPages}
+        pageNumber={pageNumber}
+        setPageNumber={setPageNumber}
+      />
 
       {/* 리뷰 수정 모달 */}
       <ReviewModal

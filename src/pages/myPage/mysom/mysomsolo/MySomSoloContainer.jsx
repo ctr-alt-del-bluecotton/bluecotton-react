@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
+import Pagination from '../../components/Pagination';
 import S from '../style';
 
 const MySomSoloContainer = () => {
@@ -9,6 +10,8 @@ const MySomSoloContainer = () => {
   const [activeFilter, setActiveFilter] = useState('scheduled');
   const [soloSoms, setSoloSoms] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [pageNumber, setPageNumber] = useState(1);
+  const itemsPerPage = 10;
 
   // 카테고리 매핑
   const categoryMap = {
@@ -141,6 +144,18 @@ const MySomSoloContainer = () => {
     }
   };
 
+  // 필터 변경 시 페이지를 1로 리셋
+  useEffect(() => {
+    setPageNumber(1);
+  }, [activeFilter]);
+
+  // 페이지네이션된 데이터 계산
+  const allCurrentData = getCurrentData();
+  const totalPages = Math.max(1, Math.ceil(allCurrentData.length / itemsPerPage));
+  const startIndex = (pageNumber - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentData = allCurrentData.slice(startIndex, endIndex);
+
   // ✅ 상태에 따라 버튼 라벨 결정
   const getButtonLabel = () => {
     if (activeFilter === 'progress') return '인증하기';
@@ -157,8 +172,6 @@ const MySomSoloContainer = () => {
   if (loading) {
     return <div>로딩 중...</div>;
   }
-
-  const currentData = getCurrentData();
 
   return (
     <div>
@@ -241,11 +254,11 @@ const MySomSoloContainer = () => {
         )}
       </S.ListContainer>
 
-      <S.Pagination>
-        <S.PageButton disabled>&lt; 이전</S.PageButton>
-        <S.PageNumber>1</S.PageNumber>
-        <S.PageButton disabled={false}>다음 &gt;</S.PageButton>
-      </S.Pagination>
+      <Pagination 
+        totalPages={totalPages}
+        pageNumber={pageNumber}
+        setPageNumber={setPageNumber}
+      />
     </div>
   );
 };

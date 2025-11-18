@@ -3,7 +3,8 @@ import S from "../style";
 import ReviewModal from "../review/ReviewModal";
 import { useSelector } from "react-redux";
 import { resolveUrl } from "../../../../utils/url";
-import { useNavigate } from "react-router-dom"; 
+import { useNavigate } from "react-router-dom";
+import Pagination from "../../components/Pagination"; 
 
 const formatDotDate = (str) => (str ? str.split("T")[0].replace(/-/g, ".") : "");
 
@@ -14,6 +15,8 @@ const MyShopOrderContainer = () => {
   const [orders, setOrders] = useState([]); 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [pageNumber, setPageNumber] = useState(1);
+  const itemsPerPage = 10;
 
 
   const [reviewExists, setReviewExists] = useState({});
@@ -173,6 +176,12 @@ const MyShopOrderContainer = () => {
 
   const totalCount = completedOrders.length;
 
+  // 페이지네이션된 데이터 계산
+  const totalPages = Math.max(1, Math.ceil(completedOrders.length / itemsPerPage));
+  const startIndex = (pageNumber - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedOrders = completedOrders.slice(startIndex, endIndex);
+
   const handleSubmit = ({ productId }) => {
     if (productId) {
       setReviewExists((prev) => ({
@@ -204,7 +213,7 @@ const MyShopOrderContainer = () => {
       <S.ListHeader>구매내역({totalCount}개)</S.ListHeader>
 
       <S.ListContainer>
-        {completedOrders.map((order) => {
+        {paginatedOrders.map((order) => {
           const src = resolveUrl(order.productMainImageUrl);
 
           const alreadyReviewed = reviewExists[order.productId] === true;
@@ -248,11 +257,11 @@ const MyShopOrderContainer = () => {
         {completedOrders.length === 0 && <div>구매내역이 없습니다.</div>}
       </S.ListContainer>
 
-      <S.Pagination>
-        <S.PageButton disabled>&lt; 이전</S.PageButton>
-        <S.PageNumber>1</S.PageNumber>
-        <S.PageButton disabled>다음 &gt;</S.PageButton>
-      </S.Pagination>
+      <Pagination 
+        totalPages={totalPages}
+        pageNumber={pageNumber}
+        setPageNumber={setPageNumber}
+      />
 
       {/* 리뷰 모달 */}
       <ReviewModal
