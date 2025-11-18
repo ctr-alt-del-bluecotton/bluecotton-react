@@ -181,62 +181,75 @@ const MySomSoloContainer = () => {
     const actionText = activeFilter === 'scheduled' ? '취소' : '중단';
     const confirmMessage = `정말로 이 챌린지를 ${actionText}하시겠습니까?`;
 
-    if (!window.confirm(confirmMessage)) {
-      return;
-    }
+    // 확인 모달 띄우기
+    openModal({
+      title: `${actionText} 확인`,
+      message: confirmMessage,
+      confirmText: '확인',
+      cancelText: '취소',
+      onConfirm: async () => {
+        try {
+          const token = localStorage.getItem("accessToken");
+          const response = await fetch(
+            `${process.env.REACT_APP_BACKEND_URL}/private/my-page/delete-som?memberId=${currentUser.id}&somId=${som.id}`,
+            {
+              method: "DELETE",
+              headers: {
+                "Content-Type": "application/json",
+                ...(token && { "Authorization": `Bearer ${token}` })
+              },
+              credentials: "include"
+            }
+          );
 
-    try {
-      const token = localStorage.getItem("accessToken");
-      const response = await fetch(
-        `${process.env.REACT_APP_BACKEND_URL}/private/my-page/delete-som?memberId=${currentUser.id}&somId=${som.id}`,
-        {
-          method: "DELETE",
-          headers: {
-            "Content-Type": "application/json",
-            ...(token && { "Authorization": `Bearer ${token}` })
-          },
-          credentials: "include"
+          if (!response.ok) {
+            const errorText = await response.text();
+            console.error('솜 삭제 실패:', errorText);
+            openModal({
+              title: `${actionText} 실패`,
+              message: `${actionText}에 실패했습니다.`,
+              confirmText: '확인'
+            });
+            return;
+          }
+
+          // 성공 시 데이터 새로고침
+          const refreshToken = localStorage.getItem("accessToken");
+          const refreshRes = await fetch(`${process.env.REACT_APP_BACKEND_URL}/private/my-page/read-som?id=${currentUser.id}`, {
+            headers: { 
+              "Content-Type": "application/json",
+              ...(refreshToken && { "Authorization": `Bearer ${refreshToken}` })
+            },
+            method: "GET",
+            credentials: "include"
+          });
+
+          if (refreshRes.ok) {
+            const refreshResult = await refreshRes.json();
+            const allData = refreshResult.data || [];
+            const soloData = allData.filter(som => {
+              const somType = String(som.somType || '').toLowerCase();
+              return somType === 'solo';
+            });
+            setSoloSoms(soloData);
+          }
+
+          // 성공 알림
+          openModal({
+            title: `${actionText} 완료`,
+            message: `챌린지가 ${actionText}되었습니다.`,
+            confirmText: '확인'
+          });
+        } catch (error) {
+          console.error('솜 삭제 중 오류 발생:', error);
+          openModal({
+            title: '오류 발생',
+            message: `${actionText} 중 오류가 발생했습니다.`,
+            confirmText: '확인'
+          });
         }
-      );
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('솜 삭제 실패:', errorText);
-        alert(`${actionText}에 실패했습니다.`);
-        return;
       }
-
-      // 성공 시 데이터 새로고침
-      const refreshToken = localStorage.getItem("accessToken");
-      const refreshRes = await fetch(`${process.env.REACT_APP_BACKEND_URL}/private/my-page/read-som?id=${currentUser.id}`, {
-        headers: { 
-          "Content-Type": "application/json",
-          ...(refreshToken && { "Authorization": `Bearer ${refreshToken}` })
-        },
-        method: "GET",
-        credentials: "include"
-      });
-
-      if (refreshRes.ok) {
-        const refreshResult = await refreshRes.json();
-        const allData = refreshResult.data || [];
-        const soloData = allData.filter(som => {
-          const somType = String(som.somType || '').toLowerCase();
-          return somType === 'solo';
-        });
-        setSoloSoms(soloData);
-      }
-
-      // 성공 알림
-      openModal({
-        title: `${actionText} 완료`,
-        message: `챌린지가 ${actionText}되었습니다.`,
-        confirmText: '확인'
-      });
-    } catch (error) {
-      console.error('솜 삭제 중 오류 발생:', error);
-      alert(`${actionText} 중 오류가 발생했습니다.`);
-    }
+    });
   };
 
   if (loading) {
