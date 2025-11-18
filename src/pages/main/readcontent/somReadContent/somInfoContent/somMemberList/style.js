@@ -41,6 +41,7 @@ S.somMemberListCotext = styled.div`
 S.somMemberListContents = styled.div`
     display: flex;
     flex-direction: row;
+    flex-wrap: wrap;
     gap: 30px;
 `
 
