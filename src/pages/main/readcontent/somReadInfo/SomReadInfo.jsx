@@ -25,6 +25,7 @@ const SomReadInfo = () => {
 
   const [ isLike, setIsLike ] = useState(isSomLike);
   const [ likeCount, setLikeCount ] = useState(somLikeCount); 
+  const isAlreadyJoined = somMemberList && currentUser && somMemberList.some((member) => member.memberId === currentUser.id);
   
   
 
@@ -56,7 +57,6 @@ const SomReadInfo = () => {
     }
     
     // 2-2. 이미 참여 중인지 확인
-    const isAlreadyJoined = somMemberList && currentUser && somMemberList.some((member) => member.memberId === currentUser.id);
     if (isAlreadyJoined) {
       // 이미 참여중 모달 표시 (somJoin 함수에서 처리)
       somJoin();
@@ -69,8 +69,16 @@ const SomReadInfo = () => {
   };
 
   const isSolo = somType === "solo" ;
-  const somButton = !isSolo ? <S.soloSomButton onClick={somOnClick}>참여 - {somTypeText}({somCount})</S.soloSomButton>
-  : <S.fullSomButton onClick={somOnClick}>참여 - {somTypeText}({somCount})</S.fullSomButton> ;
+  const somButton = () => {
+    if (isAlreadyJoined) {
+      return <S.soloSomButton onClick={somOnClick}>참여 중({somCount})</S.soloSomButton>
+    } else if (isSolo) {
+      return <S.fullSomButton onClick={somOnClick}>참여 - {somTypeText}({somCount})</S.fullSomButton> ;
+    } else if (!isSolo) {
+      return <S.soloSomButton onClick={somOnClick}>참여 - {somTypeText}({somCount})</S.soloSomButton>
+    }
+  }
+  
 
   const somLikeButton = !isLogin ? 
   <S.somLikeButton onClick={() => somJoinNotLogin()}>
@@ -120,7 +128,7 @@ const SomReadInfo = () => {
         '기간이 지난 솜입니다.' : 
         <>
           {isSolo && <S.somButton onClick={() => wisperSoloSom(somTitle)}>귓솜말하기</S.somButton>}
-          {somButton}
+          {somButton()}
           {somLikeButton}
         </>
         }
