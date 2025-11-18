@@ -73,7 +73,7 @@ const ShopContainer = () => {
                 filterParams.q = keyword;
             }
 
-            console.log("필터링한 데이터 :", filterParams);
+    
 
 
             //fetch
@@ -91,7 +91,6 @@ const ShopContainer = () => {
                 }
 
                 const json = await response.json();
-                console.log(json.data)
                 setProducts(json.data || []); 
                 setPageNumber(1); 
 

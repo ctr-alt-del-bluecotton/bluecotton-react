@@ -6,7 +6,8 @@ import { useSelector } from "react-redux";
 import { resolveUrl } from "../../../../utils/url";
 import { Link, useNavigate } from "react-router-dom";
 
-const formatDotDate = (str) => (str.includes(".") ? str : str.replace(/-/g, "."));
+const formatDotDate = (str) =>
+  (str.includes(".") ? str : str.replace(/-/g, "."));
 
 const StarRating = ({ rating = 0, size = 19 }) => (
   <S.ReviewStars>
@@ -25,7 +26,6 @@ const StarRating = ({ rating = 0, size = 19 }) => (
     ))}
   </S.ReviewStars>
 );
-
 
 const toClient = (dto) => ({
   id: dto.id,
@@ -57,9 +57,10 @@ const MyShopReviewContainer = () => {
 
         const res = await fetch(url, {
           method: "GET",
-          headers: { "Content-Type": "application/json" ,
+          headers: {
+            "Content-Type": "application/json",
             Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-           },
+          },
         });
         if (!res.ok) throw new Error("리뷰 조회 실패");
 
@@ -74,7 +75,7 @@ const MyShopReviewContainer = () => {
     fetchMyReviews();
   }, [isLogin, currentUser.id]);
 
-  // 리뷰 삭제 - 아직 미구현
+  // 리뷰 삭제
   const handleDelete = (id) => {
     openModal({
       title: "리뷰를 삭제하시겠습니까?",
@@ -82,18 +83,17 @@ const MyShopReviewContainer = () => {
       confirmText: "삭제",
       cancelText: "취소",
       onConfirm: async () => {
-
-        const url = `${process.env.REACT_APP_BACKEND_URL}/private/mypage/myshop/review/${id}`
-        const res = await fetch(url, {
+        const url = `${process.env.REACT_APP_BACKEND_URL}/private/mypage/myshop/review/${id}`;
+        await fetch(url, {
           method: "DELETE",
-          headers: { "Content-Type": "application/json" ,
-            Authorization: `Bearer ${localStorage.getItem("accessToken")}`
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
           },
-        })
+        });
 
         setReviews((prev) => prev.filter((r) => r.id !== id));
-
-      }
+      },
     });
   };
 
@@ -108,36 +108,12 @@ const MyShopReviewContainer = () => {
   const closeEdit = () => setEditOpen(false);
 
 
-  const handleEditSubmit = async ({ rating, content }) => {
-
-
-    const reviewUpdateData = {
-      memberId: currentUser.id,
-      rating: rating,
-      content: content,
-    };
-
-    const url = `${process.env.REACT_APP_BACKEND_URL}/private/mypage/myshop/review/${editing.id}`
-
-    const res = await fetch(url, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" ,
-        Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-      },
-      body: JSON.stringify(reviewUpdateData),
-    });
-
-    if (!res.ok) { 
-    const errorData = await res.json();
-    throw new Error(errorData.message || "리뷰 수정 실패");
-
-    
-
-}
-
-
+  const handleEditSubmit = ({ rating, content }) => {
+    if (!editing) return;
     setReviews((prev) =>
-      prev.map((r) => (r.id === editing.id ? { ...r, rating, text: content } : r))
+      prev.map((r) =>
+        r.id === editing.id ? { ...r, rating, text: content } : r
+      )
     );
   };
 
@@ -155,17 +131,25 @@ const MyShopReviewContainer = () => {
 
       <S.ListContainer>
         {reviews.map((review) => (
-          <S.ListItem key={review.id}
+          <S.ListItem
+            key={review.id}
             onClick={() => navigate(`/main/shop/read/${review.productId}`)}
           >
-            <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
-
-              <S.OrderItemImage style={{ backgroundImage: `url("${review.imageUrl}")` }} />
+            <div
+              style={{
+                display: "flex",
+                alignItems: "flex-start",
+                width: "100%",
+              }}
+            >
+              <S.OrderItemImage
+                style={{ backgroundImage: `url("${review.imageUrl}")` }}
+              />
 
               <S.ItemContent>
                 <S.ReviewProductInfo>
                   <S.OrderProductName>{review.name}</S.OrderProductName>
- 
+
                   <StarRating rating={review.rating} />
                   <S.ReviewDate>{formatDotDate(review.date)}</S.ReviewDate>
                   {review.text && <S.ReviewText>{review.text}</S.ReviewText>}
@@ -173,12 +157,21 @@ const MyShopReviewContainer = () => {
               </S.ItemContent>
 
               <S.ReviewActionButtons>
-               <S.ReviewButton
-                  primary onClick={(e) => {e.stopPropagation();
-                    openEdit(review);}}>
+                <S.ReviewButton
+                  primary
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    openEdit(review);
+                  }}
+                >
                   리뷰 수정
                 </S.ReviewButton>
-                <S.ReviewButton onClick={(e) => { e.stopPropagation(); handleDelete(review.id)}}>
+                <S.ReviewButton
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDelete(review.id);
+                  }}
+                >
                   리뷰 삭제
                 </S.ReviewButton>
               </S.ReviewActionButtons>
@@ -188,7 +181,9 @@ const MyShopReviewContainer = () => {
       </S.ListContainer>
 
       {reviews.length === 0 && !error && (
-        <div style={{ padding: 20, textAlign: "center" }}>작성한 리뷰가 없습니다.</div>
+        <div style={{ padding: 20, textAlign: "center" }}>
+          작성한 리뷰가 없습니다.
+        </div>
       )}
 
       <S.Pagination>
@@ -205,9 +200,10 @@ const MyShopReviewContainer = () => {
         product={{
           id: editing?.productId ?? 0,
           name: editing?.name ?? "상품명",
-          imageUrl: resolveUrl(editing?.imageUrl) 
+          imageUrl: resolveUrl(editing?.imageUrl),
         }}
         initial={{
+          id: editing?.id ?? null,          
           rating: editing?.rating ?? 0,
           content: editing?.text ?? "",
           files: [],

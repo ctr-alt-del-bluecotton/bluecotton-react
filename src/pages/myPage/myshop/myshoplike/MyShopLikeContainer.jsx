@@ -70,7 +70,7 @@ const MyShopLikeContainer = () => {
 
     const likeData = { memberId, productId };
 
-    const url = `${process.env.REACT_APP_BACKEND_URL}/private/shop/like/toggle`
+    const url = `${process.env.REACT_APP_BACKEND_URL}/private/mypage/myshop/like/toggle`
 
     const res = await fetch(url, {
       method: "POST",
