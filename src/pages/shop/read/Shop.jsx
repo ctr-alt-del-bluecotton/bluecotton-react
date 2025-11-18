@@ -198,6 +198,7 @@ const Shop = () => {
         title: "장바구니에 상품을 담았습니다.",
         message: "",
         cancelText: "닫기",
+        onConfirm: () => navigate("/main/shop"),
         confirmText: "이동",
         onConfirm: () => navigate("/main/my-page/my-shop/cart"),
       });

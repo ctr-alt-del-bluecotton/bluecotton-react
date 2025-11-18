@@ -54,7 +54,7 @@ const Report = ({ target, onClose }) => {
         postReplyId: target.id,
       };
     }  else if (target.type === "shopComment") {
-      url = `${BASE_URL}/shop/read/review/report`;
+      url = `${BASE_URL}/private/shop/read/review/report`;
       body = {
         productReviewReportContent: finalReason, 
         memberId,              
