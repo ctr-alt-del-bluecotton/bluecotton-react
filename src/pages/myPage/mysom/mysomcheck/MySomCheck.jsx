@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { fetchData, options } from '../../../../context/FetchContext';
+import { useModal } from '../../../../components/modal';
 import styled from 'styled-components';
 
 const Container = styled.div`
@@ -301,6 +302,7 @@ const SubmitButton = styled.button`
   const MySomCheck = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { openModal } = useModal();
   const { currentUser } = useSelector((state) => state.user);
   const [fileCount, setFileCount] = useState(0);
   const [textLength, setTextLength] = useState(0);
@@ -474,22 +476,38 @@ const SubmitButton = styled.button`
 
   const handleSubmit = async () => {
     if (isAlreadyChecked) {
-      alert('이미 인증이 완료된 챌린지입니다.');
+      openModal({
+        title: '알림',
+        message: '이미 인증이 완료된 챌린지입니다.',
+        confirmText: '확인'
+      });
       return;
     }
 
     if (!currentUser || !somData) {
-      alert('로그인이 필요하거나 챌린지 정보를 불러올 수 없습니다.');
+      openModal({
+        title: '오류',
+        message: '로그인이 필요하거나 챌린지 정보를 불러올 수 없습니다.',
+        confirmText: '확인'
+      });
       return;
     }
 
     if (!content.trim()) {
-      alert('인증 내용을 입력해주세요.');
+      openModal({
+        title: '입력 오류',
+        message: '인증 내용을 입력해주세요.',
+        confirmText: '확인'
+      });
       return;
     }
 
     if (selectedFiles.length === 0) {
-      alert('인증 사진을 최소 1개 이상 업로드해주세요.');
+      openModal({
+        title: '입력 오류',
+        message: '인증 사진을 최소 1개 이상 업로드해주세요.',
+        confirmText: '확인'
+      });
       return;
     }
 
@@ -533,7 +551,11 @@ const SubmitButton = styled.button`
           }
         } catch (error) {
           console.error('이미지 업로드 실패:', error);
-          alert(`이미지 업로드에 실패했습니다: ${file.name}`);
+          openModal({
+            title: '업로드 실패',
+            message: `이미지 업로드에 실패했습니다: ${file.name}`,
+            confirmText: '확인'
+          });
           setSubmitting(false);
           return;
         }
@@ -566,7 +588,11 @@ const SubmitButton = styled.button`
       if (!response.ok) {
         const errorText = await response.text();
         console.error('인증 등록 실패:', errorText);
-        alert('인증 등록에 실패했습니다.');
+        openModal({
+          title: '등록 실패',
+          message: '인증 등록에 실패했습니다.',
+          confirmText: '확인'
+        });
         setSubmitting(false);
         return;
       }
@@ -575,12 +601,22 @@ const SubmitButton = styled.button`
       console.log('인증 등록 성공:', result);
 
       // 성공 시 이전 페이지로 이동 또는 메시지 표시
-      alert('인증이 등록되었습니다.');
-      navigate(-1); // 이전 페이지로 이동
+      openModal({
+        title: '인증 완료',
+        message: '인증이 등록되었습니다.',
+        confirmText: '확인',
+        onConfirm: () => {
+          navigate(-1); // 이전 페이지로 이동
+        }
+      });
 
     } catch (error) {
       console.error('인증 등록 중 오류 발생:', error);
-      alert('인증 등록 중 오류가 발생했습니다.');
+      openModal({
+        title: '오류',
+        message: '인증 등록 중 오류가 발생했습니다.',
+        confirmText: '확인'
+      });
     } finally {
       setSubmitting(false);
     }
