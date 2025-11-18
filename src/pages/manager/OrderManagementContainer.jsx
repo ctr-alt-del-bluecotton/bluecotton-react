@@ -20,21 +20,18 @@ import {
 const API = process.env.REACT_APP_BACKEND_URL;
 const fmt = (n) => Number(n || 0).toLocaleString("ko-KR", { maximumFractionDigits: 0 });
 
-/* =========================================================
- * 1. 대시보드 내용 컴포넌트 (매출 + 예측)
- *    - 백엔드 RevenueAdminApi / RevenueService 사용하는 부분
- * =======================================================*/
+
+
 const DashboardContent = ({ orders = [], products = [] }) => {
-  // ---- 매출 & 예측 상태 ----
-  const [dailyRevenue, setDailyRevenue] = useState([]); // [{ date, revenue }]
-  const [forecast, setForecast] = useState([]); // [{ date, revenue }]
-  const [horizon, setHorizon] = useState(7); // 7 / 30 / 365
+ 
+  const [dailyRevenue, setDailyRevenue] = useState([]); 
+  const [forecast, setForecast] = useState([]); 
+  const [horizon, setHorizon] = useState(7);
 
   const [loadingRevenue, setLoadingRevenue] = useState(false);
   const [loadingForecast, setLoadingForecast] = useState(false);
   const [error, setError] = useState(null);
 
-  // ---- 요약 카드용 ----
   const totalOrders = orders.length;
   const totalSales = useMemo(
     () => orders.reduce((sum, o) => sum + (o.total || 0), 0),
@@ -45,12 +42,11 @@ const DashboardContent = ({ orders = [], products = [] }) => {
     [products]
   );
 
-  // ---- 차트용 가공 데이터 (날짜 포맷 변경) ----
   const historyChartData = useMemo(
     () =>
       dailyRevenue.map((d) => ({
         date: d.date,
-        displayDate: d.date?.slice(5) || d.date, // "YYYY-MM-DD" → "MM-DD"
+        displayDate: d.date?.slice(5) || d.date, 
         revenue: d.revenue,
       })),
     [dailyRevenue]
@@ -66,11 +62,6 @@ const DashboardContent = ({ orders = [], products = [] }) => {
     [forecast]
   );
 
-  // =======================================================
-  // 🚨 통합 API 호출 (/api/admin/revenue/forecast?horizon=..)
-  //    -> RevenueService.getRevenueDashboard(horizon)
-  //    -> { history: [...], forecast: [...] } 구조 사용
-  // =======================================================
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
@@ -90,7 +81,7 @@ const DashboardContent = ({ orders = [], products = [] }) => {
           throw new Error("백엔드 API가 history 데이터를 반환하지 않았습니다.");
         }
 
-        // 1) 과거 매출
+       
         setDailyRevenue(
           data.history.map((d) => ({
             date: d.date,
@@ -98,7 +89,6 @@ const DashboardContent = ({ orders = [], products = [] }) => {
           }))
         );
 
-        // 2) 예측 데이터
         const forecastArray = Array.isArray(data.forecast) ? data.forecast : [];
         setForecast(
           forecastArray.map((d) => ({
@@ -124,7 +114,6 @@ const DashboardContent = ({ orders = [], products = [] }) => {
     <S.DashboardWrapper>
       <S.SectionTitle>관리자 대시보드</S.SectionTitle>
 
-      {/* 상단 요약 카드 */}
       <S.SummaryGrid>
         <S.SummaryCard>
           <S.SummaryLabel>총 주문 수</S.SummaryLabel>
@@ -150,9 +139,8 @@ const DashboardContent = ({ orders = [], products = [] }) => {
 
       {error && <S.ErrorBox>에러: {error}</S.ErrorBox>}
 
-      {/* 하단: 일별 매출 + 예측 그래프 */}
+ 
       <S.ChartGrid>
-        {/* 1) 일별 매출 (라인차트) */}
         <S.ChartCard>
           <S.ChartHeader>
             <S.ChartTitle>일별 매출 (결제 기준)</S.ChartTitle>
@@ -185,11 +173,9 @@ const DashboardContent = ({ orders = [], products = [] }) => {
             </div>
           )}
         </S.ChartCard>
-
-        {/* 2) 매출 예측 (바차트) */}
         <S.ChartCard>
           <S.ChartHeader>
-            <S.ChartTitle>매출 예측 (XGBoost)</S.ChartTitle>
+            <S.ChartTitle>매출 예측</S.ChartTitle>
             <S.HorizonButtons>
               {[7, 30, 365].map((h) => (
                 <S.HorizonButton
@@ -229,16 +215,12 @@ const DashboardContent = ({ orders = [], products = [] }) => {
   );
 };
 
-/* =========================================================
- * 2. 주문/배송/상품/리뷰 신고 관리 탭 + 대시보드 탭
- * =======================================================*/
 const OrderManagementContainer = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("dashboard");
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
 
-  // --- 더미 데이터 (주문 / 상품 / 배송 / 리뷰 신고) ---
   const orders = [
     {
       id: 1,

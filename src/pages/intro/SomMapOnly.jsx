@@ -2,7 +2,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { Map, MapMarker, CustomOverlayMap } from "react-kakao-maps-sdk";
 
-const SomMapOnly = () => {
+const SomMapOnly = ({ className }) => {
   const [somList, setSomList] = useState([]);
   const [markers, setMarkers] = useState([]);
   const [center, setCenter] = useState(null);
@@ -95,116 +95,119 @@ const SomMapOnly = () => {
   if (!isLoaded || !center) return null;
 
   return (
-    <div
-      style={{
-        width: "430px",
-        height: "932px",
-        borderRadius: "50px",
-        overflow: "hidden",
-        backgroundColor: "#FFFFFF",
-        boxShadow: "0 15px 22px rgba(0, 0, 0, 0.1)",
-        position: "relative",
-      }}
-    >
-      <Map
-        center={center}
-        level={5}
-        ref={mapRef}
-        style={{ width: "100%", height: "100%" }}
+    // 👉 이 div가 DeviceWrap의 .map-img 스타일을 그대로 받는 래퍼
+    <div className={className}>
+      {/* 안쪽 래퍼만 상대 위치 + 100% 크기 */}
+      <div
+        style={{
+          width: "100%",
+          height: "100%",
+          position: "relative",
+          borderRadius: "24px",
+          overflow: "hidden",
+        }}
       >
-        {myLocation && (
-          <MapMarker
-            position={myLocation}
-            image={{
-              src:
-                process.env.PUBLIC_URL +
-                "/assets/icons/mapUserMarker.png",
-              size: { width: 60, height: 100 },
-            }}
-          />
-        )}
-
-        {markers.map((marker) => (
-          <React.Fragment key={marker.id}>
+        <Map
+          center={center}
+          level={5}
+          ref={mapRef}
+          style={{ width: "100%", height: "100%" }}
+        >
+          {myLocation && (
             <MapMarker
-              position={{ lat: marker.latitude, lng: marker.longitude }}
+              position={myLocation}
               image={{
                 src:
-                  process.env.PUBLIC_URL +
-                  "/assets/icons/mapSomMarker.png",
+                  process.env.PUBLIC_URL + "/assets/icons/mapUserMarker.png",
                 size: { width: 60, height: 100 },
               }}
-              onClick={() =>
-                handleMarkerClick(
-                  marker.id,
-                  marker.latitude,
-                  marker.longitude
-                )
-              }
             />
+          )}
 
-            {selectedMarkerId === marker.id && (
-              <CustomOverlayMap
+          {markers.map((marker) => (
+            <React.Fragment key={marker.id}>
+              <MapMarker
                 position={{ lat: marker.latitude, lng: marker.longitude }}
-                xAnchor={0.5}
-                yAnchor={1.4}
-              >
-                <div
-                  style={{
-                    backgroundColor: "#fff",
-                    borderRadius: "12px",
-                    padding: "8px 10px",
-                    boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
-                    maxWidth: "200px",
-                  }}
+                image={{
+                  src:
+                    process.env.PUBLIC_URL +
+                    "/assets/icons/mapSomMarker.png",
+                  size: { width: 60, height: 100 },
+                }}
+                onClick={() =>
+                  handleMarkerClick(
+                    marker.id,
+                    marker.latitude,
+                    marker.longitude
+                  )
+                }
+              />
+
+              {selectedMarkerId === marker.id && (
+                <CustomOverlayMap
+                  position={{ lat: marker.latitude, lng: marker.longitude }}
+                  xAnchor={0.5}
+                  yAnchor={1.4}
                 >
-                  {marker.imageUrl && (
-                    <img
-                      src={marker.imageUrl}
-                      alt={marker.title}
-                      style={{
-                        width: "100%",
-                        height: "100px",
-                        objectFit: "cover",
-                        borderRadius: "8px",
-                        marginBottom: "6px",
-                      }}
-                    />
-                  )}
                   <div
                     style={{
-                      fontSize: "14px",
-                      fontWeight: 600,
-                      marginBottom: "4px",
+                      backgroundColor: "#fff",
+                      borderRadius: "12px",
+                      padding: "8px 10px",
+                      boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+                      maxWidth: "200px",
                     }}
                   >
-                    {marker.title}
+                    {marker.imageUrl && (
+                      <img
+                        src={marker.imageUrl}
+                        alt={marker.title}
+                        style={{
+                          width: "100%",
+                          height: "100px",
+                          objectFit: "cover",
+                          borderRadius: "8px",
+                          marginBottom: "6px",
+                        }}
+                      />
+                    )}
+                    <div
+                      style={{
+                        fontSize: "14px",
+                        fontWeight: 600,
+                        marginBottom: "4px",
+                      }}
+                    >
+                      {marker.title}
+                    </div>
+                    <div style={{ fontSize: "12px", color: "#555" }}>
+                      {marker.address}
+                    </div>
                   </div>
-                  <div style={{ fontSize: "12px", color: "#555" }}>
-                    {marker.address}
-                  </div>
-                </div>
-              </CustomOverlayMap>
-            )}
-          </React.Fragment>
-        ))}
-      </Map>
+                </CustomOverlayMap>
+              )}
+            </React.Fragment>
+          ))}
+        </Map>
 
-      <img
-        src={process.env.PUBLIC_URL + "/assets/icons/somfavicon.png"}
-        alt="내 위치로 이동"
-        onClick={() =>
-          myLocation && moveToLocation(myLocation.lat, myLocation.lng)
-        }
-        style={{
-          position: "absolute",
-          bottom: "24px",
-          right: "24px",
-          width: "40px",
-          height: "40px",
-          cursor: "pointer",
-        }}
-      />
+        {/* 내 위치로 가기 버튼 */}
+        <img
+          src={process.env.PUBLIC_URL + "/assets/icons/somfavicon.png"}
+          alt="내 위치로 이동"
+          onClick={() =>
+            myLocation && moveToLocation(myLocation.lat, myLocation.lng)
+          }
+          style={{
+            position: "absolute",
+            bottom: "24px",
+            right: "24px",
+            width: "40px",
+            height: "40px",
+            cursor: "pointer",
+            zIndex: 10,
+          }}
+        />
+      </div>
     </div>
   );
 };

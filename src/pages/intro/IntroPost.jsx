@@ -37,17 +37,18 @@ const IntroPost = () => {
                 <p>바로 작성해보세요</p>
               </S.IntroPostText2>
             </motion.div>
-
-            {/* 🔽 여기: 이미지 대신 실제 게시글 리스트 프리뷰 */}
             <motion.div
               initial={{ opacity: 0, y: 80 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8 }}
               viewport={{ once: true }}
             >
-              <S.IntroPostBord>
-                <IntroPostList />
-              </S.IntroPostBord>
+              <S.DeviceWrap>
+                <img src="/assets/images/Device.png"alt="디바이스"className="device-img" />
+                <div className="screen" >
+                <img src="/assets/images/intro_post.png" className="map-img-post" />
+                </div>
+              </S.DeviceWrap>
             </motion.div>
 
             <motion.div
