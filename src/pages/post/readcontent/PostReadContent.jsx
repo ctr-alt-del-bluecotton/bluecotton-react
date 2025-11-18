@@ -87,7 +87,6 @@ const PostReadContent = () => {
       setPrevPost(fetchedPrev);
       setNextPost(fetchedNext);
 
-      /** DTO → 프론트 UI 변환 */
       const mappedComments = (fetchedPost.comments || []).map((c) => ({
         ...c,
         liked: c.isCommentLiked === 1,
@@ -241,13 +240,25 @@ const PostReadContent = () => {
           </S.EditBox>
         )}
 
+        {/* 🔥 이미지 리스트 출력 (postImageList) */}
+        {post.postImageList && post.postImageList.length > 0 && (
+          <S.ImageArea>
+            {post.postImageList.map((img) => (
+              <img
+                key={img.id}
+                src={`${img.postImagePath}${img.postImageName}`}
+                alt=""
+              />
+            ))}
+          </S.ImageArea>
+        )}
+
         <div
           className="post-content"
           dangerouslySetInnerHTML={{ __html: htmlContent }}
         />
       </S.Content>
 
-      {/* 신고 + 공유 */}
       <S.PostSocialBox>
         {isLogin && currentUser?.id !== post.memberId && (
           <S.ReportButton
@@ -305,7 +316,6 @@ const PostReadContent = () => {
         fetchPostDetail={fetchPostDetail}
       />
 
-      {/* prev/next */}
       <S.NavList>
         <S.NavItem onClick={goNext} $disabled={!nextPost}>
           <div className="label">
