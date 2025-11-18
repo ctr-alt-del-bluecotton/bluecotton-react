@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import S from '../style';
 import { useModal } from '../../../../components/modal';
-
+import Pagination from '../../components/Pagination';
 import { getUserId } from '../../utils/getUserId';
 
 const categoryMap = {
@@ -21,6 +21,8 @@ const MyPostWriteContainer = () => {
   const [userId, setUserId] = useState(null);
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [pageNumber, setPageNumber] = useState(1);
+  const itemsPerPage = 10;
   
   // 사용자 ID 가져오기
   useEffect(() => {
@@ -138,6 +140,12 @@ const MyPostWriteContainer = () => {
     );
   }
 
+  // 페이지네이션된 데이터 계산
+  const totalPages = Math.max(1, Math.ceil(posts.length / itemsPerPage));
+  const startIndex = (pageNumber - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedPosts = posts.slice(startIndex, endIndex);
+
   return (
     <div>
       <S.ListHeader>작성글({posts.length}개)</S.ListHeader>
@@ -147,7 +155,7 @@ const MyPostWriteContainer = () => {
       ) : (
         <>
           <S.ListContainer>
-            {posts.map((post, index) => (
+            {paginatedPosts.map((post, index) => (
               <S.ListItem 
                 key={post.id || index}
                 onClick={() => navigate(`/main/post/read/${post.id}`)}
@@ -178,11 +186,11 @@ const MyPostWriteContainer = () => {
             ))}
           </S.ListContainer>
 
-          <S.Pagination>
-            <S.PageButton disabled>&lt; 이전</S.PageButton>
-            <S.PageNumber>1</S.PageNumber>
-            <S.PageButton disabled={false}>다음 &gt;</S.PageButton>
-          </S.Pagination>
+          <Pagination 
+            totalPages={totalPages}
+            pageNumber={pageNumber}
+            setPageNumber={setPageNumber}
+          />
         </>
       )}
     </div>

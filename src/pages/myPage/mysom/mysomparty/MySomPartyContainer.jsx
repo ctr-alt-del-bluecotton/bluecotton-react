@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { fetchData, options } from '../../../../context/FetchContext';
 import { useModal } from '../../../../components/modal';
+import Pagination from '../../components/Pagination';
 import S from '../style';
 
 const feedbackOptions = [
@@ -40,6 +41,8 @@ const MySomPartyContainer = () => {
   const [partySoms, setPartySoms] = useState([]);
   const [loading, setLoading] = useState(true);
   const [reviewedSomIds, setReviewedSomIds] = useState([]); // 이미 리뷰한 챌린지 ID 목록
+  const [pageNumber, setPageNumber] = useState(1);
+  const itemsPerPage = 10; // 페이지당 항목 수
 
   // 모달용 팀/소식지명 변수 -> teamLeaderName 으로 변경
   const teamLeaderName = 'zl존준서';
@@ -223,6 +226,18 @@ const MySomPartyContainer = () => {
     }
   };
 
+  // 필터 변경 시 페이지를 1로 리셋
+  useEffect(() => {
+    setPageNumber(1);
+  }, [activeFilter]);
+
+  // 페이지네이션된 데이터 계산
+  const allCurrentData = getCurrentData();
+  const totalPages = Math.max(1, Math.ceil(allCurrentData.length / itemsPerPage));
+  const startIndex = (pageNumber - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentData = allCurrentData.slice(startIndex, endIndex);
+
   // ✅ 상태에 따라 버튼 라벨과 이동 경로 결정
   const getButtonLabel = () => {
     if (activeFilter === 'progress') return '인증하기';
@@ -239,8 +254,6 @@ const MySomPartyContainer = () => {
   if (loading) {
     return <div>로딩 중...</div>;
   }
-
-  const currentData = getCurrentData();
 
   return (
     <div>
@@ -338,11 +351,11 @@ const MySomPartyContainer = () => {
         )}
       </S.ListContainer>
 
-      <S.Pagination>
-        <S.PageButton disabled>&lt; 이전</S.PageButton>
-        <S.PageNumber>1</S.PageNumber>
-        <S.PageButton disabled={false}>다음 &gt;</S.PageButton>
-      </S.Pagination>
+      <Pagination 
+        totalPages={totalPages}
+        pageNumber={pageNumber}
+        setPageNumber={setPageNumber}
+      />
 
       {/* 팝업 모달 */}
       {showPopup && (

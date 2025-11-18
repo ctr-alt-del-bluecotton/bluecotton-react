@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import S from '../style';
 import { useModal } from '../../../../components/modal';
+import Pagination from '../../components/Pagination';
 import { getUserId } from '../../utils/getUserId';
 
 const categoryMap = {
@@ -20,6 +21,8 @@ const MyPostCommnetContainer = () => {
   const [userId, setUserId] = useState(null);
   const [comments, setComments] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [pageNumber, setPageNumber] = useState(1);
+  const itemsPerPage = 10;
   
   // 사용자 ID 가져오기
   useEffect(() => {
@@ -160,6 +163,12 @@ const MyPostCommnetContainer = () => {
     );
   }
 
+  // 페이지네이션된 데이터 계산
+  const totalPages = Math.max(1, Math.ceil(comments.length / itemsPerPage));
+  const startIndex = (pageNumber - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedComments = comments.slice(startIndex, endIndex);
+
   return (
     <div>
       <S.ListHeader>댓글 단 글({comments.length}개)</S.ListHeader>
@@ -169,7 +178,7 @@ const MyPostCommnetContainer = () => {
       ) : (
         <>
           <S.ListContainer>
-            {comments.map((comment, index) => (
+            {paginatedComments.map((comment, index) => (
               <S.ListItem 
                 key={`${comment.commentId}-${comment.replyId || 'comment'}-${index}`}
                 onClick={() => navigate(`/main/post/read/${comment.postId}`)}
@@ -214,11 +223,11 @@ const MyPostCommnetContainer = () => {
             ))}
           </S.ListContainer>
 
-          <S.Pagination>
-            <S.PageButton disabled>&lt; 이전</S.PageButton>
-            <S.PageNumber>1</S.PageNumber>
-            <S.PageButton disabled={false}>다음 &gt;</S.PageButton>
-          </S.Pagination>
+          <Pagination 
+            totalPages={totalPages}
+            pageNumber={pageNumber}
+            setPageNumber={setPageNumber}
+          />
         </>
       )}
     </div>

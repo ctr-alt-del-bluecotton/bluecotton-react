@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import Pagination from '../../components/Pagination';
 import S from '../style';
 
 const MySomAuthContainer = () => {
@@ -8,6 +9,8 @@ const MySomAuthContainer = () => {
   const [activeFilter, setActiveFilter] = useState('pending');
   const [authData, setAuthData] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [pageNumber, setPageNumber] = useState(1);
+  const itemsPerPage = 10;
   
   // Redux에서 사용자 id 가져오기
   const user = useSelector((state) => state.user);
@@ -64,11 +67,21 @@ const MySomAuthContainer = () => {
     return activeFilter === 'pending' ? pendingData : completedData;
   };
 
+  // 필터 변경 시 페이지를 1로 리셋
+  useEffect(() => {
+    setPageNumber(1);
+  }, [activeFilter]);
+
+  // 페이지네이션된 데이터 계산
+  const allCurrentData = getCurrentData();
+  const totalPages = Math.max(1, Math.ceil(allCurrentData.length / itemsPerPage));
+  const startIndex = (pageNumber - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const currentData = allCurrentData.slice(startIndex, endIndex);
+
   if (loading) {
     return <div>로딩 중...</div>;
   }
-
-  const currentData = getCurrentData();
 
   return (
     <div>
@@ -121,11 +134,11 @@ const MySomAuthContainer = () => {
         )}
       </S.ListContainer>
 
-      <S.Pagination>
-        <S.PageButton disabled>&lt; 이전</S.PageButton>
-        <S.PageNumber>1</S.PageNumber>
-        <S.PageButton disabled={false}>다음 &gt;</S.PageButton>
-      </S.Pagination>
+      <Pagination 
+        totalPages={totalPages}
+        pageNumber={pageNumber}
+        setPageNumber={setPageNumber}
+      />
     </div>
   );
 };
