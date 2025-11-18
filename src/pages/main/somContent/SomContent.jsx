@@ -61,6 +61,7 @@ const SomContent = ({ content }) => {
 
   const somOnClick = () => nav(`/main/som/read/${id}`);
 
+  
   const isSolo = somType === "solo" ;
   const somButtonArea = () => {
     if (!isLater){
