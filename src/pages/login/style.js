@@ -35,9 +35,10 @@ S.LoginContainer = styled.div`
 S.BackgroundBox = styled.div`
   width: 70%;
   height: 100%;
-  background-image: url(${process.env.PUBLIC_URL}/assets/images/login_image.png);
+  background-image: url(${process.env.PUBLIC_URL}/assets/images/somNight.gif);
   background-position: center;
   background-repeat: no-repeat;
+  background-size: cover; 
 `;
 
 S.LoginBox = styled.div`

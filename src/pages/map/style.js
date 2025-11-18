@@ -1,9 +1,14 @@
 import { Map } from "react-kakao-maps-sdk";
-import styled from "styled-components";
+import styled, { keyframes } from "styled-components";
 import { basic, smallText3Regular, title, titleBold } from "../../styles/common";
 
 const S = {};
 
+const float = keyframes`
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-6px); }
+  100% { transform: translateY(0px); }
+`;
 
 S.MapContainer = styled.div`
   width: 100%;
@@ -67,29 +72,19 @@ S.SomTitle = styled.h3`
   ${smallText3Regular};
   font-weight: 600;
   color: ${({ theme }) => theme.PALLETE.basic};
-
-  margin-bottom: 6px;
   line-height: 1.35;
-  
-  display: -webkit-box;
-  -webkit-line-clamp: 2; 
-  -webkit-box-orient: vertical;
+  margin-bottom: 10px;
 
   overflow: hidden;
   text-overflow: ellipsis;
-
-  white-space: normal;
-  word-break: keep-all;
-  overflow-wrap: break-word;
-
-  max-height: calc(1.35em * 2);
+  white-space: nowrap;
 `;
-
 
 
 S.SomAddress = styled.p`
   font-size: 13px;
   color: ${({ theme }) => theme.PALLETE.grey.greyScale4};
+  margin-bottom: 6px; 
 `;
 
 S.SomDate = styled.div`
@@ -113,25 +108,30 @@ S.MyLocationButton = styled.img`
   transition: all 0.2s ease;
   z-index: 9999;
 
+  animation: ${float} 2.2s ease-in-out infinite;
+
   &:hover {
     transform: translateY(-2px);
   }
 `;
 
+
 S.ViewButton = styled.button`
-  padding: 4px 10px;
+  height: 100%;
+  width: 80px;
+  padding: 0 12px;
   font-size: 12px;
   border-radius: 4px;
   border: none;
   color: ${({ theme }) => theme.PALLETE.white};
   background-color: ${({ theme }) => theme.PALLETE.primary.main};
   cursor: pointer;
+  white-space: nowrap;
 
   &:hover {
     background-color: ${({ theme }) => theme.PALLETE.primary.dark};
   }
 `;
-
 
 S.InfoBox = styled.div`
   position: relative;
@@ -233,7 +233,6 @@ S.SomInfoRight = styled.div`
   display: flex;
   flex-direction: column;
   margin-left: 15px;
-  gap: 13px;
   width: calc(100% - 70px);
   height: 100px;
 `;
@@ -241,19 +240,21 @@ S.SomInfoRight = styled.div`
 S.Row = styled.div`
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin-top: 6px;
+  gap: 10px;       
+  width: 100%;
+  height: 32px;
 `;
 
 S.LikeArea = styled.div`
   display: flex;
-  border: 1px solid ${({ theme }) => theme.PALLETE.grey.greyScale1};
-  border-radius: 4px;
   align-items: center;
-  padding: 3px 10px;
+  padding: 5px 10px;
   gap: 5px;
+  border-radius: 4px;
+  border: 1px solid ${({ theme }) => theme.PALLETE.grey.greyScale1};
   font-size: 13px;
-  color: ${({ theme }) => theme.PALLETE.secondary.main};
+  height: 100%;  
+  box-sizing: border-box;
 `;
 
 S.LikeIcon = styled.img`
