@@ -285,4 +285,16 @@ S.Mention = styled.span`
   margin-right: 4px;
 `;
 
+S.ImageArea = styled.div`
+  width: 100%;
+  margin-bottom: 16px;
+
+  img {
+    width: 100%;
+    border-radius: 10px;
+    margin-bottom: 10px;
+  }
+`;
+
+
 export default S;
