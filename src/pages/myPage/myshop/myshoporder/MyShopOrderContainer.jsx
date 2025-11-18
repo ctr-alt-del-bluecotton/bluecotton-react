@@ -52,7 +52,7 @@ const MyShopOrderContainer = () => {
         const base = process.env.REACT_APP_BACKEND_URL || "";
         const url = `${base}/private/mypage/myshop/order?memberId=${memberId}`;
 
-        console.log("[MyShopOrder] 요청 URL:", url);
+
 
         const res = await fetch(url, {
           headers: {
@@ -61,29 +61,26 @@ const MyShopOrderContainer = () => {
           },
           method: "GET",
         });
-        console.log("테스트1")
-        console.log(url)
-        console.log(res)
+
+
         if (!res.ok) {
           throw new Error(`HTTP ${res.status}`);
         }
 
         const json = await res.json();
-        console.log("[MyShopOrder] 응답 json:", json);
+
 
         const list = Array.isArray(json?.data) ? json.data : [];
 
-        console.log("[MyShopOrder] 전체 orders length:", list.length);
+
         list.forEach((o, idx) => {
-          console.log(
-            `[MyShopOrder] orders[${idx}] => orderId=${o.orderId}, productId=${o.productId}, paymentStatus=${o.paymentStatus}, orderStatus=${o.orderStatus}`
-          );
+        
         });
 
 
         setOrders(list);
       } catch (e) {
-        console.error("[MyShopOrder] 주문 조회 실패:", e);
+        console.error("MyShopOrder 주문 조회 실패:", e);
         setError(e.message || "주문 조회 실패");
       } finally {
         setLoading(false);
@@ -165,10 +162,9 @@ const MyShopOrderContainer = () => {
           nextMap[productId] = exists;
         });
 
-        console.log("[MyShopOrder] 리뷰 존재 여부 map:", nextMap);
         setReviewExists(nextMap);
       } catch (e) {
-        console.error("리뷰 존재 여부 조회 실패:", e);
+
       }
     };
 
@@ -210,7 +206,7 @@ const MyShopOrderContainer = () => {
       <S.ListContainer>
         {completedOrders.map((order) => {
           const src = resolveUrl(order.productMainImageUrl);
-          console.log("[MyShopOrder] 이미지 src:", src, "raw:", order.productMainImageUrl);
+
           const alreadyReviewed = reviewExists[order.productId] === true;
 
           return (

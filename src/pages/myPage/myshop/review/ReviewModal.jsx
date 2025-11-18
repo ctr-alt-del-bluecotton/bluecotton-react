@@ -5,18 +5,20 @@ import { useSelector } from "react-redux";
 const ReviewModal = ({
   open,
   onClose,
-  product = { id: 1, name: "솜이 인형", imageUrl: "/assets/images/shop_review_som_doll1.png" },
-  mode = "create",
-  initial = null,
+  product = {
+    id: 1,
+    name: "솜이 인형",
+    imageUrl: "/assets/images/shop_review_som_doll1.png",
+  },
+  mode = "create", // 'create' | 'edit'
+  initial = null,  // 수정 시 기존 리뷰 데이터
   onSubmit,
 }) => {
-
-
   const [imagePath, setImagePath] = useState("");
   const [imageName, setImageName] = useState("");
 
-  const { currentUser, isLogin } = useSelector((state) => state.user);
-  const memberId = currentUser.id;
+  const { currentUser } = useSelector((state) => state.user);
+  const memberId = currentUser?.id;
 
   const [rating, setRating] = useState(5);
   const [content, setContent] = useState("");
@@ -24,15 +26,10 @@ const ReviewModal = ({
   const fileInputRef = useRef(null);
 
 
-  useEffect(() => {
-    if (!open) return;
-    document.body.style.overflow = "hidden";
-    return () => (document.body.style.overflow = "auto");
-  }, [open]);
-
 
   useEffect(() => {
-    if (!open) return;
+
+
     if (mode === "edit" && initial) {
       setRating(initial.rating ?? 0);
       setContent(initial.content ?? "");
@@ -41,116 +38,137 @@ const ReviewModal = ({
       setRating(5);
       setContent("");
       setFiles([]);
+      setImagePath("");
+      setImageName("");
     }
   }, [open, mode, initial]);
 
   if (!open) return null;
 
-  const uploadImageToServer = async (file, folder = 'shop') => {
+  // 이미지 서버 업로드
+  const uploadImageToServer = async (file, folder = "shop") => {
     const now = new Date();
     const year = now.getFullYear();
     const month = String(now.getMonth() + 1).padStart(2, "0");
     const day = String(now.getDate()).padStart(2, "0");
-    
 
     const formData = new FormData();
     const folderPath = `${folder}/${year}/${month}/${day}`;
-    formData.append('file', file);
-    formData.append('folder', folderPath); 
-    
-    const res = await fetch(`${process.env.REACT_APP_BACKEND_URL}/file/upload-image`, {
-        method: 'POST',
+    formData.append("file", file);
+    formData.append("folder", folderPath);
+
+    const res = await fetch(
+      `${process.env.REACT_APP_BACKEND_URL}/file/upload-image`,
+      {
+        method: "POST",
         body: formData,
-  });
-  
-  if (!res.ok) throw new Error('이미지 업로드 실패');
-  
-  return await res.json();
-  }
+      }
+    );
+
+    if (!res.ok) throw new Error("이미지 업로드 실패");
+
+    return await res.json();
+  };
 
   const openFilePicker = () => fileInputRef.current?.click();
+
   const onChangeFiles = async (e) => {
     const picked = Array.from(e.target.files || []);
     const next = [...files, ...picked].slice(0, 5);
-    console.log(e.target.files[0])
-    const result = await uploadImageToServer(e.target.files[0] ,"shop_review");
-    console.log("[DEBUG] Image uploaded:", result);
 
-     const data = result?.data ?? result;       
+    if (picked.length === 0) return;
 
+    try {
+      const result = await uploadImageToServer(picked[0], "shop_review");
+      const data = result?.data ?? result;
 
-    let ip = "";
-    let iname = "";
+      let ip = "";
+      let iname = "";
 
-    if (data && data.imagePath) ip = data.imagePath;
-    else if (data && data.path) ip = data.path;
+      if (data && data.imagePath) ip = data.imagePath;
+      else if (data && data.path) ip = data.path;
 
-    if (data && data.imageName) iname = data.imageName;
-    else if (data && data.name) iname = data.name;
+      if (data && data.imageName) iname = data.imageName;
+      else if (data && data.name) iname = data.name;
 
-    if ((!ip || !iname) && data && data.url) {
-      const parts = data.url.split("/");
-      iname = parts[parts.length - 1];     // 파일명
-      parts.pop();
-      ip = parts.join("/") + "/";          // 폴더 경로(끝에 / 붙임)
+      // url만 내려오는 경우 처리
+      if ((!ip || !iname) && data && data.url) {
+        const parts = data.url.split("/");
+        iname = parts[parts.length - 1];
+        parts.pop();
+        ip = parts.join("/") + "/";
+      }
+
+      setImagePath(ip);
+      setImageName(iname);
+      setFiles(next);
+    } finally {
+      e.target.value = "";
     }
-
-
-  setImagePath(ip);
-  setImageName(iname);
-
-    setFiles(next);
-    e.target.value = "";
   };
 
-  const labelText = ["", "별로예요", "그저 그래요", "보통이에요", "좋아요!", "최고예요!"][rating];
+  const labelText = [
+    "",
+    "별로예요",
+    "그저 그래요",
+    "보통이에요",
+    "좋아요!",
+    "최고예요!",
+  ][rating];
+
   const primaryText = mode === "edit" ? "수정하기" : "등록";
   const titleText = mode === "edit" ? "리뷰 수정" : "리뷰 작성";
 
   const handleSubmit = () => {
+    const payload = {
+      memberId,
+      productId: product.id,
+      rating,
+      content,
+      imagePath,
+      imageName,
+    };
+
+    // 신규 작성
+    if (mode === "create") {
+      fetch(
+        `${process.env.REACT_APP_BACKEND_URL}/private/mypage/myshop/review`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          },
+          body: JSON.stringify(payload),
+        }
+      );
+    }
+
+    else {
+      const reviewId = initial?.id; 
+
+      if (!reviewId) {
+        console.error("[ReviewModal] reviewId 없음", initial);
+        return;
+      }
+
+      fetch(
+        `${process.env.REACT_APP_BACKEND_URL}/private/mypage/myshop/review/${reviewId}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+          },
+          body: JSON.stringify(payload),
+        }
+      );
+    }
+
+
     onSubmit?.({ productId: product.id, rating, content, files });
     onClose?.();
-
-
-     const payload = {
-        memberId,                
-        productId: product.id,    
-        rating,
-        content,
-        imagePath,               
-        imageName,
-      };
-
-
-      if( mode === "create"){
-        
-        const res = fetch(`${process.env.REACT_APP_BACKEND_URL}/private/mypage/myshop/review`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" ,
-          Authorization: `Bearer ${localStorage.getItem("accessToken")}`
-        },
-        body: JSON.stringify(payload),
-      });
-
-      }
-
-      else {
-        const res = fetch(`${process.env.REACT_APP_BACKEND_URL}/private/mypage/myshop/review/${initial.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" ,
-          Authorization: `Bearer ${localStorage.getItem("accessToken")}`
-        },
-        body: JSON.stringify(payload),
-      });
-
-      }
-
-
-
-
   };
-
-
 
   return (
     <S.Overlay onClick={onClose}>
@@ -185,7 +203,9 @@ const ReviewModal = ({
 
           <S.FileBox>
             <S.FileText>
-              {files.length === 0 ? "선택한 파일이 없습니다" : files.map((f) => f.name || "이미지").join(", ")}
+              {files.length === 0
+                ? "선택한 파일이 없습니다"
+                : files.map((f) => f.name || "이미지").join(", ")}
             </S.FileText>
             <S.FileButton type="button" onClick={openFilePicker}>
               + 이미지 추가
@@ -213,7 +233,9 @@ const ReviewModal = ({
 
         <S.ButtonRow>
           <S.CloseButton onClick={onClose}>닫기</S.CloseButton>
-          <S.PrimaryButton onClick={handleSubmit}>{primaryText}</S.PrimaryButton>
+          <S.PrimaryButton onClick={handleSubmit}>
+            {primaryText}
+          </S.PrimaryButton>
         </S.ButtonRow>
       </S.Dialog>
     </S.Overlay>

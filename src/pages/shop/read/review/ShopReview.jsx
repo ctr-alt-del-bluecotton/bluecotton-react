@@ -103,10 +103,6 @@ const ShopReview = () => {
         const json = await res.json();
         const list = Array.isArray(json.data) ? json.data.map(toClient) : [];
 
-        // 디버깅용
-        console.log("[ShopReview] 서버 리뷰 데이터:", json.data);
-        console.log("[ShopReview] 변환된 리뷰 데이터:", list);
-
         setReviews(list);
       } catch (err) {
         setError(err.message);
@@ -120,7 +116,7 @@ const ShopReview = () => {
     }
   }, [id, type, sort, page]);
 
-  // ------------------ 도움돼요 (프론트 상태만) ------------------
+
   const [helpfulState, setHelpfulState] = useState({});
   useEffect(() => {
     setHelpfulState(
@@ -142,9 +138,8 @@ const ShopReview = () => {
     });
   };
 
-  // ------------------ 렌더링 가드 ------------------
+
   if (!stats) {
-    // 처음 로딩 중일 때
     if (statsLoading) {
       return <S.ReviewSection>리뷰 데이터를 불러오는 중입니다...</S.ReviewSection>;
     }
@@ -258,7 +253,7 @@ const ShopReview = () => {
               </S.UserInfoWrap>
             </S.ReviewHeader>
 
-            {/* ✅ 리뷰 이미지 (첫 장만 노출 / 원하면 map으로 여러 장 가능) */}
+
             {rv.images && rv.images.length > 0 && (
               <S.ReviewImage>
                 <img src={rv.images[0]} alt="리뷰 이미지" />
