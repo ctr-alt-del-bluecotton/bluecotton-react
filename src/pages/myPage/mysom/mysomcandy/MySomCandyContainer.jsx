@@ -44,25 +44,9 @@ const MySomCandyContainer = () => {
         </thead>
         <tbody>
           <S.TableRow>
-            <S.TableCell>적립</S.TableCell>
-            <S.TableCell>2025.09.19</S.TableCell>
-            <S.TableCell style={{ color: '#F83BAA' }}>+100</S.TableCell>
-            <S.TableCell style={{ color: '#0051FF' }}>솔로</S.TableCell>
-            <S.TableCell>2km 런닝 뛰기 챌린지!! 인증 (+100 캔디)</S.TableCell>
-          </S.TableRow>
-          <S.TableRow>
-            <S.TableCell>적립</S.TableCell>
-            <S.TableCell>2025.09.19</S.TableCell>
-            <S.TableCell style={{ color: '#F83BAA' }}>+500</S.TableCell>
-            <S.TableCell style={{ color: '#0051FF' }}>파티</S.TableCell>
-            <S.TableCell>다같이 플로깅!!! 인증 (+500 캔디)</S.TableCell>
-          </S.TableRow>
-          <S.TableRow>
-            <S.TableCell>적립</S.TableCell>
-            <S.TableCell>2025.09.19</S.TableCell>
-            <S.TableCell style={{ color: '#F83BAA' }}>+500</S.TableCell>
-            <S.TableCell style={{ color: '#0051FF' }}>파티</S.TableCell>
-            <S.TableCell>스터디그룹 코딩!!! 인증 (+500 캔디)</S.TableCell>
+            <S.TableCell colSpan={5} style={{ textAlign: 'center', padding: '40px', color: '#808080' }}>
+              캔디솜 사용 내역이 없습니다
+            </S.TableCell>
           </S.TableRow>
         </tbody>
       </S.CandyTable>

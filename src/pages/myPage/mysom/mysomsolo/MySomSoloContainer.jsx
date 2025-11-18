@@ -69,17 +69,22 @@ const MySomSoloContainer = () => {
 
         const result = await res.json();
         console.log("서버 응답:", result);
-        console.log("전체 데이터:", result.data);
-        console.log("데이터 개수:", result.data?.length);
-
-        // somType이 "solo"인 데이터만 필터링 (대소문자 구분 없이)
+        
+        // 서버 응답 구조: id는 챌린지 ID, memberId는 사용자 ID
         const allData = result.data || [];
-        console.log("필터링 전 데이터:", allData);
+        console.log("전체 솜 데이터:", allData);
+        
+        // somType이 "solo"인 데이터만 필터링 (대소문자 구분 없이)
         const soloData = allData.filter(som => {
-          const somType = som.somType?.toLowerCase();
-          console.log(`som.id: ${som.id}, somType: ${som.somType}, 소문자: ${somType}`);
-          return somType === 'solo';
+          // som.id: 챌린지 ID
+          // som.memberId: 사용자 ID
+          // som.somType: "party" 또는 "solo"
+          const somType = String(som.somType || '').toLowerCase();
+          const isSolo = somType === 'solo';
+          console.log(`챌린지 ID: ${som.id}, 사용자 ID: ${som.memberId}, 타입: ${som.somType}, 솔로솜: ${isSolo}`);
+          return isSolo;
         });
+        
         console.log("필터링 후 솔로솜 데이터:", soloData);
         console.log("솔로솜 개수:", soloData.length);
         setSoloSoms(soloData);

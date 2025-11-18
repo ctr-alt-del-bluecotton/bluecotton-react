@@ -159,7 +159,7 @@ const MyPostLikeContainer = () => {
                     openModal({
                       title: "좋아요 취소",
                       message: "정말 좋아요를 취소하시겠습니까?",
-                      confirmText: "취소",
+                      confirmText: "확인",
                       cancelText: "닫기",
                       onConfirm: () => handleDelete(post.id),
                     });

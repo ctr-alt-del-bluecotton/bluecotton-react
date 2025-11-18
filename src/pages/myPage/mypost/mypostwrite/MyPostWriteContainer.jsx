@@ -73,13 +73,19 @@ const MyPostWriteContainer = () => {
         }
         
         const result = await response.json();
+        console.log('게시글 목록 응답:', result); // 디버깅용
         if (result.data && Array.isArray(result.data)) {
-          const formattedPosts = result.data.map((post) => ({
-            id: post.id,
-            type: categoryMap[post.somCategory] || post.somCategory,
-            title: post.postTitle,
-            date: formatDate(post.postCreateAt),
-          }));
+          const formattedPosts = result.data.map((post) => {
+            console.log('게시글 데이터:', post); // 디버깅용
+            // 게시글 ID는 postId 또는 id 필드에서 가져옴
+            const postId = post.postId || post.id;
+            return {
+              id: postId,
+              type: categoryMap[post.somCategory] || post.somCategory,
+              title: post.postTitle,
+              date: formatDate(post.postCreateAt),
+            };
+          });
           setPosts(formattedPosts);
         } else {
           setPosts([]);
