@@ -23,7 +23,7 @@ S.LoginForm = styled.form`
   gap: 20px;
   width: 100%;
   align-items: center;
-`
+`;
 
 S.LoginContainer = styled.div`
   width: 100%;
@@ -38,7 +38,7 @@ S.BackgroundBox = styled.div`
   background-image: url(${process.env.PUBLIC_URL}/assets/images/somNight.gif);
   background-position: center;
   background-repeat: no-repeat;
-  background-size: cover; 
+  background-size: cover;
 `;
 
 S.LoginBox = styled.div`
@@ -67,9 +67,29 @@ S.Input = styled.input`
 `;
 
 S.InputErrorMessage = styled.p`
-  ${secondary};
+  color: ${({ theme }) => theme.PALLETE.warning};
   ${smallText1Regular};
-`
+`;
+
+S.PasswordWrapper = styled.div`
+  position: relative;
+  width: 320px;
+`;
+
+S.EyeIcon = styled.img`
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  width: 20px;
+  height: 20px;
+  transform: translateY(-50%);
+  cursor: pointer;
+  opacity: 0.6;
+
+  &:hover {
+    opacity: 1;
+  }
+`;
 
 S.LoginButton = styled(Link)`
   width: 320px;
