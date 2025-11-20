@@ -1,4 +1,3 @@
-// src/pages/.../OrderManagement/AdminDashboard.jsx
 import React, { useEffect, useMemo, useState } from "react";
 import S from "./style";
 import {
@@ -23,15 +22,13 @@ const PERIOD_OPTIONS = [
 ];
 
 const AdminDashboard = ({ orders = [], products = [] }) => {
-  const [period, setPeriod] = useState("week"); // "week" | "month" | "year"
+  const [period, setPeriod] = useState("week"); 
   const [forecastData, setForecastData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // 0) 날짜 문자열 -> Date 객체
   const toDate = (s) => new Date(`${s}T00:00:00`);
 
-  // 1) 프론트에서 주문 리스트로 일자별 매출 집계
   const dailyRevenue = useMemo(() => {
     const map = new Map();
 
@@ -53,7 +50,6 @@ const AdminDashboard = ({ orders = [], products = [] }) => {
     return result;
   }, [orders]);
 
-  // 2) XGBoost 예측 결과 호출 (백엔드 연동)
   useEffect(() => {
     const fetchForecast = async () => {
       try {
@@ -71,7 +67,6 @@ const AdminDashboard = ({ orders = [], products = [] }) => {
         }
 
         const data = await res.json();
-        // 백엔드에서 { history: [...], forecast: [...] } 형태로 내려온다고 가정
         const rawForecast = Array.isArray(data.forecast)
           ? data.forecast
           : data.data || [];
@@ -79,7 +74,6 @@ const AdminDashboard = ({ orders = [], products = [] }) => {
         setForecastData(
           rawForecast.map((d) => ({
             date: d.date,
-            // RevenueForecastPoint.predictRevenue 필드에 맞춤
             predicted: d.predictRevenue ?? d.predictedRevenue ?? d.revenue,
           }))
         );
@@ -87,7 +81,6 @@ const AdminDashboard = ({ orders = [], products = [] }) => {
         console.error(e);
         setError(e.message);
 
-        // 🔧 예측 API가 죽었을 때 임시 더미 데이터 (마지막 매출 기준 7일만)
         if (dailyRevenue.length) {
           const last = dailyRevenue[dailyRevenue.length - 1];
           const dummy = Array.from({ length: 7 }).map((_, i) => {
@@ -113,7 +106,6 @@ const AdminDashboard = ({ orders = [], products = [] }) => {
     }
   }, [orders, dailyRevenue, period]);
 
-  // 3) 실제 + 예측 합친 전체 데이터
   const chartData = useMemo(() => {
     const map = new Map();
 
@@ -131,7 +123,6 @@ const AdminDashboard = ({ orders = [], products = [] }) => {
     );
   }, [dailyRevenue, forecastData]);
 
-  // 4) 기간(주간/월간/연간)에 따라 보여줄 데이터만 슬라이싱
   const filteredChartData = useMemo(() => {
     if (!chartData.length) return [];
 
