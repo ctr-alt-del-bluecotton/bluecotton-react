@@ -63,7 +63,6 @@ const Header = () => {
     setIsOpen(false);
   };
 
-  // 페이지별 이름
   const isIntroPage = pathname === "/";
   const isSomPage = pathname.startsWith("/main/som");
   const isShopPage = pathname.startsWith("/main/shop");
@@ -92,7 +91,6 @@ const Header = () => {
     </>
   );
 
-  // 프로필 이미지 불러오기
   useEffect(() => {
     const fetchProfile = async () => {
       if (!isLogin || !currentUser?.id) return;
@@ -127,7 +125,6 @@ const Header = () => {
     <S.HeaderWrap>
       <S.HeaderContainer>
         <S.HeaderRow>
-          {/* 왼쪽 영역 */}
           <S.LeftGroup>
             <S.Logo to="/">blue cotton</S.Logo>
             {!isIntroPage && goToLinkName && (
@@ -137,18 +134,13 @@ const Header = () => {
               </>
             )}
           </S.LeftGroup>
-
-          {/* 가운데 영역 */}
           <S.CenterGroup>{isIntroPage && Categories}</S.CenterGroup>
-
-          {/* 오른쪽 영역 */}
           <S.RightGroup>
             {isLogin ? (
               <div
                 ref={dropdownRef}
                 style={{ position: "relative", display: "inline-block" }}
               >
-                {/* ⬇️ 이미지 + 이름 전체 클릭 */}
                 <button
                   type="button"
                   onClick={toggleDropdown}
@@ -174,8 +166,6 @@ const Header = () => {
 
                   <S.ProfileName>{currentUser.memberNickname}</S.ProfileName>
                 </button>
-
-                {/* 드롭다운 */}
                 {isOpen && (
                   <div
                     style={{

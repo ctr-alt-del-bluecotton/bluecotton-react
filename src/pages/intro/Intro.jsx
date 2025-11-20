@@ -15,7 +15,6 @@ const Intro = () => {
     <div>
       <FloatingAction />
       <Header />
-      {/* 소개페이지! */}
       <IntroBanner />
       <IntroWhatIsSom />
       <IntroMap />
@@ -23,9 +22,6 @@ const Intro = () => {
       <IntroGrade />
       <IntroPost />
       <IntroSom />
-      {/* <div>
-        <Link to={"/main/som/all"}>메인으로이동</Link>
-      </div> */}
       <Footer />
     </div>
   );

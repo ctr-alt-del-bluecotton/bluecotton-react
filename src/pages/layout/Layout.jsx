@@ -14,7 +14,6 @@ const Layout = () => {
         <HeaderCategory />
       </header>
       <main>
-        {/* 라우트 바뀔 때마다 스크롤을 맨 위로 */}
         <ScrollToTop />
         <Outlet />
       </main>

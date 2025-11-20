@@ -6,10 +6,10 @@ const IntroShop = () => {
   return (
     <S.IntroShopWrap>
       <S.IntroShopContainer>
-        <S.IntroShopText1>캔디샵</S.IntroShopText1>
+        <S.IntroShopText1>블루코튼 샵</S.IntroShopText1>
 
         <S.IntroShopImgcontainer>
-          <img src="/assets/images/intro_shop_img.png" />
+          <img src="/assets/images/intro_shop_final.png" />
         </S.IntroShopImgcontainer>
 
         <S.IntroShopTextContainer>

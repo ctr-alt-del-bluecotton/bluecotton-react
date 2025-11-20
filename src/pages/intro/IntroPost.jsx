@@ -46,7 +46,7 @@ const IntroPost = () => {
               <S.DeviceWrap>
                 <img src="/assets/images/Device.png"alt="디바이스"className="device-img" />
                 <div className="screen" >
-                <img src="/assets/images/intro_post.png" className="map-img-post" />
+                <img src="/assets/images/intro_post_final.png" className="map-img-post" />
                 </div>
               </S.DeviceWrap>
             </motion.div>

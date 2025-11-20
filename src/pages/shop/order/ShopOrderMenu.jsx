@@ -496,14 +496,6 @@ const ShopOrderMenu = () => {
       }
       merchantUidRef.current = merchantUid;
 
-      console.log("[PAY REQUEST]", {
-        pg,
-        pay_method,
-        merchantUid: merchantUidRef.current,
-        amountToPay,
-        paymentType,
-      });
-
       await new Promise((resolve) => {
         IMP.request_pay(
           {
@@ -526,10 +518,7 @@ const ShopOrderMenu = () => {
           },
           async (rsp) => {
             requestAnimationFrame(enforceIframeStyles);
-
             console.log("[IMP callback rsp]", rsp);
-
-            // 1) imp_uid가 없으면 → 결제 자체가 완료되지 않음 (취소/실패)
             if (!rsp?.imp_uid) {
               console.error("[IMP 실패 - imp_uid 없음]", rsp);
               const baseMsg =
@@ -547,8 +536,6 @@ const ShopOrderMenu = () => {
               resolve();
               return;
             }
-
-            // 2) imp_uid가 있다면 → 성공/실패 여부는 무조건 서버 검증이 최종 판단
             try {
               if (!isMobile && API) {
                 const vRes = await fetch(`${API}/payment/verify`, {
