@@ -251,6 +251,87 @@ const MySomPartyContainer = () => {
     return null;
   };
 
+  // 솜 삭제 (취소/탈퇴) 함수
+  const handleDeleteSom = async (som) => {
+    if (!currentUser?.id) {
+      alert('사용자 정보를 불러오는데 실패했습니다.');
+      return;
+    }
+
+    const actionText = activeFilter === 'scheduled' ? '취소' : '탈퇴';
+    const confirmMessage = `정말로 이 챌린지를 ${actionText}하시겠습니까?`;
+
+    // 확인 모달 띄우기
+    openModal({
+      title: `${actionText} 확인`,
+      message: confirmMessage,
+      confirmText: '확인',
+      cancelText: '취소',
+      onConfirm: async () => {
+        try {
+          const token = localStorage.getItem("accessToken");
+          const response = await fetch(
+            `${process.env.REACT_APP_BACKEND_URL}/private/my-page/delete-som?memberId=${currentUser.id}&somId=${som.id}`,
+            {
+              method: "DELETE",
+              headers: {
+                "Content-Type": "application/json",
+                ...(token && { "Authorization": `Bearer ${token}` })
+              },
+              credentials: "include"
+            }
+          );
+
+          if (!response.ok) {
+            const errorText = await response.text();
+            console.error('솜 삭제 실패:', errorText);
+            openModal({
+              title: `${actionText} 실패`,
+              message: `${actionText}에 실패했습니다.`,
+              confirmText: '확인'
+            });
+            return;
+          }
+
+          // 성공 시 데이터 새로고침
+          const refreshToken = localStorage.getItem("accessToken");
+          const refreshRes = await fetch(`${process.env.REACT_APP_BACKEND_URL}/private/my-page/read-som?id=${currentUser.id}`, {
+            headers: { 
+              "Content-Type": "application/json",
+              ...(refreshToken && { "Authorization": `Bearer ${refreshToken}` })
+            },
+            method: "GET",
+            credentials: "include"
+          });
+
+          if (refreshRes.ok) {
+            const refreshResult = await refreshRes.json();
+            const allData = refreshResult.data || [];
+            const partyData = allData.filter(som => {
+              const somType = String(som.somType || '').toLowerCase();
+              return somType === 'party';
+            });
+            setPartySoms(partyData);
+          }
+
+          // 성공 알림
+          openModal({
+            title: `${actionText} 완료`,
+            message: `챌린지가 ${actionText}되었습니다.`,
+            confirmText: '확인'
+          });
+        } catch (error) {
+          console.error('솜 삭제 중 오류 발생:', error);
+          openModal({
+            title: '오류 발생',
+            message: `${actionText} 중 오류가 발생했습니다.`,
+            confirmText: '확인'
+          });
+        }
+      }
+    });
+  };
+
   if (loading) {
     return <div>로딩 중...</div>;
   }
@@ -303,10 +384,21 @@ const MySomPartyContainer = () => {
                   </S.ItemDetails>
                 </div>
 
-                {/* ✅ 진행예정은 버튼 숨김, 나머지는 상태에 따라 버튼 표시 */}
-                {getButtonLabel() && (
-                  <div style={{ display: 'flex', alignItems: 'center' }}>
-                    {activeFilter === 'progress' ? (
+                {/* ✅ 진행예정: 취소하기 버튼, 진행중: 인증하기 + 탈퇴하기, 진행완료: 리뷰하기 */}
+                <div style={{ display: 'flex', alignItems: 'center' }}>
+                  {activeFilter === 'scheduled' && (
+                    <S.CancelButton 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteSom(som);
+                      }}
+                    >
+                      취소하기
+                    </S.CancelButton>
+                  )}
+                  
+                  {activeFilter === 'progress' && (
+                    <>
                       <S.ActionButton 
                         onClick={(e) => {
                           e.stopPropagation();
@@ -315,36 +407,35 @@ const MySomPartyContainer = () => {
                       >
                         {getButtonLabel()}
                       </S.ActionButton>
-                    ) : (
-                      <S.ActionButton 
-                        $disabled={reviewedSomIds.includes(som.id)}
-                        onClick={(e) => {
-                          // 이미 리뷰한 챌린지는 클릭 불가
-                          if (reviewedSomIds.includes(som.id)) {
-                            e.stopPropagation();
-                            return;
-                          }
-                          e.stopPropagation();
-                          setSelectedSom(som); // 리뷰할 솜 정보 저장
-                          setShowPopup(true);
-                        }}
-                      >
-                        {reviewedSomIds.includes(som.id) ? '리뷰완료' : getButtonLabel()}
-                      </S.ActionButton>
-                    )}
-                    {activeFilter === 'progress' && (
                       <S.CancelButton 
                         onClick={(e) => {
                           e.stopPropagation();
-                          // 중단하기 로직 구현
-                          console.log('챌린지 중단');
+                          handleDeleteSom(som);
                         }}
                       >
-                        중단하기
+                        탈퇴하기
                       </S.CancelButton>
-                    )}
-                  </div>
-                )}
+                    </>
+                  )}
+                  
+                  {activeFilter === 'completed' && (
+                    <S.ActionButton 
+                      $disabled={reviewedSomIds.includes(som.id)}
+                      onClick={(e) => {
+                        // 이미 리뷰한 챌린지는 클릭 불가
+                        if (reviewedSomIds.includes(som.id)) {
+                          e.stopPropagation();
+                          return;
+                        }
+                        e.stopPropagation();
+                        setSelectedSom(som); // 리뷰할 솜 정보 저장
+                        setShowPopup(true);
+                      }}
+                    >
+                      {reviewedSomIds.includes(som.id) ? '리뷰완료' : getButtonLabel()}
+                    </S.ActionButton>
+                  )}
+                </div>
               </div>
             </S.ListItem>
           ))
