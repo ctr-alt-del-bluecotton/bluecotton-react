@@ -77,7 +77,7 @@ S.InputGroup = styled.div`
   display: flex;
   flex-direction: column;
   gap: 8px; 
-  margin-bottom: 16px; 
+  margin-bottom: ${({ $error }) => ($error ? "4px" : "16px")};
 `;
 
 S.PasswordWrapper = styled.div`
