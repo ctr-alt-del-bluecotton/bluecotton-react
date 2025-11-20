@@ -86,7 +86,7 @@ const SomContent = ({ content }) => {
 
   return (
     <S.Card>
-      <S.SomImage bgsrc={somTitleImagePath} alt={somTitleImageName} />
+      <S.SomImage bgsrc={somTitleImagePath + '?w=300'} alt={somTitleImageName} />
       <S.SomInfo>
         <S.SomTitleArea>
           <img src={memberSomLeader.memberPicturePath + memberSomLeader.memberPictureName} alt={memberSomLeader.memberPictureName} />

@@ -47,7 +47,7 @@ options.putOption = (data) => {
 
 options.deleteOption = (data) => {
   const option = {
-    method: "PUT",
+    method: "DELETE",
     body: data ? data : undefined
   }
 

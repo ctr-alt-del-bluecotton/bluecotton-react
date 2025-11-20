@@ -7,7 +7,7 @@ S.floatingChattingContainer = styled.div`
   ${primary};
     position: relative;
     width: 100%;
-    height: 850px;
+    height: 100%;
     margin: 0 30px;
     display: flex;
     flex-direction: column;

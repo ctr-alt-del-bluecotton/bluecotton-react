@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import { fetchData } from "./FetchContext";
+import { fetchData, options } from "./FetchContext";
 
 const ChattingContext = createContext();
 
@@ -16,6 +16,18 @@ export const ChattingProvider = ({ children }) => {
         menu: "list",
         chatId: 0
     });
+
+    const exitRoom = useCallback(async (id) => {
+        await fetchData(`chat/delete-user`, options.deleteOption({
+            memberEmail: currentUser.memberEmail,
+            chatId: id
+        })).then(async(res) => {
+            const json = await res.json();
+            console.log(json)
+            window.dispatchEvent(new CustomEvent("refreshChatList"));
+        })
+        
+    },[currentUser.memberEmail])
 
     const getRooms = useCallback(async () => {
         const res = await fetchData(`chat/get-join-rooms/${memberId}`)
@@ -37,7 +49,8 @@ export const ChattingProvider = ({ children }) => {
     const value = {
         joinRooms,
         chattingMenu, setChattingMenu,
-        memberId, memberName
+        memberId, memberName,
+        exitRoom
     };
 
     return (

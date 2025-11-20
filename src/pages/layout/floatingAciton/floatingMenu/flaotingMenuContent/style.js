@@ -7,8 +7,9 @@ S.floatingContentContainer = styled.div`
   ${flexCenter}
   position: relative;
   width: 100%;
-  height: 850px;
+  height: 100%;
   border-radius: 20px;
+  
 `
 
 export default S;

@@ -9,7 +9,7 @@ S.floatingMenuWrap = styled.div`
   ${primary};
   position: relative;
   width: 100%;
-  height: 850px;
+  height: 100%;
   margin: 0 30px;
   display: flex;
   flex-direction: column;
@@ -27,6 +27,8 @@ S.floatingFormWrap = styled.form`
   justify-content: space-between; /* ✅ 위, 아래 고정 */
   align-items: center;
   margin:65px 0;
+  
+  
 `
 
 S.floatingPageWrap = styled.div`
