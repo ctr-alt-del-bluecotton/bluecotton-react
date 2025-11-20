@@ -13,8 +13,8 @@ const Report = ({ target, onClose }) => {
   const [selectedReason, setSelectedReason] = useState("");
   const [customText, setCustomText] = useState("");
   const { openModal } = useModal(); // 전역 확인 모달
-  const { currentUser } = useSelector((state) => state.user); // ✅ 추가
-  const memberId = currentUser.id;                            // ✅ 신고자 ID
+  const { currentUser } = useSelector((state) => state.user); 
+  const memberId = currentUser.id;                          
 
   // 등록 버튼 눌렀을 때
   const handleSubmit = async () => {
