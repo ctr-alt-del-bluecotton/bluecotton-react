@@ -59,7 +59,7 @@ export const ReadProvider = ({ children }) => {
     const wisperJoin = async (somTitle) => {
         await fetchData(`chat/join-room?somTitle=${somTitle}&memberEmail=${currentUser.memberEmail}`, options.getOption())
         .then((res) => {
-
+            window.dispatchEvent(new CustomEvent("refreshChatList"));
         })
     }
 
@@ -70,6 +70,7 @@ export const ReadProvider = ({ children }) => {
         }))
         .then((res) => {
             window.dispatchEvent(new CustomEvent("refreshSomList"));
+            window.dispatchEvent(new CustomEvent("refreshChatList"));
             somJoinSomComplete();
             // 참여 후 데이터 새로고침
             loadReadData();

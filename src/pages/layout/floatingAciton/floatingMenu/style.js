@@ -10,7 +10,7 @@ S.floatingMenuContainer = styled.div`
   align-items: flex-start;
   overflow: visible;
   width: 500px;
-  height: 850px;
+  height: 90dvh;
   box-shadow: -15px 15px 20px 0px #00000030;
   background-color: white;
   border-radius: 20px;
