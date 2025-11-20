@@ -382,16 +382,14 @@ const PostComment = ({
                   showReplyTarget?.parentId === c.id && (
                     <S.CommentForm $indent>
                       <div className="avatar">
-                        <img
-                          src={
-                            c.memberProfileUrl
-                              ? c.memberProfileUrl.startsWith("/upload/")
-                                ? `http://localhost:10000${c.memberProfileUrl}`
-                                : c.memberProfileUrl
-                              : "/images/default_profile.png"
-                          }
-                          alt="내 프로필"
-                        />
+                      <img
+                        src={
+                          localProfileImage?.startsWith("/upload/")
+                            ? `http://localhost:10000${localProfileImage}`
+                            : localProfileImage || "/images/default_profile.png"
+                        }
+                        alt="내 프로필"
+                      />
                         <span className="nickname">
                           {currentUser?.memberNickname}
                         </span>
@@ -532,11 +530,9 @@ const PostComment = ({
                           <div className="avatar">
                           <img
                             src={
-                              c.memberProfileUrl
-                                ? c.memberProfileUrl.startsWith("/upload/")
-                                  ? `http://localhost:10000${c.memberProfileUrl}`
-                                  : c.memberProfileUrl
-                                : "/images/default_profile.png"
+                              localProfileImage?.startsWith("/upload/")
+                                ? `http://localhost:10000${localProfileImage}`
+                                : localProfileImage || "/images/default_profile.png"
                             }
                             alt="내 프로필"
                           />

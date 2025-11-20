@@ -205,6 +205,8 @@ const PostReadContent = () => {
   let raw = post.postContent || "";
   let htmlContent = marked.parse(raw);
 
+  htmlContent = htmlContent.replace(/<img[^>]*>/g, "");
+
   /** 공유용 썸네일 함수 */
   const getThumbnail = () => {
     if (post.postImageList && post.postImageList.length > 0) {
@@ -240,7 +242,7 @@ const PostReadContent = () => {
           </S.EditBox>
         )}
 
-        {/* 🔥 이미지 리스트 출력 (postImageList) */}
+        {/* 이미지 리스트 출력 (postImageList) */}
         {post.postImageList && post.postImageList.length > 0 && (
           <S.ImageArea>
             {post.postImageList.map((img) => (
