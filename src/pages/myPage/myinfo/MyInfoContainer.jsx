@@ -91,7 +91,7 @@ const MyInfoContainer = () => {
             return;
           }
     
-          // ✅ 생년월일 변환
+          // 생년월일 변환
           let birthYear = '';
           let birthMonth = '';
           let birthDay = '';
@@ -170,7 +170,6 @@ const MyInfoContainer = () => {
       }));
     });
   };
-  // ✅ 인풋 공통 변경 핸들러
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
