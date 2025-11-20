@@ -118,6 +118,7 @@ const MapContainer = () => {
             <S.Map center={center} level={5} ref={mapRef}>
               {myLocation && (
                 <MapMarker
+                  zIndex={9999}
                   position={myLocation}
                   image={{
                     src: "/assets/icons/mapUserMarker.png",

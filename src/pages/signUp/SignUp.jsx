@@ -13,7 +13,6 @@ const SignUp = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
 
-
   const {
     register,
     handleSubmit,
@@ -22,7 +21,6 @@ const SignUp = () => {
     trigger,
     formState: { errors, isSubmitting },
   } = useForm({ mode: "onChange" });
-
 
   const handleSubmitForm = handleSubmit(async (data) => {
     const { memberPasswordConfirm, ...member } = data;
@@ -53,14 +51,12 @@ const SignUp = () => {
     });
   });
 
-
   const goNext = async (fields) => {
     const valid = await trigger(fields);
     if (valid) setStep(step + 1);
   };
 
   const goPrev = () => setStep(step - 1);
-
 
   const formatPhone = (value) => {
     const numbers = value.replace(/[^0-9]/g, "");
@@ -80,6 +76,7 @@ const SignUp = () => {
         <S.SignUpForm onSubmit={handleSubmitForm}>
           <S.Logo>blue cotton</S.Logo>
 
+          {/* STEP 1 */}
           {step === 1 && (
             <>
               <S.InputGroup>
@@ -87,8 +84,13 @@ const SignUp = () => {
                 <S.Input
                   placeholder="이름을 입력해주세요"
                   $error={!!errors.memberName}
-                  {...register("memberName", { required: true })}
+                  {...register("memberName", {
+                    required: "이름을 입력해주세요.",
+                  })}
                 />
+                {errors.memberName && (
+                  <S.ErrorText>{errors.memberName.message}</S.ErrorText>
+                )}
               </S.InputGroup>
 
               <S.InputGroup>
@@ -97,8 +99,17 @@ const SignUp = () => {
                   placeholder="닉네임을 입력해주세요(최대 8 글자)"
                   maxLength={8}
                   $error={!!errors.memberNickname}
-                  {...register("memberNickname", { required: true })}
+                  {...register("memberNickname", {
+                    required: "닉네임을 입력해주세요.",
+                    maxLength: {
+                      value: 8,
+                      message: "닉네임은 8글자 이하로 입력해주세요.",
+                    },
+                  })}
                 />
+                {errors.memberNickname && (
+                  <S.ErrorText>{errors.memberNickname.message}</S.ErrorText>
+                )}
               </S.InputGroup>
 
               <S.InputGroup>
@@ -107,27 +118,39 @@ const SignUp = () => {
                   placeholder="이메일을 입력해주세요"
                   $error={!!errors.memberEmail}
                   {...register("memberEmail", {
-                    required: true,
-                    pattern: emailRegex,
+                    required: "이메일을 입력해주세요.",
+                    pattern: {
+                      value: emailRegex,
+                      message: "올바른 이메일 형식이 아닙니다. example@example.com",
+                    },
                   })}
                 />
+                {errors.memberEmail && (
+                  <S.ErrorText>{errors.memberEmail.message}</S.ErrorText>
+                )}
               </S.InputGroup>
 
               <S.InputGroup>
                 <S.InputLabel>전화번호</S.InputLabel>
                 <S.Input
-                  placeholder="전화번호를 입력해주세요"
+                  placeholder="010-0000-0000"
                   maxLength={13}
                   $error={!!errors.memberPhone}
                   {...register("memberPhone", {
-                    required: true,
-                    pattern: /^01[0-9]-\d{3,4}-\d{4}$/,
+                    required: "전화번호를 입력해주세요.",
+                    pattern: {
+                      value: /^01[0-9]-\d{3,4}-\d{4}$/,
+                      message: "올바른 전화번호 형식이 아닙니다.",
+                    },
                   })}
                   onChange={(e) => {
                     const formatted = formatPhone(e.target.value);
                     setValue("memberPhone", formatted, { shouldValidate: true });
                   }}
                 />
+                {errors.memberPhone && (
+                  <S.ErrorText>{errors.memberPhone.message}</S.ErrorText>
+                )}
               </S.InputGroup>
 
               <S.InputGroup>
@@ -142,9 +165,10 @@ const SignUp = () => {
                       required: "비밀번호를 입력해주세요.",
                       pattern: {
                         value: passwordRegex,
-                        message: "영문, 숫자, 특수문자를 포함한 8자 이상이어야 합니다.",
+                        message:
+                          "영문, 숫자, 특수문자를 포함한 8자 이상이어야 합니다.",
                       },
-                      onChange: () => trigger("memberPasswordConfirm"), 
+                      onChange: () => trigger("memberPasswordConfirm"),
                     })}
                   />
                   <S.EyeIcon
@@ -156,6 +180,10 @@ const SignUp = () => {
                     onClick={() => setShowPassword(!showPassword)}
                   />
                 </S.PasswordWrapper>
+
+                {errors.memberPassword && (
+                  <S.ErrorText>{errors.memberPassword.message}</S.ErrorText>
+                )}
               </S.InputGroup>
 
               <S.InputGroup style={{ marginBottom: "28px" }}>
@@ -169,7 +197,8 @@ const SignUp = () => {
                     {...register("memberPasswordConfirm", {
                       required: "비밀번호를 다시 입력해주세요.",
                       validate: (check) =>
-                        check === getValues("memberPassword") || "비밀번호가 일치하지 않습니다.",
+                        check === getValues("memberPassword") ||
+                        "비밀번호가 일치하지 않습니다.",
                     })}
                   />
                   <S.EyeIcon
@@ -178,9 +207,17 @@ const SignUp = () => {
                         ? "/assets/icons/eye.svg"
                         : "/assets/icons/visibility_off.svg"
                     }
-                    onClick={() => setShowPasswordConfirm(!showPasswordConfirm)}
+                    onClick={() =>
+                      setShowPasswordConfirm(!showPasswordConfirm)
+                    }
                   />
                 </S.PasswordWrapper>
+
+                {errors.memberPasswordConfirm && (
+                  <S.ErrorText>
+                    {errors.memberPasswordConfirm.message}
+                  </S.ErrorText>
+                )}
               </S.InputGroup>
 
               <S.SignUpButton
@@ -211,20 +248,30 @@ const SignUp = () => {
                     readOnly
                     placeholder="주소 검색"
                     $error={!!errors.memberAddress}
-                    {...register("memberAddress", { required: true })}
+                    {...register("memberAddress", {
+                      required: "주소를 입력해주세요.",
+                    })}
                   />
                   <S.SmallButton
                     type="button"
                     onClick={() =>
                       openPostcode(({ address, postcode }) => {
-                        setValue("memberAddress", address);
-                        setValue("memberPostcode", postcode);
+                        setValue("memberAddress", address, {
+                          shouldValidate: true,
+                        });
+                        setValue("memberPostcode", postcode, {
+                          shouldValidate: true,
+                        });
                       })
                     }
                   >
                     검색
                   </S.SmallButton>
                 </S.AddressBox>
+
+                {errors.memberAddress && (
+                  <S.ErrorText>{errors.memberAddress.message}</S.ErrorText>
+                )}
               </S.InputGroup>
 
               <S.InputGroup>
@@ -232,8 +279,15 @@ const SignUp = () => {
                 <S.Input
                   placeholder="상세주소 입력"
                   $error={!!errors.memberDetailAddress}
-                  {...register("memberDetailAddress", { required: true })}
+                  {...register("memberDetailAddress", {
+                    required: "상세주소를 입력해주세요.",
+                  })}
                 />
+                {errors.memberDetailAddress && (
+                  <S.ErrorText>
+                    {errors.memberDetailAddress.message}
+                  </S.ErrorText>
+                )}
               </S.InputGroup>
 
               <S.InputGroup>
@@ -242,8 +296,13 @@ const SignUp = () => {
                   readOnly
                   placeholder="우편번호"
                   $error={!!errors.memberPostcode}
-                  {...register("memberPostcode", { required: true })}
+                  {...register("memberPostcode", {
+                    required: "우편번호를 입력해주세요.",
+                  })}
                 />
+                {errors.memberPostcode && (
+                  <S.ErrorText>{errors.memberPostcode.message}</S.ErrorText>
+                )}
               </S.InputGroup>
 
               <S.InputGroup>
@@ -271,6 +330,10 @@ const SignUp = () => {
                     여
                   </S.GenderOption>
                 </S.GenderSelectBox>
+
+                {errors.memberGender && (
+                  <S.ErrorText>{errors.memberGender.message}</S.ErrorText>
+                )}
               </S.InputGroup>
 
               <S.InputGroup style={{ marginBottom: "28px" }}>
@@ -278,9 +341,15 @@ const SignUp = () => {
                 <S.DateInputBox>
                   <S.DateInput
                     $error={!!errors.memberBirth}
-                    {...register("memberBirth", { required: true })}
+                    {...register("memberBirth", {
+                      required: "생년월일을 선택해주세요.",
+                    })}
                   />
                 </S.DateInputBox>
+
+                {errors.memberBirth && (
+                  <S.ErrorText>{errors.memberBirth.message}</S.ErrorText>
+                )}
               </S.InputGroup>
 
               <S.ButtonRow>

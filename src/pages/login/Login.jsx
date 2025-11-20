@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import S from "./style";
 import { useForm } from "react-hook-form";
@@ -14,11 +14,11 @@ const Login = () => {
     formState: { errors, isSubmitting },
   } = useForm({ mode: "onChange" });
 
-  const emailRegex =
-    /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  const [showPassword, setShowPassword] = useState(false);
 
-  const passwordRegex =
-    /^(?=.*\d)(?=.*[a-z])(?=.*[!@#])[\da-zA-Z!@#]{8,}$/;
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+  const passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[!@#])[\da-zA-Z!@#]{8,}$/;
 
   const handleSubmitForm = handleSubmit((data) => {
     fetch(`${process.env.REACT_APP_BACKEND_URL}/auth/login`, {
@@ -72,20 +72,45 @@ const Login = () => {
             placeholder="이메일을 작성해주세요"
             $error={!!errors.memberEmail}
             {...register("memberEmail", {
-              required: true,
-              pattern: emailRegex,
+              required: "이메일을 입력해주세요.",
+              pattern: {
+                value: emailRegex,
+                message: "올바른 이메일 형식이 아닙니다.",
+              },
             })}
           />
+          {errors.memberEmail && (
+            <S.InputErrorMessage>{errors.memberEmail.message}</S.InputErrorMessage>
+          )}
 
-          <S.Input
-            type="password"
-            placeholder="비밀번호를 작성해주세요"
-            $error={!!errors.memberPassword}
-            {...register("memberPassword", {
-              required: true,
-              pattern: passwordRegex,
-            })}
-          />
+          <S.PasswordWrapper>
+            <S.Input
+              type={showPassword ? "text" : "password"}
+              placeholder="비밀번호를 작성해주세요"
+              $error={!!errors.memberPassword}
+              {...register("memberPassword", {
+                required: "비밀번호를 입력해주세요.",
+                pattern: {
+                  value: passwordRegex,
+                  message: "영문 소문자 + 숫자 + 특수문자(!@#) 포함 8자 이상",
+                },
+              })}
+            />
+
+            <S.EyeIcon
+              src={
+                showPassword
+                  ? "/assets/icons/eye.svg"
+                  : "/assets/icons/visibility_off.svg"
+              }
+              alt="toggle password"
+              onClick={() => setShowPassword(!showPassword)}
+            />
+          </S.PasswordWrapper>
+
+          {errors.memberPassword && (
+            <S.InputErrorMessage>{errors.memberPassword.message}</S.InputErrorMessage>
+          )}
 
           <S.LoginButton as="button" type="submit" disabled={isSubmitting}>
             로그인하기

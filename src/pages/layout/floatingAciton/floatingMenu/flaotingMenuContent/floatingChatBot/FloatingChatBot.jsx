@@ -7,7 +7,7 @@ const ChatBotSimple = () => {
     return saved
       ? JSON.parse(saved)
       : [
-          { sender: "bot", text: "안녕하세요! 블루코튼 챗봇 솜이에요 🐻‍❄️" },
+          { sender: "bot", text: "안녕하세요! 블루코튼 챗봇 솜이에요!" },
           { sender: "bot", text: "무엇이 궁금하신가요?" },
         ];
   });
@@ -15,7 +15,6 @@ const ChatBotSimple = () => {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // ⭐ scroll reference 추가
   const scrollRef = useRef(null);
 
   const suggestedQuestions = [
@@ -30,7 +29,6 @@ const ChatBotSimple = () => {
     localStorage.setItem("chatMessages", JSON.stringify(messages));
   }, [messages]);
 
-  // ⭐ 메시지가 추가될 때 자동 스크롤
   useEffect(() => {
     scrollRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, loading]);
@@ -94,7 +92,6 @@ const ChatBotSimple = () => {
 
         {loading && <S.Bubble isUser={false}>솜이가 생각 중이에요...</S.Bubble>}
 
-        {/* ⭐ 스크롤 이동 기준점 */}
         <div ref={scrollRef} />
       </S.ChatBody>
 
