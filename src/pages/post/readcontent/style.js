@@ -51,6 +51,7 @@ S.Content = styled.div`
   img {
     max-width: 100% !important;
     height: auto !important;
+    margin-top: 20px;
     display: block;
     border-radius: 10px;
   }
