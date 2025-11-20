@@ -34,7 +34,7 @@ const Report = ({ target, onClose }) => {
     let url = "";
     let body = {};
 
-    /** 🔥 신고 타입에 따라 fetch URL, body 자동 변경 */
+    /** 신고 타입에 따라 fetch URL, body 자동 변경 */
     if (target.type === "post") {
       url = `${BASE_URL}/private/post/report/post`;
       body = {
