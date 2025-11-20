@@ -10,7 +10,7 @@ S.floatingFormWrap = styled.div`
   flex-direction: column;
   justify-content: flex-start;
   align-items: flex-start;
-  overflow-y : scroll;
+  overflow-y : auto;
   gap: 20px;
 `
 
