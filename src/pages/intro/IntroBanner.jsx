@@ -13,6 +13,14 @@ const IntroBanner = () => {
 
     return (
         <S.IntroBannerWarp>
+            <video 
+                className="bg-video"
+                src="/assets/images/intro_banner.mp4"
+                autoPlay
+                loop
+                muted
+                playsInline
+            />
             <S.IntroBannerContainer>
                 <S.IntroBannerText1>
                     <p>함께 <S.IntroBannerText2>'솜'</S.IntroBannerText2>하며 도전하는 우리</p>

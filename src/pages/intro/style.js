@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { basic, fontGreyScale0,  fontGreyScale1,  fontGreyScale2,  fontGreyScale3, heading1, heading2, heading3, heading4, paragraphLight, paragraphRegular, paragraphStrong, primary, primaryLight1, secondary, secondaryDark, secondaryLight, smallText3Regular,title, titleBold, white } from "../../styles/common";
+import { basic, flexCenter, fontGreyScale0,  fontGreyScale1,  fontGreyScale2,  fontGreyScale3, heading1, heading2, heading3, heading4, paragraphLight, paragraphRegular, paragraphStrong, primary, primaryLight1, secondary, secondaryDark, secondaryLight, smallText3Regular,title, titleBold, white } from "../../styles/common";
 import {shapeCSS, sizeCSS } from "../../components/button/style";
 
 const S = {};
@@ -7,17 +7,32 @@ const S = {};
 // 소개페이지 배너
 S.IntroBannerWarp = styled.div `
     width: 100%;
+    display: flex;
     height: 1177px;
     overflow: hidden;
     position: relative;
     z-index: 1;
-    background: url("/assets/images/moveBanner.gif") center/cover no-repeat;
+    display: flex;
+
+    .bg-video {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 0;
+    pointer-events: none; /* 클릭 막기 (선택) */
+  }
     
 `
 
 S.IntroBannerContainer = styled.div `
-    max-width: 1920px;
+    max-width: 100%;
     height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     margin: 0 auto;
     padding: 0 16px;
     box-sizing: border-box;
@@ -26,12 +41,15 @@ S.IntroBannerContainer = styled.div `
 `
 
 S.IntroBannerText1 = styled.div `
+    width: 1150px;
+    height: 100%;
     ${heading2}
     ${basic}
+    align-items: center;
+    justify-content: center;
     z-index: 2;
     position: absolute;
-    top: 15%;
-    left: 30%;
+    top: 8%;
     text-align: center;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
@@ -39,27 +57,27 @@ S.IntroBannerText1 = styled.div `
 
 S.IntroBannerText2 = styled.span `
     ${heading2}
-    ${primary}
+    ${primary} 
     z-index: 2;
 `
 
 S.IntroBannerButtonContainer = styled.div `
-    /* width: 100%; */
     height: 50px;
-    top: 33%; 
-    left: 40%;
+    top: 26.7%; 
+    justify-content: center;
+    align-self: center;
     position: absolute;
     z-index: 2;
-    gap: 10px;
+    gap: 50px;
     display: flex;
 `
 
 S.IntroBannerButton = styled.button `
+    ${flexCenter}
     ${sizeCSS.large2}
     background-color: #0051FF;
     border: none;
     border-radius: 4px;
-    margin-right: 50px;
     padding: 3px;
     cursor: pointer;
     ${shapeCSS.small}
@@ -83,18 +101,19 @@ S.DeviceWrap = styled.div`
     z-index: 2;          
     pointer-events: none;
     overflow: hidden;
+    /* background-color: white; */
   }
 
   .screen {
     position: absolute;
-    top: 90px;
+    top: 70px;
     left: 27px;
     width: 380px;
-    height: 800px;
+    height: 790px;
     border-radius: 32px;
     overflow: hidden;
     z-index: 1;
-    background-color: #ffffff;
+    background-color: #FFFFFF;
   }
   
   .map-img {
@@ -102,7 +121,7 @@ S.DeviceWrap = styled.div`
     top: 40px;    
     left: 27px;    
     width: 380px; 
-    height: 855px; 
+    height: 830px; 
     border-radius: 32px;
     overflow: hidden;
     z-index: 1;
@@ -123,13 +142,12 @@ S.DeviceWrap = styled.div`
 
   .map-img-post {
     position: absolute;
-    top: 20px;
-    left: 10px;
+    /* top: 20px; */
     width: 365px;
     height: 850px;
     border-radius: 24px;
     overflow: hidden;
-    z-index: 1;
+    z-index: 3;
     background-color: #FFFFFF;
     object-fit: cover; 
     background-color: #ffffff;
@@ -141,7 +159,7 @@ S.DeviceWrap = styled.div`
 S.WhatIsSomWrap = styled.div `
     width: 100%;
     box-sizing: border-box;
-    background-color: #6977F0; 
+    background-color: #3182F6; 
     
 `
 S.WhatIsSomContainer = styled.div `
