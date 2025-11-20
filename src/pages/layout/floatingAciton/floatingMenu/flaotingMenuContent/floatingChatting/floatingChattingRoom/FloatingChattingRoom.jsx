@@ -22,19 +22,16 @@ const FloatingChattingRoom = () => {
     setJoinedKey(`joined_${chatId}_${memberId}`)
   },[chatId, memberId])
 
-  /** 자동 스크롤 */
   const scrollToBottom = useCallback(() => {
     const box = chatBoxRef.current;
     if (!box) return;
     box.scrollTop = box.scrollHeight;
   }, []);
 
-  /** 메시지 불러오기 (안정화 버전) */
   const loadMessages = useCallback(
     async (newOffset = 0) => {
       setIsLoading(true);
 
-      // 메시지 목록
       const res = await fetchData(
         `chats/${chatId}/messages?offset=${newOffset}&limit=50`
       );
@@ -64,13 +61,12 @@ const FloatingChattingRoom = () => {
 
       setIsLoading(false);
     },
-    [chatId, scrollToBottom] // 안정된 dependency
+    [chatId, scrollToBottom]
   );
 
   /** 첫 로딩 */
   useEffect(() => {
     loadMessages(0);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chatId]);
 
   /** 무한 스크롤 */
@@ -125,7 +121,7 @@ const FloatingChattingRoom = () => {
           // 메시지 표준화
           const normalized = {
             ...raw,
-            memberName: raw.memberName ?? memberName, // 🔥 없으면 보내는 사람 본인 이름으로 채움
+            memberName: raw.memberName ?? memberName,
             createdAt: raw.createdAt ?? new Date().toISOString()
           };
         
@@ -175,7 +171,7 @@ const FloatingChattingRoom = () => {
       setTimeout(scrollToBottom, 0);
     }
   };
-
+  
   const handleSend = (e) => {
     stompClientRef.current?.publish({
       destination: '/pub/chat/send',
@@ -184,6 +180,7 @@ const FloatingChattingRoom = () => {
         chatMessageSenderId: memberId,
         chatMessageReceiverId: null,
         chatMessageContent: message,
+        memberName: memberName,
         chatMessageType: 'MESSAGE'
       })
     });
@@ -200,21 +197,50 @@ const FloatingChattingRoom = () => {
       </S.Header>
 
       <S.ChatBody ref={chatBoxRef}>
-        {chatList?.map((chat, idx) =>
-          chat.chatMessageType === "MESSAGE" ? (
-            <S.ChatContent key={idx}>
-              <S.chatSenderName isUser={chat.chatMessageSenderId === memberId}>
-                {chat.memberName}
-              </S.chatSenderName>
+        {chatList?.map((chat, idx) => {
 
-              <S.Bubble isUser={chat.chatMessageSenderId === memberId}>
-                {chat.chatMessageContent}
-              </S.Bubble>
+          const prev = chatList[idx - 1];
+
+          const isUser = chat.chatMessageSenderId === memberId;
+
+          // 이전 메시지가 MESSAGE 타입일 때만 같은 유저인지 확인
+          const isPrevMessage =
+            prev && prev.chatMessageType === "MESSAGE";
+
+          const isSameUserWithPrev =
+            isPrevMessage &&
+            prev.chatMessageSenderId === chat.chatMessageSenderId;
+
+          // 현재 메시지가 시스템 메시지인지
+          const isSystem = chat.chatMessageType !== "MESSAGE";
+
+          return (
+            <S.ChatContent key={idx} isUser={isUser} isSystem={isSystem}>
+              
+              {/* 닉네임 출력 조건:
+                  1) 내 메시지는 닉네임 X
+                  2) 시스템 메시지는 닉네임 X
+                  3) 이전 MESSAGE와 같은 유저면 닉네임 X
+                  4) 그 외의 경우 닉네임 표시 */}
+              {!isUser && !isSystem && !isSameUserWithPrev && (
+                <S.chatSenderName>
+                  {chat.memberName ?? "알 수 없음"}
+                </S.chatSenderName>
+              )}
+
+              {/* 메시지 형태 */}
+              {isSystem ? (
+                <S.systemMessage>
+                  {chat.chatMessageContent}
+                </S.systemMessage>
+              ) : (
+                <S.Bubble isUser={isUser}>
+                  {chat.chatMessageContent}
+                </S.Bubble>
+              )}
             </S.ChatContent>
-          ) : (
-            <S.systemMessage key={idx}>{chat.chatMessageContent}</S.systemMessage>
-          )
-        )}
+          );
+        })}
 
         {isLoading && (
           <S.Bubble isUser={false}>이전 메시지를 불러오는 중...</S.Bubble>

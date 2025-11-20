@@ -12,6 +12,7 @@ S.floatingFormWrap = styled.div`
   align-items: flex-start;
   overflow: hidden;
   gap: 20px;
+  overflow-y : scroll;
 `
 
 S.editerWrap = styled.div`

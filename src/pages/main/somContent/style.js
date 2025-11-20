@@ -18,6 +18,7 @@ S.SomImage = styled.div.withConfig({
   background-image: ${({ bgsrc }) => `url("${bgsrc}")`};
   background-position: center;
   border-radius: 8px;
+  border: 1px solid ${({ theme }) => theme.PALLETE.grey.greyScale1};
   background-size: cover;
   object-fit: cover;
 `;
