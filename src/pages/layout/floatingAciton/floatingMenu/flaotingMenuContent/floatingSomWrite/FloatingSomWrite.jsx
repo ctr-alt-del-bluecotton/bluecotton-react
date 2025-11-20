@@ -12,7 +12,7 @@ const FloatingSomWrite = () => {
 const FloatingSomWriteInner = () => {
   const { somMenuPage, setSomMenuPage, handleSubmit, getValues, setIsAllError,
     uploadImageTempIds, setUploadImageTempIds, reset, currentUser, setValue, setSelected,
-    setIsDisplayFloatingMenu, setIsReset
+    setIsDisplayFloatingMenu, setIsReset, setIsFloatingSelect
    } = useFloatingAction();
   const nav = useNavigate();
    
@@ -101,7 +101,8 @@ const FloatingSomWriteInner = () => {
       setValue("somType", "solo");
       setUploadImageTempIds([]);
       setSomMenuPage(0);
-      setIsDisplayFloatingMenu((prev) => !prev)
+      setIsDisplayFloatingMenu(false);
+      setIsFloatingSelect(false);
       setIsReset((prev) => !prev)
       setIsAllError((prev) => !prev);
       setSelected("")
