@@ -4,12 +4,16 @@ import ShopList from "./ShopList";
 import ShopNumberSelect from "./shopNumberSelect/ShopNumberSelect";
 import { useSelector } from "react-redux";
 import { useSearchParams } from "react-router-dom";
+import { useModal } from "../../components/modal"; 
 
 const ShopContainer = () => {
 
     const { currentUser, isLogin } = useSelector((state) => state.user);
-      const memberId = currentUser.id;
+    const memberId = currentUser.id;
     
+
+    const { openModal } = useModal();
+
     const [searchParams] = useSearchParams();  
     const keyword = (searchParams.get("q") || "").trim();
 
@@ -42,26 +46,20 @@ const ShopContainer = () => {
 
 
     useEffect(() => {
-
         const fetchFilterProduct = async () => {
-
             const filterParams = {};
 
             Object.keys(categories).forEach(key => {
                 if (categories[key]) {
-                    // 'clothing' -> 'CLOTHING' (DB ENUM 값)
                     filterParams[key] = key.toUpperCase();
                 }
             });
 
-
             if (productTypes.new) filterParams.newType = 'NEW';
             if (productTypes.best) filterParams.best = 'BEST';
 
-            // 구매 타입:
             Object.keys(purchaseTypes).forEach(key => {
                 if (purchaseTypes[key]) {
-
                     filterParams[key] = key.toUpperCase();
                 }
             });
@@ -73,10 +71,6 @@ const ShopContainer = () => {
                 filterParams.q = keyword;
             }
 
-    
-
-
-            //fetch
             try {
                 const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/shop/`, {
                     method: "POST",
@@ -96,7 +90,6 @@ const ShopContainer = () => {
 
             } catch (error) {
                 console.error("상품 조회 실패:", error);
-
             }
         };
 
@@ -104,10 +97,61 @@ const ShopContainer = () => {
 
     }, [categories, productTypes, purchaseTypes, selected, memberId, isLogin, keyword]); 
 
-    
+
+    const handleToggleLike = async (productId) => {
+
+        if (!isLogin || !memberId) {
+            openModal({
+                title: "로그인이 필요합니다",
+                message: "찜하기는 로그인 후 이용할 수 있어요.",
+                confirmText: "로그인하러 가기",
+                cancelText: "취소",
+                onConfirm: () => (window.location.href = "/login"),
+            });
+            return;
+        }
+
+        const likeData = { memberId, productId };
+        const url = `${process.env.REACT_APP_BACKEND_URL}/shop/like/toggle`;
+
+        try {
+            const res = await fetch(url, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(likeData),
+            });
+
+            if (!res.ok) {
+                const errorData = await res.json();
+                throw new Error(errorData.message || "서버 에러");
+            }
+
+            setProducts((prevProducts) => 
+                prevProducts.map((p) => {
+                    if (p.id === productId) {
+                        const currentLiked = p.isLiked === 1 || p.isLiked === true || p.isLiked === "1";
+                        const nextLiked = !currentLiked;
+                        
+                        return {
+                            ...p,
+                            isLiked: nextLiked ? 1 : 0,
+                            productLikeCount: nextLiked 
+                                ? (p.productLikeCount || 0) + 1 
+                                : (p.productLikeCount || 0) - 1
+                        };
+                    }
+                    return p;
+                })
+            );
+
+        } catch (error) {
+            console.error("찜하기 처리 중 오류 발생:", error);
+            alert(error.message || "요청을 처리하는 중 오류가 발생했습니다.");
+        }
+    };
+
 
     const displayItems = useMemo(() => {
-
         return products.map((p) => ({
             id: p.id,
             name: p.productName,
@@ -118,7 +162,7 @@ const ShopContainer = () => {
             likeCount: p.productLikeCount ?? 0,
             isNew: String(p.productType).includes("NEW"),
             isBest: String(p.productType).includes("BEST"),
-            isLiked: p.isLiked
+            isLiked: p.isLiked 
         }));
     }, [products]);
 
@@ -142,7 +186,6 @@ const ShopContainer = () => {
                     <S.FilterGroup>
                         <S.CatagoryTopBar />
                         <S.FilterTitle>카테고리</S.FilterTitle>
-                        {/* setCategories */}
                         <S.Label><S.Checkbox checked={categories.clothing} onChange={() => setCategories(prev => ({...prev, clothing: !prev.clothing}))} /> 의류</S.Label>
                         <S.Label><S.Checkbox checked={categories.keyring} onChange={() => setCategories(prev => ({...prev, keyring: !prev.keyring}))}/> 키링</S.Label>
                         <S.Label><S.Checkbox checked={categories.bag} onChange={() => setCategories(prev => ({...prev, bag: !prev.bag}))}/> 가방</S.Label>
@@ -155,14 +198,12 @@ const ShopContainer = () => {
 
                     <S.FilterGroup>
                         <S.FilterTitle>상품 타입</S.FilterTitle>
-                        {/* setProductTypes */}
                         <S.Label><S.Checkbox checked={productTypes.new} onChange={() => setProductTypes(prev => ({...prev, new: !prev.new}))}/> NEW</S.Label>
                         <S.Label><S.Checkbox checked={productTypes.best} onChange={() => setProductTypes(prev => ({...prev, best: !prev.best}))}/> BEST</S.Label>
                     </S.FilterGroup>
 
                     <S.FilterGroup>
                         <S.FilterTitle>구매 타입</S.FilterTitle>
-                        {/* setPurchaseTypes */}
                         <S.Label><S.Checkbox checked={purchaseTypes.candy} onChange={() => setPurchaseTypes(prev => ({...prev, candy: !prev.candy}))}/> 캔디</S.Label>
                         <S.Label><S.Checkbox checked={purchaseTypes.cash} onChange={() => setPurchaseTypes(prev => ({...prev, cash: !prev.cash}))}/> 일반</S.Label>
                     </S.FilterGroup>
@@ -193,7 +234,9 @@ const ShopContainer = () => {
 
                     <S.SortBottomLine />
 
-                    <ShopList items={pagedItems} />
+
+                    <ShopList items={pagedItems} onLike={handleToggleLike} />
+                    
                     <S.Pagination>
                         <ShopNumberSelect
                             shopList={displayItems}
