@@ -371,7 +371,7 @@ const IntroSom = () => {
                   </S.IntroSomText3>
                 </S.IntroSomTextContainer2>
               </S.IntroSomContainer3>
-            </motion.div>+
+            </motion.div>
             <motion.div
               initial={{ opacity: 0, y: 80 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -593,7 +593,6 @@ const IntroSom = () => {
                           background: "#FFFFFF",
                         }}
                       >
-                        + 추가
                       </div>
                       {[...Array(sampleImageCount)].map((_, i) => (
                         <div

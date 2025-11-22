@@ -1,10 +1,7 @@
-// src/pages/manager/order/OrderManagementContainer.jsx
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
 import S from "./style";
 
-// Recharts 라이브러리 (npm install recharts)
 import {
   ResponsiveContainer,
   LineChart,
@@ -17,15 +14,13 @@ import {
   Bar,
 } from "recharts";
 
-const API = process.env.REACT_APP_BACKEND_URL;
-const fmt = (n) => Number(n || 0).toLocaleString("ko-KR", { maximumFractionDigits: 0 });
-
-
+const API = process.env.REACT_APP_BACKEND_URL || "";
+const fmt = (n) =>
+  Number(n || 0).toLocaleString("ko-KR", { maximumFractionDigits: 0 });
 
 const DashboardContent = ({ orders = [], products = [] }) => {
- 
-  const [dailyRevenue, setDailyRevenue] = useState([]); 
-  const [forecast, setForecast] = useState([]); 
+  const [dailyRevenue, setDailyRevenue] = useState([]);
+  const [forecast, setForecast] = useState([]);
   const [horizon, setHorizon] = useState(7);
 
   const [loadingRevenue, setLoadingRevenue] = useState(false);
@@ -46,7 +41,7 @@ const DashboardContent = ({ orders = [], products = [] }) => {
     () =>
       dailyRevenue.map((d) => ({
         date: d.date,
-        displayDate: d.date?.slice(5) || d.date, 
+        displayDate: d.date?.slice(5) || d.date,
         revenue: d.revenue,
       })),
     [dailyRevenue]
@@ -69,19 +64,25 @@ const DashboardContent = ({ orders = [], products = [] }) => {
         setLoadingForecast(true);
         setError(null);
 
-        const res = await axios.get(
-          `${API}/api/admin/revenue/forecast?horizon=${horizon}`,
-          { withCredentials: true }
-        );
+        const url = new URL(`${API}/api/admin/revenue/forecast`);
+        url.searchParams.set("horizon", horizon);
 
-        const data = res.data;
-        console.log("[DashboardContent] Integrated Data:", data);
+        const res = await fetch(url.toString(), {
+          method: "GET",
+          credentials: "include",
+        });
+
+        if (!res.ok) {
+          throw new Error(`HTTP ${res.status}`);
+        }
+
+        const body = await res.json();
+        const data = body?.data ?? body;
 
         if (!data || !Array.isArray(data.history)) {
           throw new Error("백엔드 API가 history 데이터를 반환하지 않았습니다.");
         }
 
-       
         setDailyRevenue(
           data.history.map((d) => ({
             date: d.date,
@@ -139,7 +140,6 @@ const DashboardContent = ({ orders = [], products = [] }) => {
 
       {error && <S.ErrorBox>에러: {error}</S.ErrorBox>}
 
- 
       <S.ChartGrid>
         <S.ChartCard>
           <S.ChartHeader>
@@ -154,7 +154,7 @@ const DashboardContent = ({ orders = [], products = [] }) => {
             <div style={{ width: "100%", height: 300 }}>
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={historyChartData}>
-                  <CartesianGrid strokeDasharray="3 3" />
+                  <CartesianGrid strokeDasharray="3 10" />
                   <XAxis dataKey="displayDate" />
                   <YAxis tickFormatter={(v) => fmt(v)} width={80} />
                   <Tooltip
@@ -167,12 +167,14 @@ const DashboardContent = ({ orders = [], products = [] }) => {
                     stroke="#726EF0"
                     strokeWidth={2}
                     dot={{ r: 3 }}
+                    animationDuration={3500}
                   />
                 </LineChart>
               </ResponsiveContainer>
             </div>
           )}
         </S.ChartCard>
+
         <S.ChartCard>
           <S.ChartHeader>
             <S.ChartTitle>매출 예측</S.ChartTitle>
@@ -217,52 +219,27 @@ const DashboardContent = ({ orders = [], products = [] }) => {
 
 const OrderManagementContainer = () => {
   const navigate = useNavigate();
+
   const [activeTab, setActiveTab] = useState("dashboard");
   const [searchTerm, setSearchTerm] = useState("");
-  const [filterStatus, setFilterStatus] = useState("all");
 
-  const orders = [
-    {
-      id: 1,
-      orderNumber: "ORD-001",
-      user: "user1",
-      product: "블루코튼 티셔츠",
-      quantity: 2,
-      total: 50000,
-      status: "pending",
-      orderDate: "2024-12-10",
-    },
-    {
-      id: 2,
-      orderNumber: "ORD-002",
-      user: "user2",
-      product: "블루코튼 후드",
-      quantity: 1,
-      total: 80000,
-      status: "shipped",
-      orderDate: "2024-12-09",
-    },
-    {
-      id: 3,
-      orderNumber: "ORD-003",
-      user: "user3",
-      product: "블루코튼 캡",
-      quantity: 3,
-      total: 45000,
-      status: "delivered",
-      orderDate: "2024-12-08",
-    },
-    {
-      id: 4,
-      orderNumber: "ORD-004",
-      user: "user4",
-      product: "블루코튼 가방",
-      quantity: 1,
-      total: 60000,
-      status: "pending",
-      orderDate: "2024-12-11",
-    },
-  ];
+  const [orderStatusFilter, setOrderStatusFilter] = useState("all");
+  const [deliveryStatusFilter, setDeliveryStatusFilter] = useState("all");
+  const [reviewStatusFilter, setReviewStatusFilter] = useState("all");
+
+  const [deliveryData, setDeliveryData] = useState([]);
+  const [loadingDeliveries, setLoadingDeliveries] = useState(false);
+  const [deliveryError, setDeliveryError] = useState(null);
+
+  const [detailOpen, setDetailOpen] = useState(false);
+  const [detailOrder, setDetailOrder] = useState(null);
+  const [detailItems, setDetailItems] = useState([]);
+  const [detailLoading, setDetailLoading] = useState(false);
+  const [detailError, setDetailError] = useState(null);
+
+  const [sortOrder, setSortOrder] = useState("desc");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   const products = [
     {
@@ -303,63 +280,12 @@ const OrderManagementContainer = () => {
     },
   ];
 
-  const deliveries = [
-    {
-      id: 1,
-      orderNumber: "ORD-001",
-      orderId: 1,
-      user: "user1",
-      product: "블루코튼 티셔츠",
-      trackingNumber: "1234567890",
-      address: "서울시 강남구 테헤란로 123",
-      status: "preparing",
-      shipDate: null,
-      deliveryDate: null,
-    },
-    {
-      id: 2,
-      orderNumber: "ORD-002",
-      orderId: 2,
-      user: "user2",
-      product: "블루코튼 후드",
-      trackingNumber: "0987654321",
-      address: "서울시 서초구 서초대로 456",
-      status: "shipped",
-      shipDate: "2024-12-09",
-      deliveryDate: null,
-    },
-    {
-      id: 3,
-      orderNumber: "ORD-003",
-      orderId: 3,
-      user: "user3",
-      product: "블루코튼 캡",
-      trackingNumber: "1122334455",
-      address: "서울시 송파구 올림픽로 789",
-      status: "delivered",
-      shipDate: "2024-12-08",
-      deliveryDate: "2024-12-10",
-    },
-    {
-      id: 4,
-      orderNumber: "ORD-004",
-      orderId: 4,
-      user: "user4",
-      product: "블루코튼 가방",
-      trackingNumber: null,
-      address: "서울시 마포구 홍대로 321",
-      status: "preparing",
-      shipDate: null,
-      deliveryDate: null,
-    },
-  ];
-
   const reviewReports = [
     {
       id: 1,
       reviewId: 101,
       orderId: 3,
-      orderNumber: "ORD-003",
+      orderNumber: "ORD-000003",
       product: "블루코튼 캡",
       reviewContent: "부적절한 리뷰 내용입니다...",
       rating: 1,
@@ -373,7 +299,7 @@ const OrderManagementContainer = () => {
       id: 2,
       reviewId: 102,
       orderId: 2,
-      orderNumber: "ORD-002",
+      orderNumber: "ORD-000002",
       product: "블루코튼 후드",
       reviewContent: "욕설이 포함된 리뷰",
       rating: 2,
@@ -387,7 +313,7 @@ const OrderManagementContainer = () => {
       id: 3,
       reviewId: 103,
       orderId: 1,
-      orderNumber: "ORD-001",
+      orderNumber: "ORD-000001",
       product: "블루코튼 티셔츠",
       reviewContent: "스팸 리뷰",
       rating: 5,
@@ -399,14 +325,150 @@ const OrderManagementContainer = () => {
     },
   ];
 
-  // ---- 필터링 ----
+  const formatDate = (value) => {
+    if (!value) return "-";
+    const str = String(value);
+    if (str.length >= 10) return str.slice(0, 10);
+    return str;
+  };
+
+  const toOrderStatusKey = (deliveryStatus) => {
+    switch (deliveryStatus) {
+      case "READY":
+        return "pending";
+      case "SHIPPING":
+        return "shipped";
+      case "COMPLETED":
+        return "delivered";
+      case "CANCELLED":
+        return "cancelled";
+      default:
+        return "pending";
+    }
+  };
+
+  const toDeliveryStatusKey = (deliveryStatus) => {
+    switch (deliveryStatus) {
+      case "READY":
+        return "preparing";
+      case "SHIPPING":
+        return "shipped";
+      case "COMPLETED":
+        return "delivered";
+      case "CANCELLED":
+        return "cancelled";
+      default:
+        return "preparing";
+    }
+  };
+
+  const safeTime = (value) => {
+    if (!value || value === "-") return 0;
+    const t = new Date(value).getTime();
+    return Number.isNaN(t) ? 0 : t;
+  };
+
+  const paginate = (list) => {
+    const indexOfLast = currentPage * itemsPerPage;
+    const indexOfFirst = indexOfLast - itemsPerPage;
+    return list.slice(indexOfFirst, indexOfLast);
+  };
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [
+    activeTab,
+    searchTerm,
+    orderStatusFilter,
+    deliveryStatusFilter,
+    reviewStatusFilter,
+    sortOrder,
+  ]);
+
+  const fetchDeliveries = async () => {
+    try {
+      setLoadingDeliveries(true);
+      setDeliveryError(null);
+
+      const res = await fetch(`${API}/admin/deliveries/lists`, {
+        method: "GET",
+        credentials: "include",
+      });
+
+      if (!res.ok) {
+        console.error("Delivery list HTTP error:", res.status);
+        throw new Error(`HTTP ${res.status}`);
+      }
+
+      const body = await res.json();
+      const list = body?.data || [];
+
+      console.log("[OrderManagement] Delivery List:", list);
+      setDeliveryData(list);
+    } catch (e) {
+      console.error("[OrderManagement] 배송/주문 목록 조회 실패:", e);
+      setDeliveryError("배송/주문 목록을 불러오는 데 실패했습니다.");
+      setDeliveryData([]);
+    } finally {
+      setLoadingDeliveries(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchDeliveries();
+  }, []);
+
+  const orders = useMemo(() => {
+    return (deliveryData || []).map((d) => {
+      const items = d.adminOrderItemDTOList || [];
+      const quantity = items.reduce(
+        (sum, item) => sum + (item.orderQuantity || 0),
+        0
+      );
+      const productNames = items.map((item) => item.productName).join(", ");
+
+      return {
+        id: d.orderId,
+        deliveryId: d.id,
+        orderNumber: `ORD-${String(d.orderId).padStart(6, "0")}`,
+        user: d.memberNickname,
+        product: productNames || "-",
+        quantity,
+        total: d.paymentPrice ?? 0,
+        status: toOrderStatusKey(d.deliveryStatus),
+        orderDate: formatDate(d.paymentCreateAt),
+      };
+    });
+  }, [deliveryData]);
+
+  const deliveries = useMemo(() => {
+    return (deliveryData || []).map((d) => {
+      const items = d.adminOrderItemDTOList || [];
+      const productNames = items.map((item) => item.productName).join(", ");
+
+      return {
+        id: d.id,
+        orderId: d.orderId,
+        orderNumber: `ORD-${String(d.orderId).padStart(6, "0")}`,
+        user: d.memberNickname,
+        product: productNames || "-",
+        productPurchaseType: d.productPurchaseType,
+        address: d.deliveryAddress,
+        deliveryRequest: d.deliveryRequest,
+        paymentDate: formatDate(d.paymentCreateAt),
+        status: toDeliveryStatusKey(d.deliveryStatus),
+      };
+    });
+  }, [deliveryData]);
+
   const filteredOrders = orders.filter((order) => {
     const term = searchTerm.toLowerCase();
     const matchesSearch =
       order.orderNumber.toLowerCase().includes(term) ||
       order.user.toLowerCase().includes(term) ||
       order.product.toLowerCase().includes(term);
-    const matchesFilter = filterStatus === "all" || order.status === filterStatus;
+    const matchesFilter =
+      orderStatusFilter === "all" || order.status === orderStatusFilter;
     return matchesSearch && matchesFilter;
   });
 
@@ -420,9 +482,13 @@ const OrderManagementContainer = () => {
       delivery.orderNumber.toLowerCase().includes(term) ||
       delivery.user.toLowerCase().includes(term) ||
       delivery.product.toLowerCase().includes(term) ||
-      (delivery.trackingNumber &&
-        delivery.trackingNumber.toLowerCase().includes(term));
-    const matchesFilter = filterStatus === "all" || delivery.status === filterStatus;
+      (delivery.productPurchaseType &&
+        delivery.productPurchaseType.toLowerCase().includes(term)) ||
+      (delivery.deliveryRequest &&
+        delivery.deliveryRequest.toLowerCase().includes(term));
+    const matchesFilter =
+      deliveryStatusFilter === "all" ||
+      delivery.status === deliveryStatusFilter;
     return matchesSearch && matchesFilter;
   });
 
@@ -434,45 +500,199 @@ const OrderManagementContainer = () => {
       report.reviewContent.toLowerCase().includes(term) ||
       report.reportedUser.toLowerCase().includes(term) ||
       report.reporter.toLowerCase().includes(term);
-    const matchesFilter = filterStatus === "all" || report.status === filterStatus;
+    const matchesFilter =
+      reviewStatusFilter === "all" || report.status === reviewStatusFilter;
     return matchesSearch && matchesFilter;
   });
 
-  // ---- 핸들러 (지금은 콘솔만) ----
-  const handleOrderStatusChange = (orderId, newStatus) => {
-    console.log(`주문 ${orderId} 상태 변경: ${newStatus}`);
-    // TODO: API 연결
+  const sortedOrders = useMemo(() => {
+    const arr = [...filteredOrders];
+    arr.sort((a, b) => {
+      const diff = safeTime(a.orderDate) - safeTime(b.orderDate);
+      return sortOrder === "asc" ? diff : -diff;
+    });
+    return arr;
+  }, [filteredOrders, sortOrder]);
+
+  const sortedDeliveries = useMemo(() => {
+    const arr = [...filteredDeliveries];
+    arr.sort((a, b) => {
+      const diff = safeTime(a.paymentDate) - safeTime(b.paymentDate);
+      return sortOrder === "asc" ? diff : -diff;
+    });
+    return arr;
+  }, [filteredDeliveries, sortOrder]);
+
+  const sortedReviewReports = useMemo(() => {
+    const arr = [...filteredReviewReports];
+    arr.sort((a, b) => {
+      const diff = safeTime(a.reportDate) - safeTime(b.reportDate);
+      return sortOrder === "asc" ? diff : -diff;
+    });
+    return arr;
+  }, [filteredReviewReports, sortOrder]);
+
+  const pageOrders = paginate(sortedOrders);
+  const pageDeliveries = paginate(sortedDeliveries);
+  const pageReviewReports = paginate(sortedReviewReports);
+
+  const renderPagination = (totalItems) => {
+    const totalPages = Math.ceil(totalItems / itemsPerPage);
+    if (totalPages <= 1) return null;
+
+    const pages = [];
+    for (let i = 1; i <= totalPages; i++) {
+      pages.push(i);
+    }
+
+    return (
+      <div
+        style={{
+          marginTop: "16px",
+          display: "flex",
+          justifyContent: "center",
+          gap: "4px",
+        }}
+      >
+        <button
+          type="button"
+          onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+          disabled={currentPage === 1}
+          style={{
+            padding: "6px 10px",
+            borderRadius: "6px",
+            border: "1px solid black",
+            backgroundColor: currentPage === 1 ? "#f5f5f5" : "#fff",
+            cursor: currentPage === 1 ? "default" : "pointer",
+            fontSize: "12px",
+          }}
+        >
+          이전
+        </button>
+        {pages.map((p) => (
+          <button
+            key={p}
+            type="button"
+            onClick={() => setCurrentPage(p)}
+            style={{
+              padding: "6px 10px",
+              borderRadius: "6px",
+              border: "1px solid #ddd",
+              backgroundColor: currentPage === p ? "#726EF0" : "#fff",
+              color: currentPage === p ? "#fff" : "#333",
+              cursor: "pointer",
+              fontSize: "12px",
+            }}
+          >
+            {p}
+          </button>
+        ))}
+        <button
+          type="button"
+          onClick={() =>
+            setCurrentPage((p) => Math.min(totalPages, p + 1))
+          }
+          disabled={currentPage === totalPages}
+          style={{
+            padding: "6px 10px",
+            borderRadius: "6px",
+            border: "1px solid #ddd",
+            backgroundColor:
+              currentPage === totalPages ? "#f5f5f5" : "#fff",
+            cursor: currentPage === totalPages ? "default" : "pointer",
+            fontSize: "12px",
+          }}
+        >
+          다음
+        </button>
+      </div>
+    );
+  };
+
+  const changeDeliveryStatus = async (deliveryId, statusEnum) => {
+    try {
+      const url = new URL(`${API}/admin/deliveries/status/${deliveryId}`);
+      url.searchParams.set("status", statusEnum);
+
+      const res = await fetch(url.toString(), {
+        method: "PUT",
+        credentials: "include",
+      });
+
+      if (!res.ok) {
+        console.error("changeDeliveryStatus HTTP error:", res.status);
+        throw new Error(`HTTP ${res.status}`);
+      }
+
+      await fetchDeliveries();
+    } catch (e) {
+      console.error("배송 상태 변경 실패:", e);
+      alert("배송 상태 변경에 실패했습니다.");
+    }
   };
 
   const handleProductStatusChange = (productId, newStatus) => {
     console.log(`상품 ${productId} 상태 변경: ${newStatus}`);
-    // TODO: API 연결
   };
 
   const handleAddProduct = () => {
     console.log("상품 등록 모달 열기");
-    // TODO: 상품 등록 모달 구현
   };
 
-  const handleDeliveryStatusChange = (deliveryId, newStatus) => {
-    console.log(`배송 ${deliveryId} 상태 변경: ${newStatus}`);
-    // TODO: API 연결
-  };
-
-  const handleTrackingNumberUpdate = (deliveryId, trackingNumber) => {
-    console.log(`배송 ${deliveryId} 추적번호 업데이트: ${trackingNumber}`);
-    // TODO: API 연결
+  const handleDeliveryStatusChange = (deliveryId, nextStatusEnum) => {
+    changeDeliveryStatus(deliveryId, nextStatusEnum);
   };
 
   const handleReviewReportResolve = (reportId) => {
     console.log(`리뷰 신고 ${reportId} 처리 완료`);
-    // TODO: API 연결
   };
 
   const handleReviewDelete = (reviewId) => {
     console.log(`리뷰 ${reviewId} 삭제`);
-    // TODO: API 연결
   };
+
+  const openOrderDetail = async (order) => {
+    try {
+      setDetailOpen(true);
+      setDetailOrder(order);
+      setDetailItems([]);
+      setDetailError(null);
+      setDetailLoading(true);
+
+      const res = await fetch(
+        `${API}/admin/deliveries/items/${order.id}`,
+        {
+          method: "GET",
+          credentials: "include",
+        }
+      );
+
+      if (!res.ok) {
+        throw new Error(`HTTP ${res.status}`);
+      }
+
+      const body = await res.json();
+      const items = body?.data ?? body ?? [];
+
+      setDetailItems(Array.isArray(items) ? items : []);
+    } catch (e) {
+      console.error("[OrderManagement] 주문 상세 조회 실패:", e);
+      setDetailError("주문 상품 목록을 불러오는 데 실패했습니다.");
+      setDetailItems([]);
+    } finally {
+      setDetailLoading(false);
+    }
+  };
+
+  const closeOrderDetail = () => {
+    setDetailOpen(false);
+    setDetailOrder(null);
+    setDetailItems([]);
+    setDetailError(null);
+  };
+
+  const getItemPrice = (item) =>
+    item.orderPrice ?? item.paymentPrice ?? item.productPrice ?? 0;
 
   return (
     <S.ManagerWrapper>
@@ -483,18 +703,21 @@ const OrderManagementContainer = () => {
           </S.BackButton>
           <S.Title>관리자 센터</S.Title>
           <S.Subtitle>
-            {activeTab === "dashboard" ? "운영 현황 대시보드" : "주문 및 상품 관리"}
+            {activeTab === "dashboard"
+              ? "운영 현황 대시보드"
+              : "주문 및 상품 관리"}
           </S.Subtitle>
         </S.Header>
 
-        {/* 탭 영역 */}
         <S.TabContainer>
           <S.TabButton
             $active={activeTab === "dashboard"}
             onClick={() => {
               setActiveTab("dashboard");
               setSearchTerm("");
-              setFilterStatus("all");
+              setOrderStatusFilter("all");
+              setDeliveryStatusFilter("all");
+              setReviewStatusFilter("all");
             }}
           >
             대시보드
@@ -504,7 +727,7 @@ const OrderManagementContainer = () => {
             onClick={() => {
               setActiveTab("orders");
               setSearchTerm("");
-              setFilterStatus("all");
+              setOrderStatusFilter("all");
             }}
           >
             주문 관리
@@ -514,7 +737,7 @@ const OrderManagementContainer = () => {
             onClick={() => {
               setActiveTab("deliveries");
               setSearchTerm("");
-              setFilterStatus("all");
+              setDeliveryStatusFilter("all");
             }}
           >
             배송 관리
@@ -524,7 +747,6 @@ const OrderManagementContainer = () => {
             onClick={() => {
               setActiveTab("products");
               setSearchTerm("");
-              setFilterStatus("all");
             }}
           >
             상품 등록/관리
@@ -534,19 +756,26 @@ const OrderManagementContainer = () => {
             onClick={() => {
               setActiveTab("reviewReports");
               setSearchTerm("");
-              setFilterStatus("all");
+              setReviewStatusFilter("all");
             }}
           >
             리뷰 신고
           </S.TabButton>
         </S.TabContainer>
 
-        {/* 1) 대시보드 탭 */}
         {activeTab === "dashboard" && (
           <DashboardContent orders={orders} products={products} />
         )}
 
-        {/* 2) 주문 관리 탭 */}
+        {(activeTab === "orders" || activeTab === "deliveries") && (
+          <>
+            {loadingDeliveries && (
+              <S.EmptyState>주문/배송 데이터를 불러오는 중...</S.EmptyState>
+            )}
+            {deliveryError && <S.ErrorBox>{deliveryError}</S.ErrorBox>}
+          </>
+        )}
+
         {activeTab === "orders" && (
           <S.ContentSection>
             <S.FilterBar>
@@ -557,16 +786,38 @@ const OrderManagementContainer = () => {
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
               <S.FilterSelect
-                value={filterStatus}
-                onChange={(e) => setFilterStatus(e.target.value)}
+                value={orderStatusFilter}
+                onChange={(e) => setOrderStatusFilter(e.target.value)}
               >
                 <option value="all">전체 상태</option>
-                <option value="pending">대기중</option>
+                <option value="pending">준비중</option>
                 <option value="shipped">배송중</option>
                 <option value="delivered">배송완료</option>
-                <option value="cancelled">취소됨</option>
               </S.FilterSelect>
+              <button
+                type="button"
+                onClick={() =>
+                  setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"))
+                }
+                style={{
+                  marginLeft: "8px",
+                  padding: "6px 10px",
+                  borderRadius: "6px",
+                  border: "1px solid #ddd",
+                  backgroundColor: "#fff",
+                  cursor: "pointer",
+                  fontSize: "12px",
+                }}
+              >
+                {sortOrder === "asc" ? "오래된순" : "최신순"}
+              </button>
             </S.FilterBar>
+
+            {pageOrders.length === 0 &&
+              !loadingDeliveries &&
+              !deliveryError && (
+                <S.EmptyState>표시할 주문이 없습니다.</S.EmptyState>
+              )}
 
             <S.Table>
               <S.TableHeader>
@@ -582,13 +833,15 @@ const OrderManagementContainer = () => {
                 </S.TableRow>
               </S.TableHeader>
               <tbody>
-                {filteredOrders.map((order) => (
-                  <S.TableRow key={order.id}>
+                {pageOrders.map((order) => (
+                  <S.TableRow key={`${order.id}-${order.deliveryId}`}>
                     <S.TableCell>{order.orderNumber}</S.TableCell>
                     <S.TableCell>{order.user}</S.TableCell>
                     <S.TableCell>{order.product}</S.TableCell>
                     <S.TableCell>{order.quantity}</S.TableCell>
-                    <S.TableCell>{order.total.toLocaleString()}원</S.TableCell>
+                    <S.TableCell>
+                      {order.total.toLocaleString()}원
+                    </S.TableCell>
                     <S.TableCell>
                       <S.StatusBadge $status={order.status}>
                         {order.status === "pending"
@@ -603,19 +856,8 @@ const OrderManagementContainer = () => {
                     <S.TableCell>{order.orderDate}</S.TableCell>
                     <S.TableCell>
                       <S.ButtonGroup>
-                        <S.Button
-                          onClick={() =>
-                            handleOrderStatusChange(order.id, "shipped")
-                          }
-                          style={{ padding: "6px 12px", fontSize: "12px" }}
-                          disabled={order.status !== "pending"}
-                        >
-                          배송시작
-                        </S.Button>
                         <S.SecondaryButton
-                          onClick={() =>
-                            console.log(`주문 ${order.id} 상세보기`)
-                          }
+                          onClick={() => openOrderDetail(order)}
                           style={{ padding: "6px 12px", fontSize: "12px" }}
                         >
                           상세
@@ -626,29 +868,53 @@ const OrderManagementContainer = () => {
                 ))}
               </tbody>
             </S.Table>
+
+            {renderPagination(sortedOrders.length)}
           </S.ContentSection>
         )}
 
-        {/* 3) 배송 관리 탭 */}
         {activeTab === "deliveries" && (
           <S.ContentSection>
             <S.FilterBar>
               <S.SearchInput
                 type="text"
-                placeholder="주문번호, 사용자, 상품명, 추적번호로 검색..."
+                placeholder="주문번호, 사용자, 상품명, 구매 타입, 요청사항으로 검색..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
               <S.FilterSelect
-                value={filterStatus}
-                onChange={(e) => setFilterStatus(e.target.value)}
+                value={deliveryStatusFilter}
+                onChange={(e) => setDeliveryStatusFilter(e.target.value)}
               >
                 <option value="all">전체 상태</option>
                 <option value="preparing">준비중</option>
                 <option value="shipped">배송중</option>
                 <option value="delivered">배송완료</option>
               </S.FilterSelect>
+              <button
+                type="button"
+                onClick={() =>
+                  setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"))
+                }
+                style={{
+                  marginLeft: "8px",
+                  padding: "6px 10px",
+                  borderRadius: "6px",
+                  border: "1px solid black",
+                  backgroundColor: "#fff",
+                  cursor: "pointer",
+                  fontSize: "12px",
+                }}
+              >
+                {sortOrder === "asc" ? "오래된순" : "최신순"}
+              </button>
             </S.FilterBar>
+
+            {pageDeliveries.length === 0 &&
+              !loadingDeliveries &&
+              !deliveryError && (
+                <S.EmptyState>표시할 배송 정보가 없습니다.</S.EmptyState>
+              )}
 
             <S.Table>
               <S.TableHeader>
@@ -657,21 +923,24 @@ const OrderManagementContainer = () => {
                   <S.TableHeaderCell>주문번호</S.TableHeaderCell>
                   <S.TableHeaderCell>사용자</S.TableHeaderCell>
                   <S.TableHeaderCell>상품</S.TableHeaderCell>
+                  <S.TableHeaderCell>상품 구매 타입</S.TableHeaderCell>
                   <S.TableHeaderCell>배송 주소</S.TableHeaderCell>
-                  <S.TableHeaderCell>추적번호</S.TableHeaderCell>
+                  <S.TableHeaderCell>배송 요청사항</S.TableHeaderCell>
+                  <S.TableHeaderCell>결제일</S.TableHeaderCell>
                   <S.TableHeaderCell>상태</S.TableHeaderCell>
-                  <S.TableHeaderCell>발송일</S.TableHeaderCell>
-                  <S.TableHeaderCell>배송완료일</S.TableHeaderCell>
                   <S.TableHeaderCell>작업</S.TableHeaderCell>
                 </S.TableRow>
               </S.TableHeader>
               <tbody>
-                {filteredDeliveries.map((delivery) => (
+                {pageDeliveries.map((delivery) => (
                   <S.TableRow key={delivery.id}>
                     <S.TableCell>{delivery.id}</S.TableCell>
                     <S.TableCell>{delivery.orderNumber}</S.TableCell>
                     <S.TableCell>{delivery.user}</S.TableCell>
                     <S.TableCell>{delivery.product}</S.TableCell>
+                    <S.TableCell>
+                      {delivery.productPurchaseType || "-"}
+                    </S.TableCell>
                     <S.TableCell
                       style={{
                         maxWidth: "200px",
@@ -682,24 +951,37 @@ const OrderManagementContainer = () => {
                     >
                       {delivery.address}
                     </S.TableCell>
-                    <S.TableCell>{delivery.trackingNumber || "-"}</S.TableCell>
+                    <S.TableCell
+                      style={{
+                        maxWidth: "200px",
+                        overflow: "hidden",
+                        textOverflow: "ellipsis",
+                        whiteSpace: "nowrap",
+                      }}
+                    >
+                      {delivery.deliveryRequest || "-"}
+                    </S.TableCell>
+                    <S.TableCell>{delivery.paymentDate || "-"}</S.TableCell>
                     <S.TableCell>
                       <S.StatusBadge $status={delivery.status}>
                         {delivery.status === "preparing"
                           ? "준비중"
                           : delivery.status === "shipped"
                           ? "배송중"
-                          : "배송완료"}
+                          : delivery.status === "delivered"
+                          ? "배송완료"
+                          : "취소됨"}
                       </S.StatusBadge>
                     </S.TableCell>
-                    <S.TableCell>{delivery.shipDate || "-"}</S.TableCell>
-                    <S.TableCell>{delivery.deliveryDate || "-"}</S.TableCell>
                     <S.TableCell>
                       <S.ButtonGroup>
                         {delivery.status === "preparing" && (
                           <S.Button
                             onClick={() =>
-                              handleDeliveryStatusChange(delivery.id, "shipped")
+                              handleDeliveryStatusChange(
+                                delivery.id,
+                                "SHIPPING"
+                              )
                             }
                             style={{ padding: "6px 12px", fontSize: "12px" }}
                           >
@@ -711,7 +993,7 @@ const OrderManagementContainer = () => {
                             onClick={() =>
                               handleDeliveryStatusChange(
                                 delivery.id,
-                                "delivered"
+                                "COMPLETED"
                               )
                             }
                             style={{ padding: "6px 12px", fontSize: "12px" }}
@@ -719,31 +1001,17 @@ const OrderManagementContainer = () => {
                             배송완료
                           </S.Button>
                         )}
-                        <S.SecondaryButton
-                          onClick={() => {
-                            const trackingNumber =
-                              window.prompt("추적번호를 입력하세요:");
-                            if (trackingNumber) {
-                              handleTrackingNumberUpdate(
-                                delivery.id,
-                                trackingNumber
-                              );
-                            }
-                          }}
-                          style={{ padding: "6px 12px", fontSize: "12px" }}
-                        >
-                          추적번호 입력
-                        </S.SecondaryButton>
                       </S.ButtonGroup>
                     </S.TableCell>
                   </S.TableRow>
                 ))}
               </tbody>
             </S.Table>
+
+            {renderPagination(sortedDeliveries.length)}
           </S.ContentSection>
         )}
 
-        {/* 4) 상품 관리 탭 */}
         {activeTab === "products" && (
           <S.ContentSection>
             <S.FilterBar>
@@ -753,10 +1021,13 @@ const OrderManagementContainer = () => {
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
-              <S.Button onClick={handleAddProduct} style={{ marginLeft: "12px" }}>
-                + 상품 등록
-              </S.Button>
-            </S.FilterBar>
+            <S.Button
+              onClick={handleAddProduct}
+              style={{ marginLeft: "12px" }}
+            >
+              + 상품 등록
+            </S.Button>
+          </S.FilterBar>
 
             <S.Table>
               <S.TableHeader>
@@ -776,7 +1047,9 @@ const OrderManagementContainer = () => {
                   <S.TableRow key={product.id}>
                     <S.TableCell>{product.id}</S.TableCell>
                     <S.TableCell>{product.name}</S.TableCell>
-                    <S.TableCell>{product.price.toLocaleString()}원</S.TableCell>
+                    <S.TableCell>
+                      {product.price.toLocaleString()}원
+                    </S.TableCell>
                     <S.TableCell>{product.stock}개</S.TableCell>
                     <S.TableCell>{product.category}</S.TableCell>
                     <S.TableCell>
@@ -819,7 +1092,6 @@ const OrderManagementContainer = () => {
           </S.ContentSection>
         )}
 
-        {/* 5) 리뷰 신고 탭 */}
         {activeTab === "reviewReports" && (
           <S.ContentSection>
             <S.FilterBar>
@@ -830,13 +1102,30 @@ const OrderManagementContainer = () => {
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
               <S.FilterSelect
-                value={filterStatus}
-                onChange={(e) => setFilterStatus(e.target.value)}
+                value={reviewStatusFilter}
+                onChange={(e) => setReviewStatusFilter(e.target.value)}
               >
                 <option value="all">전체 상태</option>
                 <option value="pending">대기중</option>
                 <option value="resolved">처리완료</option>
               </S.FilterSelect>
+              <button
+                type="button"
+                onClick={() =>
+                  setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"))
+                }
+                style={{
+                  marginLeft: "8px",
+                  padding: "6px 10px",
+                  borderRadius: "6px",
+                  border: "1px solid #ddd",
+                  backgroundColor: "#fff",
+                  cursor: "pointer",
+                  fontSize: "12px",
+                }}
+              >
+                {sortOrder === "asc" ? "오래된순" : "최신순"}
+              </button>
             </S.FilterBar>
 
             <S.Table>
@@ -857,7 +1146,7 @@ const OrderManagementContainer = () => {
                 </S.TableRow>
               </S.TableHeader>
               <tbody>
-                {filteredReviewReports.map((report) => (
+                {pageReviewReports.map((report) => (
                   <S.TableRow key={report.id}>
                     <S.TableCell>{report.id}</S.TableCell>
                     <S.TableCell>{report.reviewId}</S.TableCell>
@@ -904,7 +1193,154 @@ const OrderManagementContainer = () => {
                 ))}
               </tbody>
             </S.Table>
+
+            {renderPagination(sortedReviewReports.length)}
           </S.ContentSection>
+        )}
+
+        {detailOpen && (
+          <div
+            style={{
+              position: "fixed",
+              inset: 0,
+              backgroundColor: "rgba(0,0,0,0.4)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              zIndex: 9999,
+            }}
+            onClick={closeOrderDetail}
+          >
+            <div
+              style={{
+                backgroundColor: "#fff",
+                borderRadius: "12px",
+                padding: "20px",
+                width: "600px",
+                maxHeight: "80vh",
+                overflowY: "auto",
+                boxShadow: "0 10px 30px rgba(0,0,0,0.15)",
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <h3 style={{ marginBottom: "8px", fontSize: "20px" }}>
+                주문 상세
+              </h3>
+              {detailOrder && (
+                <p style={{ marginBottom: "12px", color: "#666" }}>
+                  주문번호: <b>{detailOrder.orderNumber}</b> / 사용자:{" "}
+                  <b>{detailOrder.user}</b>
+                </p>
+              )}
+
+              {detailLoading && (
+                <S.EmptyState>주문 상품을 불러오는 중...</S.EmptyState>
+              )}
+              {detailError && <S.ErrorBox>{detailError}</S.ErrorBox>}
+
+              {!detailLoading && !detailError && detailItems.length === 0 && (
+                <S.EmptyState>주문 상품이 없습니다.</S.EmptyState>
+              )}
+
+              {!detailLoading && !detailError && detailItems.length > 0 && (
+                <table
+                  style={{
+                    width: "100%",
+                    borderCollapse: "collapse",
+                    marginTop: "8px",
+                  }}
+                >
+                  <thead>
+                    <tr>
+                      <th
+                        style={{
+                          textAlign: "left",
+                          borderBottom: "1px solid #eee",
+                          padding: "8px 4px",
+                        }}
+                      >
+                        상품명
+                      </th>
+                      <th
+                        style={{
+                          textAlign: "right",
+                          borderBottom: "1px solid #eee",
+                          padding: "8px 4px",
+                        }}
+                      >
+                        수량
+                      </th>
+                      <th
+                        style={{
+                          textAlign: "right",
+                          borderBottom: "1px solid #eee",
+                          padding: "8px 4px",
+                        }}
+                      >
+                        금액
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {detailItems.map((item) => (
+                      <tr
+                        key={item.id ?? `${item.productId}-${item.orderId}`}
+                      >
+                        <td
+                          style={{
+                            padding: "8px 4px",
+                            borderBottom: "1px solid #f5f5f5",
+                          }}
+                        >
+                          {item.productName ?? "-"}
+                        </td>
+                        <td
+                          style={{
+                            padding: "8px 4px",
+                            textAlign: "right",
+                            borderBottom: "1px solid #f5f5f5",
+                          }}
+                        >
+                          {item.orderQuantity ?? 0}
+                        </td>
+                        <td
+                          style={{
+                            padding: "8px 4px",
+                            textAlign: "right",
+                            borderBottom: "1px solid #f5f5f5",
+                          }}
+                        >
+                          {fmt(getItemPrice(item))}원
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "flex-end",
+                  marginTop: "16px",
+                }}
+              >
+                <button
+                  onClick={closeOrderDetail}
+                  style={{
+                    padding: "8px 16px",
+                    borderRadius: "8px",
+                    border: "none",
+                    backgroundColor: "#726EF0",
+                    color: "#fff",
+                    cursor: "pointer",
+                  }}
+                >
+                  닫기
+                </button>
+              </div>
+            </div>
+          </div>
         )}
       </S.ManagerContainer>
     </S.ManagerWrapper>
