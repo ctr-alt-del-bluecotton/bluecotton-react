@@ -1,4 +1,3 @@
-// src/pages/.../shop/Shop.jsx
 import React, { useEffect, useMemo, useState } from "react";
 import S from "./style";
 import ShopInfo from "./info/ShopInfo";
@@ -13,13 +12,6 @@ const formatPrice = (type, value) => {
   return `${n.toLocaleString()}${type === "CANDY" ? "캔디" : "원"}`;
 };
 
-const parseSubs = (s) =>
-  typeof s === "string"
-    ? s
-        .split(",")
-        .map((v) => v.trim())
-        .filter(Boolean)
-    : [];
 
 const Shop = () => {
   const { id } = useParams();
@@ -96,11 +88,12 @@ const Shop = () => {
           setIsLiked(false);
         }
 
-        // 메인 이미지 선택 (빈 src 방지)
+
         const main = resolveUrl(product.productMainImageUrl);
-        const subs = parseSubs(product.productSubImageUrl)
-          .map(resolveUrl)
-          .filter(Boolean);
+        
+        const subImages = product.productSubImages || [];
+        const subs = subImages.map(resolveUrl).filter(Boolean);
+
         const firstAvailable = main || subs[0] || "/assets/images/fallback.png";
 
         setSelectedImage(firstAvailable);
@@ -193,12 +186,11 @@ const Shop = () => {
         throw new Error("장바구니 담기 에러");
       }
 
-      // 서버에 담기만 하면 되고, 프론트는 모달만 띄우면 됨
       openModal({
         title: "장바구니에 상품을 담았습니다.",
         message: "",
         cancelText: "닫기",
-        onConfirm: () => navigate("/main/shop"),
+        onConfirm: () => navigate("/main/shop"), 
         confirmText: "이동",
         onConfirm: () => navigate("/main/my-page/my-shop/cart"),
       });
@@ -296,14 +288,14 @@ const Shop = () => {
     productName,
     productPrice,
     productPurchaseType,
-    productSubImageUrl,
+    productSubImages, 
     productType,
     productMainImageUrl,
   } = headerData;
 
   const { avgScore, totalCount: reviewCount } = reviewStats;
 
-  const subImagesOnly = parseSubs(productSubImageUrl);
+  const subImagesOnly = productSubImages || [];
 
   const allThumbnails = [
     resolveUrl(productMainImageUrl),
