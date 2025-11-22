@@ -380,7 +380,7 @@ const SubmitButton = styled.button`
           }
         }
 
-        // 인증 완료 여부 확인
+        // 인증 완료 여부 확인 (인증 완료된 항목만 체크)
         if (currentUser?.id && somId) {
           try {
             const checkToken = localStorage.getItem("accessToken");
@@ -397,7 +397,7 @@ const SubmitButton = styled.button`
               const checkResult = await checkRes.json();
               const checkData = checkResult.data || [];
               
-              // 현재 챌린지에 대한 인증이 완료되었는지 확인
+              // 현재 챌린지에 대한 인증이 완료되었는지 확인 (somCheckIsChecked === true인 경우만)
               const completedCheck = checkData.find(
                 item => String(item.somId) === String(somId) && item.somCheckIsChecked === true
               );
@@ -563,12 +563,12 @@ const SubmitButton = styled.button`
 
       // API 요청 데이터 준비
       const checkData = {
-        somCheckIsChecked: true,
+        somCheckIsChecked: false,
         somCheckContent: content.trim(),
         memberId: currentUser.id,
         somId: somData.id,
         images: uploadedImages,
-        somCheckIsCheckedYn: 'Y'
+        somCheckIsCheckedYn: 'N'
       };
 
       console.log('전송할 데이터:', checkData);
@@ -602,8 +602,8 @@ const SubmitButton = styled.button`
 
       // 성공 시 이전 페이지로 이동 또는 메시지 표시
       openModal({
-        title: '인증 완료',
-        message: '인증이 등록되었습니다.',
+        title: '등록 완료',
+        message: '인증이 등록되었습니다. 관리자 승인 후 인증 완료 처리됩니다.',
         confirmText: '확인',
         onConfirm: () => {
           navigate(-1); // 이전 페이지로 이동
