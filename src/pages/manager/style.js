@@ -106,12 +106,12 @@ S.CardContent = styled.p`
   margin-bottom: 12px;
 `;
 
-// =======================================================
-// [버튼 공통]
-// =======================================================
+
 S.ButtonGroup = styled.div`
-  ${C.flexBetweenRow}
-  gap: 12px;
+ display: flex;
+  justify-content: center;   
+  align-items: center;      
+  gap: 12px;                 
   margin-top: 20px;
 `;
 
@@ -121,7 +121,8 @@ S.Button = styled.button`
   background-color: ${({ theme }) => theme.PALLETE.primary.main};
   border: none;
   border-radius: 6px;
-  padding: 10px 20px;
+  padding: 6px 15px;
+  margin-bottom: 18px;
   cursor: pointer;
   transition: all 0.2s ease;
 
@@ -142,9 +143,9 @@ S.SecondaryButton = styled.button`
   ${C.secondary}
   background-color: ${({ theme }) => theme.PALLETE.white};
   border: 1px solid ${({ theme }) => theme.PALLETE.grey.greyScale1};
-  border-radius: 6px;
-  padding: 10px 20px;
+  border-radius: 4px;
   cursor: pointer;
+  margin-bottom: 19px;
   transition: all 0.2s ease;
 
   &:hover {
@@ -152,14 +153,13 @@ S.SecondaryButton = styled.button`
   }
 `;
 
-// =======================================================
-// [필터 & 탭]
-// =======================================================
+
 S.FilterBar = styled.div`
   display: flex;
   gap: 12px;
   margin-bottom: 24px;
   align-items: center;
+  border-radius: 4px;
 
   @media (max-width: 768px) {
     flex-direction: column;
@@ -223,9 +223,6 @@ S.TabButton = styled.button`
   }
 `;
 
-// =======================================================
-// [테이블]
-// =======================================================
 S.Table = styled.table`
   width: 100%;
   border-collapse: collapse;
@@ -251,6 +248,7 @@ S.TableHeaderCell = styled.th`
   ${C.basic}
   padding: 14px 16px;
   text-align: left;
+  text-align: center;
   font-weight: ${({ theme }) => theme.FONT_WEIGHT.bold};
 `;
 
@@ -258,6 +256,7 @@ S.TableCell = styled.td`
   ${C.smallText1Regular}
   ${C.basic}
   padding: 14px 16px;
+  text-align: center;
   vertical-align: middle;
 `;
 
@@ -291,9 +290,7 @@ S.StatusBadge = styled.span`
   display: inline-block;
 `;
 
-// =======================================================
-// [Empty State]
-// =======================================================
+
 S.EmptyState = styled.div`
   ${C.flexCenterColumn}
   padding: 60px 20px;
@@ -306,9 +303,6 @@ S.EmptyStateText = styled.p`
   margin-top: 16px;
 `;
 
-// =======================================================
-// [Quick Action / 메인 카드형 섹션]
-// =======================================================
 S.QuickActionSection = styled.section`
   background: linear-gradient(
     135deg,
@@ -371,9 +365,7 @@ S.QuickActionDesc = styled.p`
   margin: 0;
 `;
 
-// =======================================================
-// [상세 정보 레이아웃] - 모달 안/밖 모두 재사용 가능
-// =======================================================
+
 S.DetailSection = styled.section`
   margin-top: 24px;
   padding: 20px 24px;
@@ -424,9 +416,7 @@ S.DetailValue = styled.span`
   color: ${({ theme }) => theme.PALLETE.basic};
 `;
 
-// =======================================================
-// [모달 스타일] - 사용자 상세 모달 등에 사용
-// =======================================================
+
 S.ModalOverlay = styled.div`
   position: fixed;
   inset: 0;
@@ -490,9 +480,7 @@ S.ModalClose = styled.button`
   }
 `;
 
-// =======================================================
-// [Dashboard 전용 스타일]
-// =======================================================
+
 S.DashboardWrapper = S.ContentSection;
 
 S.SummaryGrid = styled.div`
@@ -619,6 +607,93 @@ S.ErrorBox = styled.div`
   padding: 16px;
   margin-bottom: 24px;
   text-align: center;
+`;
+
+S.ModalOverlay = styled.div`
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+`;
+
+
+S.ModalContent = styled.div`
+  background: ${({ theme }) => theme.PALLETE.white};
+  width: 620px;
+  max-height: 80vh;
+  border-radius: 12px;
+  padding: 20px 24px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+  overflow-y: auto;
+`;
+
+S.ModalHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+`;
+S.ModalTitle = styled.h2`
+  font-size: 18px;
+  font-weight: 600;
+  color: ${({ theme }) => theme.PALLETE.black};
+`;
+
+S.ModalCloseButton = styled.button`
+  border: none;
+  background: transparent;
+  font-size: 20px;
+  cursor: pointer;
+  color: ${({ theme }) => theme.PALLETE.grey.greyScale6};
+
+  &:hover {
+    color: ${({ theme }) => theme.PALLETE.primary.main};
+  }
+`;
+
+S.DetailBox = styled.div`
+  border: 1px solid ${({ theme }) => theme.PALLETE.grey.greyScale1};
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  background: ${({ theme }) => theme.PALLETE.white};
+
+  p {
+    ${C.smallText2Regular}
+    color: ${({ theme }) => theme.PALLETE.grey.greyScale6};
+  }
+
+  p + p {
+    margin-top: 6px;
+  }
+
+  strong {
+    color: ${({ theme }) => theme.PALLETE.black};
+  }
+`;
+
+
+S.ImageGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 12px;
+`;
+
+
+S.ImageItem = styled.div`
+  overflow: hidden;
+  border-radius: 8px;
+  background: ${({ theme }) => theme.PALLETE.grey.greyScale1};
+
+  img {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
 `;
 
 export default S;
