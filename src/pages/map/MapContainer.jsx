@@ -180,7 +180,7 @@ const MapContainer = () => {
 
           <S.ListBox>
             {somList.map((som) => {
-              const img = som.somImageList?.[0]?.somImagePath || "/assets/icons/defaultSom.png";
+              const img = som.somImageList?.[0]?.somImagePath + '?w=300' || "/assets/icons/defaultSom.png";
               const likeCount = som.somLikeCount ?? 0;
 
               return (
