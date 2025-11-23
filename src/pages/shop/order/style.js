@@ -14,72 +14,59 @@ const S = {};
 /* 주문자 정보*/
 S.UserInfoWrapper = styled.div`
   width: 100%;
-  height: 240px;
   display: flex;
-  align-items: center;
   justify-content: center;
-  margin-top: 50px;
 `;
 
 S.UserInfoContainer = styled.div`
-  width: 1120px;
+  width: 720px;
   display: flex;
   flex-direction: column;
 `;
 
 S.UserContainer = styled.div`
   width: 720px;
-  margin-bottom: 27px;
+  padding-bottom: 20px;
+  margin-bottom: 20px;
   border-bottom: 1px solid #E0E0E0;
-  display: flex;
-  flex-direction: column;
 `;
 
 S.UserInfoName = styled.div`
-  gap: 10px;
   display: flex;
   align-items: center;
+  gap: 10px;
 `;
 
 S.UserName = styled.div`
-  /* ${smallText3Regular} */
+  font-size: 20px;
+  font-weight: 700;
   color: ${basic};
-  font-size: 18px;
 `;
 
 S.UserInfoTag = styled.button`
-  width: 64px;
-  height: 18px;
+  background: #e0e0e0;
+  padding: 4px 8px;
   border-radius: 4px;
-  background-color: #e0e0e0;
-  border: 1px solid #e0e0e0;
-  margin-top: 2px;
-  font-family: inherit;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  border: 1px solid #E0E0E0;
 `;
 
 S.TagName = styled.div`
   ${smallText0Light}
   ${fontGreyScale4}
   font-family: inherit;
+  
 `;
 
 S.UserFix = styled.button`
-  width: 76px;
-  height: 26px;
-  background-color: #ffffff;
-  border: 1px solid #e0e0e0;
-  margin-left: auto;
+margin-left: auto;
+  background: none;
+  border: 1px solid #dcdcdc;
+  padding: 4px 10px;
   border-radius: 4px;
-  ${smallText1Regular}
-  font-family: inherit;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  cursor: pointer;
 
   &:hover {
+    border-color: #0015FF;
     color: #0015FF;
   }
 `;
@@ -93,9 +80,8 @@ S.UserFixText = styled.div`
 S.UserAddressContainer = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 5px;
-  margin-top: 27px;
-  margin-bottom: 28px;
+  margin-top: 12px;
+  gap: 4px;
 `;
 
 S.UserAddress = styled.div`
@@ -106,9 +92,9 @@ S.UserAddress = styled.div`
 
 /* 드롭다운 */
 S.DropdownWrapper = styled.div`
+width: 720px;
+  margin-top: 12px;
   position: relative;
-  padding-top: 20px;
-  width: 100%;
 `;
 
 S.UserAddressButton = styled.button`
@@ -526,6 +512,146 @@ S.OrderProductTotal = styled.p`
   margin-top: 16px;
   font-weight: 600;
   text-align: right;
+`;
+
+S.Wrap = styled.div`
+  width: 720px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+`;
+
+S.Row = styled.div`
+  width: 720px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+`;
+
+S.SectionTitle = styled.div`
+  font-size: 18px;
+  font-weight: 600;
+  color: ${basic};
+  margin-bottom: 8px;
+`;
+
+S.Field = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+`;
+
+S.Label = styled.label`
+  font-size: 14px;
+  color: ${basic};
+  ${smallText1Regular}
+`;
+
+S.Value = styled.div`
+    flex: 1 1 auto;
+    font-size: 15px;
+    color: ${basic}; /* basic 변수 사용 */
+`;
+
+S.Input = styled.input`
+  width: 720px;
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 14px;
+  outline: none;
+  color: ${basic};
+
+  &:focus {
+    border-color: var(--brand-main);
+  }
+`;
+
+S.InputRow = styled.div`
+  width: 720px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+`;
+
+S.AddressBtn = styled.button`
+  height: 40px;
+  flex: 0 0 110px;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  background: #ffffff;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 14px;
+  transition: 0.15s;
+
+  &:hover {
+    border-color: var(--brand-main);
+    color: var(--brand-main);
+  }
+`;
+
+S.DropdownWrap = styled.div`
+  width: 720px;
+  position: relative;
+`;
+
+S.DropdownHeader = styled.button`
+  width: 720px;
+  height: 40px;
+  padding: 0 12px;
+  background: #fff;
+  border: 1px solid ${(p) => (p.$open ? "var(--brand-main)" : "#e0e0e0")};
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  &::after {
+    content: "";
+    width: 12px;
+    height: 8px;
+    mask-image: url("/assets/icons/drop_down.svg");
+    mask-repeat: no-repeat;
+    mask-size: contain;
+    background-color: ${(p) => (p.$open ? "var(--brand-main)" : "#000")};
+    transform: rotate(${(p) => (p.$open ? "180deg" : "0deg")});
+    transition: 0.2s;
+  }
+`;
+
+S.Dropdown = styled.ul`
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  width: 100%;
+  max-height: 220px;
+  overflow-y: auto;
+  padding: 6px 0;
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  box-shadow: -2px 4px 14px rgba(0,0,0,0.15);
+  z-index: 20;
+  list-style: none;
+`;
+
+S.DropItem = styled.li`
+  padding: 10px 14px;
+  font-size: 14px;
+  cursor: pointer;
+  ${smallText1Regular}
+  color: ${basic};
+
+  &:hover {
+    background: var(--brand-main);
+    color: #fff;
+  }
 `;
 
 

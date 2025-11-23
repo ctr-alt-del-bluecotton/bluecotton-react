@@ -1,23 +1,34 @@
-// DeliveryAddressModal.jsx
-import React, { useMemo, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import * as S from "./style";
-import AddressForm from "./DeliveryAddressForm"; // ← 폼 임포트
+import AddressForm from "./AddressForm";
 
 const SAMPLE_ADDRESSES = [
-  { id: 1, name: "최준서", phone: "010-1234-1234", addr1: "서울 서초구 강남대로 48-6 (한석빌딩)", addr2: "123", isDefault: true },
-  { id: 2, name: "홍길동", phone: "010-9876-5432", addr1: "경기 화성시 동탄문화센터로", addr2: "123-12", isDefault: false },
+  {
+    id: 1,
+    name: "최준서",
+    phone: "010-1234-1234",
+    addr1: "서울 서초구 강남대로 48-6 (한석빌딩)",
+    isDefault: true,
+  },
+  {
+    id: 2,
+    name: "홍길동",
+    phone: "010-9876-5432",
+    addr1: "경기 화성시 동탄문화센터로",
+    isDefault: false,
+  },
 ];
 
-export default function DeliveryAddressModal({ open, onClose, onEditAddress, onConfirm }) {
+const DeliveryAddressModal = ({ open, onClose, onConfirm }) => {
   const [addresses, setAddresses] = useState(SAMPLE_ADDRESSES);
-  const [selectedId, setSelectedId] = useState(addresses.find(a => a.isDefault)?.id ?? null);
+  const [selectedId, setSelectedId] = useState(
+    addresses.find((a) => a.isDefault)?.id ?? null
+  );
 
+  const [mode, setMode] = useState("list");
+  const [editing, setEditing] = useState(null);
 
-  const [mode, setMode] = useState("list"); 
-  const [editing, setEditing] = useState(null); 
-  
-
-  const nextIdRef = useRef(Math.max(...addresses.map(a => a.id)) + 1);
+  const nextIdRef = useRef(Math.max(...addresses.map((a) => a.id)) + 1);
 
   if (!open) return null;
 
@@ -34,15 +45,13 @@ export default function DeliveryAddressModal({ open, onClose, onEditAddress, onC
   };
 
   const handleDelete = (id) => {
-    setAddresses(prev => prev.filter(p => p.id !== id));
+    setAddresses((prev) => prev.filter((p) => p.id !== id));
     if (selectedId === id) setSelectedId(null);
   };
 
-  
   const applyDefaultNormalization = (list, defaultId) =>
-    list.map(item => ({ ...item, isDefault: item.id === defaultId }));
+    list.map((item) => ({ ...item, isDefault: item.id === defaultId }));
 
-  
   const handleSubmitForm = (values) => {
     if (mode === "create") {
       const newId = nextIdRef.current++;
@@ -54,7 +63,9 @@ export default function DeliveryAddressModal({ open, onClose, onEditAddress, onC
       setAddresses(updated);
       setSelectedId(newId);
     } else if (mode === "edit" && editing) {
-      let updated = addresses.map(a => (a.id === editing.id ? { ...a, ...values, id: editing.id } : a));
+      let updated = addresses.map((a) =>
+        a.id === editing.id ? { ...a, ...values, id: editing.id } : a
+      );
       if (values.isDefault) updated = applyDefaultNormalization(updated, editing.id);
 
       setAddresses(updated);
@@ -70,7 +81,16 @@ export default function DeliveryAddressModal({ open, onClose, onEditAddress, onC
     setEditing(null);
   };
 
-  
+  const handleConfirmClick = () => {
+    const selected = addresses.find((a) => a.id === selectedId);
+    if (!selected) {
+      alert("선택된 배송지가 없습니다.");
+      return;
+    }
+    if (onConfirm) onConfirm(selected);
+    onClose();
+  };
+
   const ListView = (
     <>
       <S.Header>
@@ -83,7 +103,7 @@ export default function DeliveryAddressModal({ open, onClose, onEditAddress, onC
       </S.AddBtn>
 
       <S.List>
-        {addresses.map(addr => (
+        {addresses.map((addr) => (
           <S.Item key={addr.id}>
             <S.RadioWrap>
               <input
@@ -101,12 +121,16 @@ export default function DeliveryAddressModal({ open, onClose, onEditAddress, onC
                 <S.Phone>{addr.phone}</S.Phone>
               </S.Row>
 
-              <S.Address>{`${addr.addr1} ${addr.addr2 ?? ""}`}</S.Address>
+              <S.Address>{addr.addr1}</S.Address>
 
               <S.Actions>
                 {addr.isDefault && <S.Tag>기본 배송지</S.Tag>}
-                <S.ActionButton type="button" onClick={() => openEdit(addr)}>수정</S.ActionButton>
-                <S.DeleteButton type="button" onClick={() => handleDelete(addr.id)}>삭제</S.DeleteButton>
+                <S.ActionButton type="button" onClick={() => openEdit(addr)}>
+                  수정
+                </S.ActionButton>
+                <S.DeleteButton type="button" onClick={() => handleDelete(addr.id)}>
+                  삭제
+                </S.DeleteButton>
               </S.Actions>
             </S.Content>
           </S.Item>
@@ -114,17 +138,13 @@ export default function DeliveryAddressModal({ open, onClose, onEditAddress, onC
       </S.List>
 
       <S.Footer>
-        <S.ConfirmButton
-          disabled={!selectedId}
-          onClick={() => onConfirm && onConfirm(selectedId)}
-        >
+        <S.ConfirmButton disabled={!selectedId} onClick={handleConfirmClick}>
           변경하기
         </S.ConfirmButton>
       </S.Footer>
     </>
   );
 
-  
   const FormView = (
     <>
       <S.Header>
@@ -143,9 +163,15 @@ export default function DeliveryAddressModal({ open, onClose, onEditAddress, onC
 
   return (
     <S.Overlay onClick={onClose}>
-      <S.Modal onClick={(e) => e.stopPropagation()}>
+      <S.Modal
+        onClick={(e) => {
+          e.stopPropagation();
+        }}
+      >
         {mode === "list" ? ListView : FormView}
       </S.Modal>
     </S.Overlay>
   );
-}
+};
+
+export default DeliveryAddressModal;

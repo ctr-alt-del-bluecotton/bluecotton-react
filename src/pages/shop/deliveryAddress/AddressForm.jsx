@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import * as S from "./style";
 
-const DeliveryAddressForm = ({
+const AddressForm = ({
   defaultValues = {},
   onSubmit,
   onCancel,
@@ -12,7 +12,6 @@ const DeliveryAddressForm = ({
     name: "",
     phone: "",
     addr1: "",
-    addr2: "",
     isDefault: false,
     ...defaultValues,
   });
@@ -124,4 +123,4 @@ const DeliveryAddressForm = ({
   );
 };
 
-export default DeliveryAddressForm;
+export default AddressForm;
