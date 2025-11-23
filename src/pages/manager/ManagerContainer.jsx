@@ -1,42 +1,102 @@
-import React, { useState } from 'react';
+// src/pages/manager/ManagerContainer.jsx
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import S from './style';
 
-// 매니저 페이지 주소
 export const MANAGER_PAGE_PATH = '/main/manager';
+const API = process.env.REACT_APP_BACKEND_URL || '';
 
 const ManagerContainer = () => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('overview');
 
-  // 더미 데이터
-  const stats = [
-    { title: '전체 사용자', value: '1,234', change: '+12%' },
-    { title: '활성 솜', value: '56', change: '+5%' },
-    { title: '게시글', value: '890', change: '+23%' },
-    { title: '주문 건수', value: '345', change: '+8%' },
-  ];
+  const [stats, setStats] = useState([
+    { title: '전체 사용자', value: '-', change: '' },
+    { title: '활성 솜', value: '-', change: '' },
+    { title: '게시글', value: '-', change: '' },
+    { title: '주문 건수', value: '-', change: '' },
+  ]);
 
-  const recentActivities = [
-    { id: 1, type: '사용자', action: '신규 가입', user: 'user123', time: '2분 전' },
-    { id: 2, type: '솜', action: '새 솜 생성', user: 'user456', time: '15분 전' },
-    { id: 3, type: '게시글', action: '새 게시글 작성', user: 'user789', time: '30분 전' },
-    { id: 4, type: '주문', action: '주문 완료', user: 'user012', time: '1시간 전' },
-  ];
+  const [recentActivities, setRecentActivities] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-  const reports = [
-    { id: 1, type: '게시글', reason: '부적절한 내용', reporter: 'user001', reported: 'user002', time: '1시간 전', status: 'pending' },
-    { id: 2, type: '댓글', reason: '욕설/비방', reporter: 'user003', reported: 'user004', time: '3시간 전', status: 'pending' },
-    { id: 3, type: '사용자', reason: '스팸 계정', reporter: 'user005', reported: 'user006', time: '5시간 전', status: 'active' },
-    { id: 4, type: '게시글', reason: '저작권 침해', reporter: 'user007', reported: 'user008', time: '1일 전', status: 'active' },
-  ];
+  const fetchDashboardData = async () => {
+    setLoading(true);
+    setError(null);
 
-  const certifications = [
-    { id: 1, user: 'user101', somTitle: '매일 운동하기', type: '이미지', time: '10분 전', status: 'pending' },
-    { id: 2, user: 'user102', somTitle: '책 읽기 챌린지', type: '이미지', time: '30분 전', status: 'active' },
-    { id: 3, user: 'user103', somTitle: '물 마시기', type: '텍스트', time: '1시간 전', status: 'active' },
-    { id: 4, user: 'user104', somTitle: '일기 쓰기', type: '이미지', time: '2시간 전', status: 'pending' },
-  ];
+    try {
+      const res = await fetch(`${API}/admin/dashboard/overview`);
+      if (!res.ok) {
+        throw new Error(`대시보드 조회 실패: ${res.status}`);
+      }
+
+      const body = await res.json();
+      const data = body.data || {};
+
+      const {
+        totalUsers = 0,
+        activeSoms = 0,
+        totalPosts = 0,
+        totalOrders = 0,
+        userChangeRate,
+        somChangeRate,
+        postChangeRate,
+        orderChangeRate,
+        recentActivities: activities = [],
+      } = data;
+
+      setStats([
+        {
+          title: '전체 사용자',
+          value: totalUsers.toLocaleString('ko-KR'),
+          change: userChangeRate != null ? `${userChangeRate}%` : '',
+        },
+        {
+          title: '활성 솜',
+          value: activeSoms.toLocaleString('ko-KR'),
+          change: somChangeRate != null ? `${somChangeRate}%` : '',
+        },
+        {
+          title: '게시글',
+          value: totalPosts.toLocaleString('ko-KR'),
+          change: postChangeRate != null ? `${postChangeRate}%` : '',
+        },
+        {
+          title: '주문 건수',
+          value: totalOrders.toLocaleString('ko-KR'),
+          change: orderChangeRate != null ? `${orderChangeRate}%` : '',
+        },
+      ]);
+
+      setRecentActivities(activities);
+    } catch (e) {
+      console.error(e);
+      setError(e.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
+
+  const getStatusBadgeProps = (status) => {
+    const s = (status || '').toString().toUpperCase();
+
+    if (s === 'Y' || s === 'ACTIVE') {
+      return { $status: 'active', label: '활성' };
+    }
+    if (s === 'N' || s === 'INACTIVE') {
+      return { $status: 'blocked', label: '비활성' };
+    }
+    return { $status: 'pending', label: '대기' };
+  };
+
+  const formatUser = (user) => {
+    if (!user) return '알 수 없음';
+    return user;
+  };
 
   return (
     <S.ManagerWrapper>
@@ -46,7 +106,7 @@ const ManagerContainer = () => {
           <S.Subtitle>시스템 관리 및 모니터링</S.Subtitle>
         </S.Header>
 
-        {/* 빠른 작업 섹션 */}
+      
         <S.QuickActionSection>
           <S.QuickActionTitle>빠른 작업</S.QuickActionTitle>
           <S.QuickActionGrid>
@@ -73,59 +133,32 @@ const ManagerContainer = () => {
           </S.QuickActionGrid>
         </S.QuickActionSection>
 
-        {/* 통계 섹션 */}
+       
         <S.ContentSection>
           <S.SectionTitle>통계 현황</S.SectionTitle>
-          <S.GridContainer>
-            {stats.map((stat, index) => (
-              <S.Card key={index}>
-                <S.CardTitle>{stat.title}</S.CardTitle>
-                <S.CardContent style={{ fontSize: '24px', fontWeight: 'bold', color: '#000' }}>
-                  {stat.value}
-                </S.CardContent>
-                <S.CardContent style={{ color: '#0051FF' }}>
-                  {stat.change}
-                </S.CardContent>
-              </S.Card>
-            ))}
-          </S.GridContainer>
-        </S.ContentSection>
-
-        {/* 최근 활동 섹션 */}
-        <S.ContentSection>
-          <S.SectionTitle>최근 활동</S.SectionTitle>
-          <S.Table>
-            <S.TableHeader>
-              <S.TableRow>
-                <S.TableHeaderCell>유형</S.TableHeaderCell>
-                <S.TableHeaderCell>작업</S.TableHeaderCell>
-                <S.TableHeaderCell>사용자</S.TableHeaderCell>
-                <S.TableHeaderCell>시간</S.TableHeaderCell>
-                <S.TableHeaderCell>상태</S.TableHeaderCell>
-              </S.TableRow>
-            </S.TableHeader>
-            <tbody>
-              {recentActivities.map((activity) => (
-                <S.TableRow key={activity.id}>
-                  <S.TableCell>{activity.type}</S.TableCell>
-                  <S.TableCell>{activity.action}</S.TableCell>
-                  <S.TableCell>{activity.user}</S.TableCell>
-                  <S.TableCell>{activity.time}</S.TableCell>
-                  <S.TableCell>
-                    <S.StatusBadge $status="active">활성</S.StatusBadge>
-                  </S.TableCell>
-                </S.TableRow>
+          {loading && <div>통계를 불러오는 중입니다...</div>}
+          {error && <div style={{ color: 'red' }}>에러: {error}</div>}
+          {!loading && !error && (
+            <S.GridContainer>
+              {stats.map((stat, index) => (
+                <S.Card key={index}>
+                  <S.CardTitle>{stat.title}</S.CardTitle>
+                  <S.CardContent style={{ fontSize: '24px', fontWeight: 'bold', color: '#000' }}>
+                    {stat.value}개
+                  </S.CardContent>
+                  {stat.change && (
+                    <S.CardContent style={{ color: '#0051FF' }}>
+                      {stat.change}
+                    </S.CardContent>
+                  )}
+                </S.Card>
               ))}
-            </tbody>
-          </S.Table>
+            </S.GridContainer>
+          )}
         </S.ContentSection>
-
-              
-
       </S.ManagerContainer>
     </S.ManagerWrapper>
   );
 };
 
 export default ManagerContainer;
-

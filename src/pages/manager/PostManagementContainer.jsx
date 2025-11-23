@@ -1,4 +1,3 @@
-// src/pages/manager/post/PostManagementContainer.jsx
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import S from "./style";
@@ -113,13 +112,13 @@ const PostManagementContainer = () => {
       const list = (body && body.data) || [];
       const normalized = list.map((r) => ({
         id: r.id,
-        commentId: r.commentId || r.postCommentId,
+        commentId: r.postCommentId,
         postId: r.postId || null,
         postTitle: r.postTitle || "",
-        commentContent: r.commentContent || r.postCommentContent || "",
+        commentContent: r.postCommentContent || r.commentContent || "",
         reportedUser: r.reportedUserNickname || r.commentedNickname || "",
         reporter: r.reporterNickname || r.reporter || "",
-        reason: r.reason || r.postCommentReportContent || "",
+        reason: r.postCommentReportContent || r.reason || "",
         reportDate: r.reportDate || r.createdAt || "",
         status: r.status || "pending",
       }));
@@ -650,13 +649,11 @@ const PostManagementContainer = () => {
               </S.TableHeader>
               <tbody>
                 {filteredCommentReplyReports.map((report) => (
-                  <S.TableRow
-                    key={`${report.targetType}-${report.id}`}
-                  >
-                    <S.TableCell>{report.id}</S.TableCell>
-                    <S.TableCell>{report.targetType}</S.TableCell>
+                  <S.TableRow key={`${report.targetType}-${report.id}`}>
                     <S.TableCell>{report.targetId}</S.TableCell>
+                    <S.TableCell>{report.targetType}</S.TableCell>
                     <S.TableCell>{report.postTitle}</S.TableCell>
+                    <S.TableCell>{report.commentContent}</S.TableCell>
                     <S.TableCell
                       style={{
                         maxWidth: "220px",
@@ -682,10 +679,7 @@ const PostManagementContainer = () => {
                       <S.ButtonGroup>
                         <S.Button
                           onClick={() =>
-                            handleReportResolve(
-                              report.id,
-                              report.targetType
-                            )
+                            handleReportResolve(report.id, report.targetType)
                           }
                           style={{ padding: "6px 12px", fontSize: "12px" }}
                           disabled={report.status === "resolved"}
@@ -694,10 +688,7 @@ const PostManagementContainer = () => {
                         </S.Button>
                         <S.SecondaryButton
                           onClick={() =>
-                            handleDelete(
-                              report.targetId,
-                              report.targetType
-                            )
+                            handleDelete(report.targetId, report.targetType)
                           }
                           style={{ padding: "6px 12px", fontSize: "12px" }}
                         >

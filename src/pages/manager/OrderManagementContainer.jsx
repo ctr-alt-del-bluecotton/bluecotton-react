@@ -1,4 +1,3 @@
-// src/pages/manager/order/OrderManagementContainer.jsx
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import S from "./style";
@@ -652,7 +651,7 @@ const ProductCreateModal = ({ onClose, onCreated }) => {
               disabled={uploadingMain}
             />
             <span className="product-modal-hint">
-              C:\bluecotton\image\MAIN 쪽으로 저장되는 업로드 API에 연결됩니다.
+              C:\bluecotton\file\MAIN 경로로 저장되는 업로드 API에 연결됩니다.
             </span>
             {form.productMainImageName && (
               <span className="product-modal-upload-result">
@@ -671,7 +670,7 @@ const ProductCreateModal = ({ onClose, onCreated }) => {
               disabled={uploadingSub}
             />
             <span className="product-modal-hint">
-              C:\bluecotton\image\SUB 쪽으로 저장되는 업로드 API에 연결됩니다.
+              C:\bluecotton\file\SUB 경로로 저장되는 업로드 API에 연결됩니다.
             </span>
             {form.productSubImageName && (
               <span className="product-modal-upload-result">
@@ -1409,6 +1408,7 @@ const OrderManagementContainer = () => {
   const pageOrders = paginate(sortedOrders);
   const pageDeliveries = paginate(sortedDeliveries);
   const pageReviewReports = paginate(sortedReviewReports);
+  const pageProducts = paginate(filteredProducts);
 
   const renderPagination = (totalItems) => {
     const totalPages = Math.ceil(totalItems / itemsPerPage);
@@ -1973,7 +1973,7 @@ const OrderManagementContainer = () => {
                 </S.TableRow>
               </S.TableHeader>
               <tbody>
-                {filteredProducts.map((product) => (
+                {pageProducts.map((product) => (
                   <S.TableRow key={product.id}>
                     <S.TableCell>{product.id}</S.TableCell>
                     <S.TableCell>{product.productName}</S.TableCell>
@@ -2005,6 +2005,8 @@ const OrderManagementContainer = () => {
                 ))}
               </tbody>
             </S.Table>
+
+            {renderPagination(filteredProducts.length)}
           </S.ContentSection>
         )}
 
@@ -2085,21 +2087,14 @@ const OrderManagementContainer = () => {
                     <S.TableCell>{report.reportDate}</S.TableCell>
                     <S.TableCell>
                       <S.StatusBadge $status={report.status}>
-                        {report.status === "pending" ? "대기중" : "처리완료"}
+                        {report.status === "pending" ? "대기" : "완료"}
                       </S.StatusBadge>
                     </S.TableCell>
                     <S.TableCell>
                       <S.ButtonGroup>
-                        <S.Button
-                          onClick={() => handleReviewReportResolve(report.id)}
-                          style={{ padding: "6px 12px", fontSize: "12px" }}
-                          disabled={report.status === "resolved"}
-                        >
-                          처리
-                        </S.Button>
                         <S.SecondaryButton
                           onClick={() => handleReviewDelete(report.reviewId)}
-                          style={{ padding: "6px 12px", fontSize: "12px" }}
+                          style={{ padding: "6px 18px", fontSize: "12px" }}
                         >
                           삭제
                         </S.SecondaryButton>

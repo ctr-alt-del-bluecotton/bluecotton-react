@@ -6,6 +6,7 @@ import { resolveUrl } from "../../utils/url";
 const ShopList = ({ items, onLike }) => {
   
   const data = items;
+  
 
   return (
     <S.CardGrid>
@@ -34,6 +35,7 @@ const ShopList = ({ items, onLike }) => {
             >
               <S.ProductImageBox
                 $bg={resolveUrl(item.imageUrl || "/assets/images/fallback.png")}
+                
               />
               <S.ProductTitleRow>
                 <S.ProductName>{item.name}</S.ProductName>

@@ -164,7 +164,7 @@ const Header = () => {
                     alt="프로필아이콘"
                   />
 
-                  <S.ProfileName>{currentUser.memberNickname}</S.ProfileName>
+                  <S.ProfileName >{currentUser.memberNickname}</S.ProfileName>
                 </button>
                 {isOpen && (
                   <div

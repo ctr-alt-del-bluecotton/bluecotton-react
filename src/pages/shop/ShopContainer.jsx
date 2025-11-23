@@ -155,7 +155,10 @@ const ShopContainer = () => {
         return products.map((p) => ({
             id: p.id,
             name: p.productName,
-            imageUrl: p.productImageUrl,
+            imageUrl: p.productMainImageUrl ||
+            p.productSubImageUrl ||
+            p.productImageUrl ||
+            null,
             priceText: `${Number(p.productPrice).toLocaleString()}${p.productPurchaseType === "CANDY" ? "캔디" : "원"}`,
             score: (p.productAvgRating ?? 0).toFixed(1),
             reviewCount: p.productReviewCount ?? 0,
