@@ -81,8 +81,15 @@ const MyPostLikeContainer = () => {
             type: categoryMap[post.somCategory] || post.somCategory,
             title: post.postTitle,
             date: formatDate(post.postCreateAt),
+            createAt: post.postCreateAt, // 정렬용 원본 날짜 저장
           }));
-          setPosts(formattedPosts);
+          // 최신순 정렬 (postCreateAt 기준 내림차순)
+          const sortedPosts = formattedPosts.sort((a, b) => {
+            const dateA = a.createAt ? new Date(a.createAt) : new Date(0);
+            const dateB = b.createAt ? new Date(b.createAt) : new Date(0);
+            return dateB - dateA; // 최신순 (내림차순)
+          });
+          setPosts(sortedPosts);
         } else {
           setPosts([]);
         }

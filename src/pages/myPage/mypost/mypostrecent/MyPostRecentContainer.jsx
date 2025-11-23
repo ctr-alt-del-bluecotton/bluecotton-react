@@ -78,15 +78,23 @@ const MyPostRecentContainer = () => {
         
         if (result.data && Array.isArray(result.data)) {
           const formattedPosts = result.data.map((post) => {
-            const formattedDate = formatDate(post.postRecentCreateAt || post.postCreateAt || post.createAt || post.date);
+            const createAt = post.postRecentCreateAt || post.postCreateAt || post.createAt || post.date;
+            const formattedDate = formatDate(createAt);
             return {
               id: post.id,
               type: categoryMap[post.somCategory] || post.somCategory || '기타',
               title: post.postTitle || post.title || '제목 없음',
               date: formattedDate || '조회일자 없음',
+              createAt: createAt, // 정렬용 원본 날짜 저장
             };
           });
-          setPosts(formattedPosts);
+          // 최신순 정렬 (createAt 기준 내림차순)
+          const sortedPosts = formattedPosts.sort((a, b) => {
+            const dateA = a.createAt ? new Date(a.createAt) : new Date(0);
+            const dateB = b.createAt ? new Date(b.createAt) : new Date(0);
+            return dateB - dateA; // 최신순 (내림차순)
+          });
+          setPosts(sortedPosts);
         } else {
           setPosts([]);
         }

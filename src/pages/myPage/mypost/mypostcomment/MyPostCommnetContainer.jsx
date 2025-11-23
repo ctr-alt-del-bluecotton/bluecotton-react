@@ -87,9 +87,16 @@ const MyPostCommnetContainer = () => {
             // 댓글인지 대댓글인지에 따라 내용과 날짜 선택
             content: item.replyId ? (item.postReplyContent || '') : (item.postCommentContent || ''),
             date: formatDate(item.replyId ? item.postReplyCreateAt : item.postCommentCreateAt),
+            createAt: item.replyId ? item.postReplyCreateAt : item.postCommentCreateAt, // 정렬용 원본 날짜 저장
             isReply: item.replyId !== null, // 대댓글 여부
           }));
-          setComments(formattedComments);
+          // 최신순 정렬 (createAt 기준 내림차순)
+          const sortedComments = formattedComments.sort((a, b) => {
+            const dateA = a.createAt ? new Date(a.createAt) : new Date(0);
+            const dateB = b.createAt ? new Date(b.createAt) : new Date(0);
+            return dateB - dateA; // 최신순 (내림차순)
+          });
+          setComments(sortedComments);
         } else {
           setComments([]);
         }

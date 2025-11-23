@@ -75,13 +75,14 @@ const MyShopOrderContainer = () => {
 
         const list = Array.isArray(json?.data) ? json.data : [];
 
-
-        list.forEach((o, idx) => {
-        
+        // 최신순 정렬 (orderCreateAt 기준 내림차순)
+        const sortedList = list.sort((a, b) => {
+          const dateA = a.orderCreateAt ? new Date(a.orderCreateAt) : new Date(0);
+          const dateB = b.orderCreateAt ? new Date(b.orderCreateAt) : new Date(0);
+          return dateB - dateA; // 최신순 (내림차순)
         });
 
-
-        setOrders(list);
+        setOrders(sortedList);
       } catch (e) {
         console.error("MyShopOrder 주문 조회 실패:", e);
         setError(e.message || "주문 조회 실패");
