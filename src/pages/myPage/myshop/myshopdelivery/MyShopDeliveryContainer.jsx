@@ -74,7 +74,13 @@ const MyShopDeliveryContainer = () => {
         const transformedData = Array.isArray(json.data)
           ? json.data.map(toClient)
           : [];
-        setAllItems(transformedData);
+        // 최신순 정렬 (date 기준 내림차순)
+        const sortedData = transformedData.sort((a, b) => {
+          const dateA = a.date ? new Date(a.date) : new Date(0);
+          const dateB = b.date ? new Date(b.date) : new Date(0);
+          return dateB - dateA; // 최신순 (내림차순)
+        });
+        setAllItems(sortedData);
       } catch (err) {
         setError(err.message);
       } finally {
