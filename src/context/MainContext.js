@@ -88,7 +88,6 @@ export const MainProvider = ({ children }) => {
 
         return res;
     }
-
     const somJoinNotLogin = () => {
         if (!isLogin) {
             openModal({
