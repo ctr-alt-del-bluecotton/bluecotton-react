@@ -23,7 +23,7 @@ S.floatingInputTitles = styled.div`
 `
 
 S.floatingInputs = styled.input.withConfig({
-  shouldForwardProp: (prop) => !["$isError", "$isTouched", "$isAllError"].includes(prop)
+  shouldForwardProp: (prop) => !prop.startsWith("$")
 })`
   ${basic}
   ${smallText3Regular}
@@ -33,9 +33,8 @@ S.floatingInputs = styled.input.withConfig({
   border-radius: 4px;
   box-sizing: border-box;
   border: 1px solid;
-  border-color: ${({ $isError, $isAllError, $isTouched, theme }) => 
-    $isError && ($isTouched || $isAllError)
-      ? theme.PALLETE.warning
+  border-color: ${({ $isError, $isAllError, $hasTouched, theme }) =>
+    ($isError && ($hasTouched || $isAllError)) ? theme.PALLETE.warning
       : theme.PALLETE.grey.greyScale1};
   outline: 0;
   transition: border-color 0.2s ease;
@@ -55,9 +54,8 @@ S.floatingCategoryInput = styled.select`
   border-radius: 4px;
   box-sizing: border-box;
   border: 1px solid;
-  border-color: ${({ $isError, $isAllError, $isTouched, theme }) => 
-    $isError && ($isTouched || $isAllError)
-      ? theme.PALLETE.warning
+  border-color: ${({ $isError, $isAllError, $hasTouched, theme }) =>
+    ($isError && ($hasTouched || $isAllError)) ? theme.PALLETE.warning
       : theme.PALLETE.grey.greyScale1};
   outline: 0;
   transition: border-color 0.2s ease;
@@ -121,10 +119,11 @@ S.floatingSomAddressInputWrap = styled.div`
   flex-direction: row;
   gap: 20px;
 `
-S.floatingSomAddressInput = styled.input`
-  border-color: ${({ $isError, $isAllError, $isTouched, theme }) => 
-    $isError && ($isTouched || $isAllError)
-      ? theme.PALLETE.warning
+S.floatingSomAddressInput = styled.input.withConfig({
+  shouldForwardProp: (prop) => !prop.startsWith("$")
+})`
+  border-color: ${({ $isError, $isAllError, $hasTouched, theme }) => 
+    ($isError && ($hasTouched || $isAllError)) ? theme.PALLETE.warning
       : theme.PALLETE.grey.greyScale1};
 
 `
@@ -163,7 +162,7 @@ S.floatingSomDateSelectWrap = styled.div`
 `
 
 S.floatingDateInputs = styled.input.withConfig({
-  shouldForwardProp: (prop) => !["$isError", "$isAllError", "$isTouched"].includes(prop)
+  shouldForwardProp: (prop) => !prop.startsWith("$")
 })`
   ${basic}
   ${smallText3Regular}
@@ -175,9 +174,8 @@ S.floatingDateInputs = styled.input.withConfig({
   border-radius: 4px;
   box-sizing: border-box;
   border: 1px solid;
-  border-color: ${({ $isError, $isAllError, $isTouched, theme }) => 
-    ($isError || $isAllError) && ($isTouched || $isAllError)
-      ? theme.PALLETE.warning
+  border-color: ${({ $isError, $isAllError, $hasTouched, theme }) =>
+    ($isError && ($hasTouched || $isAllError)) ? theme.PALLETE.warning
       : theme.PALLETE.grey.greyScale1};
   outline: 0;
   transition: border-color 0.2s ease;
@@ -220,9 +218,8 @@ S.floatingSomCategoryInputValue = styled.div.withConfig({
   justify-content: space-between;
   align-items: center;
   transition: all 0.2s ease;
-  border-color: ${({ open, $isError, $isAllError, $isTouched, theme }) => 
-      $isError && ($isTouched || $isAllError)
-      ? theme.PALLETE.warning
+  border-color: ${({ open, $isError, $isAllError, $hasTouched, theme }) => 
+      ($isError && ($hasTouched || $isAllError)) ? theme.PALLETE.warning
       : open ? theme.PALLETE.primary.main : theme.PALLETE.grey.greyScale1};
 `;
 

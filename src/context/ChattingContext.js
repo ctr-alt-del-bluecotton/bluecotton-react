@@ -23,7 +23,6 @@ export const ChattingProvider = ({ children }) => {
             chatId: id
         })).then(async(res) => {
             const json = await res.json();
-            console.log(json)
             window.dispatchEvent(new CustomEvent("refreshChatList"));
         })
         

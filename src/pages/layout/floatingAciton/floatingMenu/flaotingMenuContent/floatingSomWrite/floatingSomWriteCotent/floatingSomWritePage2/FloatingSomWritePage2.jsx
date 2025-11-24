@@ -29,9 +29,9 @@ const FloatingSomWritePage2 = () => {
       
       if (result && result.url) {
         const cleanUrl = result.url
-        .replace(/\\/g, "")           // 백슬래시 제거
-        .replace(/\s+/g, "%20")       // 공백 → %20
-        .replace(/([^:]\/)\/+/g, "$1"); // 중복 슬래시 제거
+        .replace(/\\/g, "")
+        .replace(/\s+/g, "%20")
+        .replace(/([^:]\/)\/+/g, "$1");
         callback(cleanUrl, "image");
         await insertImageData(cleanUrl);
       } else {
@@ -41,7 +41,7 @@ const FloatingSomWritePage2 = () => {
       console.error("이미지 업로드 실패:", err);
       alert("이미지 업로드에 실패했습니다.");
     }
-};
+  };
 
 
   return (

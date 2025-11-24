@@ -41,12 +41,6 @@ export const MainProvider = ({ children }) => {
     
         const next = new URLSearchParams(searchParams);
         let changed = false;
-    
-        // if ((searchParams.get("page") || "1") !== "1") {
-        //   next.set("page", "1");
-        //   changed = true;
-        // }
-    
         if (changed) setSearchParams(next, { replace: true });
     
         // eslint-disable-next-line
@@ -62,7 +56,8 @@ export const MainProvider = ({ children }) => {
 
                 if (keyword) params.set("q", keyword);
 
-                await fetchData(`som/category?somCategory=${category}&somType=${sortBy}&page=${pageNumber}&memberEmail=${currentUser.memberEmail}&somKeyword=${keyword}` ,options.getOption())
+                await fetchData(`som/category?somCategory=${category}&somType=${sortBy}&page=${pageNumber}&memberEmail=${currentUser.memberEmail}&somKeyword=${keyword}` 
+                    ,options.getOption())
                 .then(async (res) => {
                     const jsonData = await res.json(); 
                     const somListData = jsonData.data.somList;
@@ -93,7 +88,6 @@ export const MainProvider = ({ children }) => {
 
         return res;
     }
-
     const somJoinNotLogin = () => {
         if (!isLogin) {
             openModal({

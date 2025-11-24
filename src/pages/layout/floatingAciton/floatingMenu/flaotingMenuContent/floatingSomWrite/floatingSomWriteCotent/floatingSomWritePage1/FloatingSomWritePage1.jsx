@@ -140,7 +140,9 @@ const FloatingSomWritePage1 = () => {
         <S.floatingInputs
           placeholder='제목을 입력하세요'
           {...register("somTitle", { required: true })}
-          $isError={errors.somTitle && (touchedFields.somTitle || isAllError)}
+          $isError={!!errors.somTitle}
+          $hasTouched={!!touchedFields.somTitle}
+          $isAllError={isAllError}
         />
       </S.floatingInputWrap>
 
@@ -151,7 +153,9 @@ const FloatingSomWritePage1 = () => {
 
         <S.floatingSomCategoryInputWrap>
           <S.floatingSomCategoryInputValue
-            $isError={errors.somCategory && (touchedFields.somCategory || isAllError)}
+            $isError={!!errors.somCategory}
+            $hasTouched={!!touchedFields.somCategory}
+            $isAllError={isAllError}
             $hasValue={!!selected}
             open={open}
             onClick={() => setOpen(!open)}
@@ -182,7 +186,9 @@ const FloatingSomWritePage1 = () => {
             placeholder="주소 검색"
             readOnly
             {...register("somAddress", { required: true })}
-            $isError={errors.somAddress && (touchedFields.somAddress || isAllError)}
+            $isError={!!errors.somAddress}
+            $hasTouched={!!touchedFields.somAddress}
+            $isAllError={isAllError}
           />
           <S.floatingSomAddressButton onClick={openPostcode}>
             주소 검색
@@ -198,14 +204,18 @@ const FloatingSomWritePage1 = () => {
           <S.floatingDateInputs
             type='datetime-local'
             {...register("somStartDate", { required: true })}
-            $isError={errors.somStartDate && (touchedFields.somStartDate || isAllError)}
+            $isError={!!errors.somStartDate}
+            $hasTouched={!!touchedFields.somStartDate}
+            $isAllError={isAllError}
             min={minStartDate}
           />
 
           <S.floatingDateInputs
             type='datetime-local'
             {...register("somEndDate", { required: true })}
-            $isError={errors.somEndDate && (touchedFields.somEndDate || isAllError)}
+            $isError={!!errors.somEndDate}
+            $hasTouched={!!touchedFields.somEndDate}
+            $isAllError={isAllError}
             min={minEndDate}
             disabled={!valueWatch.somStartDate}
           />
