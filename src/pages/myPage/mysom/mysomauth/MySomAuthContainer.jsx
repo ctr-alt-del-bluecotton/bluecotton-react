@@ -46,7 +46,13 @@ const MySomAuthContainer = () => {
 
         // data 배열에서 데이터 가져오기
         const checkData = result.data || [];
-        setAuthData(checkData);
+        // 최신순 정렬 (날짜 필드 기준: somCheckCreateAt 또는 id 기준 내림차순)
+        const sortedData = checkData.sort((a, b) => {
+          const dateA = a.somCheckCreateAt ? new Date(a.somCheckCreateAt) : new Date(a.id || 0);
+          const dateB = b.somCheckCreateAt ? new Date(b.somCheckCreateAt) : new Date(b.id || 0);
+          return dateB - dateA; // 최신순 (내림차순)
+        });
+        setAuthData(sortedData);
       } catch (error) {
         console.error('인증 데이터 로딩 실패:', error);
         setAuthData([]);

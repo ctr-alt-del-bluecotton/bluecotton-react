@@ -130,7 +130,13 @@ const MySomPartyContainer = () => {
         
         console.log("필터링 후 파티솜 데이터:", partyData);
         console.log("파티솜 개수:", partyData.length);
-        setPartySoms(partyData);
+        // 최신순 정렬 (somStartDate 기준 내림차순)
+        const sortedPartyData = partyData.sort((a, b) => {
+          const dateA = new Date(a.somStartDate || 0);
+          const dateB = new Date(b.somStartDate || 0);
+          return dateB - dateA; // 최신순 (내림차순)
+        });
+        setPartySoms(sortedPartyData);
       } catch (error) {
         console.error('솜 데이터 로딩 실패:', error);
         setPartySoms([]);

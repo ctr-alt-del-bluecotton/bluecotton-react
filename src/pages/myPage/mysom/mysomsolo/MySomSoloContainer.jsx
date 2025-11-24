@@ -92,7 +92,13 @@ const MySomSoloContainer = () => {
         
         console.log("필터링 후 솔로솜 데이터:", soloData);
         console.log("솔로솜 개수:", soloData.length);
-        setSoloSoms(soloData);
+        // 최신순 정렬 (somStartDate 기준 내림차순)
+        const sortedSoloData = soloData.sort((a, b) => {
+          const dateA = new Date(a.somStartDate || 0);
+          const dateB = new Date(b.somStartDate || 0);
+          return dateB - dateA; // 최신순 (내림차순)
+        });
+        setSoloSoms(sortedSoloData);
       } catch (error) {
         console.error('솜 데이터 로딩 실패:', error);
         setSoloSoms([]);
