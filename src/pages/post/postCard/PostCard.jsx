@@ -143,25 +143,26 @@ const PostCard = ({
       {/* 좋아요 버튼 */}
       <S.LikeButton $liked={isLiked} onClick={handleLikeClick} />
 
-      {/* 썸네일 */}
-      <S.ThumbWrap>
-        <img
-          src={
-            imageUrl?.startsWith("http")
-              ? imageUrl
-              : `http://localhost:10000${
-                  imageUrl?.startsWith("/") ? imageUrl : "/" + imageUrl
-                }`
+    {/* 썸네일 */}
+    <S.ThumbWrap>
+      <img
+        loading="lazy"
+        src={
+          imageUrl?.startsWith("http")
+            ? imageUrl + "?w=300"
+            : `http://localhost:10000${
+                imageUrl?.startsWith("/") ? imageUrl : "/" + imageUrl
+              }?w=300`
+        }
+        alt="썸네일"
+        onError={(e) => {
+          if (!e.target.dataset.fallback) {
+            e.target.dataset.fallback = "true";
+            e.target.src = "/assets/images/postDefault.jpg";
           }
-          alt="썸네일"
-          onError={(e) => {
-            if (!e.target.dataset.fallback) {
-              e.target.dataset.fallback = "true";
-              e.target.src = "/assets/images/postDefault.jpg";
-            }
-          }}
-        />
-      </S.ThumbWrap>
+        }}
+      />
+    </S.ThumbWrap>
 
       {/* 본문 */}
       <S.Body>

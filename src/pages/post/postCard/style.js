@@ -203,6 +203,15 @@ S.IconEye = styled(IconBase)`
   background-image: url("/assets/icons/eye_gray.svg");
 `;
 
-
+S.PostThumb = styled.div.withConfig({
+  shouldForwardProp: (prop) => prop !== "bgsrc"
+})`
+  width: 100%;
+  height: 210px;
+  background-image: ${({ bgsrc }) => `url("${bgsrc}")`};
+  background-size: cover;
+  background-position: center;
+  border-radius: 8px;
+`;
 
 export default S;
