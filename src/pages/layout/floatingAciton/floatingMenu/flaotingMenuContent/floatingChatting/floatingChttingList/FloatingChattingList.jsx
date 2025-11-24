@@ -7,7 +7,7 @@ import FloatingChattingContent from './floatingChattingCotent/FloatingChattingCo
 
 const FloatingChattingListContainer = () => {
     
-    const { joinRooms, setChattingMenu, exitRoom } = useChatting();
+    const { joinRooms, setChattingMenu, exitRoom, exitRoomModal } = useChatting();
     const [ isLoding, setIsLoding ] = useState(false);
     
     useEffect(() => {
@@ -20,7 +20,7 @@ const FloatingChattingListContainer = () => {
         <S.chattingListWrap>
             { 
                 joinRooms?.map((content, i) => (
-                    <FloatingChattingContent key={i} content={content} setChattingMenu={setChattingMenu} exitRoom={exitRoom} />
+                    <FloatingChattingContent key={i} content={content} setChattingMenu={setChattingMenu} exitRoom={exitRoom} exitRoomModal={exitRoomModal} />
                 ))
             }
         </S.chattingListWrap>
