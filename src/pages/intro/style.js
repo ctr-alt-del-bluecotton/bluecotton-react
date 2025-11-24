@@ -89,7 +89,7 @@ S.IntroBannerButton = styled.button `
 S.DeviceWrap = styled.div`
   position: relative;
   width: 432px;
-  height: 932px;
+  height: 900px;
   overflow: hidden;
   filter: drop-shadow(0px 15px 22px rgba(0, 0, 0, 0.25));
 
@@ -159,7 +159,7 @@ S.DeviceWrap = styled.div`
 S.WhatIsSomWrap = styled.div `
     width: 100%;
     box-sizing: border-box;
-    background-color: #3182F6; 
+    background-color: #0015FF; 
     
 `
 S.WhatIsSomContainer = styled.div `
