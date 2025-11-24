@@ -60,6 +60,7 @@ export const ReadProvider = ({ children }) => {
         await fetchData(`chat/join-room?somTitle=${somTitle}&memberEmail=${currentUser.memberEmail}`, options.getOption())
         .then((res) => {
             window.dispatchEvent(new CustomEvent("refreshChatList"));
+            window.dispatchEvent(new CustomEvent("floatingActionEvent"));
         })
     }
 

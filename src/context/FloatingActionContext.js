@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext } from 'react';
+import React, { createContext, useState, useContext, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { fetchData, options } from './FetchContext';
 import { useSelector } from 'react-redux';
@@ -26,6 +26,19 @@ export const FloatingActionProvider = ({ children }) => {
     const [isReset, setIsReset] = useState(false);
     const { currentUser, isLogin } = useSelector((state) => state.user);
     
+    useEffect(() => {
+        const openChatting = (e) => {
+            console.log('이벤트 발생')
+            setIsFloatingSelect(true)
+            setIsDisplayFloatingMenu(true)
+            setSomMenuContent('chatting')
+        }
+        window.addEventListener("floatingActionEvent", openChatting);
+
+        return () => {
+            window.removeEventListener("floatingActionEvent", openChatting);
+        };
+    }, [])
 
     const somMenuSelect = (contentName) => {
         if (isDisplayFloatingMenu === false) {
@@ -48,7 +61,6 @@ export const FloatingActionProvider = ({ children }) => {
         const month = String(now.getMonth() + 1).padStart(2, "0");
         const day = String(now.getDate()).padStart(2, "0");
         
-        // ✅ 폴더 구조: som/2025/11/10
         const formData = new FormData();
         const folderPath = `${folder}/${year}/${month}/${day}`;
         formData.append('file', file);

@@ -13,6 +13,7 @@ S.floatingFormWrap = styled.div`
   overflow: hidden;
   gap: 20px;
   overflow-y : auto;
+  background-color: ${({theme}) => theme.PALLETE.white};
 `
 
 S.editerWrap = styled.div`
