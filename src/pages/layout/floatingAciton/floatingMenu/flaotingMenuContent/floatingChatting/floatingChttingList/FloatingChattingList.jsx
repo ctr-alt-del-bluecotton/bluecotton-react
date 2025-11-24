@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import S from './style';
 import { useChatting } from '../../../../../../../context/ChattingContext';
 import FloatingChattingContent from './floatingChattingCotent/FloatingChattingContent';
@@ -10,20 +10,18 @@ const FloatingChattingListContainer = () => {
     const { joinRooms, setChattingMenu, exitRoom } = useChatting();
     const [ isLoding, setIsLoding ] = useState(false);
     
-    useState(() => {
+    useEffect(() => {
         if(joinRooms?.length === 0) {
             setIsLoding(true)
         }
     },[isLoding, joinRooms])
 
-    console.log(joinRooms)
-
     return (
         <S.chattingListWrap>
             { 
-            joinRooms?.map((content, i) => (
-                <FloatingChattingContent key={i} content={content} setChattingMenu={setChattingMenu} exitRoom={exitRoom} />
-            ))
+                joinRooms?.map((content, i) => (
+                    <FloatingChattingContent key={i} content={content} setChattingMenu={setChattingMenu} exitRoom={exitRoom} />
+                ))
             }
         </S.chattingListWrap>
     );

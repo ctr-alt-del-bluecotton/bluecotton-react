@@ -18,18 +18,6 @@ const FloatingSomWriteInner = () => {
    
   const contents = Object.keys(getValues()).filter((content) => content !== "somContent");
 
-  // const isContent = (contentName) => {
-  //   if (getValues() == {}) {
-  //       return false;
-  //   } else {
-  //       if(getValues()[contentName] === null) {
-  //           return false;
-  //       }
-  //   }
-  //   return true;
-
-  // }
-
   const pageNext = (e) => {
     setIsAllError(true)
     for(const content of contents){
@@ -47,20 +35,6 @@ const FloatingSomWriteInner = () => {
         .map(([key]) => key);
   
       if (emptyFields.length > 0) {
-        // 페이지 분류 로직 (입력 필드별 페이지 지정)
-        const pageMapping = {
-          somTitle: 1,
-          somCategory: 1,
-          somAddress: 1,
-          somStartDate: 1,
-          somEndDate: 1,
-          somCount: 1,
-          somContent: 2,
-        };
-  
-        const firstInvalid = emptyFields[0];
-        const targetPage = pageMapping[firstInvalid] || 1;
-        setSomMenuPage(targetPage);
         return;
       }
       data.memberId = currentUser.id;
@@ -71,12 +45,10 @@ const FloatingSomWriteInner = () => {
           typeof value === "string" ? value.trim() : value,
         ])
       );
-  
-      // ✅ 백엔드로 전송
+
       await fetchData('som/register', options.postOption(trimData))
       .then(async (somRes) => {
         const somData = await somRes.json()
-        console.log(somData)
         if (uploadImageTempIds.length !== 0){
           await fetchData('som-image/update', options.putOption({ 
             somId : somData.data.id,
@@ -91,9 +63,8 @@ const FloatingSomWriteInner = () => {
           memberId: currentUser.id,
         }
         
-        nav(`/main/som/read/${somData.data.id}`)
-
         await fetchData('chat/create-rooms', options.postOption(createChatData))
+        nav(`/main/som/read/${somData.data.id}`)
       })
     }
     asyncSubmit(inputData).then(() => {
@@ -108,6 +79,7 @@ const FloatingSomWriteInner = () => {
       setSelected("")
       window.scrollTo(0, 0);   
       window.dispatchEvent(new CustomEvent("refreshSomList"));
+      window.dispatchEvent(new CustomEvent("refreshChatList"));
     })
   };
   
