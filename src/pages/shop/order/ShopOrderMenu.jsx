@@ -219,7 +219,10 @@ const ShopOrderMenu = () => {
 
   const itemPrice = useMemo(() => rawTotal, [rawTotal]);
   const candyNeedAmount = itemPrice;
-  const totalAmount = useMemo(() => itemPrice + shippingFee, [itemPrice, shippingFee]);
+  const totalAmount = useMemo(
+    () => itemPrice + shippingFee,
+    [itemPrice, shippingFee]
+  );
 
   const purchaseTypeForOrder = useMemo(() => {
     if (!orderData?.items?.length) return "CASH";
@@ -239,13 +242,6 @@ const ShopOrderMenu = () => {
   }, [openModal]);
 
   const handlePortOnePay = async () => {
-    if (!deliveryInfo) {
-      return openModal({
-        title: "배송 정보 없음",
-        message: "배송지를 먼저 입력해주세요.",
-      });
-    }
-
     if (payLoading || isLoadingOrder || !orderData) {
       return openModal({
         title: "준비 중",
@@ -288,7 +284,7 @@ const ShopOrderMenu = () => {
     try {
       setPayLoading(true);
 
-      if (API) {
+      if (API && deliveryInfo) {
         await fetch(`${API}/delivery/save`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -408,7 +404,7 @@ const ShopOrderMenu = () => {
             buyer_email: currentUser.memberEmail || "",
             buyer_name: currentUser.memberName || "",
             buyer_tel: currentUser.memberPhone || "",
-            buyer_addr: deliveryInfo.deliveryAddress,
+            buyer_addr: deliveryInfo?.deliveryAddress || "",
             buyer_postcode: "00000",
             ...(isMobile ? { m_redirect_url: window.location.href } : {}),
           },
@@ -468,6 +464,14 @@ const ShopOrderMenu = () => {
     }
   };
 
+  const payButtonLabel = useMemo(() => {
+    if (payLoading) return "결제창 여는 중…";
+    if (isCandy) {
+      return `${candyNeedAmount.toLocaleString()}캔디 결제하기`;
+    }
+    return `${totalAmount.toLocaleString()}원 결제하기`;
+  }, [payLoading, isCandy, candyNeedAmount, totalAmount]);
+
   if (isLoadingOrder || !orderData) {
     return <S.OrderPageWrap>주문 정보 불러오는 중</S.OrderPageWrap>;
   }
@@ -492,7 +496,11 @@ const ShopOrderMenu = () => {
           <S.SideTitle>결제 예정금액</S.SideTitle>
           <S.SideRow>
             <span>상품금액</span>
-            <span>{itemPrice.toLocaleString()}원</span>
+            <span>
+              {isCandy
+                ? `${candyNeedAmount.toLocaleString()}캔디`
+                : `${itemPrice.toLocaleString()}원`}
+            </span>
           </S.SideRow>
           <S.SideRow>
             <span>배송비</span>
@@ -500,7 +508,11 @@ const ShopOrderMenu = () => {
           </S.SideRow>
           <S.SideTotal>
             <span>합계</span>
-            <span className="price">{totalAmount.toLocaleString()}원</span>
+            <span className="price">
+              {isCandy
+                ? `${candyNeedAmount.toLocaleString()}캔디`
+                : `${totalAmount.toLocaleString()}원`}
+            </span>
           </S.SideTotal>
 
           <S.PayButton
@@ -510,9 +522,7 @@ const ShopOrderMenu = () => {
               !Number.isFinite(Number(orderData?.orderId ?? orderId))
             }
           >
-            {payLoading
-              ? "결제창 여는 중…"
-              : `${totalAmount.toLocaleString()}원 결제하기`}
+            {payButtonLabel}
           </S.PayButton>
         </S.SideContainer>
       </S.OrderSideSection>

@@ -340,7 +340,7 @@ const SomManagementContainer = () => {
                   onClick={handleSortById}
                   style={{ cursor: "pointer" }}
                 >
-                  ID {sortOrder === "asc" ? "🔺" : "🔻"}
+                  ID
                 </S.TableHeaderCell>
                 <S.TableHeaderCell>솜 제목</S.TableHeaderCell>
                 <S.TableHeaderCell>닉네임</S.TableHeaderCell>

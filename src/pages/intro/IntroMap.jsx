@@ -31,11 +31,13 @@ const IntroMap = () => {
                     >
                         <S.DeviceWrap>
                             <img
-                            src="/assets/images/Device.png"
-                            alt="디바이스"
-                            className="device-img"
+                                src="/assets/images/Device.png"
+                                alt="디바이스"
+                                className="device-img"
                             />
-                            <MapInlineForIntro className="map-img" />  
+                            <div className="map-only">
+                                <MapInlineForIntro className="map-img" />
+                            </div>
                         </S.DeviceWrap>
                     </motion.div>
                 </S.IntroMapImgAndText>

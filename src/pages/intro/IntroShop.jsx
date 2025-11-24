@@ -1,6 +1,5 @@
 import React from "react";
 import S from "./style";
-import IntroShopProductList from "./IntroShopProductList"; 
 
 const IntroShop = () => {
   return (

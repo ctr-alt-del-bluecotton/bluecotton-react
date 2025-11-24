@@ -186,7 +186,7 @@ const UserManagementContainer = () => {
           <S.Table>
             <S.TableHeader onClick={handleSortById}>
               <S.TableRow>
-                <S.TableHeaderCell>ID {sortOrder === "asc" ? "🔺" : "🔻"}</S.TableHeaderCell>
+                <S.TableHeaderCell>ID</S.TableHeaderCell>
                 <S.TableHeaderCell>이메일</S.TableHeaderCell>
                 <S.TableHeaderCell>소셜 로그인</S.TableHeaderCell>
                 <S.TableHeaderCell>닉네임</S.TableHeaderCell>
@@ -199,7 +199,7 @@ const UserManagementContainer = () => {
             <tbody>
               {currentMembers.map((m) => (
                 <S.TableRow key={m.id}>
-                  <S.TableCell style={{ textAlign: "center" }}>{m.id}</S.TableCell>
+                  <S.TableCell style={{ textAlign: "center"}}>{m.id}</S.TableCell>
                   <S.TableCell style={{ textAlign: "center" }}>
                     {m.email}
                   </S.TableCell>
@@ -219,12 +219,12 @@ const UserManagementContainer = () => {
                     {m.address}
                   </S.TableCell>
                   <S.TableCell>
-                      <S.SecondaryButton
+                      <S.ThirdButton
                         onClick={() => handleShowDetail(m)}
                         style={{ padding: "6px 12px", fontSize: "12px" }}
                       >
                         상세
-                      </S.SecondaryButton>
+                      </S.ThirdButton>
                   </S.TableCell>
                 </S.TableRow>
               ))}

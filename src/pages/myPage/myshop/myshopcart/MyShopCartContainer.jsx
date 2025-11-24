@@ -362,6 +362,8 @@ const MyShopCartContainer = () => {
   if (loading) return <div>불러오는 중…</div>;
   if (error) return <div>에러: {String(error.message || error)}</div>;
 
+  const isEmpty = currentItems.length === 0;
+
   return (
     <div>
       <S.ListHeader>장바구니</S.ListHeader>
@@ -383,109 +385,130 @@ const MyShopCartContainer = () => {
         </S.FilterButton>
       </S.FilterContainer>
 
-      <S.CartHeader>
-        <S.SelectAll>
-          <S.Checkbox
-            checked={allChecked}
-            onChange={toggleAll}
-            aria-label="전체선택"
-          />
-          전체선택
-        </S.SelectAll>
-
-        <div style={{ display: "flex", gap: 8 }}>
-          <S.ResetButton
-            $active={checkedIds.size > 0}
-            onClick={() => setCheckedIds(new Set())}
-          >
-            선택해제
-          </S.ResetButton>
-
-          <S.DeleteButton
-            $active={checkedIds.size > 0}
-            onClick={handleDeleteSelected}
-          >
-            선택삭제
-          </S.DeleteButton>
-        </div>
-      </S.CartHeader>
-
-      <S.ListContainer>
-        {currentItems.map((item) => {
-          const q = qtyMap[item.id] || 1;
-
-          return (
-            <S.CartItem key={item.id}>
+      {isEmpty ? (
+        <>
+          <S.ListContainer>
+            <div
+              style={{
+                width: "100%",
+                padding: "60px 0",
+                textAlign: "center",
+                color: "#9e9e9e",
+                fontSize: 16,
+              }}
+            >
+              장바구니에 담긴 상품이 없습니다.
+            </div>
+          </S.ListContainer>
+          {/* 비어 있을 때는 체크박스/요약/주문 버튼 모두 숨김 */}
+        </>
+      ) : (
+        <>
+          <S.CartHeader>
+            <S.SelectAll>
               <S.Checkbox
-                checked={checkedIds.has(item.id)}
-                onChange={toggleOne(item.id)}
-                aria-label={`${item.productName} 선택`}
+                checked={allChecked}
+                onChange={toggleAll}
+                aria-label="전체선택"
               />
-              <S.ItemImage>
-                {item.productImageUrl && (
-                  <img src={item.productImageUrl} alt={item.productName} />
-                )}
-              </S.ItemImage>
-              <S.ItemInfo>
-                <div>
-                  <S.ItemName>{item.productName}</S.ItemName>
-                  <div
-                    style={{
-                      color: "#757575",
-                      fontSize: 14,
-                      marginBottom: 8,
-                      cursor: "pointer",
-                    }}
-                    onClick={() => handleDelete(item.id)}
-                  >
-                    삭제
-                  </div>
+              전체선택
+            </S.SelectAll>
 
-                  <S.QuantityControl>
-                    <S.QuantityButton
-                      onClick={() => dec(item.id)}
-                      disabled={q <= 1}
-                    >
-                      -
-                    </S.QuantityButton>
-                    <S.Quantity>{q}</S.Quantity>
-                    <S.QuantityButton onClick={() => inc(item.id)}>
-                      +
-                    </S.QuantityButton>
-                  </S.QuantityControl>
-                </div>
-              </S.ItemInfo>
-            </S.CartItem>
-          );
-        })}
-      </S.ListContainer>
+            <div style={{ display: "flex", gap: 8 }}>
+              <S.ResetButton
+                $active={checkedIds.size > 0}
+                onClick={() => setCheckedIds(new Set())}
+              >
+                선택해제
+              </S.ResetButton>
 
-      <S.OrderSummary>
-        <S.SummaryRow>
-          <span>선택 상품 금액</span>
-          <span>
-            {selectedTotal.toLocaleString()}
-            {unit}
-          </span>
-        </S.SummaryRow>
-        <S.SummaryRow>
-          <span>+ 총 배송비</span>
-          <span>{shippingText}</span>
-        </S.SummaryRow>
-        <S.SummaryRow>
-          <span>- 할인 예상 금액</span>
-          <span>0{unit}</span>
-        </S.SummaryRow>
-        <S.SummaryRow>
-          <span>주문 금액(배송비 별도)</span>
-          <span>
-            {totalOrderAmount.toLocaleString()}
-            {unit}
-          </span>
-        </S.SummaryRow>
-      </S.OrderSummary>
+              <S.DeleteButton
+                $active={checkedIds.size > 0}
+                onClick={handleDeleteSelected}
+              >
+                선택삭제
+              </S.DeleteButton>
+            </div>
+          </S.CartHeader>
 
-      <S.OrderButton onClick={handleOrder}>주문하기</S.OrderButton>
+          <S.ListContainer>
+            {currentItems.map((item) => {
+              const q = qtyMap[item.id] || 1;
+
+              return (
+                <S.CartItem key={item.id}>
+                  <S.Checkbox
+                    checked={checkedIds.has(item.id)}
+                    onChange={toggleOne(item.id)}
+                    aria-label={`${item.productName} 선택`}
+                  />
+                  <S.ItemImage>
+                    {item.productImageUrl && (
+                      <img src={item.productImageUrl} alt={item.productName} />
+                    )}
+                  </S.ItemImage>
+                  <S.ItemInfo>
+                    <div>
+                      <S.ItemName>{item.productName}</S.ItemName>
+                      <div
+                        style={{
+                          color: "#757575",
+                          fontSize: 14,
+                          marginBottom: 8,
+                          cursor: "pointer",
+                        }}
+                        onClick={() => handleDelete(item.id)}
+                      >
+                        삭제
+                      </div>
+
+                      <S.QuantityControl>
+                        <S.QuantityButton
+                          onClick={() => dec(item.id)}
+                          disabled={q <= 1}
+                        >
+                          -
+                        </S.QuantityButton>
+                        <S.Quantity>{q}</S.Quantity>
+                        <S.QuantityButton onClick={() => inc(item.id)}>
+                          +
+                        </S.QuantityButton>
+                      </S.QuantityControl>
+                    </div>
+                  </S.ItemInfo>
+                </S.CartItem>
+              );
+            })}
+          </S.ListContainer>
+
+          <S.OrderSummary>
+            <S.SummaryRow>
+              <span>선택 상품 금액</span>
+              <span>
+                {selectedTotal.toLocaleString()}
+                {unit}
+              </span>
+            </S.SummaryRow>
+            <S.SummaryRow>
+              <span>+ 총 배송비</span>
+              <span>{shippingText}</span>
+            </S.SummaryRow>
+            <S.SummaryRow>
+              <span>- 할인 예상 금액</span>
+              <span>0{unit}</span>
+            </S.SummaryRow>
+            <S.SummaryRow>
+              <span>주문 금액(배송비 별도)</span>
+              <span>
+                {totalOrderAmount.toLocaleString()}
+                {unit}
+              </span>
+            </S.SummaryRow>
+          </S.OrderSummary>
+
+          <S.OrderButton onClick={handleOrder}>주문하기</S.OrderButton>
+        </>
+      )}
     </div>
   );
 };

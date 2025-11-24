@@ -28,13 +28,13 @@ const PostManagementContainer = () => {
 
   const [postCategoryFilter, setPostCategoryFilter] = useState("all");
   const [postStatusFilter, setPostStatusFilter] = useState("all");
-  const [postReportStatusFilter, setPostReportStatusFilter] = useState("all");
+  const [postReportStatusFilter, setPostReportStatusFilter] =
+    useState("all");
   const [commentStatusFilter, setCommentStatusFilter] = useState("all");
 
   const [posts, setPosts] = useState([]);
   const [postReports, setPostReports] = useState([]);
   const [commentReports, setCommentReports] = useState([]);
-  const [replyReports, setReplyReports] = useState([]);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -111,7 +111,7 @@ const PostManagementContainer = () => {
       const body = await safeJson(res);
       const list = (body && body.data) || [];
       const normalized = list.map((r) => ({
-        id: r.id,
+        id: r.postCommentReportId ?? r.id ?? r.postCommentId,
         commentId: r.postCommentId,
         postId: r.postId || null,
         postTitle: r.postTitle || "",
@@ -128,34 +128,6 @@ const PostManagementContainer = () => {
     }
   };
 
-  const fetchReplyReports = async () => {
-    try {
-      const res = await fetch(`${API}/admin/post/replies/reported`, {
-        method: "GET",
-        credentials: "include",
-      });
-      if (!res.ok) throw new Error("대댓글 신고 조회 실패");
-      const body = await safeJson(res);
-      const list = (body && body.data) || [];
-      const normalized = list.map((r) => ({
-        id: r.id,
-        replyId: r.replyId || r.postReplyId,
-        commentId: r.commentId || r.postCommentId,
-        postId: r.postId || null,
-        postTitle: r.postTitle || "",
-        replyContent: r.replyContent || r.postReplyContent || "",
-        reportedUser: r.reportedUserNickname || "",
-        reporter: r.reporterNickname || r.reporter || "",
-        reason: r.reason || r.postReplyReportContent || "",
-        reportDate: r.reportDate || r.createdAt || "",
-        status: r.status || "pending",
-      }));
-      setReplyReports(normalized);
-    } catch (e) {
-      setError(e.message || "대댓글 신고 조회 중 오류");
-    }
-  };
-
   const fetchAll = async () => {
     setLoading(true);
     setError("");
@@ -164,7 +136,6 @@ const PostManagementContainer = () => {
         fetchPosts(),
         fetchPostReports(),
         fetchCommentReports(),
-        fetchReplyReports(),
       ]);
     } finally {
       setLoading(false);
@@ -190,7 +161,6 @@ const PostManagementContainer = () => {
       const body = await safeJson(res);
       const data = body && body.data;
       if (!data) throw new Error("게시글 상세 데이터가 없습니다.");
-
       setDetailPost({
         id: data.id,
         title: data.postTitle || "",
@@ -218,10 +188,6 @@ const PostManagementContainer = () => {
           let url = "";
           if (type === "게시글") {
             url = `${API}/admin/posts/delete/${id}`;
-          } else if (type === "댓글") {
-            url = `${API}/admin/post/comments/reported/${id}`;
-          } else if (type === "대댓글") {
-            url = `${API}/admin/post/comments/replies/${id}`;
           } else {
             return;
           }
@@ -236,16 +202,6 @@ const PostManagementContainer = () => {
             setPosts((prev) => prev.filter((p) => p.id !== id));
             setPostReports((prev) => prev.filter((r) => r.postId !== id));
             setCommentReports((prev) => prev.filter((r) => r.postId !== id));
-            setReplyReports((prev) => prev.filter((r) => r.postId !== id));
-          } else if (type === "댓글") {
-            setCommentReports((prev) =>
-              prev.filter((r) => r.commentId !== id)
-            );
-            setReplyReports((prev) =>
-              prev.filter((r) => r.commentId !== id)
-            );
-          } else if (type === "대댓글") {
-            setReplyReports((prev) => prev.filter((r) => r.replyId !== id));
           }
 
           openModal({
@@ -264,16 +220,51 @@ const PostManagementContainer = () => {
     });
   };
 
+  const handleDeleteComment = (reportId, commentId) => {
+    openModal({
+      title: "삭제 확인",
+      message: "댓글을 정말 삭제하시겠습니까?",
+      confirmText: "삭제",
+      cancelText: "취소",
+      onConfirm: async () => {
+        try {
+          if (!reportId) {
+            throw new Error("신고 ID가 유효하지 않습니다.");
+          }
+
+          const url = `${API}/admin/post/comments/reported/${reportId}`;
+
+          const res = await fetch(url, {
+            method: "DELETE",
+            credentials: "include",
+          });
+          if (!res.ok) throw new Error("댓글 삭제 실패");
+
+          setCommentReports((prev) =>
+            prev.filter((r) => r.id !== reportId && r.commentId !== commentId)
+          );
+
+          openModal({
+            title: "완료",
+            message: "댓글 삭제가 완료되었습니다.",
+            confirmText: "확인",
+          });
+        } catch (e) {
+          openModal({
+            title: "오류",
+            message: e.message || "댓글 삭제 중 오류가 발생했습니다.",
+            confirmText: "확인",
+          });
+        }
+      },
+    });
+  };
+
   const handleReportResolve = async (reportId, type) => {
     try {
-      let url = "";
-      if (type === "댓글") {
-        url = `${API}/admin/post/comments/reports/${reportId}/resolve`;
-      } else if (type === "대댓글") {
-        url = `${API}/admin/post/replies/reports/${reportId}/resolve`;
-      } else {
-        return;
-      }
+      if (type !== "댓글") return;
+
+      const url = `${API}/admin/post/comments/reports/${reportId}/resolve`;
 
       const res = await fetch(url, {
         method: "POST",
@@ -281,19 +272,11 @@ const PostManagementContainer = () => {
       });
       if (!res.ok) throw new Error("신고 처리 실패");
 
-      if (type === "댓글") {
-        setCommentReports((prev) =>
-          prev.map((r) =>
-            r.id === reportId ? { ...r, status: "resolved" } : r
-          )
-        );
-      } else if (type === "대댓글") {
-        setReplyReports((prev) =>
-          prev.map((r) =>
-            r.id === reportId ? { ...r, status: "resolved" } : r
-          )
-        );
-      }
+      setCommentReports((prev) =>
+        prev.map((r) =>
+          r.id === reportId ? { ...r, status: "resolved" } : r
+        )
+      );
     } catch (e) {
       openModal({
         title: "오류",
@@ -305,14 +288,9 @@ const PostManagementContainer = () => {
 
   const handleReportReject = async (reportId, type) => {
     try {
-      let url = "";
-      if (type === "댓글") {
-        url = `${API}/admin/post/comments/reports/${reportId}/reject`;
-      } else if (type === "대댓글") {
-        url = `${API}/admin/post/replies/reports/${reportId}/reject`;
-      } else {
-        return;
-      }
+      if (type !== "댓글") return;
+
+      const url = `${API}/admin/post/comments/reports/${reportId}/reject`;
 
       const res = await fetch(url, {
         method: "POST",
@@ -320,19 +298,11 @@ const PostManagementContainer = () => {
       });
       if (!res.ok) throw new Error("신고 기각 실패");
 
-      if (type === "댓글") {
-        setCommentReports((prev) =>
-          prev.map((r) =>
-            r.id === reportId ? { ...r, status: "resolved" } : r
-          )
-        );
-      } else if (type === "대댓글") {
-        setReplyReports((prev) =>
-          prev.map((r) =>
-            r.id === reportId ? { ...r, status: "resolved" } : r
-          )
-        );
-      }
+      setCommentReports((prev) =>
+        prev.map((r) =>
+          r.id === reportId ? { ...r, status: "resolved" } : r
+        )
+      );
     } catch (e) {
       openModal({
         title: "오류",
@@ -373,24 +343,18 @@ const PostManagementContainer = () => {
     return matchesSearch && matchesStatus;
   });
 
-  const mergedCommentReplyReports = [
-    ...commentReports.map((r) => ({
+  const mergedCommentReplyReports = commentReports
+    .map((r) => ({
       ...r,
       targetType: "댓글",
       targetId: r.commentId,
       content: r.commentContent,
-    })),
-    ...replyReports.map((r) => ({
-      ...r,
-      targetType: "대댓글",
-      targetId: r.replyId,
-      content: r.replyContent,
-    })),
-  ].sort((a, b) => {
-    const da = new Date(a.reportDate);
-    const db = new Date(b.reportDate);
-    return db - da;
-  });
+    }))
+    .sort((a, b) => {
+      const da = new Date(a.reportDate);
+      const db = new Date(b.reportDate);
+      return db - da;
+    });
 
   const filteredCommentReplyReports = mergedCommentReplyReports.filter(
     (report) => {
@@ -596,9 +560,7 @@ const PostManagementContainer = () => {
                           상세
                         </S.Button>
                         <S.SecondaryButton
-                          onClick={() =>
-                            handleDelete(report.postId, "게시글")
-                          }
+                          onClick={() => handleDelete(report.postId, "게시글")}
                           style={{ padding: "6px 12px", fontSize: "12px" }}
                         >
                           삭제
@@ -636,7 +598,7 @@ const PostManagementContainer = () => {
                 <S.TableRow>
                   <S.TableHeaderCell>신고 ID</S.TableHeaderCell>
                   <S.TableHeaderCell>유형</S.TableHeaderCell>
-                  <S.TableHeaderCell>대상 ID</S.TableHeaderCell>
+                  <S.TableHeaderCell>댓글 ID</S.TableHeaderCell>
                   <S.TableHeaderCell>게시글 제목</S.TableHeaderCell>
                   <S.TableHeaderCell>내용</S.TableHeaderCell>
                   <S.TableHeaderCell>피신고자</S.TableHeaderCell>
@@ -648,12 +610,16 @@ const PostManagementContainer = () => {
                 </S.TableRow>
               </S.TableHeader>
               <tbody>
-                {filteredCommentReplyReports.map((report) => (
-                  <S.TableRow key={`${report.targetType}-${report.id}`}>
-                    <S.TableCell>{report.targetId}</S.TableCell>
+                {filteredCommentReplyReports.map((report, index) => (
+                  <S.TableRow
+                    key={`comment-report-${
+                      report.id ?? report.commentId ?? `idx-${index}`
+                    }`}
+                  >
+                    <S.TableCell>{report.id}</S.TableCell>
                     <S.TableCell>{report.targetType}</S.TableCell>
+                    <S.TableCell>{report.commentId}</S.TableCell>
                     <S.TableCell>{report.postTitle}</S.TableCell>
-                    <S.TableCell>{report.commentContent}</S.TableCell>
                     <S.TableCell
                       style={{
                         maxWidth: "220px",
@@ -688,7 +654,7 @@ const PostManagementContainer = () => {
                         </S.Button>
                         <S.SecondaryButton
                           onClick={() =>
-                            handleDelete(report.targetId, report.targetType)
+                            handleDeleteComment(report.id, report.commentId)
                           }
                           style={{ padding: "6px 12px", fontSize: "12px" }}
                         >
@@ -754,9 +720,7 @@ const PostManagementContainer = () => {
               </div>
 
               {detailLoading && <p>상세 정보를 불러오는 중입니다...</p>}
-              {detailError && (
-                <p style={{ color: "red" }}>{detailError}</p>
-              )}
+              {detailError && <p style={{ color: "red" }}>{detailError}</p>}
 
               {!detailLoading && !detailError && detailPost && (
                 <>
