@@ -148,13 +148,33 @@ S.SecondaryButton = styled.button`
   border: 1px solid ${({ theme }) => theme.PALLETE.grey.greyScale1};
   border-radius: 4px;
   cursor: pointer;
-  margin-bottom: 19px;
   transition: all 0.2s ease;
+  margin-bottom: 20px;
+  margin-left: 5px;
 
   &:hover {
     background-color: ${({ theme }) => theme.PALLETE.grey.greyScale0};
   }
 `;
+
+S.ThirdButton =styled.button `
+  ${C.smallText2Regular}
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  text-align: center;
+  ${C.secondary}
+  background-color: ${({ theme }) => theme.PALLETE.white};
+  border: 1px solid ${({ theme }) => theme.PALLETE.grey.greyScale1};
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-left: 40px;
+
+  &:hover {
+    background-color: ${({ theme }) => theme.PALLETE.grey.greyScale0};
+  }
+`
 
 
 S.FilterBar = styled.div`
@@ -250,7 +270,6 @@ S.TableHeaderCell = styled.th`
   ${C.smallText2Regular}
   ${C.basic}
   padding: 14px 16px;
-  text-align: left;
   text-align: center;
   font-weight: ${({ theme }) => theme.FONT_WEIGHT.bold};
 `;
@@ -260,8 +279,11 @@ S.TableCell = styled.td`
   ${C.basic}
   padding: 14px 16px;
   text-align: center;
+  align-items: center;
   vertical-align: middle;
 `;
+
+
 
 S.StatusBadge = styled.span`
   ${C.smallText1Regular}

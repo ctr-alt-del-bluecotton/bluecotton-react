@@ -135,6 +135,61 @@ S.DeviceWrap = styled.div`
     overflow: hidden;
   }
 
+  .custom-map-icon {
+    position: absolute;
+
+    bottom: 48px;   
+    right: 48px;   
+    
+    width: 60px;
+    height: 60px;
+    z-index: 9999;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.2);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+
+  .DeviceWrap .device-bottom-icon {
+  position: absolute;
+  right: 24px;
+  bottom: 24px;
+  width: 64px;
+  height: 64px;
+  border-radius: 20px;
+  object-fit: cover;
+  z-index: 3;
+}
+
+.map-only .map-img img[src*="somfavicon"],
+.map-only .map-img .custom-marker,
+.map-only .map-img .my-location-btn {
+  display: none !important;
+}
+
+.map-only .map-img .wrap_control,
+.map-only .map-img .container_control {
+  display: none !important;
+}
+
+.map-only .map-img .customoverlay {
+  display: none !important;
+}
+
+
+
+  
+
+  .custom-map-icon img {
+    width: 70%;
+    height: 70%;
+    object-fit: contain;
+  }
+
   .map-img .map-inner > div {
     width: 100%;
     height: 100%;
@@ -155,11 +210,12 @@ S.DeviceWrap = styled.div`
 `;
 
 
+
 // 소개 페이지 (솜이란?)
 S.WhatIsSomWrap = styled.div `
     width: 100%;
     box-sizing: border-box;
-    background-color: #0015FF; 
+    background-color: #3182F6; 
     
 `
 S.WhatIsSomContainer = styled.div `
