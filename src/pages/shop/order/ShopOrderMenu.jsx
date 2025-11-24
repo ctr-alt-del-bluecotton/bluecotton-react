@@ -12,30 +12,24 @@ import { updateMemberCandy } from "../../../store/userSlice";
 const PORTONE_IMP_KEY = process.env.REACT_APP_PORTONE_IMP_KEY;
 const API = process.env.REACT_APP_BACKEND_URL;
 
-// PortOne SDK 로더
 const getIMP = (() => {
   let promise;
   return () => {
     if (window.IMP) return Promise.resolve(window.IMP);
     if (promise) return promise;
-
     promise = new Promise((resolve, reject) => {
       const script = document.createElement("script");
       script.src = "https://cdn.iamport.kr/v1/iamport.js";
       script.async = true;
       script.onload = () => {
         if (!window.IMP) return reject(new Error("PortOne SDK 로드 실패"));
-        if (!PORTONE_IMP_KEY)
-          return reject(
-            new Error("PORTONE 식별키 없음 (REACT_APP_PORTONE_IMP_KEY)")
-          );
+        if (!PORTONE_IMP_KEY) return reject(new Error("포트원 식별키 없음"));
         window.IMP.init(PORTONE_IMP_KEY);
         resolve(window.IMP);
       };
-      script.onerror = () => reject(new Error("PortOne 스크립트 로드 실패"));
+      script.onerror = () => reject(new Error("PortOne 로드 실패"));
       document.head.appendChild(script);
     });
-
     return promise;
   };
 })();
@@ -70,28 +64,24 @@ const ShopOrderMenu = () => {
 
   const [orderData, setOrderData] = useState(null);
   const [isLoadingOrder, setIsLoadingOrder] = useState(true);
-
-  // 'toss' | 'kakao' | 'general' | 'candy'
   const [payType, setPayType] = useState(null);
-  const [generalMethod, setGeneralMethod] = useState("card"); // 'card' | 'trans' 등
+  const [generalMethod, setGeneralMethod] = useState("card");
   const [payLoading, setPayLoading] = useState(false);
-
   const merchantUidRef = useRef(null);
-
   const [candyBalance, setCandyBalance] = useState(0);
+
+  const [deliveryInfo, setDeliveryInfo] = useState(null);
 
   useEffect(() => {
     setCandyBalance(Number(currentUser?.memberCandy ?? 0) || 0);
   }, [currentUser]);
 
-  // 1) snapshot(장바구니/단일상품)로 들어온 경우
   useEffect(() => {
     if (snapshot?.items?.length) {
       const items = snapshot.items.map((it) => {
         const quantity = Number(it.quantity ?? 1);
         const unitPrice = Number(it.unitPrice ?? 0);
         const lineTotal = unitPrice * quantity;
-
         return {
           productId: it.productId,
           name: it.name ?? it.productName ?? "",
@@ -103,12 +93,10 @@ const ShopOrderMenu = () => {
           lineTotal,
         };
       });
-
       const totalPrice = Number(
         snapshot.totalPrice ??
           items.reduce((s, v) => s + (v.lineTotal || 0), 0)
       );
-
       setOrderData({
         orderId: Number(orderId) || undefined,
         items,
@@ -119,11 +107,9 @@ const ShopOrderMenu = () => {
     }
   }, [snapshot, orderId]);
 
-  // 2) 서버에서 주문 상세를 다시 조회하는 경우
   useEffect(() => {
     if (snapshot?.items?.length) return;
-
-    if (!orderId && !(snapshot?.items?.length)) {
+    if (!orderId) {
       openModal({
         title: "오류",
         message: "주문 정보가 유효하지 않습니다.",
@@ -132,13 +118,10 @@ const ShopOrderMenu = () => {
       });
       return;
     }
-
     const fetchOrderData = async () => {
-      if (!orderId) return;
+      if (!orderId || !currentUser?.id) return;
       setIsLoadingOrder(true);
       try {
-        if (!currentUser?.id) return;
-
         const res = await fetch(
           `${API}/order/option?id=${orderId}&memberId=${currentUser.id}`,
           {
@@ -146,45 +129,29 @@ const ShopOrderMenu = () => {
           }
         );
         if (!res.ok) throw new Error("주문 상세 정보 로드 실패");
-
         const result = await res.json();
         const rawServer = result?.data?.value ?? result?.data ?? null;
-
         let rawItems = [];
-        let resolvedOrderId = Number(orderId) || undefined;
+        let resolvedOrderId = Number(orderId);
         let totalPrice = 0;
-
         if (Array.isArray(rawServer)) {
           rawItems = rawServer;
           if (rawServer.length > 0) {
-            resolvedOrderId = Number(
-              rawServer[0].orderId ?? rawServer[0].id ?? resolvedOrderId
-            );
+            resolvedOrderId = Number(rawServer[0].orderId);
           }
         } else if (rawServer) {
           rawItems = rawServer.items || [];
-          resolvedOrderId = Number(rawServer.orderId ?? resolvedOrderId);
+          resolvedOrderId = Number(rawServer.orderId);
           totalPrice = Number(rawServer.totalPrice ?? 0);
         }
-
         const items = rawItems.map((item) => {
-          const quantity = Number(item.orderQuantity ?? item.quantity ?? 1);
-          const unitPrice = Number(
-            item.productPrice ??
-              item.price ??
-              (item.orderTotalPrice && quantity
-                ? item.orderTotalPrice / quantity
-                : 0)
-          );
-          const lineTotal = Number(
-            item.orderTotalPrice ?? unitPrice * quantity
-          );
-
+          const quantity = Number(item.orderQuantity ?? 1);
+          const unitPrice = Number(item.productPrice ?? 0);
+          const lineTotal = Number(item.orderTotalPrice ?? unitPrice * quantity);
           return {
             productId: item.productId,
-            name: item.productName ?? item.name ?? "",
-            imageUrl:
-              item.imageUrl ?? item.imgUrl ?? item.productImageUrl ?? null,
+            name: item.productName ?? "",
+            imageUrl: item.imageUrl ?? null,
             unitPrice,
             quantity,
             orderTotalPrice: lineTotal,
@@ -194,14 +161,12 @@ const ShopOrderMenu = () => {
             ).toUpperCase(),
           };
         });
-
         if (!totalPrice) {
           totalPrice = items.reduce(
             (sum, it) => sum + (it.orderTotalPrice || 0),
             0
           );
         }
-
         if (items.length > 0) {
           setOrderData({
             orderId: resolvedOrderId,
@@ -221,34 +186,24 @@ const ShopOrderMenu = () => {
         setIsLoadingOrder(false);
       }
     };
-
-    if (currentUser?.id && orderId) {
-      fetchOrderData();
-    }
+    if (currentUser?.id) fetchOrderData();
   }, [API, currentUser, navigate, openModal, orderId, snapshot]);
 
   const rawTotal = useMemo(() => {
     if (!orderData) return 0;
-
     if (
       typeof orderData.totalPrice === "number" &&
-      !Number.isNaN(orderData.totalPrice) &&
       orderData.totalPrice > 0
     ) {
       return orderData.totalPrice;
     }
-
     return (orderData.items || []).reduce(
-      (s, it) =>
-        s +
-        (it.orderTotalPrice ??
-          (it.unitPrice || 0) * (it.quantity || 1)),
+      (s, it) => s + (it.orderTotalPrice ?? it.unitPrice * it.quantity),
       0
     );
   }, [orderData]);
 
   const FIXED_SHIPPING_FEE = 3000;
-
   const isCandy = payType === "candy";
 
   const shippingFee = useMemo(() => {
@@ -264,48 +219,33 @@ const ShopOrderMenu = () => {
 
   const itemPrice = useMemo(() => rawTotal, [rawTotal]);
   const candyNeedAmount = itemPrice;
-
-  const totalAmount = useMemo(
-    () => itemPrice + shippingFee,
-    [itemPrice, shippingFee]
-  );
+  const totalAmount = useMemo(() => itemPrice + shippingFee, [itemPrice, shippingFee]);
 
   const purchaseTypeForOrder = useMemo(() => {
     if (!orderData?.items?.length) return "CASH";
-    const first = orderData.items[0].purchaseType || "CASH";
-    return String(first).toUpperCase();
+    return String(orderData.items[0].purchaseType).toUpperCase();
   }, [orderData]);
 
-  const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(
-    navigator.userAgent
-  );
+  const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
 
   useEffect(() => {
     getIMP().catch((e) =>
       openModal({
         title: "결제 준비 실패",
-        message: e.message || "PortOne SDK를 불러오지 못했습니다.",
+        message: e.message,
         confirmText: "확인",
       })
     );
   }, [openModal]);
 
-  // 디버깅 로그
-  useEffect(() => {
-    console.log("[ShopOrderMenu] candyBalance:", candyBalance);
-    console.log("[ShopOrderMenu] purchaseTypeForOrder:", purchaseTypeForOrder);
-  }, [candyBalance, purchaseTypeForOrder]);
-
-  useEffect(() => {
-    console.log("[PRICE DEBUG]", {
-      rawTotal,
-      itemPrice,
-      shippingFee,
-      totalAmount,
-    });
-  }, [rawTotal, itemPrice, shippingFee, totalAmount]);
-
   const handlePortOnePay = async () => {
+    if (!deliveryInfo) {
+      return openModal({
+        title: "배송 정보 없음",
+        message: "배송지를 먼저 입력해주세요.",
+      });
+    }
+
     if (payLoading || isLoadingOrder || !orderData) {
       return openModal({
         title: "준비 중",
@@ -315,8 +255,8 @@ const ShopOrderMenu = () => {
 
     if (!currentUser?.id) {
       return openModal({
-        title: "로그인이 필요합니다",
-        message: "결제 진행을 위해 로그인해주세요.",
+        title: "로그인 필요",
+        message: "로그인 후 이용해주세요.",
         confirmText: "로그인",
         onConfirm: () => navigate("/login"),
       });
@@ -329,46 +269,50 @@ const ShopOrderMenu = () => {
       });
     }
 
-    // CANDY 전용 상품인데 카드/토스/카카오 선택하면 막기
-    if (!isCandy && purchaseTypeForOrder === "CANDY") {
+    const effectiveOrderId = Number(orderData.orderId);
+    if (!Number.isFinite(effectiveOrderId) || effectiveOrderId <= 0) {
       return openModal({
-        title: "결제 수단 오류",
-        message: "이 상품은 캔디 결제만 가능합니다.",
-        confirmText: "확인",
+        title: "주문 오류",
+        message: "주문번호가 유효하지 않습니다.",
       });
     }
 
-    // ✅ 캔디 결제
-    if (isCandy) {
-      if (!orderData || !orderData.items?.length) {
-        return openModal({
-          title: "주문 정보 오류",
-          message: "주문 정보가 없습니다. 장바구니에서 다시 시도해주세요.",
-          confirmText: "확인",
-          onConfirm: () => navigate("/main/shop/cart"),
+    const amountToPay = Math.round(totalAmount);
+    if (!Number.isFinite(amountToPay) || amountToPay <= 0) {
+      return openModal({
+        title: "결제 실패",
+        message: "결제 금액 오류",
+      });
+    }
+
+    try {
+      setPayLoading(true);
+
+      if (API) {
+        await fetch(`${API}/delivery/save`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            orderId: effectiveOrderId,
+            memberId: currentUser.id,
+            productId: orderData.items[0]?.productId ?? null,
+            deliveryReceiverName: deliveryInfo.deliveryReceiverName,
+            deliveryReceiverPhone: deliveryInfo.deliveryReceiverPhone,
+            deliveryAddress: deliveryInfo.deliveryAddress,
+            deliveryRequest: deliveryInfo.deliveryRequest,
+            deliveryFee: shippingFee,
+            deliveryStatus: "PAID",
+          }),
         });
       }
 
-      const effectiveOrderId = Number(orderData?.orderId ?? orderId);
-      if (!Number.isFinite(effectiveOrderId) || effectiveOrderId <= 0) {
-        return openModal({
-          title: "주문번호 확인 필요",
-          message:
-            "주문번호가 없어 캔디 결제를 시작할 수 없습니다. 장바구니에서 다시 시도해 주세요.",
-          confirmText: "확인",
-        });
-      }
-
-      if (candyBalance < candyNeedAmount) {
-        return openModal({
-          title: "캔디 부족",
-          message: "보유 캔디가 결제 금액보다 적습니다.",
-          confirmText: "확인",
-        });
-      }
-
-      try {
-        setPayLoading(true);
+      if (isCandy) {
+        if (candyBalance < candyNeedAmount) {
+          return openModal({
+            title: "캔디 부족",
+            message: "보유 캔디가 부족합니다.",
+          });
+        }
 
         const res = await fetch(`${API}/payment/candy`, {
           method: "POST",
@@ -380,71 +324,27 @@ const ShopOrderMenu = () => {
           }),
         });
 
-        if (!res.ok) {
-          const text = await res.text().catch(() => "");
-          throw new Error(text || `캔디 결제 실패 (status: ${res.status})`);
-        }
-
         const json = await res.json().catch(() => null);
-
         const msg =
           json?.message ||
           json?.data?.message ||
           "캔디 결제가 완료되었습니다.";
-        setCandyBalance((prev) => {
-          const next = Math.max(0, prev - candyNeedAmount);
-          dispatch(updateMemberCandy(next));
-          return next;
-        });
+
+        const next = Math.max(0, candyBalance - candyNeedAmount);
+        setCandyBalance(next);
+        dispatch(updateMemberCandy(next));
 
         openModal({
           title: "캔디 결제 완료",
           message: msg,
           confirmText: "확인",
           onConfirm: () =>
-            navigate(
-              `/main/my-page/my-shop/order?memberId=${currentUser.id}`
-            ),
+            navigate(`/main/my-page/my-shop/order?memberId=${currentUser.id}`),
         });
-      } catch (e) {
-        console.error("캔디 결제 오류:", e);
-        openModal({
-          title: "캔디 결제 실패",
-          message:
-            e.message ||
-            "캔디 결제 처리 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.",
-          confirmText: "확인",
-        });
-      } finally {
-        setPayLoading(false);
+        return;
       }
-      return;
-    }
 
-    // ✅ 일반(PG) 결제
-    const effectiveOrderId = Number(orderData?.orderId ?? orderId);
-    if (!Number.isFinite(effectiveOrderId) || effectiveOrderId <= 0) {
-      return openModal({
-        title: "주문번호 확인 필요",
-        message:
-          "주문번호가 없어 결제를 시작할 수 없습니다. 장바구니에서 다시 시도해 주세요.",
-        confirmText: "확인",
-      });
-    }
-
-    const amountToPay = Math.round(totalAmount);
-    if (!Number.isFinite(amountToPay) || amountToPay <= 0) {
-      return openModal({
-        title: "결제 실패",
-        message: "결제 금액이 올바르지 않습니다.",
-      });
-    }
-
-    setPayLoading(true);
-
-    try {
       const IMP = await getIMP();
-
       let paymentType = "CASH";
       let pg = "";
       let pay_method = "";
@@ -461,14 +361,12 @@ const ShopOrderMenu = () => {
           pay_method = "card";
           break;
         case "general":
-          // 일반 결제는 카드로 고정
           paymentType = "CARD";
-          // 포트원 테스트 NICE v2 상점
           pg = "nice_v2.iamport00m";
-          pay_method = generalMethod; // 'card', 'trans' 등
+          pay_method = generalMethod;
           break;
         default:
-          throw new Error("결제 수단을 확인해주세요.");
+          throw new Error("결제 수단 오류");
       }
 
       let merchantUid = `BC_${effectiveOrderId}_${Date.now()}`;
@@ -485,15 +383,13 @@ const ShopOrderMenu = () => {
             merchantUid,
           }),
         });
-        if (!prepRes.ok) {
-          const message = await prepRes.text().catch(() => "");
-          throw new Error(`사전 등록 실패 (${prepRes.status}) ${message}`);
-        }
+
         const prepJson = await prepRes.json().catch(() => ({}));
-        if (prepJson?.data?.merchantUid || prepJson?.merchantUid) {
-          merchantUid = prepJson.data?.merchantUid ?? prepJson.merchantUid;
+        if (prepJson?.data?.merchantUid) {
+          merchantUid = prepJson.data.merchantUid;
         }
       }
+
       merchantUidRef.current = merchantUid;
 
       await new Promise((resolve) => {
@@ -506,38 +402,28 @@ const ShopOrderMenu = () => {
               orderData.items.length > 1
                 ? `${orderData.items[0].name} 외 ${
                     orderData.items.length - 1
-                  }건`
-                : `블루코튼 상품 결제 (No. ${effectiveOrderId})`,
+                  }`
+                : `블루코튼 주문결제 (${effectiveOrderId})`,
             amount: amountToPay,
-            buyer_email: currentUser?.memberEmail || "",
-            buyer_name: currentUser?.memberName || "",
-            buyer_tel: currentUser?.memberPhone || "",
-            buyer_addr: currentUser?.memberAddress || "",
-            buyer_postcode: currentUser?.memberPostcode || "00000",
+            buyer_email: currentUser.memberEmail || "",
+            buyer_name: currentUser.memberName || "",
+            buyer_tel: currentUser.memberPhone || "",
+            buyer_addr: deliveryInfo.deliveryAddress,
+            buyer_postcode: "00000",
             ...(isMobile ? { m_redirect_url: window.location.href } : {}),
           },
           async (rsp) => {
             requestAnimationFrame(enforceIframeStyles);
-            console.log("[IMP callback rsp]", rsp);
             if (!rsp?.imp_uid) {
-              console.error("[IMP 실패 - imp_uid 없음]", rsp);
-              const baseMsg =
-                rsp?.error_msg ||
-                rsp?.fail_reason ||
-                "사용자가 결제를 취소했거나, 결제가 완료되지 않았습니다.";
-
               openModal({
                 title: "결제 실패",
-                message: `${baseMsg}\n\nmerchant_uid: ${
-                  rsp?.merchant_uid || merchantUidRef.current || "없음"
-                }\nimp_uid: ${rsp?.imp_uid || "없음"}`,
-                confirmText: "확인",
+                message: "사용자가 결제를 취소했습니다.",
               });
               resolve();
               return;
             }
             try {
-              if (!isMobile && API) {
+              if (!isMobile) {
                 const vRes = await fetch(`${API}/payment/verify`, {
                   method: "POST",
                   headers: { "Content-Type": "application/json" },
@@ -550,17 +436,12 @@ const ShopOrderMenu = () => {
                     easyPayProvider: rsp.easy_pay?.provider,
                   }),
                 });
-
-                if (!vRes.ok) {
-                  const message = await vRes.text().catch(() => "");
-                  throw new Error(`검증 실패 : ${message || vRes.status}`);
-                }
+                if (!vRes.ok) throw new Error("검증 실패");
               }
 
               openModal({
                 title: "결제 완료",
-                message:
-                  "결제가 성공적으로 완료되었습니다. 주문 완료 페이지로 이동합니다.",
+                message: "결제가 완료되었습니다.",
                 confirmText: "확인",
                 onConfirm: () =>
                   navigate(
@@ -568,26 +449,19 @@ const ShopOrderMenu = () => {
                   ),
               });
             } catch (err) {
-              console.error("[결제 검증 오류]", err);
               openModal({
                 title: "결제 검증 오류",
-                message:
-                  err.message ||
-                  "결제는 승인되었으나, 주문 정보 반영 중 오류가 발생했습니다. 마이페이지 주문 내역을 확인해 주세요.",
-                confirmText: "확인",
+                message: err.message || "결제는 승인되었으나 오류 발생",
               });
             }
-
             resolve();
           }
         );
       });
     } catch (e) {
-      console.error(e);
       openModal({
         title: "결제 오류",
-        message: e.message || "결제 중 오류가 발생했습니다.",
-        confirmText: "확인",
+        message: e.message || "결제 중 오류 발생",
       });
     } finally {
       setPayLoading(false);
@@ -601,7 +475,7 @@ const ShopOrderMenu = () => {
   return (
     <S.OrderPageWrap className={isCandy ? "candy-mode" : ""}>
       <S.OrderMainSection>
-        <OrderUserInfo />
+        <OrderUserInfo onDeliveryChange={setDeliveryInfo} />
         <OrderProduct orderData={orderData} />
         <PaymentMethod
           value={payType}
@@ -626,9 +500,7 @@ const ShopOrderMenu = () => {
           </S.SideRow>
           <S.SideTotal>
             <span>합계</span>
-            <span className="price">
-              {totalAmount.toLocaleString()}원
-            </span>
+            <span className="price">{totalAmount.toLocaleString()}원</span>
           </S.SideTotal>
 
           <S.PayButton

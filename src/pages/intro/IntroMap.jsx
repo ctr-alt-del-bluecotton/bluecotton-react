@@ -1,7 +1,7 @@
 import React from "react";
 import S from "./style";
 import { motion } from "framer-motion";
-import SomMapOnly from "./SomMapOnly";
+import MapInlineForIntro from "../map/MapInlineForIntro";
 
 const IntroMap = () => {
 
@@ -35,7 +35,7 @@ const IntroMap = () => {
                             alt="디바이스"
                             className="device-img"
                             />
-                            <SomMapOnly className="map-img" />   
+                            <MapInlineForIntro className="map-img" />  
                         </S.DeviceWrap>
                     </motion.div>
                 </S.IntroMapImgAndText>

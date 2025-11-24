@@ -146,7 +146,8 @@ S.ProfileBox = styled.div`
 `;
 
 S.ProfileName = styled.span`
-  ${subtitleRegular}
+  font-family: 'Daeojamjil';
+  font-size: large;
   color: ${({ theme }) => theme.PALLETE.primary.main};
   max-width: 90px;          
   white-space: nowrap;      

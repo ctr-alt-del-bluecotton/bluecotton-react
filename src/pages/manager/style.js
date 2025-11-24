@@ -109,7 +109,7 @@ S.CardContent = styled.p`
 
 S.ButtonGroup = styled.div`
  display: flex;
-  justify-content: center;   
+  justify-content: center; 
   align-items: center;      
   gap: 12px;                 
   margin-top: 20px;
@@ -140,6 +140,9 @@ S.Button = styled.button`
 
 S.SecondaryButton = styled.button`
   ${C.smallText2Regular}
+  display: flex;
+  flex-direction: row;
+  align-items: center;
   ${C.secondary}
   background-color: ${({ theme }) => theme.PALLETE.white};
   border: 1px solid ${({ theme }) => theme.PALLETE.grey.greyScale1};
