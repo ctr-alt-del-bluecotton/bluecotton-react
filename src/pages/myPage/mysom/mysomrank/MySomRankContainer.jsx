@@ -13,7 +13,7 @@ const MySomRankContainer = () => {
   console.log('Redux User 정보:', user);
   console.log('Redux CurrentUser 정보:', currentUser);
 
-  // API에서 완료한 솜 수 가져오기
+  // API에서 완료한 솜 수 가져오기 (솔로솜 + 파티솜 합계)
   useEffect(() => {
     const fetchRankData = async () => {
       if (!currentUser?.id) {
@@ -23,7 +23,8 @@ const MySomRankContainer = () => {
 
       try {
         const token = localStorage.getItem("accessToken");
-        const res = await fetch(`${process.env.REACT_APP_BACKEND_URL}/private/my-page/read-rank?id=${currentUser.id}`, {
+        // read-som API로 모든 솜 데이터 가져오기
+        const res = await fetch(`${process.env.REACT_APP_BACKEND_URL}/private/my-page/read-som?id=${currentUser.id}`, {
           headers: { 
             "Content-Type": "application/json",
             ...(token && { "Authorization": `Bearer ${token}` })
@@ -33,15 +34,38 @@ const MySomRankContainer = () => {
         });
 
         if (!res.ok) {
-          throw new Error('랭크 데이터를 불러오는데 실패했습니다.');
+          throw new Error('솜 데이터를 불러오는데 실패했습니다.');
         }
 
         const result = await res.json();
-        console.log("랭크 API 응답:", result);
+        console.log("솜 데이터 API 응답:", result);
         
-        // data는 완료한 솜의 수
-        const completedSom = result.data || 0;
-        setUserSom(completedSom);
+        const allData = result.data || [];
+        const now = new Date();
+        
+        // 완료된 솔로솜과 파티솜 개수 계산
+        let completedSoloCount = 0;
+        let completedPartyCount = 0;
+        
+        allData.forEach(som => {
+          const somType = String(som.somType || '').toLowerCase();
+          const endDate = new Date(som.somEndDate);
+          
+          // 종료 시간이 현재보다 과거인 경우 완료로 간주
+          if (endDate < now) {
+            if (somType === 'solo') {
+              completedSoloCount++;
+            } else if (somType === 'party') {
+              completedPartyCount++;
+            }
+          }
+        });
+        
+        // 솔로솜과 파티솜의 합계
+        const totalCompletedSom = completedSoloCount + completedPartyCount;
+        console.log(`완료된 솔로솜: ${completedSoloCount}개, 완료된 파티솜: ${completedPartyCount}개, 합계: ${totalCompletedSom}개`);
+        
+        setUserSom(totalCompletedSom);
       } catch (error) {
         console.error('랭크 데이터 로딩 실패:', error);
         setUserSom(0);
