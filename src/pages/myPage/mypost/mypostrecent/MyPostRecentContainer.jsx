@@ -75,19 +75,30 @@ const MyPostRecentContainer = () => {
         
         const result = await response.json();
         console.log('최근 본 게시글 응답:', result);
+        if (result.data?.[0]) {
+          console.log('첫 번째 항목 전체 필드:', Object.keys(result.data[0]));
+          console.log('첫 번째 항목 상세:', JSON.stringify(result.data[0], null, 2));
+        }
         
         if (result.data && Array.isArray(result.data)) {
           const formattedPosts = result.data.map((post) => {
-            const createAt = post.postRecentCreateAt || post.postCreateAt || post.createAt || post.date;
+            const createAt =
+              post.postRecentCreateAt || post.postCreateAt || post.createAt || post.date;
             const formattedDate = formatDate(createAt);
+          
             return {
+              // 최근 본 글 기록 ID (삭제용)
               id: post.id,
+          
+              // 실제 게시글 ID (이동용)
+              postId: post.postId || post.post_id,  // 백엔드 필드명에 맞게
+          
               type: categoryMap[post.somCategory] || post.somCategory || '기타',
               title: post.postTitle || post.title || '제목 없음',
               date: formattedDate || '조회일자 없음',
-              createAt: createAt, // 정렬용 원본 날짜 저장
+              createAt,
             };
-          });
+          }); 
           // 최신순 정렬 (createAt 기준 내림차순)
           const sortedPosts = formattedPosts.sort((a, b) => {
             const dateA = a.createAt ? new Date(a.createAt) : new Date(0);
@@ -111,8 +122,15 @@ const MyPostRecentContainer = () => {
 
   const handleDelete = async (postId) => {
     try {
+      // userId가 없으면 삭제할 수 없음
+      if (!userId) {
+        throw new Error('사용자 정보를 찾을 수 없습니다.');
+      }
+
       const token = localStorage.getItem("accessToken");
-      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/private/my-page/delete-post-recent?id=${postId}`, {
+      const url = `${process.env.REACT_APP_BACKEND_URL}/private/my-page/delete-post-recent?memberId=${userId}&postId=${postId}`;
+      
+      const response = await fetch(url, {
         method: 'DELETE',
         headers: { 
           "Content-Type": "application/json",
@@ -121,16 +139,17 @@ const MyPostRecentContainer = () => {
       });
 
       if (!response.ok) {
-        throw new Error('최근 본 게시글 삭제 실패');
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || '최근 본 게시글 삭제 실패');
       }
 
       // 성공적으로 삭제되면 목록에서 해당 게시글 제거
-      setPosts(prevPosts => prevPosts.filter(post => post.id !== postId));
+      setPosts(prevPosts => prevPosts.filter(post => post.postId !== postId));
     } catch (error) {
       console.error('최근 본 게시글 삭제 오류:', error);
       openModal({
         title: "삭제 실패",
-        message: "최근 본 게시글 삭제에 실패했습니다.",
+        message: error.message || "최근 본 게시글 삭제에 실패했습니다.",
         confirmText: "확인",
       });
     }
@@ -163,7 +182,7 @@ const MyPostRecentContainer = () => {
             {paginatedPosts.map((post, index) => (
               <S.ListItem 
                 key={post.id || index}
-                onClick={() => navigate(`/main/post/read/${post.id}`)}
+                onClick={() => navigate(`/main/post/read/${post.postId}`)}
                 style={{ cursor: 'pointer' }}
               >
                 <div style={{ flex: 1 }}>
@@ -181,7 +200,7 @@ const MyPostRecentContainer = () => {
                       message: "정말 이 기록을 삭제하시겠습니까?",
                       confirmText: "삭제",
                       cancelText: "취소",
-                      onConfirm: () => handleDelete(post.id),
+                      onConfirm: () => handleDelete(post.postId),
                     });
                   }}
                 >

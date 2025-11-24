@@ -38,76 +38,83 @@ const MyPostLikeContainer = () => {
     fetchUserId();
   }, [searchParams]);
 
-  useEffect(() => {
-    const formatDate = (dateString) => {
-      if (!dateString) return '';
-      const date = new Date(dateString);
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, '0');
-      const day = String(date.getDate()).padStart(2, '0');
-      return `${year}.${month}.${day}`;
-    };
+  const formatDate = (dateString) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}.${month}.${day}`;
+  };
 
-    const fetchPosts = async () => {
-      try {
-        setLoading(true);
-        // userId가 없으면 API 호출하지 않음 (서버에서 id가 필수 파라미터일 수 있음)
-        if (!userId) {
-          setPosts([]);
-          setLoading(false);
-          return;
-        }
-        
-        const token = localStorage.getItem("accessToken");
-        const url = `${process.env.REACT_APP_BACKEND_URL}/private/my-page/read-post-like?id=${userId}`;
-        
-        const response = await fetch(url, {
-          headers: { 
-            "Content-Type": "application/json",
-            ...(token && { "Authorization": `Bearer ${token}` })
-          },
-          method: "GET",
-          credentials: "include"
-        });
-        
-        if (!response.ok) {
-          throw new Error('좋아요 게시글 조회 실패');
-        }
-        
-        const result = await response.json();
-        if (result.data && Array.isArray(result.data)) {
-          const formattedPosts = result.data.map((post) => ({
-            id: post.id,
-            type: categoryMap[post.somCategory] || post.somCategory,
-            title: post.postTitle,
-            date: formatDate(post.postCreateAt),
-            createAt: post.postCreateAt, // 정렬용 원본 날짜 저장
-          }));
-          // 최신순 정렬 (postCreateAt 기준 내림차순)
-          const sortedPosts = formattedPosts.sort((a, b) => {
-            const dateA = a.createAt ? new Date(a.createAt) : new Date(0);
-            const dateB = b.createAt ? new Date(b.createAt) : new Date(0);
-            return dateB - dateA; // 최신순 (내림차순)
-          });
-          setPosts(sortedPosts);
-        } else {
-          setPosts([]);
-        }
-      } catch (error) {
-        console.error('좋아요 게시글 조회 오류:', error);
+  const fetchPosts = async () => {
+    try {
+      setLoading(true);
+      // userId가 없으면 API 호출하지 않음 (서버에서 id가 필수 파라미터일 수 있음)
+      if (!userId) {
         setPosts([]);
-      } finally {
         setLoading(false);
+        return;
       }
-    };
+      
+      const token = localStorage.getItem("accessToken");
+      const url = `${process.env.REACT_APP_BACKEND_URL}/private/my-page/read-post-like?id=${userId}`;
+      
+      const response = await fetch(url, {
+        headers: { 
+          "Content-Type": "application/json",
+          ...(token && { "Authorization": `Bearer ${token}` })
+        },
+        method: "GET",
+        credentials: "include"
+      });
+      
+      if (!response.ok) {
+        throw new Error('좋아요 게시글 조회 실패');
+      }
+      
+      const result = await response.json();
+      if (result.data && Array.isArray(result.data)) {
+        const formattedPosts = result.data.map((post) => ({
+          id: post.id,
+          type: categoryMap[post.somCategory] || post.somCategory,
+          title: post.postTitle,
+          date: formatDate(post.postCreateAt),
+          createAt: post.postCreateAt, // 정렬용 원본 날짜 저장
+        }));
+        // 최신순 정렬 (postCreateAt 기준 내림차순)
+        const sortedPosts = formattedPosts.sort((a, b) => {
+          const dateA = a.createAt ? new Date(a.createAt) : new Date(0);
+          const dateB = b.createAt ? new Date(b.createAt) : new Date(0);
+          return dateB - dateA; // 최신순 (내림차순)
+        });
+        setPosts(sortedPosts);
+      } else {
+        setPosts([]);
+      }
+    } catch (error) {
+      console.error('좋아요 게시글 조회 오류:', error);
+      setPosts([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  useEffect(() => {
     fetchPosts();
   }, [userId]);
 
   const handleDelete = async (postId) => {
     try {
+      // userId가 없으면 삭제할 수 없음
+      if (!userId) {
+        throw new Error('사용자 정보를 찾을 수 없습니다.');
+      }
+
       const token = localStorage.getItem("accessToken");
-      const response = await fetch(`${process.env.REACT_APP_BACKEND_URL}/private/my-page/delete-post-like?id=${postId}`, {
+      const url = `${process.env.REACT_APP_BACKEND_URL}/private/my-page/delete-post-like?postId=${postId}&memberId=${userId}`;
+      
+      const response = await fetch(url, {
         method: 'DELETE',
         headers: { 
           "Content-Type": "application/json",
@@ -117,16 +124,27 @@ const MyPostLikeContainer = () => {
       });
 
       if (!response.ok) {
-        throw new Error('좋아요 취소 실패');
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || '좋아요 취소 실패');
       }
 
-      // 성공적으로 삭제되면 목록에서 해당 게시글 제거
-      setPosts(prevPosts => prevPosts.filter(post => post.id !== postId));
+      // 서버 응답 확인
+      const result = await response.json().catch(() => ({}));
+      
+      // 삭제 성공 후 목록을 서버에서 다시 불러와서 최신 상태로 업데이트
+      await fetchPosts();
+      
+      // 성공 메시지 표시
+      openModal({
+        title: "삭제 완료",
+        message: "좋아요가 취소되었습니다.",
+        confirmText: "확인",
+      });
     } catch (error) {
       console.error('좋아요 취소 오류:', error);
       openModal({
         title: "취소 실패",
-        message: "좋아요 취소에 실패했습니다.",
+        message: error.message || "좋아요 취소에 실패했습니다.",
         confirmText: "확인",
       });
     }
